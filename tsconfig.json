@@ -1,0 +1,35 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "isolatedModules": false,
+        "jsx": "react",
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "declaration": false,
+        "noImplicitAny": false,
+        "removeComments": true,
+        "noLib": false,
+        "preserveConstEnums": true,
+        "suppressImplicitAnyIndexErrors": true,
+        "outDir": "out/",
+        "rootDir": "./",
+        "skipLibCheck": true,
+        "strictNullChecks": true
+    },
+    "exclude": [
+    ],
+    "include": [
+        "src/**/*.ts",
+        "external/gs_tools/declarations/**/*.d.ts",
+        "external/gs_tools/src/**/*.ts",
+        "node_modules/typescript/lib/lib.dom.d.ts",
+        "node_modules/typescript/lib/lib.es2015.d.ts"
+    ],
+    "compileOnSave": false,
+    "buildOnSave": false,
+    "atom": {
+        "rewriteTsconfig": true
+    }
+}

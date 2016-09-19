@@ -1,0 +1,7 @@
+npm-debug.log
+bazel-bin
+bazel-genfiles
+bazel-out
+bazel-protoasset/
+bazel-testlogs
+node_modules/
