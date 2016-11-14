@@ -34,12 +34,16 @@ filegroup(
 test_suite(
     name = "test",
     tests = [
+        "//src/data:test",
+        "//src/landing:test",
     ]
 )
 
 filegroup(
     name = "pack_template",
     srcs = [
+        "@gs_ui//:pack_template",
+        "//src/landing:template",
     ]
 )
 

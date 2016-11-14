@@ -1,4 +1,19 @@
-import {Jsons} from '../../external/gs_tools/src/collection';
+import {Jsons} from 'external/gs_tools/src/collection';
+
+import {DefaultPalettes, Main} from 'external/gs_ui/src/bootstrap';
+import {Templates} from 'external/gs_tools/src/webc';
+import {Theme} from 'external/gs_ui/src/theming';
+
+import {LandingView} from '../landing/landing-view';
 
 
-Jsons.setValue(window, 'pa.bootstrap', () => {});
+const bootstrap = () => {
+  let main = Main.newInstance();
+  let theme = Theme.newInstance(
+      DefaultPalettes.indigo,
+      DefaultPalettes.orange);
+  main.bootstrap(theme, [LandingView]);
+};
+
+Jsons.setValue(window, 'gs.Templates', Templates);
+Jsons.setValue(window, 'pa.bootstrap', bootstrap);
