@@ -1,5 +1,6 @@
 package(default_visibility = ["//:internal"])
 
+load("@gs_tools//bazel/karma:defs.bzl", "karma_run")
 load("@gs_tools//bazel/ts:defs.bzl", "ts_binary", "ts_library")
 load("@gs_tools//bazel/webpack:defs.bzl", "webpack_binary")
 
@@ -31,11 +32,19 @@ filegroup(
     srcs = ["tslint.json"]
 )
 
-test_suite(
+karma_run(
     name = "test",
+    srcs = [
+        "//src/data:test_src",
+        "//src/landing:test_src",
+    ]
+)
+
+test_suite(
+    name = "lint",
     tests = [
-        "//src/data:test",
-        "//src/landing:test",
+        "//src/data:lint",
+        "//src/landing:lint",
     ]
 )
 
