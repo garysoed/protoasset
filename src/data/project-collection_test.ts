@@ -55,4 +55,34 @@ describe('data.ProjectCollection', () => {
           }, done.fail);
     });
   });
+
+  describe('reserveId', () => {
+    it('should return a promise that is resolved with the correct project ID', (done: any) => {
+      let projectId = 'projectId';
+      spyOn(collection['storage_'], 'reserve').and.returnValue(Promise.resolve(projectId));
+      collection
+          .reserveId()
+          .then((result: string) => {
+            assert(result).to.equal(projectId);
+            done();
+          }, done.fail);
+    });
+  });
+
+  describe('update', () => {
+    it('should update the project correctly', (done: any) => {
+      let projectId = 'projectId';
+      let mockProject = jasmine.createSpyObj('Project', ['getId']);
+      mockProject.getId.and.returnValue(projectId);
+
+      spyOn(collection['storage_'], 'update').and.returnValue(Promise.resolve());
+
+      collection
+          .update(mockProject)
+          .then(() => {
+            assert(collection['storage_'].update).to.haveBeenCalledWith(projectId, mockProject);
+            done();
+          }, done.fail);
+    });
+  });
 });

@@ -8,12 +8,13 @@ import {CreateProjectView} from '../landing/create-project-view';
 import {LandingView} from '../landing/landing-view';
 
 
-const bootstrap = () => {
+function bootstrap(document: Document): void {
   let main = Main.newInstance();
   let theme = Theme.newInstance(
       DefaultPalettes.indigo,
       DefaultPalettes.orange);
   main.bootstrap(theme, [CreateProjectView, LandingView]);
+  main.applyTheme(document);
 };
 
 Jsons.setValue(window, 'gs.Templates', Templates);

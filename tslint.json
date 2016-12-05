@@ -9,10 +9,9 @@
     "curly": true,
     "eofline": true,
     "indent": "spaces",
-    "interface-name": true,
+    "interface-name": [false],
     "jsdoc-format": true,
     "label-position": true,
-    "label-undefined": true,
     "max-line-length": [
       true,
       100
@@ -29,9 +28,7 @@
     "no-consecutive-blank-lines": false,
     "no-console": true,
     "no-construct": true,
-    "no-constructor-vars": false,
     "no-debugger": true,
-    "no-duplicate-key": true,
     "no-duplicate-variable": true,
     "no-empty": false,
     "no-eval": true,
@@ -42,9 +39,13 @@
     "no-shadowed-variable": false,
     "no-string-literal": false,
     "no-trailing-whitespace": true,
-    "no-unreachable": true,
     "no-unused-expression": false,
-    "no-unused-variable": true,
+    "no-unused-variable": [
+      true,
+      {
+        "ignore-pattern": "pipe.*"
+      }
+    ],
     "no-use-before-declare": true,
     "no-var-keyword": true,
     "no-var-requires": true,
@@ -89,7 +90,6 @@
         "variable-declaration": "nospace"
       }
     ],
-    "use-strict": false,
     "variable-name": [
       true,
       "allow-trailing-underscore",

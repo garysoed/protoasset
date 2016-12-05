@@ -1,5 +1,4 @@
 import {Field, Serializable} from 'external/gs_tools/src/data';
-import {Random} from 'external/gs_tools/src/random';
 
 
 /**
@@ -11,9 +10,9 @@ export class Project {
   @Field('id') private id_: string;
   @Field('name') private name_: string;
 
-  constructor() {
+  constructor(id: string) {
     this.assetIds_ = {};
-    this.id_ = Random().shortId();
+    this.id_ = id;
     this.name_ = 'Unnamed Project';
   }
 

@@ -42,4 +42,22 @@ export class ProjectCollection {
               .asArray();
         });
   }
+
+  /**
+   * Reserves an ID for creating a new project.
+   *
+   * @return Promise that will be resolved with the project ID that is guaranteed to be unique.
+   */
+  reserveId(): Promise<string> {
+    return this.storage_.reserve();
+  }
+
+  /**
+   * Updates the given project.
+   *
+   * @param project
+   */
+  update(project: Project): Promise<void> {
+    return this.storage_.update(project.getId(), project);
+  }
 }
