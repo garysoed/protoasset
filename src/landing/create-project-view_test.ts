@@ -6,16 +6,33 @@ import {TestDispose} from 'external/gs_tools/src/testing';
 
 import {CreateProjectView} from './create-project-view';
 import {Project} from '../data/project';
+import {Routes} from '../routing/routes';
 
 
 describe('landing.CreateProjectView', () => {
   let mockProjectCollection;
+  let mockRouteService;
   let view: CreateProjectView;
 
   beforeEach(() => {
     mockProjectCollection = jasmine.createSpyObj('ProjectCollection', ['reserveId', 'update']);
-    view = new CreateProjectView(Mocks.object('ThemeService'), mockProjectCollection);
+    mockRouteService = jasmine.createSpyObj('RouteService', ['goTo']);
+    view = new CreateProjectView(
+        Mocks.object('ThemeService'),
+        mockProjectCollection,
+        mockRouteService);
     TestDispose.add(view);
+  });
+
+  describe('onCancelAction_', () => {
+    it('should navigate to the landing page', () => {
+      let route = Mocks.object('route');
+      spyOn(Routes.LANDING, 'create').and.returnValue(route);
+
+      view['onCancelAction_']();
+
+      assert(mockRouteService.goTo).to.haveBeenCalledWith(route);
+    });
   });
 
   describe('onNameChange_', () => {

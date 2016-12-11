@@ -15,6 +15,8 @@ import {Validate} from 'external/gs_tools/src/valid';
 
 import {Project} from '../data/project';
 import {ProjectCollection} from '../data/project-collection';
+import {RouteService} from '../routing/route-service';
+import {Routes} from '../routing/routes';
 
 
 /**
@@ -32,6 +34,7 @@ export class CreateProjectView extends BaseThemedElement {
   private readonly createButtonDisabledBridge_: DomBridge<boolean>;
 
   private readonly projectCollection_: ProjectCollection;
+  private readonly routeService_: RouteService;
 
   /**
    * @param themeService
@@ -39,11 +42,21 @@ export class CreateProjectView extends BaseThemedElement {
    */
   constructor(
       @inject('theming.ThemeService') themeService: ThemeService,
-      @inject('pa.data.ProjectCollection') projectCollection: ProjectCollection) {
+      @inject('pa.data.ProjectCollection') projectCollection: ProjectCollection,
+      @inject('pa.routing.RouteService') routeService: RouteService) {
     super(themeService);
     this.createButtonDisabledBridge_ = DomBridge.of<boolean>(true);
     this.nameValueBridge_ = DomBridge.of<string>();
     this.projectCollection_ = projectCollection;
+    this.routeService_ = routeService;
+  }
+
+  /**
+   * Handles event when the cancel button is clicked.
+   */
+  @handle('#cancelButton').event(Event.ACTION)
+  protected onCancelAction_(): void {
+    this.routeService_.goTo(Routes.LANDING.create());
   }
 
   /**
@@ -59,7 +72,7 @@ export class CreateProjectView extends BaseThemedElement {
    *
    * @return Promise that will be resolved when all handling logic have completed.
    */
-  @handle('gs-basic-button#createButton').event(Event.ACTION)
+  @handle('#createButton').event(Event.ACTION)
   protected onSubmitAction_(): Promise<void> {
     let projectName = this.nameValueBridge_.get();
     if (projectName === null) {

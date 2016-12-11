@@ -51,6 +51,17 @@ describe('landing.LandingView', () => {
     TestDispose.add(view);
   });
 
+  describe('onCreateAction_', () => {
+  it('should go to create project view', () => {
+      let route = Mocks.object('route');
+      spyOn(Routes.CREATE_PROJECT, 'create').and.returnValue(route);
+
+      view['onCreateAction_']();
+
+      assert(mockRouteService.goTo).to.haveBeenCalledWith(route);
+    });
+  });
+
   describe('onRouteChanged_', () => {
     it('should redirect to create page if the new location is landing but there are no projects',
         (done: any) => {

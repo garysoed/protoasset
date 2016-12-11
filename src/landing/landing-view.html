@@ -1,8 +1,31 @@
 <style>
+  #projects {
+    margin-left: -.5rem;
+    margin-right: -.5rem;
+  }
+
   #projects pa-project-item {
     margin: .5rem;
     width: 20rem;
   }
+
+  #main {
+    padding: 0 1rem;
+  }
 </style>
 
-<div id="projects" flex-wrap layout="row"></div>
+<div fill-parent layout="row">
+  <div flex-justify="flex-end" layout="column">
+    <gs-basic-button class="gs-theme-normal gs-primary" id="createButton">
+      <div gs-content>
+        <gs-icon>add</gs-icon>
+      </div>
+    </gs-basic-button>
+  </div>
+  <div id="main">
+    <h2>Choose Project</h2>
+    <div flex-wrap id="projects" layout="row"></div>
+  </div>
+  <div id="rightNav">
+  </div>
+</div>

@@ -1,8 +1,9 @@
 import {Arrays} from 'external/gs_tools/src/collection';
-import {bind, customElement, DomBridge} from 'external/gs_tools/src/webc';
+import {bind, customElement, DomBridge, handle} from 'external/gs_tools/src/webc';
 import {inject} from 'external/gs_tools/src/inject';
 
 import {BaseThemedElement} from 'external/gs_ui/src/common';
+import {Event} from 'external/gs_ui/src/const';
 import {ThemeService} from 'external/gs_ui/src/theming';
 
 import {Project} from '../data/project';
@@ -70,6 +71,14 @@ export class LandingView extends BaseThemedElement {
     } else {
       return Promise.resolve();
     }
+  }
+
+  /**
+   * Handles event when the create button is clicked.
+   */
+  @handle('#createButton').event(Event.ACTION)
+  protected onCreateAction_(): void {
+    this.routeService_.goTo(Routes.CREATE_PROJECT.create());
   }
 
   /**
