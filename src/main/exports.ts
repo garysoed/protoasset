@@ -11,7 +11,7 @@ import {LandingView} from '../landing/landing-view';
 function bootstrap(document: Document): void {
   let main = Main.newInstance();
   let theme = Theme.newInstance(
-      DefaultPalettes.indigo,
+      DefaultPalettes.egyptianblue,
       DefaultPalettes.orange);
   main.bootstrap(theme, [CreateProjectView, LandingView]);
   main.applyTheme(document);

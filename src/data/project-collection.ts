@@ -17,14 +17,22 @@ export class ProjectCollection {
   }
 
   /**
+   * @return The promise that will be resolved with the requested project, or null if it does not
+   *    exist.
+   */
+  get(projectId: string): Promise<Project | null> {
+    return this.storage_.read(projectId);
+  }
+
+  /**
    * @return A list of projects in the storage.
    */
   list(): Promise<Project[]> {
     return this.storage_
         .list()
-        .then((ids: string[]) => {
+        .then((ids: Set<string>) => {
           return Arrays
-              .of(ids)
+              .fromIterable(ids)
               .map((id: string) => {
                 return this.storage_.read(id);
               })

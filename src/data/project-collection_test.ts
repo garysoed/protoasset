@@ -13,6 +13,17 @@ describe('data.ProjectCollection', () => {
     collection = new ProjectCollection(window);
   });
 
+  describe('get', () => {
+    it('should return the value returned by the storage', () => {
+      let projectId = 'projectId';
+      let promise = Mocks.object('promise');
+      spyOn(collection['storage_'], 'read').and.returnValue(promise);
+
+      assert(collection.get(projectId)).to.equal(promise);
+      assert(collection['storage_'].read).to.haveBeenCalledWith(projectId);
+    });
+  });
+
   describe('list', () => {
     it('should return the correct projects', (done: any) => {
       let project1 = Mocks.object('project1');

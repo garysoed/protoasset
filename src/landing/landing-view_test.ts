@@ -18,7 +18,9 @@ describe('landing.LandingView', () => {
   beforeEach(() => {
     mockLocationService = jasmine.createSpyObj('LocationService', ['goTo', 'hasMatch', 'on']);
     mockProjectCollection = jasmine.createSpyObj('ProjectCollection', ['list']);
-    view = new LandingView(mockLocationService, mockProjectCollection);
+    view = new LandingView(
+        jasmine.createSpyObj('ThemeService', ['applyTheme']),
+        mockLocationService, mockProjectCollection);
     TestDispose.add(view);
   });
 

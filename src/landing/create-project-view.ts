@@ -13,7 +13,7 @@ import {ThemeService} from 'external/gs_ui/src/theming';
 
 import {Validate} from 'external/gs_tools/src/valid';
 
-import {Project} from '../data/project'
+import {Project} from '../data/project';
 import {ProjectCollection} from '../data/project-collection';
 
 
@@ -28,8 +28,8 @@ export class CreateProjectView extends BaseThemedElement {
   @bind('gs-text-input').attribute('gs-value', StringParser)
   private readonly nameValueBridge_: DomBridge<string>;
 
-  @bind('gs-basic-button.createButton').attribute('disabled', BooleanParser)
-  private readonly createButtonDisabledBridge_: DomBridge<boolean>
+  @bind('gs-basic-button#createButton').attribute('disabled', BooleanParser)
+  private readonly createButtonDisabledBridge_: DomBridge<boolean>;
 
   private readonly projectCollection_: ProjectCollection;
 
@@ -50,7 +50,7 @@ export class CreateProjectView extends BaseThemedElement {
    * Handles event when the name field has changed.
    */
   @handle('gs-text-input').attributeChange('gs-value', StringParser)
-  private onNameChange_(): void {
+  protected onNameChange_(): void {
     this.createButtonDisabledBridge_.set(!this.nameValueBridge_.get());
   }
 
@@ -59,8 +59,8 @@ export class CreateProjectView extends BaseThemedElement {
    *
    * @return Promise that will be resolved when all handling logic have completed.
    */
-  @handle('gs-basic-button.createButton').event(Event.ACTION)
-  private onSubmitAction_(): Promise<void> {
+  @handle('gs-basic-button#createButton').event(Event.ACTION)
+  protected onSubmitAction_(): Promise<void> {
     let projectName = this.nameValueBridge_.get();
     if (projectName === null) {
       Validate.fail('Project name is not set');

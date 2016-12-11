@@ -1,28 +1,30 @@
 <style>
-  .createButton {
+  #createButton {
     min-width: 6rem;
   }
 
-  .nameRow {
+  #nameRow {
     padding: 1rem;
   }
 
-  .nameRow gs-text-input {
+  #nameRow gs-text-input {
     padding-left: 1rem;
   }
 </style>
-<div layout="column">
-  <div class="nameRow" layout="row">
-    <label>
-      Name:
-    </label>
-    <gs-text-input flex gs-value=""></gs-text-input>
+<div fill-parent layout="column">
+  <div flex id="nameRow">
+    <div layout="row">
+      <label>
+        Name:
+      </label>
+      <gs-text-input flex gs-value=""></gs-text-input>
+    </div>
   </div>
   <div layout="row" flex-justify="flex-end">
-    <gs-basic-button class="gs-primary createButton">
+    <gs-basic-button id="createButton" class="gs-primary">
       <div gs-content>Create</div>
     </gs-basic-button>
-    <gs-basic-button class="cancelButton">
+    <gs-basic-button id="cancelButton">
       <div gs-content>Cancel</div>
     </gs-basic-button>
   </div>

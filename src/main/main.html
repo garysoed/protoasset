@@ -1,11 +1,15 @@
 <html>
+  <head>
+  </head>
   <body class="gs-theme-normal">
     <script src="../../node_modules/x-tag/src/core.js"></script>
     <script src="../../bazel-genfiles/pack.js"></script>
-    <gs-view-slot>
-      <pa-create-project-view gs-view-path="create"></pa-create-project-view>
-      <pa-landing-view gs-view-path="."></pa-landing-view>
-    </gs-view-slot>
+    <div fill-parent layout="column">
+      <gs-view-slot flex>
+        <pa-create-project-view gs-view-path="create"></pa-create-project-view>
+        <pa-landing-view gs-view-path="."></pa-landing-view>
+      </gs-view-slot>
+    </div>
     <script>
       pa.bootstrap(document);
     </script>

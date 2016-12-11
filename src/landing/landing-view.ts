@@ -1,27 +1,32 @@
-import {BaseElement, customElement} from 'external/gs_tools/src/webc';
+import {customElement} from 'external/gs_tools/src/webc';
 import {inject} from 'external/gs_tools/src/inject';
 import {LocationService, LocationServiceEvents} from 'external/gs_tools/src/ui';
 
+import {BaseThemedElement} from 'external/gs_ui/src/common';
+import {ThemeService} from 'external/gs_ui/src/theming';
+
 import {Project} from '../data/project';
 import {ProjectCollection} from '../data/project-collection';
+import {ProjectItem} from './project-item';
 
 
 /**
  * The main landing view of the app.
  */
 @customElement({
-  dependencies: [ProjectCollection],
+  dependencies: [ProjectCollection, ProjectItem],
   tag: 'pa-landing-view',
   templateKey: 'src/landing/landing-view',
 })
-export class LandingView extends BaseElement {
+export class LandingView extends BaseThemedElement {
   private readonly locationService_: LocationService;
   private readonly projectCollection_: ProjectCollection;
 
   constructor(
+      @inject('theming.ThemeService') themeService: ThemeService,
       @inject('gs.LocationService') locationService: LocationService,
       @inject('pa.ProjectCollection') projectCollection: ProjectCollection) {
-    super();
+    super(themeService);
     this.locationService_ = locationService;
     this.projectCollection_ = projectCollection;
   }
