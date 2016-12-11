@@ -8,7 +8,7 @@ import {Project} from './project';
 /**
  * Represents a collection of projects.
  */
-@bind('pa.ProjectCollection')
+@bind('pa.data.ProjectCollection')
 export class ProjectCollection {
   private storage_: LocalStorage<Project>;
 

@@ -19,7 +19,7 @@ export class ProjectItem extends BaseThemedElement {
   private readonly projectNameBridge_: DomBridge<string>;
 
   constructor(
-      @inject('pa.ProjectCollection') projectCollection: ProjectCollection,
+      @inject('pa.data.ProjectCollection') projectCollection: ProjectCollection,
       @inject('theming.ThemeService') themeService: ThemeService) {
     super(themeService);
 

@@ -37,6 +37,7 @@ karma_run(
     srcs = [
         "//src/data:test_src",
         "//src/landing:test_src",
+        "//src/routing:test_src",
     ]
 )
 
@@ -45,6 +46,7 @@ test_suite(
     tests = [
         "//src/data:lint",
         "//src/landing:lint",
+        "//src/routing:lint",
     ]
 )
 

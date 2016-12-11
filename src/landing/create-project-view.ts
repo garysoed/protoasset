@@ -39,7 +39,7 @@ export class CreateProjectView extends BaseThemedElement {
    */
   constructor(
       @inject('theming.ThemeService') themeService: ThemeService,
-      @inject('pa.ProjectCollection') projectCollection: ProjectCollection) {
+      @inject('pa.data.ProjectCollection') projectCollection: ProjectCollection) {
     super(themeService);
     this.createButtonDisabledBridge_ = DomBridge.of<boolean>(true);
     this.nameValueBridge_ = DomBridge.of<string>();
