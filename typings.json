@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "fuse": "registry:npm/fuse#0.1.0+20160630205713"
+  },
+  "globalDependencies": {
+    "fuse": "registry:dt/fuse#2.5.0+20161123234806"
+  }
+}

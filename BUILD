@@ -35,6 +35,7 @@ filegroup(
 karma_run(
     name = "test",
     srcs = [
+        "//src/common:test_src",
         "//src/data:test_src",
         "//src/landing:test_src",
         "//src/routing:test_src",
@@ -44,6 +45,7 @@ karma_run(
 test_suite(
     name = "lint",
     tests = [
+        "//src/common:lint",
         "//src/data:lint",
         "//src/landing:lint",
         "//src/routing:lint",
@@ -54,6 +56,7 @@ filegroup(
     name = "pack_template",
     srcs = [
         "@gs_ui//:pack_template",
+        "//src/common:template",
         "//src/landing:template",
     ]
 )

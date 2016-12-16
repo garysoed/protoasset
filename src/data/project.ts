@@ -1,6 +1,11 @@
 import {Field, Serializable} from 'external/gs_tools/src/data';
 
 
+export type ProjectSearchIndex = {
+  name: string,
+  this: Project,
+};
+
 /**
  * Represents a project
  */
@@ -28,6 +33,16 @@ export class Project {
    */
   getName(): string {
     return this.name_;
+  }
+
+  /**
+   * @return The index used for searching.
+   */
+  getSearchIndex(): ProjectSearchIndex {
+    return {
+      name: this.name_,
+      this: this,
+    };
   }
 
   /**

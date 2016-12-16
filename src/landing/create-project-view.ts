@@ -52,10 +52,18 @@ export class CreateProjectView extends BaseThemedElement {
   }
 
   /**
+   * Resets the form.
+   */
+  private reset_(): void {
+    this.nameValueBridge_.set('');
+  }
+
+  /**
    * Handles event when the cancel button is clicked.
    */
   @handle('#cancelButton').event(Event.ACTION)
   protected onCancelAction_(): void {
+    this.reset_();
     this.routeService_.goTo(Routes.LANDING.create());
   }
 
@@ -85,6 +93,10 @@ export class CreateProjectView extends BaseThemedElement {
           let project = new Project(id);
           project.setName(projectName!);
           return this.projectCollection_.update(project);
+        })
+        .then(() => {
+          this.reset_();
+          this.routeService_.goTo(Routes.LANDING.create());
         });
   }
 }

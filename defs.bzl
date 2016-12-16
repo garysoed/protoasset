@@ -39,7 +39,7 @@ def proto_asset(deps = [], test_deps = []):
     ts_library(
         name = lib_name,
         srcs = native.glob(["*.ts"], exclude = ["*_test.ts"]),
-        deps = ["@gs_tools//declarations"] + deps
+        deps = ["@gs_tools//declarations", "//typings"] + deps
     )
 
     ts_binary(

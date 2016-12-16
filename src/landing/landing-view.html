@@ -12,6 +12,12 @@
   #main {
     padding: 0 1rem;
   }
+
+  #filterButton {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
 </style>
 
 <div fill-parent layout="row">
@@ -26,6 +32,5 @@
     <h2>Choose Project</h2>
     <div flex-wrap id="projects" layout="row"></div>
   </div>
-  <div id="rightNav">
-  </div>
+  <pa-filter-button id="filterButton"></pa-filter-button>
 </div>

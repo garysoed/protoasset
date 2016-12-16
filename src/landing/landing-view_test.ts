@@ -1,4 +1,4 @@
-import {assert, Matchers, TestBase} from '../test-base';
+import {assert, TestBase} from '../test-base';
 TestBase.setup();
 
 import {DisposableFunction} from 'external/gs_tools/src/dispose';
@@ -6,8 +6,8 @@ import {LocationServiceEvents} from 'external/gs_tools/src/ui';
 import {Mocks} from 'external/gs_tools/src/mock';
 import {TestDispose} from 'external/gs_tools/src/testing';
 
+import {CollectionEvents} from '../data/collection-events';
 import {LandingView, projectItemElGenerator, projectItemElDataSetter} from './landing-view';
-import {Project} from '../data/project';
 import {Routes} from '../routing/routes';
 
 
@@ -43,22 +43,90 @@ describe('landing.LandingView', () => {
 
   beforeEach(() => {
     mockRouteService = jasmine.createSpyObj('RouteService', ['goTo', 'isDisplayed', 'on']);
-    mockProjectCollection = jasmine.createSpyObj('ProjectCollection', ['list']);
+    mockProjectCollection = Mocks.listenable('ProjectCollection');
+    mockProjectCollection.list = jasmine.createSpy('ProjectCollection.list');
+    mockProjectCollection.search = jasmine.createSpy('ProjectCollection.search');
     view = new LandingView(
         jasmine.createSpyObj('ThemeService', ['applyTheme']),
         mockProjectCollection,
         mockRouteService);
-    TestDispose.add(view);
+    TestDispose.add(view, mockProjectCollection);
   });
 
   describe('onCreateAction_', () => {
-  it('should go to create project view', () => {
+    it('should go to create project view', () => {
       let route = Mocks.object('route');
       spyOn(Routes.CREATE_PROJECT, 'create').and.returnValue(route);
 
       view['onCreateAction_']();
 
       assert(mockRouteService.goTo).to.haveBeenCalledWith(route);
+    });
+  });
+
+  describe('onFilterButtonTextAttrChange_', () => {
+    it('should set the project collection to the search results if there is filter text',
+        (done: any) => {
+          let newValue = 'newValue';
+          let projects = Mocks.object('projects');
+          mockProjectCollection.search.and.returnValue(Promise.resolve(projects));
+          spyOn(view['projectCollectionBridge_'], 'set');
+          view['onFilterButtonTextAttrChange_'](newValue)
+              .then(() => {
+                assert(view['projectCollectionBridge_'].set).to.haveBeenCalledWith(projects);
+                assert(mockProjectCollection.search).to.haveBeenCalledWith(newValue);
+                done();
+              }, done.fail);
+        });
+
+    it('should set the project collection to all projects if the filter text is null',
+        (done: any) => {
+          let newValue = null;
+          let projects = Mocks.object('projects');
+          mockProjectCollection.list.and.returnValue(Promise.resolve(projects));
+          spyOn(view['projectCollectionBridge_'], 'set');
+          view['onFilterButtonTextAttrChange_'](newValue)
+              .then(() => {
+                assert(view['projectCollectionBridge_'].set).to.haveBeenCalledWith(projects);
+                done();
+              }, done.fail);
+        });
+
+    it('should set the project collection to all projects if the filter text is empty string',
+        (done: any) => {
+          let newValue = '';
+          let projects = Mocks.object('projects');
+          mockProjectCollection.list.and.returnValue(Promise.resolve(projects));
+          spyOn(view['projectCollectionBridge_'], 'set');
+          view['onFilterButtonTextAttrChange_'](newValue)
+              .then(() => {
+                assert(view['projectCollectionBridge_'].set).to.haveBeenCalledWith(projects);
+                done();
+              }, done.fail);
+        });
+  });
+
+  describe('onProjectAdded_', () => {
+    it('should add the project to the bridge', () => {
+      let project = Mocks.object('project');
+      spyOn(view['projectCollectionBridge_'], 'get').and.returnValue([]);
+
+      spyOn(view['projectCollectionBridge_'], 'set');
+
+      view['onProjectAdded_'](project);
+
+      assert(view['projectCollectionBridge_'].set).to.haveBeenCalledWith([project]);
+    });
+
+    it('should handle the case when project collection bridge has null value', () => {
+      let project = Mocks.object('project');
+      spyOn(view['projectCollectionBridge_'], 'get').and.returnValue(null);
+
+      spyOn(view['projectCollectionBridge_'], 'set');
+
+      view['onProjectAdded_'](project);
+
+      assert(view['projectCollectionBridge_'].set).to.haveBeenCalledWith([project]);
     });
   });
 
@@ -108,12 +176,18 @@ describe('landing.LandingView', () => {
       spyOn(view, 'onRouteChanged_');
       mockRouteService.on.and.returnValue(DisposableFunction.of(() => {}));
 
+      spyOn(mockProjectCollection, 'on').and.callThrough();
+
       view.onCreated(Mocks.object('element'));
       assert(view['onRouteChanged_']).to.haveBeenCalledWith();
 
       assert(mockRouteService.on).to.haveBeenCalledWith(
           LocationServiceEvents.CHANGED,
           view['onRouteChanged_'],
+          view);
+      assert(mockProjectCollection.on).to.haveBeenCalledWith(
+          CollectionEvents.ADDED,
+          view['onProjectAdded_'],
           view);
     });
   });
@@ -129,17 +203,14 @@ describe('landing.LandingView', () => {
       mockProject2.getName.and.returnValue(projectName2);
 
       mockProjectCollection.list.and.returnValue(Promise.resolve([mockProject1, mockProject2]));
-      let bridgeSetSpy = spyOn(view['projectCollectionBridge_'], 'set');
+
+      spyOn(view['projectCollectionBridge_'], 'set');
 
       let element = Mocks.object('element');
       view.onInserted(element)
           .then(() => {
-            assert(view['projectCollectionBridge_'].set).to.haveBeenCalledWith(Matchers.any(Map));
-            let projectsMap: Map<string, Project> = bridgeSetSpy.calls.argsFor(0)[0];
-            assert(projectsMap).to.haveEntries([
-              [projectName1, mockProject1],
-              [projectName2, mockProject2],
-            ]);
+            assert(view['projectCollectionBridge_'].set).to
+                .haveBeenCalledWith([mockProject1, mockProject2]);
             done();
           }, done.fail);
     });

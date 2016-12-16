@@ -24,14 +24,24 @@ describe('landing.CreateProjectView', () => {
     TestDispose.add(view);
   });
 
+  describe('reset_', () => {
+    it('should clear the name value', () => {
+      spyOn(view['nameValueBridge_'], 'set');
+      view['reset_']();
+      assert(view['nameValueBridge_'].set).to.haveBeenCalledWith('');
+    });
+  });
+
   describe('onCancelAction_', () => {
     it('should navigate to the landing page', () => {
       let route = Mocks.object('route');
+      spyOn(view, 'reset_');
       spyOn(Routes.LANDING, 'create').and.returnValue(route);
 
       view['onCancelAction_']();
 
       assert(mockRouteService.goTo).to.haveBeenCalledWith(route);
+      assert(view['reset_']).to.haveBeenCalledWith();
     });
   });
 
@@ -56,14 +66,18 @@ describe('landing.CreateProjectView', () => {
   });
 
   describe('onSubmitAction_', () => {
-    it('should create the project correctly', (done: any) => {
+    it('should create the project correctly, reset, and redirect to landing page', (done: any) => {
       let projectId = 'projectId';
       mockProjectCollection.reserveId.and.returnValue(Promise.resolve(projectId));
 
       let projectName = 'projectName';
 
+      let route = Mocks.object('route');
+      spyOn(Routes.LANDING, 'create').and.returnValue(route);
+
       spyOn(Project.prototype, 'setName');
       spyOn(view['nameValueBridge_'], 'get').and.returnValue(projectName);
+      spyOn(view, 'reset_');
 
       view['onSubmitAction_']()
           .then(() => {
@@ -72,6 +86,9 @@ describe('landing.CreateProjectView', () => {
             let project = mockProjectCollection.update.calls.argsFor(0)[0];
             assert(project.setName).to.haveBeenCalledWith(projectName);
             assert(project.getId()).to.equal(projectId);
+
+            assert(view['reset_']).to.haveBeenCalledWith();
+            assert(mockRouteService.goTo).to.haveBeenCalledWith(route);
             done();
           }, done.fail);
     });
