@@ -1,7 +1,8 @@
-import {bind, customElement, DomBridge} from 'external/gs_tools/src/webc';
+import {bind, customElement, DomBridge, handle} from 'external/gs_tools/src/webc';
 import {inject} from 'external/gs_tools/src/inject';
 
 import {BaseThemedElement} from 'external/gs_ui/src/common';
+import {Event} from 'external/gs_ui/src/const';
 import {ThemeService} from 'external/gs_ui/src/theming';
 
 import {FilterButton} from '../common/filter-button';
@@ -38,13 +39,21 @@ export class ProjectView extends BaseThemedElement {
   }
 
   /**
+   * @return The project ID of the view, or null if the view has no project IDs.
+   */
+  private getProjectId_(): null | string {
+    let matches = this.routeService_.getMatches(Routes.PROJECT);
+    return matches === null ? null : matches.projectId;
+  }
+
+  /**
    * Updates the project name.
    */
   private updateProjectName_(): Promise<void> {
-    let matches = this.routeService_.getMatches(Routes.PROJECT);
-    if (matches !== null) {
+    let projectId = this.getProjectId_();
+    if (projectId !== null) {
       return this.projectCollection_
-          .get(matches.projectId)
+          .get(projectId)
           .then((project: Project | null) => {
             if (project !== null) {
               this.projectNameTextBridge_.set(project.getName());
@@ -52,6 +61,14 @@ export class ProjectView extends BaseThemedElement {
           });
     }
     return Promise.resolve();
+  }
+
+  @handle('#createButton').event(Event.ACTION)
+  protected onCreateButtonClicked_(): void {
+    let projectId = this.getProjectId_();
+    if (projectId !== null) {
+      this.routeService_.goTo(Routes.CREATE_ASSET.create(projectId));
+    }
   }
 
   /**

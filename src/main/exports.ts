@@ -4,6 +4,7 @@ import {DefaultPalettes, Main} from 'external/gs_ui/src/bootstrap';
 import {Templates} from 'external/gs_tools/src/webc';
 import {Theme} from 'external/gs_ui/src/theming';
 
+import {CreateAssetView} from '../project/create-asset-view';
 import {CreateProjectView} from '../landing/create-project-view';
 import {LandingView} from '../landing/landing-view';
 import {ProjectView} from '../project/project-view';
@@ -14,7 +15,7 @@ function bootstrap(document: Document): void {
   let theme = Theme.newInstance(
       DefaultPalettes.egyptianblue,
       DefaultPalettes.orange);
-  main.bootstrap(theme, [CreateProjectView, LandingView, ProjectView]);
+  main.bootstrap(theme, [CreateAssetView, CreateProjectView, LandingView, ProjectView]);
   main.applyTheme(document);
 };
 

@@ -107,7 +107,7 @@ describe('data.ProjectCollection', () => {
   describe('reserveId', () => {
     it('should return a promise that is resolved with the correct project ID', (done: any) => {
       let projectId = 'projectId';
-      spyOn(collection['storage_'], 'reserve').and.returnValue(Promise.resolve(projectId));
+      spyOn(collection['storage_'], 'generateId').and.returnValue(Promise.resolve(projectId));
       collection
           .reserveId()
           .then((result: string) => {

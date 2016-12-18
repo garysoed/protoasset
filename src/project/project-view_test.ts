@@ -18,6 +18,7 @@ describe('project.ProjectView', () => {
     mockProjectCollection = jasmine.createSpyObj('ProjectCollection', ['get']);
     mockRouteService = Mocks.listenable('RouteService');
     mockRouteService.getMatches = jasmine.createSpy('RouteService.getMatches');
+    mockRouteService.goTo = jasmine.createSpy('RouteService.goTo');
     TestDispose.add(mockRouteService);
 
     view = new ProjectView(
@@ -25,6 +26,23 @@ describe('project.ProjectView', () => {
         mockRouteService,
         jasmine.createSpyObj('ThemeService', ['applyTheme']));
     TestDispose.add(view);
+  });
+
+  describe('getProjectId_', () => {
+    it('should return the correct project ID if there is a match', () => {
+      let projectId = 'projectId';
+      mockRouteService.getMatches.and.returnValue({projectId: projectId});
+
+      assert(view['getProjectId_']()).to.equal(projectId);
+      assert(mockRouteService.getMatches).to.haveBeenCalledWith(Routes.PROJECT);
+    });
+
+    it('should return null if there are no project IDs', () => {
+      mockRouteService.getMatches.and.returnValue(null);
+
+      assert(view['getProjectId_']()).to.beNull();
+      assert(mockRouteService.getMatches).to.haveBeenCalledWith(Routes.PROJECT);
+    });
   });
 
   describe('updateProjectName_', () => {
@@ -77,6 +95,28 @@ describe('project.ProjectView', () => {
             assert(view['projectNameTextBridge_'].set).toNot.haveBeenCalled();
             done();
           }, done.fail);
+    });
+  });
+
+  describe('onCreateButtonClicked_', () => {
+    it('should navigate to create asset view', () => {
+      let projectId = 'projectId';
+      spyOn(view, 'getProjectId_').and.returnValue(projectId);
+
+      let createAssetRoute = Mocks.object('createAssetRoute');
+      spyOn(Routes.CREATE_ASSET, 'create').and.returnValue(createAssetRoute);
+
+      view['onCreateButtonClicked_']();
+
+      assert(mockRouteService.goTo).to.haveBeenCalledWith(createAssetRoute);
+      assert(Routes.CREATE_ASSET.create).to.haveBeenCalledWith(projectId);
+    });
+
+    it('should not throw error if there are no project IDs', () => {
+      spyOn(view, 'getProjectId_').and.returnValue(null);
+      assert(() => {
+        view['onCreateButtonClicked_']();
+      }).toNot.throw();
     });
   });
 

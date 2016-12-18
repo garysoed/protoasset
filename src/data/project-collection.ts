@@ -101,7 +101,7 @@ export class ProjectCollection extends BaseListenable<CollectionEvents> {
    * @return Promise that will be resolved with the project ID that is guaranteed to be unique.
    */
   reserveId(): Promise<string> {
-    return this.storage_.reserve();
+    return this.storage_.generateId();
   }
 
   /**
