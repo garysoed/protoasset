@@ -17,6 +17,7 @@ describe('routing.RouteService', () => {
 
   beforeEach(() => {
     mockLocationService = Mocks.listenable('LocationService');
+    mockLocationService.getMatches = jasmine.createSpy('LocationService.getMatches');
     service = new RouteService(mockLocationService);
     TestDispose.add(mockLocationService, service);
   });
@@ -39,6 +40,35 @@ describe('routing.RouteService', () => {
           LocationServiceEvents.CHANGED,
           service['onLocationChanged_'],
           service);
+    });
+  });
+
+  describe('getMatches', () => {
+    it('should return the correct matches', () => {
+      let matcher = 'matcher';
+      let populatedMatches = Mocks.object('populatedMatches');
+      let mockRouteFactory =
+          jasmine.createSpyObj('RouteFactory', ['getMatcher', 'populateMatches']);
+      mockRouteFactory.getMatcher.and.returnValue(matcher);
+      mockRouteFactory.populateMatches.and.returnValue(populatedMatches);
+
+      let matches = Mocks.object('matches');
+      mockLocationService.getMatches.and.returnValue(matches);
+
+      assert(service.getMatches(mockRouteFactory)).to.equal(populatedMatches);
+      assert(mockRouteFactory.populateMatches).to.haveBeenCalledWith(matches);
+      assert(mockLocationService.getMatches).to.haveBeenCalledWith(matcher);
+    });
+
+    it('should return null if there are no matches', () => {
+      let matcher = 'matcher';
+      let mockRouteFactory = jasmine.createSpyObj('RouteFactory', ['getMatcher']);
+      mockRouteFactory.getMatcher.and.returnValue(matcher);
+
+      mockLocationService.getMatches.and.returnValue(null);
+
+      assert(service.getMatches(mockRouteFactory)).to.equal(null);
+      assert(mockLocationService.getMatches).to.haveBeenCalledWith(matcher);
     });
   });
 

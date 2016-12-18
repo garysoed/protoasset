@@ -40,7 +40,20 @@ export class RouteService extends BaseListenable<RouteServiceEvents> {
   }
 
   /**
+   * @param routeFactory The factory of the routes to get the matcher of.
+   */
+  getMatches<T>(routeFactory: IRouteFactory<any, T>): T | null {
+    let matches = this.locationService_.getMatches(routeFactory.getMatcher());
+    if (matches === null) {
+      return null;
+    }
+
+    return routeFactory.populateMatches(matches);
+  }
+
+  /**
    * Go to the given route object.
+   * @param route The route to go to.
    */
   goTo(route: Route): void {
     this.locationService_.goTo(route.getLocation());
@@ -49,7 +62,7 @@ export class RouteService extends BaseListenable<RouteServiceEvents> {
   /**
    * @return True iff the current location is displaying the given route.
    */
-  isDisplayed(routeFactory: IRouteFactory<any>): boolean {
+  isDisplayed(routeFactory: IRouteFactory<any, any>): boolean {
     return this.locationService_.hasMatch(routeFactory.getMatcher());
   }
 }

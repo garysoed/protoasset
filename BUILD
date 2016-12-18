@@ -38,6 +38,7 @@ karma_run(
         "//src/common:test_src",
         "//src/data:test_src",
         "//src/landing:test_src",
+        "//src/project:test_src",
         "//src/routing:test_src",
     ]
 )
@@ -48,6 +49,7 @@ test_suite(
         "//src/common:lint",
         "//src/data:lint",
         "//src/landing:lint",
+        "//src/project:lint",
         "//src/routing:lint",
     ]
 )
@@ -58,6 +60,7 @@ filegroup(
         "@gs_ui//:pack_template",
         "//src/common:template",
         "//src/landing:template",
+        "//src/project:template",
     ]
 )
 

@@ -39,6 +39,7 @@ export class FilterButton extends BaseThemedElement {
   protected onClearButtonAction_(): void {
     this.searchTextValueBridge_.set('');
     this.filterTextAttrBridge_.set('');
+    this.drawerExpandedBridge_.set(false);
   }
 
   @handle('#searchButton').event(Event.ACTION)

@@ -5,18 +5,45 @@ import {Mocks} from 'external/gs_tools/src/mock';
 import {TestDispose} from 'external/gs_tools/src/testing';
 
 import {ProjectItem} from './project-item';
+import {Routes} from '../routing/routes';
 
 
 describe('landing.ProjectItem', () => {
   let mockProjectCollection;
+  let mockRouteService;
   let item;
 
   beforeEach(() => {
     mockProjectCollection = jasmine.createSpyObj('ProjectCollection', ['get']);
+    mockRouteService = jasmine.createSpyObj('RouteService', ['goTo']);
     item = new ProjectItem(
         mockProjectCollection,
+        mockRouteService,
         Mocks.object('ThemeService'));
     TestDispose.add(item);
+  });
+
+  describe('onElementClicked_', () => {
+    it('should go to the correct project view', () => {
+      let projectId = 'projectId';
+      spyOn(item['projectIdBridge_'], 'get').and.returnValue(projectId);
+
+      let projectRoute = Mocks.object('projectRoute');
+      spyOn(Routes.PROJECT, 'create').and.returnValue(projectRoute);
+
+      item['onElementClicked_']();
+
+      assert(mockRouteService.goTo).to.haveBeenCalledWith(projectRoute);
+      assert(Routes.PROJECT.create).to.haveBeenCalledWith(projectId);
+    });
+
+    it('should do nothing if the project ID is null', () => {
+      spyOn(item['projectIdBridge_'], 'get').and.returnValue(null);
+
+      item['onElementClicked_']();
+
+      assert(mockRouteService.goTo).toNot.haveBeenCalled();
+    });
   });
 
   describe('onProjectIdChanged_', () => {

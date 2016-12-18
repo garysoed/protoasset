@@ -2,6 +2,7 @@ npm-debug.log
 bazel-bin
 bazel-genfiles
 bazel-out
+.vscode/
 bazel-protoasset/
 bazel-testlogs
 node_modules/

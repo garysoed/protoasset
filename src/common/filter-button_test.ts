@@ -19,11 +19,13 @@ describe('common.FilterButton', () => {
     it('should clear the search text value and the filter text attribute', () => {
       spyOn(button['searchTextValueBridge_'], 'set');
       spyOn(button['filterTextAttrBridge_'], 'set');
+      spyOn(button['drawerExpandedBridge_'], 'set');
 
       button['onClearButtonAction_']();
 
       assert(button['searchTextValueBridge_'].set).to.haveBeenCalledWith('');
       assert(button['filterTextAttrBridge_'].set).to.haveBeenCalledWith('');
+      assert(button['drawerExpandedBridge_'].set).to.haveBeenCalledWith(false);
     });
   });
 

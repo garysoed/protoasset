@@ -2,7 +2,7 @@ import {IRouteFactory} from './interfaces';
 import {Route} from './route';
 
 
-export class SimpleRouteFactory implements IRouteFactory<void> {
+export class SimpleRouteFactory implements IRouteFactory<void, void> {
   private readonly location_: string;
 
   constructor(location: string) {
@@ -24,4 +24,9 @@ export class SimpleRouteFactory implements IRouteFactory<void> {
   getMatcher(): string {
     return `${this.location_}$`;
   }
+
+  /**
+   * @override
+   */
+  populateMatches(matches: {[key: string]: string}): void { }
 }
