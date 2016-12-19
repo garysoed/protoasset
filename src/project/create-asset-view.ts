@@ -9,13 +9,13 @@ import {
 
 import {BaseThemedElement} from 'external/gs_ui/src/common';
 import {Event} from 'external/gs_ui/src/const';
+import {RouteService} from 'external/gs_ui/src/routing';
 import {ThemeService} from 'external/gs_ui/src/theming';
 
 import {Validate} from 'external/gs_tools/src/valid';
 
 import {Asset} from '../data/asset';
 import {AssetCollection} from '../data/asset-collection';
-import {RouteService} from '../routing/route-service';
 import {Routes} from '../routing/routes';
 
 
@@ -44,7 +44,7 @@ export class CreateAssetView extends BaseThemedElement {
   constructor(
       @inject('theming.ThemeService') themeService: ThemeService,
       @inject('pa.data.AssetCollection') assetCollection: AssetCollection,
-      @inject('pa.routing.RouteService') routeService: RouteService) {
+      @inject('gs.routing.RouteService') routeService: RouteService) {
     super(themeService);
     this.createButtonDisabledBridge_ = DomBridge.of<boolean>(true);
     this.nameValueBridge_ = DomBridge.of<string>();

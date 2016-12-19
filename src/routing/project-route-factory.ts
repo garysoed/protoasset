@@ -1,5 +1,4 @@
-import {IRouteFactory} from './interfaces';
-import {Route} from './route';
+import {IRouteFactory, Route} from 'external/gs_ui/src/routing';
 
 
 export class ProjectRouteFactory implements IRouteFactory<string, {projectId: string}> {

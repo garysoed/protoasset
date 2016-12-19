@@ -3,6 +3,7 @@ import {inject} from 'external/gs_tools/src/inject';
 
 import {BaseThemedElement} from 'external/gs_ui/src/common';
 import {Event} from 'external/gs_ui/src/const';
+import {RouteService, RouteServiceEvents} from 'external/gs_ui/src/routing';
 import {ThemeService} from 'external/gs_ui/src/theming';
 
 import {CollectionEvents} from '../data/collection-events';
@@ -10,8 +11,6 @@ import {FilterButton} from '../common/filter-button';
 import {Project} from '../data/project';
 import {ProjectCollection} from '../data/project-collection';
 import {ProjectItem} from './project-item';
-import {RouteService} from '../routing/route-service';
-import {RouteServiceEvents} from '../routing/route-service-events';
 import {Routes} from '../routing/routes';
 
 /**
@@ -50,7 +49,7 @@ export class LandingView extends BaseThemedElement {
   constructor(
       @inject('theming.ThemeService') themeService: ThemeService,
       @inject('pa.data.ProjectCollection') projectCollection: ProjectCollection,
-      @inject('pa.routing.RouteService') routeService: RouteService) {
+      @inject('gs.routing.RouteService') routeService: RouteService) {
     super(themeService);
     this.routeService_ = routeService;
     this.projectCollection_ = projectCollection;

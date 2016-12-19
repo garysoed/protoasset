@@ -9,13 +9,13 @@ import {
 
 import {BaseThemedElement} from 'external/gs_ui/src/common';
 import {Event} from 'external/gs_ui/src/const';
+import {RouteService} from 'external/gs_ui/src/routing';
 import {ThemeService} from 'external/gs_ui/src/theming';
 
 import {Validate} from 'external/gs_tools/src/valid';
 
 import {Project} from '../data/project';
 import {ProjectCollection} from '../data/project-collection';
-import {RouteService} from '../routing/route-service';
 import {Routes} from '../routing/routes';
 
 
@@ -43,7 +43,7 @@ export class CreateProjectView extends BaseThemedElement {
   constructor(
       @inject('theming.ThemeService') themeService: ThemeService,
       @inject('pa.data.ProjectCollection') projectCollection: ProjectCollection,
-      @inject('pa.routing.RouteService') routeService: RouteService) {
+      @inject('gs.routing.RouteService') routeService: RouteService) {
     super(themeService);
     this.createButtonDisabledBridge_ = DomBridge.of<boolean>(true);
     this.nameValueBridge_ = DomBridge.of<string>();

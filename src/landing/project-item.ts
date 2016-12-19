@@ -3,11 +3,11 @@ import {DomEvent} from 'external/gs_tools/src/event';
 import {inject} from 'external/gs_tools/src/inject';
 
 import {BaseThemedElement} from 'external/gs_ui/src/common';
+import {RouteService} from 'external/gs_ui/src/routing';
 import {ThemeService} from 'external/gs_ui/src/theming';
 
 import {Project} from '../data/project';
 import {ProjectCollection} from '../data/project-collection';
-import {RouteService} from '../routing/route-service';
 import {Routes} from '../routing/routes';
 
 
@@ -28,7 +28,7 @@ export class ProjectItem extends BaseThemedElement {
 
   constructor(
       @inject('pa.data.ProjectCollection') projectCollection: ProjectCollection,
-      @inject('pa.routing.RouteService') routeService: RouteService,
+      @inject('gs.routing.RouteService') routeService: RouteService,
       @inject('theming.ThemeService') themeService: ThemeService) {
     super(themeService);
 

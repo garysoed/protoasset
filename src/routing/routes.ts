@@ -1,6 +1,7 @@
+import {SimpleRouteFactory} from 'external/gs_ui/src/routing';
+
 import {CreateAssetRouteFactory} from './create-asset-route-factory';
 import {ProjectRouteFactory} from './project-route-factory';
-import {SimpleRouteFactory} from './simple-route-factory';
 
 
 /**

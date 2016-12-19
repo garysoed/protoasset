@@ -3,13 +3,12 @@ import {inject} from 'external/gs_tools/src/inject';
 
 import {BaseThemedElement} from 'external/gs_ui/src/common';
 import {Event} from 'external/gs_ui/src/const';
+import {RouteService, RouteServiceEvents} from 'external/gs_ui/src/routing';
 import {ThemeService} from 'external/gs_ui/src/theming';
 
 import {FilterButton} from '../common/filter-button';
 import {Project} from '../data/project';
 import {ProjectCollection} from '../data/project-collection';
-import {RouteService} from '../routing/route-service';
-import {RouteServiceEvents} from '../routing/route-service-events';
 import {Routes} from '../routing/routes';
 
 
@@ -30,7 +29,7 @@ export class ProjectView extends BaseThemedElement {
 
   constructor(
       @inject('pa.data.ProjectCollection') projectCollection: ProjectCollection,
-      @inject('pa.routing.RouteService') routeService: RouteService,
+      @inject('gs.routing.RouteService') routeService: RouteService,
       @inject('theming.ThemeService') themeService: ThemeService) {
     super(themeService);
     this.projectCollection_ = projectCollection;
