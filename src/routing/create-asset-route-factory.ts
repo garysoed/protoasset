@@ -1,29 +1,43 @@
-import {IRouteFactory, Route} from 'external/gs_ui/src/routing';
+import {AbstractRouteFactory} from 'external/gs_ui/src/routing';
+
+import {Views} from '../routing/views';
 
 
-export class CreateAssetRouteFactory implements IRouteFactory<string, {projectId: string}> {
-  /**
-   * Creates a new Route object.
-   *
-   * @override
-   */
-  create(projectId: string): Route {
-    return new Route(`/project/${projectId}/create`);
+type CreateAssetParams = {projectId: string};
+
+
+export class CreateAssetRouteFactory extends
+    AbstractRouteFactory<Views, CreateAssetParams, {}> {
+
+  constructor(parent: AbstractRouteFactory<Views, any, CreateAssetParams>) {
+    super(Views.CREATE_ASSET, parent);
   }
 
   /**
    * @override
    */
-  getMatcher(): string {
-    return `/project/:projectId/create$`;
+  protected getRelativeMatchParams_(matches: {[key: string]: string}): {} {
+    return {};
   }
 
   /**
    * @override
    */
-  populateMatches(matches: {[key: string]: string}): {projectId: string} {
-    return {
-      projectId: matches['projectId'],
-    };
+  protected getRelativeMatcher_(): string {
+    return '/create';
+  }
+
+  /**
+   * @override
+   */
+  protected getRelativePath_(params: CreateAssetParams): string {
+    return '/create';
+  }
+
+  /**
+   * @override
+   */
+  getName(params: CreateAssetParams): Promise<string> {
+    return Promise.resolve('Create asset');
   }
 }

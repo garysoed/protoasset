@@ -1,31 +1,66 @@
 import {assert, TestBase} from '../test-base';
 TestBase.setup();
 
+import {Mocks} from 'external/gs_tools/src/mock';
+
 import {ProjectRouteFactory} from './project-route-factory';
 
 
 describe('routing.ProjectRouteFactory', () => {
+  let mockProjectCollection;
   let factory: ProjectRouteFactory;
 
   beforeEach(() => {
-    factory = new ProjectRouteFactory();
+    mockProjectCollection = jasmine.createSpyObj('ProjectCollection', ['get']);
+    factory = new ProjectRouteFactory(
+        mockProjectCollection,
+        Mocks.object('parent'));
   });
 
-  describe('create', () => {
-    it('should create the correct route', () => {
+  describe('getRelativePath_', () => {
+    it('should return the correct path', () => {
       let projectId = 'projectId';
-      assert(factory.create(projectId).getLocation()).to.equal(`/project/${projectId}`);
+      assert(factory['getRelativePath_']({projectId: projectId})).to.equal(`/project/${projectId}`);
     });
   });
 
-  describe('populateMatches', () => {
-    it('should create the correct match object', () => {
+  describe('getRelativeMatchParams_', () => {
+    it('should return the correct params', () => {
       let projectId = 'projectId';
-      let matches = {
-        'projectId': projectId,
-      };
+      assert(factory['getRelativeMatchParams_']({'projectId': projectId})).to.equal({
+        projectId: projectId,
+      });
+    });
+  });
 
-      assert(factory.populateMatches(matches)).to.equal({projectId: projectId});
+  describe('getName', () => {
+    it('should return the correct name', (done: any) => {
+      let name = 'name';
+      let mockProject = jasmine.createSpyObj('Project', ['getName']);
+      mockProject.getName.and.returnValue(name);
+      mockProjectCollection.get.and.returnValue(Promise.resolve(mockProject));
+
+      let projectId = 'projectId';
+
+      factory
+          .getName({projectId: projectId})
+          .then((actualName: string) => {
+            assert(actualName).to.equal(name);
+            assert(mockProjectCollection.get).to.haveBeenCalledWith(projectId);
+            done();
+          }, done.fail);
+    });
+
+    it('should return the project ID if the project is unknown', (done: any) => {
+      mockProjectCollection.get.and.returnValue(Promise.resolve(null));
+
+      let projectId = 'projectId';
+      factory
+          .getName({projectId: projectId})
+          .then((actualName: string) => {
+            assert(actualName).to.equal(`Unknown project ${projectId}`);
+            done();
+          }, done.fail);
     });
   });
 });

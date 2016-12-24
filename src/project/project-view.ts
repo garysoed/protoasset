@@ -9,7 +9,8 @@ import {ThemeService} from 'external/gs_ui/src/theming';
 import {FilterButton} from '../common/filter-button';
 import {Project} from '../data/project';
 import {ProjectCollection} from '../data/project-collection';
-import {Routes} from '../routing/routes';
+import {RouteFactoryService} from '../routing/route-factory-service';
+import {Views} from '../routing/views';
 
 
 /**
@@ -22,18 +23,21 @@ import {Routes} from '../routing/routes';
 })
 export class ProjectView extends BaseThemedElement {
   private readonly projectCollection_: ProjectCollection;
-  private readonly routeService_: RouteService;
+  private readonly routeFactoryService_: RouteFactoryService;
+  private readonly routeService_: RouteService<Views>;
 
   @bind('#projectName').innerText()
   private readonly projectNameTextBridge_: DomBridge<string>;
 
   constructor(
       @inject('pa.data.ProjectCollection') projectCollection: ProjectCollection,
-      @inject('gs.routing.RouteService') routeService: RouteService,
+      @inject('pa.routing.RouteFactoryService') routeFactoryService: RouteFactoryService,
+      @inject('gs.routing.RouteService') routeService: RouteService<Views>,
       @inject('theming.ThemeService') themeService: ThemeService) {
     super(themeService);
     this.projectCollection_ = projectCollection;
     this.projectNameTextBridge_ = DomBridge.of<string>();
+    this.routeFactoryService_ = routeFactoryService;
     this.routeService_ = routeService;
   }
 
@@ -41,8 +45,8 @@ export class ProjectView extends BaseThemedElement {
    * @return The project ID of the view, or null if the view has no project IDs.
    */
   private getProjectId_(): null | string {
-    let matches = this.routeService_.getMatches(Routes.PROJECT);
-    return matches === null ? null : matches.projectId;
+    let params = this.routeService_.getParams(this.routeFactoryService_.project());
+    return params === null ? null : params.projectId;
   }
 
   /**
@@ -66,7 +70,8 @@ export class ProjectView extends BaseThemedElement {
   protected onCreateButtonClicked_(): void {
     let projectId = this.getProjectId_();
     if (projectId !== null) {
-      this.routeService_.goTo(Routes.CREATE_ASSET.create(projectId));
+      this.routeService_.goTo(
+          this.routeFactoryService_.createAsset(), {projectId: projectId});
     }
   }
 

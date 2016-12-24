@@ -1,17 +1,38 @@
 <html>
   <head>
+    <style>
+      #banner {
+        padding-left: 1.5rem;
+      }
+
+      #breadcrumbContainer {
+        height: 3.5rem;
+        position: relative;
+      }
+
+      #viewSlotContainer {
+        position: relative;
+      }
+    </style>
   </head>
   <body class="gs-theme-normal">
     <script src="../../node_modules/x-tag/src/core.js"></script>
     <script src="../../bazel-genfiles/pack.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/2.5.0/fuse.min.js"></script>
     <div fill-parent layout="column">
-      <gs-view-slot flex>
-        <pa-create-asset-view gs-view-path="project/:projectId/create"></pa-create-asset-view>
-        <pa-create-project-view gs-view-path="create"></pa-create-project-view>
-        <pa-project-view gs-view-path="project/:projectId"></pa-project-view>
-        <pa-landing-view gs-view-path="."></pa-landing-view>
-      </gs-view-slot>
+      <div class="gs-theme-normal-hilite" id="banner">
+        <div id="breadcrumbContainer">
+          <gs-breadcrumb></gs-breadcrumb>
+        </div>
+      </div>
+      <div flex id="viewSlotContainer">
+        <gs-view-slot flex>
+          <pa-create-asset-view gs-view-path="/home/project/:projectId/create"></pa-create-asset-view>
+          <pa-project-view gs-view-path="/home/project/:projectId"></pa-project-view>
+          <pa-create-project-view gs-view-path="/home/create"></pa-create-project-view>
+          <pa-landing-view gs-view-path="/home"></pa-landing-view>
+        </gs-view-slot>
+      </div>
     </div>
     <script>
       pa.bootstrap(document);

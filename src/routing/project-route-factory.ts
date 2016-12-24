@@ -1,14 +1,44 @@
-import {IRouteFactory, Route} from 'external/gs_ui/src/routing';
+import {AbstractRouteFactory} from 'external/gs_ui/src/routing';
+
+import {Project} from '../data/project';
+import {ProjectCollection} from '../data/project-collection';
+import {Views} from './views';
 
 
-export class ProjectRouteFactory implements IRouteFactory<string, {projectId: string}> {
+type Params = {projectId: string};
+
+
+export class ProjectRouteFactory extends AbstractRouteFactory<Views, {}, Params> {
+  private readonly projectCollection_: ProjectCollection;
+
+  constructor(
+      projectCollection: ProjectCollection,
+      parent: AbstractRouteFactory<Views, any, {}>) {
+    super(Views.PROJECT, parent);
+    this.projectCollection_ = projectCollection;
+  }
+
   /**
-   * Creates a new Route object.
-   *
    * @override
    */
-  create(projectId: string): Route {
-    return new Route(`/project/${projectId}`);
+  protected getRelativeMatcher_(): string {
+    return `/project/:projectId`;
+  }
+
+  /**
+   * @override
+   */
+  protected getRelativePath_(params: Params): string {
+    return `/project/${params.projectId}`;
+  }
+
+  /**
+   * @override
+   */
+  getRelativeMatchParams_(matches: {[key: string]: string}): Params {
+    return {
+      projectId: matches['projectId'],
+    };
   }
 
   /**
@@ -21,9 +51,15 @@ export class ProjectRouteFactory implements IRouteFactory<string, {projectId: st
   /**
    * @override
    */
-  populateMatches(matches: {[key: string]: string}): {projectId: string} {
-    return {
-      projectId: matches['projectId'],
-    };
+  getName(params: Params): Promise<string> {
+    return this.projectCollection_
+        .get(params.projectId)
+        .then((project: Project | null) => {
+          if (project === null) {
+            return `Unknown project ${params.projectId}`;
+          }
+
+          return project.getName();
+        });
   }
 }

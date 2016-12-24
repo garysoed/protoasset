@@ -8,7 +8,8 @@ import {ThemeService} from 'external/gs_ui/src/theming';
 
 import {Project} from '../data/project';
 import {ProjectCollection} from '../data/project-collection';
-import {Routes} from '../routing/routes';
+import {RouteFactoryService} from '../routing/route-factory-service';
+import {Views} from '../routing/views';
 
 
 @customElement({
@@ -17,7 +18,8 @@ import {Routes} from '../routing/routes';
 })
 export class ProjectItem extends BaseThemedElement {
   private readonly projectCollection_: ProjectCollection;
-  private readonly routeService_: RouteService;
+  private readonly routeFactoryService_: RouteFactoryService;
+  private readonly routeService_: RouteService<Views>;
 
   @bind(null).attribute('project-id', StringParser)
   private readonly projectIdBridge_: DomBridge<string>;
@@ -28,13 +30,15 @@ export class ProjectItem extends BaseThemedElement {
 
   constructor(
       @inject('pa.data.ProjectCollection') projectCollection: ProjectCollection,
-      @inject('gs.routing.RouteService') routeService: RouteService,
+      @inject('pa.routing.RouteFactoryService') routeFactoryService: RouteFactoryService,
+      @inject('gs.routing.RouteService') routeService: RouteService<Views>,
       @inject('theming.ThemeService') themeService: ThemeService) {
     super(themeService);
 
     this.projectCollection_ = projectCollection;
     this.projectIdBridge_ = DomBridge.of<string>();
     this.projectNameBridge_ = DomBridge.of<string>();
+    this.routeFactoryService_ = routeFactoryService;
     this.routeService_ = routeService;
   }
 
@@ -42,7 +46,7 @@ export class ProjectItem extends BaseThemedElement {
   protected onElementClicked_(): void {
     let projectId = this.projectIdBridge_.get();
     if (projectId !== null) {
-      this.routeService_.goTo(Routes.PROJECT.create(projectId));
+      this.routeService_.goTo(this.routeFactoryService_.project(), {projectId: projectId});
     }
   }
 

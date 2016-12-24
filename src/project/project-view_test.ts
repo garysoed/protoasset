@@ -4,25 +4,29 @@ TestBase.setup();
 import {Mocks} from 'external/gs_tools/src/mock';
 import {TestDispose} from 'external/gs_tools/src/testing';
 
+import {RouteServiceEvents} from 'external/gs_ui/src/routing';
+
 import {ProjectView} from './project-view';
-import {RouteServiceEvents} from '../routing/route-service-events';
-import {Routes} from '../routing/routes';
 
 
 describe('project.ProjectView', () => {
   let mockProjectCollection;
+  let mockRouteFactoryService;
   let mockRouteService;
   let view: ProjectView;
 
   beforeEach(() => {
     mockProjectCollection = jasmine.createSpyObj('ProjectCollection', ['get']);
+    mockRouteFactoryService =
+        jasmine.createSpyObj('RouteFactoryService', ['createAsset', 'project']);
     mockRouteService = Mocks.listenable('RouteService');
-    mockRouteService.getMatches = jasmine.createSpy('RouteService.getMatches');
+    mockRouteService.getParams = jasmine.createSpy('RouteService.getParams');
     mockRouteService.goTo = jasmine.createSpy('RouteService.goTo');
     TestDispose.add(mockRouteService);
 
     view = new ProjectView(
         mockProjectCollection,
+        mockRouteFactoryService,
         mockRouteService,
         jasmine.createSpyObj('ThemeService', ['applyTheme']));
     TestDispose.add(view);
@@ -31,17 +35,24 @@ describe('project.ProjectView', () => {
   describe('getProjectId_', () => {
     it('should return the correct project ID if there is a match', () => {
       let projectId = 'projectId';
-      mockRouteService.getMatches.and.returnValue({projectId: projectId});
+
+      let routeFactory = Mocks.object('routeFactory');
+      mockRouteFactoryService.project.and.returnValue(routeFactory);
+
+      mockRouteService.getParams.and.returnValue({projectId: projectId});
 
       assert(view['getProjectId_']()).to.equal(projectId);
-      assert(mockRouteService.getMatches).to.haveBeenCalledWith(Routes.PROJECT);
+      assert(mockRouteService.getParams).to.haveBeenCalledWith(routeFactory);
     });
 
     it('should return null if there are no project IDs', () => {
-      mockRouteService.getMatches.and.returnValue(null);
+      let routeFactory = Mocks.object('routeFactory');
+      mockRouteFactoryService.project.and.returnValue(routeFactory);
+
+      mockRouteService.getParams.and.returnValue(null);
 
       assert(view['getProjectId_']()).to.beNull();
-      assert(mockRouteService.getMatches).to.haveBeenCalledWith(Routes.PROJECT);
+      assert(mockRouteService.getParams).to.haveBeenCalledWith(routeFactory);
     });
   });
 
@@ -55,15 +66,13 @@ describe('project.ProjectView', () => {
 
       mockProjectCollection.get.and.returnValue(Promise.resolve(mockProject));
 
-      mockRouteService.getMatches.and.returnValue({projectId: projectId});
-
+      spyOn(view, 'getProjectId_').and.returnValue(projectId);
       spyOn(view['projectNameTextBridge_'], 'set');
 
       view['updateProjectName_']()
           .then(() => {
             assert(view['projectNameTextBridge_'].set).to.haveBeenCalledWith(projectName);
             assert(mockProjectCollection.get).to.haveBeenCalledWith(projectId);
-            assert(mockRouteService.getMatches).to.haveBeenCalledWith(Routes.PROJECT);
             done();
           }, done.fail);
     });
@@ -73,9 +82,7 @@ describe('project.ProjectView', () => {
           let projectId = 'projectId';
 
           mockProjectCollection.get.and.returnValue(Promise.resolve(null));
-
-          mockRouteService.getMatches.and.returnValue({projectId: projectId});
-
+          spyOn(view, 'getProjectId_').and.returnValue(projectId);
           spyOn(view['projectNameTextBridge_'], 'set');
 
           view['updateProjectName_']()
@@ -85,9 +92,8 @@ describe('project.ProjectView', () => {
               }, done.fail);
         });
 
-    it('should not throw error if there are no matches', (done: any) => {
-      mockRouteService.getMatches.and.returnValue(null);
-
+    it('should not throw error if there are no project IDs', (done: any) => {
+      spyOn(view, 'getProjectId_').and.returnValue(null);
       spyOn(view['projectNameTextBridge_'], 'set');
 
       view['updateProjectName_']()
@@ -103,13 +109,12 @@ describe('project.ProjectView', () => {
       let projectId = 'projectId';
       spyOn(view, 'getProjectId_').and.returnValue(projectId);
 
-      let createAssetRoute = Mocks.object('createAssetRoute');
-      spyOn(Routes.CREATE_ASSET, 'create').and.returnValue(createAssetRoute);
+      let routeFactory = Mocks.object('routeFactory');
+      mockRouteFactoryService.createAsset.and.returnValue(routeFactory);
 
       view['onCreateButtonClicked_']();
 
-      assert(mockRouteService.goTo).to.haveBeenCalledWith(createAssetRoute);
-      assert(Routes.CREATE_ASSET.create).to.haveBeenCalledWith(projectId);
+      assert(mockRouteService.goTo).to.haveBeenCalledWith(routeFactory, {projectId: projectId});
     });
 
     it('should not throw error if there are no project IDs', () => {

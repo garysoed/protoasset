@@ -16,7 +16,8 @@ import {Validate} from 'external/gs_tools/src/valid';
 
 import {Project} from '../data/project';
 import {ProjectCollection} from '../data/project-collection';
-import {Routes} from '../routing/routes';
+import {RouteFactoryService} from '../routing/route-factory-service';
+import {Views} from '../routing/views';
 
 
 /**
@@ -34,7 +35,8 @@ export class CreateProjectView extends BaseThemedElement {
   private readonly createButtonDisabledBridge_: DomBridge<boolean>;
 
   private readonly projectCollection_: ProjectCollection;
-  private readonly routeService_: RouteService;
+  private readonly routeFactoryService_: RouteFactoryService;
+  private readonly routeService_: RouteService<Views>;
 
   /**
    * @param themeService
@@ -43,11 +45,13 @@ export class CreateProjectView extends BaseThemedElement {
   constructor(
       @inject('theming.ThemeService') themeService: ThemeService,
       @inject('pa.data.ProjectCollection') projectCollection: ProjectCollection,
-      @inject('gs.routing.RouteService') routeService: RouteService) {
+      @inject('pa.routing.RouteFactoryService') routeFactoryService: RouteFactoryService,
+      @inject('gs.routing.RouteService') routeService: RouteService<Views>) {
     super(themeService);
     this.createButtonDisabledBridge_ = DomBridge.of<boolean>(true);
     this.nameValueBridge_ = DomBridge.of<string>();
     this.projectCollection_ = projectCollection;
+    this.routeFactoryService_ = routeFactoryService;
     this.routeService_ = routeService;
   }
 
@@ -64,7 +68,7 @@ export class CreateProjectView extends BaseThemedElement {
   @handle('#cancelButton').event(Event.ACTION)
   protected onCancelAction_(): void {
     this.reset_();
-    this.routeService_.goTo(Routes.LANDING.create());
+    this.routeService_.goTo(this.routeFactoryService_.landing(), {});
   }
 
   /**
@@ -96,7 +100,7 @@ export class CreateProjectView extends BaseThemedElement {
         })
         .then(() => {
           this.reset_();
-          this.routeService_.goTo(Routes.LANDING.create());
+          this.routeService_.goTo(this.routeFactoryService_.landing(), {});
         });
   }
 }

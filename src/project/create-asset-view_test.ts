@@ -6,20 +6,22 @@ import {TestDispose} from 'external/gs_tools/src/testing';
 
 import {Asset} from '../data/asset';
 import {CreateAssetView} from './create-asset-view';
-import {Routes} from '../routing/routes';
 
 
 describe('project.CreateAssetView', () => {
   let mockAssetCollection;
+  let mockRouteFactoryService;
   let mockRouteService;
   let view: CreateAssetView;
 
   beforeEach(() => {
     mockAssetCollection = jasmine.createSpyObj('AssetCollection', ['reserveId', 'update']);
-    mockRouteService = jasmine.createSpyObj('RouteService', ['getMatches', 'goTo']);
+    mockRouteFactoryService = jasmine.createSpyObj('RouteFactoryService', ['project']);
+    mockRouteService = jasmine.createSpyObj('RouteService', ['getParams', 'goTo']);
     view = new CreateAssetView(
         Mocks.object('ThemeService'),
         mockAssetCollection,
+        mockRouteFactoryService,
         mockRouteService);
     TestDispose.add(view);
   });
@@ -27,15 +29,24 @@ describe('project.CreateAssetView', () => {
   describe('getProjectId_', () => {
     it('should return the correct project ID', () => {
       let projectId = 'projectId';
-      mockRouteService.getMatches.and.returnValue({projectId: projectId});
+
+      let routeFactory = Mocks.object('routeFactory');
+      mockRouteFactoryService.project.and.returnValue(routeFactory);
+
+      mockRouteService.getParams.and.returnValue({projectId: projectId});
+
       assert(view['getProjectId_']()).to.equal(projectId);
-      assert(mockRouteService.getMatches).to.haveBeenCalledWith(Routes.CREATE_ASSET);
+      assert(mockRouteService.getParams).to.haveBeenCalledWith(routeFactory);
     });
 
     it('should return null if there are no matches', () => {
-      mockRouteService.getMatches.and.returnValue(null);
+      let routeFactory = Mocks.object('routeFactory');
+      mockRouteFactoryService.project.and.returnValue(routeFactory);
+
+      mockRouteService.getParams.and.returnValue(null);
+
       assert(view['getProjectId_']()).to.beNull();
-      assert(mockRouteService.getMatches).to.haveBeenCalledWith(Routes.CREATE_ASSET);
+      assert(mockRouteService.getParams).to.haveBeenCalledWith(routeFactory);
     });
   });
 
@@ -49,26 +60,22 @@ describe('project.CreateAssetView', () => {
 
   describe('onCancelAction_', () => {
     it('should reset the form and go to the project main view', () => {
+      let routeFactory = Mocks.object('routeFactory');
+      mockRouteFactoryService.project.and.returnValue(routeFactory);
+
       let projectId = 'projectId';
       spyOn(view, 'reset_');
       spyOn(view, 'getProjectId_').and.returnValue(projectId);
 
-      let projectRoute = Mocks.object('projectRoute');
-      spyOn(Routes.PROJECT, 'create').and.returnValue(projectRoute);
-
       view['onCancelAction_']();
 
-      assert(mockRouteService.goTo).to.haveBeenCalledWith(projectRoute);
-      assert(Routes.PROJECT.create).to.haveBeenCalledWith(projectId);
+      assert(mockRouteService.goTo).to.haveBeenCalledWith(routeFactory, {projectId: projectId});
       assert(view['reset_']).to.haveBeenCalledWith();
     });
 
     it('should do nothing if there are no project IDs', () => {
       spyOn(view, 'reset_');
       spyOn(view, 'getProjectId_').and.returnValue(null);
-
-      let projectRoute = Mocks.object('projectRoute');
-      spyOn(Routes.PROJECT, 'create').and.returnValue(projectRoute);
 
       view['onCancelAction_']();
 
@@ -99,8 +106,8 @@ describe('project.CreateAssetView', () => {
 
   describe('onSubmitAction_', () => {
     it('should create the asset correctly and navigate to the project main view', (done: any) => {
-      let projectRoute = Mocks.object('projectRoute');
-      spyOn(Routes.PROJECT, 'create').and.returnValue(projectRoute);
+      let routeFactory = Mocks.object('routeFactory');
+      mockRouteFactoryService.project.and.returnValue(routeFactory);
 
       let projectId = 'projectId';
       spyOn(view, 'getProjectId_').and.returnValue(projectId);
@@ -115,8 +122,8 @@ describe('project.CreateAssetView', () => {
 
       view['onSubmitAction_']()
           .then(() => {
-            assert(mockRouteService.goTo).to.haveBeenCalledWith(projectRoute);
-            assert(Routes.PROJECT.create).to.haveBeenCalledWith(projectId);
+            assert(mockRouteService.goTo).to
+                .haveBeenCalledWith(routeFactory, {projectId: projectId});
             assert(view['reset_']).to.haveBeenCalledWith();
 
             assert(mockAssetCollection.update).to.haveBeenCalledWith(Matchers.any(Asset));

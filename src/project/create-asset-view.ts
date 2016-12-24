@@ -16,7 +16,8 @@ import {Validate} from 'external/gs_tools/src/valid';
 
 import {Asset} from '../data/asset';
 import {AssetCollection} from '../data/asset-collection';
-import {Routes} from '../routing/routes';
+import {RouteFactoryService} from '../routing/route-factory-service';
+import {Views} from '../routing/views';
 
 
 /**
@@ -35,7 +36,8 @@ export class CreateAssetView extends BaseThemedElement {
   private readonly createButtonDisabledBridge_: DomBridge<boolean>;
 
   private readonly assetCollection_: AssetCollection;
-  private readonly routeService_: RouteService;
+  private readonly routeFactoryService_: RouteFactoryService;
+  private readonly routeService_: RouteService<Views>;
 
   /**
    * @param themeService
@@ -44,11 +46,13 @@ export class CreateAssetView extends BaseThemedElement {
   constructor(
       @inject('theming.ThemeService') themeService: ThemeService,
       @inject('pa.data.AssetCollection') assetCollection: AssetCollection,
-      @inject('gs.routing.RouteService') routeService: RouteService) {
+      @inject('pa.routing.RouteFactoryService') routeFactoryService: RouteFactoryService,
+      @inject('gs.routing.RouteService') routeService: RouteService<Views>) {
     super(themeService);
     this.createButtonDisabledBridge_ = DomBridge.of<boolean>(true);
     this.nameValueBridge_ = DomBridge.of<string>();
     this.assetCollection_ = assetCollection;
+    this.routeFactoryService_ = routeFactoryService;
     this.routeService_ = routeService;
   }
 
@@ -56,8 +60,8 @@ export class CreateAssetView extends BaseThemedElement {
    * @return Project ID of the view, or null if there is none.
    */
   private getProjectId_(): string | null {
-    let matches = this.routeService_.getMatches(Routes.CREATE_ASSET);
-    return matches === null ? null : matches.projectId;
+    let params = this.routeService_.getParams(this.routeFactoryService_.project());
+    return params === null ? null : params.projectId;
   }
 
   /**
@@ -75,7 +79,7 @@ export class CreateAssetView extends BaseThemedElement {
     let projectId = this.getProjectId_();
     if (projectId !== null) {
       this.reset_();
-      this.routeService_.goTo(Routes.PROJECT.create(projectId));
+      this.routeService_.goTo(this.routeFactoryService_.project(), {projectId: projectId});
     }
   }
 
@@ -113,7 +117,8 @@ export class CreateAssetView extends BaseThemedElement {
         })
         .then(() => {
           this.reset_();
-          this.routeService_.goTo(Routes.PROJECT.create(projectId));
+          this.routeService_
+              .goTo(this.routeFactoryService_.project(), {projectId: projectId});
         });
   }
 }

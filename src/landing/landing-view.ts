@@ -11,7 +11,8 @@ import {FilterButton} from '../common/filter-button';
 import {Project} from '../data/project';
 import {ProjectCollection} from '../data/project-collection';
 import {ProjectItem} from './project-item';
-import {Routes} from '../routing/routes';
+import {RouteFactoryService} from '../routing/route-factory-service';
+import {Views} from '../routing/views';
 
 /**
  * @param document The document to create the element in.
@@ -43,14 +44,17 @@ export class LandingView extends BaseThemedElement {
   @bind('#projects').childrenElements(projectItemElGenerator, projectItemElDataSetter)
   private readonly projectCollectionBridge_: DomBridge<Project[]>;
 
-  private readonly routeService_: RouteService;
+  private readonly routeFactoryService_: RouteFactoryService;
+  private readonly routeService_: RouteService<Views>;
   private readonly projectCollection_: ProjectCollection;
 
   constructor(
       @inject('theming.ThemeService') themeService: ThemeService,
       @inject('pa.data.ProjectCollection') projectCollection: ProjectCollection,
-      @inject('gs.routing.RouteService') routeService: RouteService) {
+      @inject('pa.routing.RouteFactoryService') routeFactoryService: RouteFactoryService,
+      @inject('gs.routing.RouteService') routeService: RouteService<Views>) {
     super(themeService);
+    this.routeFactoryService_ = routeFactoryService;
     this.routeService_ = routeService;
     this.projectCollection_ = projectCollection;
     this.projectCollectionBridge_ = DomBridge.of<Project[]>();
@@ -60,12 +64,16 @@ export class LandingView extends BaseThemedElement {
    * Handles event when the location was changed.
    */
   private onRouteChanged_(): Promise<void> {
-    if (this.routeService_.isDisplayed(Routes.LANDING)) {
+    let route = this.routeService_.getRoute();
+    if (route === null) {
+      this.routeService_.goTo(this.routeFactoryService_.landing(), {});
+      return Promise.resolve();
+    } else if (route.getType() === Views.LANDING) {
       return this.projectCollection_
           .list()
           .then((projects: Project[]) => {
             if (projects.length === 0) {
-              this.routeService_.goTo(Routes.CREATE_PROJECT.create());
+              this.routeService_.goTo(this.routeFactoryService_.createProject(), {});
             }
           });
     } else {
@@ -78,7 +86,7 @@ export class LandingView extends BaseThemedElement {
    */
   @handle('#createButton').event(Event.ACTION)
   protected onCreateAction_(): void {
-    this.routeService_.goTo(Routes.CREATE_PROJECT.create());
+    this.routeService_.goTo(this.routeFactoryService_.createProject(), {});
   }
 
   @handle('#filterButton').attributeChange('filter-text', StringParser)

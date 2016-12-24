@@ -6,20 +6,22 @@ import {TestDispose} from 'external/gs_tools/src/testing';
 
 import {CreateProjectView} from './create-project-view';
 import {Project} from '../data/project';
-import {Routes} from '../routing/routes';
 
 
 describe('landing.CreateProjectView', () => {
   let mockProjectCollection;
+  let mockRouteFactoryService;
   let mockRouteService;
   let view: CreateProjectView;
 
   beforeEach(() => {
     mockProjectCollection = jasmine.createSpyObj('ProjectCollection', ['reserveId', 'update']);
+    mockRouteFactoryService = jasmine.createSpyObj('RouteFactoryService', ['landing']);
     mockRouteService = jasmine.createSpyObj('RouteService', ['goTo']);
     view = new CreateProjectView(
         Mocks.object('ThemeService'),
         mockProjectCollection,
+        mockRouteFactoryService,
         mockRouteService);
     TestDispose.add(view);
   });
@@ -34,13 +36,14 @@ describe('landing.CreateProjectView', () => {
 
   describe('onCancelAction_', () => {
     it('should navigate to the landing page', () => {
-      let route = Mocks.object('route');
+      let routeFactory = Mocks.object('routeFactory');
+      mockRouteFactoryService.landing.and.returnValue(routeFactory);
+
       spyOn(view, 'reset_');
-      spyOn(Routes.LANDING, 'create').and.returnValue(route);
 
       view['onCancelAction_']();
 
-      assert(mockRouteService.goTo).to.haveBeenCalledWith(route);
+      assert(mockRouteService.goTo).to.haveBeenCalledWith(routeFactory, {});
       assert(view['reset_']).to.haveBeenCalledWith();
     });
   });
@@ -72,8 +75,8 @@ describe('landing.CreateProjectView', () => {
 
       let projectName = 'projectName';
 
-      let route = Mocks.object('route');
-      spyOn(Routes.LANDING, 'create').and.returnValue(route);
+      let routeFactory = Mocks.object('routeFactory');
+      mockRouteFactoryService.landing.and.returnValue(routeFactory);
 
       spyOn(Project.prototype, 'setName');
       spyOn(view['nameValueBridge_'], 'get').and.returnValue(projectName);
@@ -88,7 +91,7 @@ describe('landing.CreateProjectView', () => {
             assert(project.getId()).to.equal(projectId);
 
             assert(view['reset_']).to.haveBeenCalledWith();
-            assert(mockRouteService.goTo).to.haveBeenCalledWith(route);
+            assert(mockRouteService.goTo).to.haveBeenCalledWith(routeFactory, {});
             done();
           }, done.fail);
     });

@@ -8,7 +8,7 @@ import {TestDispose} from 'external/gs_tools/src/testing';
 
 import {CollectionEvents} from '../data/collection-events';
 import {LandingView, projectItemElGenerator, projectItemElDataSetter} from './landing-view';
-import {Routes} from '../routing/routes';
+import {Views} from '../routing/views';
 
 
 describe('landing.projectItemElGenerator', () => {
@@ -38,29 +38,33 @@ describe('landing.projectItemElDataSetter', () => {
 
 describe('landing.LandingView', () => {
   let view: LandingView;
+  let mockRouteFactoryService;
   let mockRouteService;
   let mockProjectCollection;
 
   beforeEach(() => {
-    mockRouteService = jasmine.createSpyObj('RouteService', ['goTo', 'isDisplayed', 'on']);
+    mockRouteFactoryService =
+        jasmine.createSpyObj('RouteFactoryService', ['createProject', 'landing']);
+    mockRouteService = jasmine.createSpyObj('RouteService', ['getRoute', 'goTo', 'on']);
     mockProjectCollection = Mocks.listenable('ProjectCollection');
     mockProjectCollection.list = jasmine.createSpy('ProjectCollection.list');
     mockProjectCollection.search = jasmine.createSpy('ProjectCollection.search');
     view = new LandingView(
         jasmine.createSpyObj('ThemeService', ['applyTheme']),
         mockProjectCollection,
+        mockRouteFactoryService,
         mockRouteService);
     TestDispose.add(view, mockProjectCollection);
   });
 
   describe('onCreateAction_', () => {
     it('should go to create project view', () => {
-      let route = Mocks.object('route');
-      spyOn(Routes.CREATE_PROJECT, 'create').and.returnValue(route);
+      let routeFactory = Mocks.object('routeFactory');
+      mockRouteFactoryService.createProject.and.returnValue(routeFactory);
 
       view['onCreateAction_']();
 
-      assert(mockRouteService.goTo).to.haveBeenCalledWith(route);
+      assert(mockRouteService.goTo).to.haveBeenCalledWith(routeFactory, {});
     });
   });
 
@@ -133,22 +137,28 @@ describe('landing.LandingView', () => {
   describe('onRouteChanged_', () => {
     it('should redirect to create page if the new location is landing but there are no projects',
         (done: any) => {
-          let createProjectRoute = Mocks.object('createProjectRoute');
-          spyOn(Routes.CREATE_PROJECT, 'create').and.returnValue(createProjectRoute);
-          mockRouteService.isDisplayed.and.returnValue(true);
+          let mockRoute = jasmine.createSpyObj('Route', ['getType']);
+          mockRoute.getType.and.returnValue(Views.LANDING);
+          mockRouteService.getRoute.and.returnValue(mockRoute);
+
+          let routeFactory = Mocks.object('routeFactory');
+          mockRouteFactoryService.createProject.and.returnValue(routeFactory);
+
           mockProjectCollection.list.and.returnValue(Promise.resolve([]));
 
           view['onRouteChanged_']()
               .then(() => {
-                assert(mockRouteService.goTo).to.haveBeenCalledWith(createProjectRoute);
-                assert(mockRouteService.isDisplayed).to.haveBeenCalledWith(Routes.LANDING);
+                assert(mockRouteService.goTo).to.haveBeenCalledWith(routeFactory, {});
                 done();
               }, done.fail);
         });
 
     it('should not redirect if the new location is landing but there are projects',
         (done: any) => {
-          mockRouteService.isDisplayed.and.returnValue(true);
+          let mockRoute = jasmine.createSpyObj('Route', ['getType']);
+          mockRoute.getType.and.returnValue(Views.LANDING);
+          mockRouteService.getRoute.and.returnValue(mockRoute);
+
           mockProjectCollection.list.and.returnValue(Promise.resolve([Mocks.object('project')]));
 
           view['onRouteChanged_']()
@@ -158,14 +168,29 @@ describe('landing.LandingView', () => {
               }, done.fail);
         });
 
+    it('should redirect to landing page if there are no valid routes', (done: any) => {
+      mockRouteService.getRoute.and.returnValue(null);
+
+      let routeFactory = Mocks.object('routeFactory');
+      mockRouteFactoryService.landing.and.returnValue(routeFactory);
+
+      view['onRouteChanged_']()
+          .then(() => {
+            assert(mockRouteService.goTo).to.haveBeenCalledWith(routeFactory, {});
+            done();
+          }, done.fail);
+    });
+
     it('should not redirect if the new location is not landing', (done: any) => {
-      mockRouteService.isDisplayed.and.returnValue(false);
+      let mockRoute = jasmine.createSpyObj('Route', ['getType']);
+      mockRoute.getType.and.returnValue(Views.CREATE_ASSET);
+      mockRouteService.getRoute.and.returnValue(mockRoute);
+
       mockProjectCollection.list.and.returnValue(Promise.resolve([]));
 
       view['onRouteChanged_']()
           .then(() => {
             assert(mockRouteService.goTo).toNot.haveBeenCalled();
-            assert(mockRouteService.isDisplayed).to.haveBeenCalledWith(Routes.LANDING);
             done();
           }, done.fail);
     });
