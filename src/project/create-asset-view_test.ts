@@ -126,7 +126,8 @@ describe('project.CreateAssetView', () => {
                 .haveBeenCalledWith(routeFactory, {projectId: projectId});
             assert(view['reset_']).to.haveBeenCalledWith();
 
-            assert(mockAssetCollection.update).to.haveBeenCalledWith(Matchers.any(Asset));
+            assert(mockAssetCollection.update).to
+                .haveBeenCalledWith(Matchers.any(Asset), projectId);
             let asset = mockAssetCollection.update.calls.argsFor(0)[0];
             assert(asset.getName()).to.equal(assetName);
             assert(asset.getId()).to.equal(assetId);

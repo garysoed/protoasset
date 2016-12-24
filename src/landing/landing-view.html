@@ -11,6 +11,7 @@
 
   #main {
     padding: 0 1rem;
+    overflow: scroll;
   }
 
   #filterButton {
@@ -18,10 +19,15 @@
     top: 0;
     right: 0;
   }
+
+  #leftMargin, #rightMargin {
+    max-width: var(--paMarginWidth);
+    min-width: var(--paMarginWidth);
+  }
 </style>
 
 <div fill-parent layout="row">
-  <div flex-justify="flex-end" layout="column">
+  <div flex-justify="flex-end" id="leftMargin" layout="column">
     <gs-basic-button class="gs-theme-normal gs-primary" id="createButton">
       <div gs-content>
         <gs-icon>add</gs-icon>
@@ -32,5 +38,6 @@
     <h2>Choose Project</h2>
     <div flex-wrap id="projects" layout="row"></div>
   </div>
+  <div id="rightMargin"></div>
   <pa-filter-button id="filterButton"></pa-filter-button>
 </div>

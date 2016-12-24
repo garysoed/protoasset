@@ -113,7 +113,7 @@ export class CreateAssetView extends BaseThemedElement {
         .then((id: string) => {
           let asset = new Asset(id, projectId);
           asset.setName(assetName);
-          return this.assetCollection_.update(asset);
+          return this.assetCollection_.update(asset, projectId);
         })
         .then(() => {
           this.reset_();

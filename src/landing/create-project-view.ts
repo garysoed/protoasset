@@ -96,11 +96,14 @@ export class CreateProjectView extends BaseThemedElement {
         .then((id: string) => {
           let project = new Project(id);
           project.setName(projectName!);
-          return this.projectCollection_.update(project);
+          return Promise.all([
+            this.projectCollection_.update(project),
+            id,
+          ]);
         })
-        .then(() => {
+        .then(([, id]: [void, string]) => {
           this.reset_();
-          this.routeService_.goTo(this.routeFactoryService_.landing(), {});
+          this.routeService_.goTo(this.routeFactoryService_.project(), {projectId: id});
         });
   }
 }

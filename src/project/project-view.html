@@ -11,6 +11,7 @@
 
   #main {
     padding: 0 1rem;
+    overflow: scroll;
   }
 
   #filterButton {
@@ -19,13 +20,18 @@
     right: 0;
   }
 
+  #leftMargin, #rightMargin {
+    max-width: var(--paMarginWidth);
+    min-width: var(--paMarginWidth);
+  }
+
   #projectName {
     text-decoration: underline;
   }
 </style>
 
 <div fill-parent layout="row">
-  <div flex-justify="flex-end" layout="column">
+  <div flex-justify="flex-end" id="leftWidth" layout="column">
     <gs-basic-button class="gs-theme-normal gs-primary" id="createButton">
       <div gs-content>
         <gs-icon>add</gs-icon>
@@ -36,5 +42,6 @@
     <h2>Choose Asset for project <span id="projectName"></span></h2>
     <div flex-wrap id="assets" layout="row"></div>
   </div>
+  <div id="rightMargin"></div>
   <pa-filter-button id="filterButton"></pa-filter-button>
 </div>

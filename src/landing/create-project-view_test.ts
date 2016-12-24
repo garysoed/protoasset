@@ -16,7 +16,7 @@ describe('landing.CreateProjectView', () => {
 
   beforeEach(() => {
     mockProjectCollection = jasmine.createSpyObj('ProjectCollection', ['reserveId', 'update']);
-    mockRouteFactoryService = jasmine.createSpyObj('RouteFactoryService', ['landing']);
+    mockRouteFactoryService = jasmine.createSpyObj('RouteFactoryService', ['landing', 'project']);
     mockRouteService = jasmine.createSpyObj('RouteService', ['goTo']);
     view = new CreateProjectView(
         Mocks.object('ThemeService'),
@@ -69,14 +69,14 @@ describe('landing.CreateProjectView', () => {
   });
 
   describe('onSubmitAction_', () => {
-    it('should create the project correctly, reset, and redirect to landing page', (done: any) => {
+    it('should create the project correctly, reset, and redirect to project page', (done: any) => {
       let projectId = 'projectId';
       mockProjectCollection.reserveId.and.returnValue(Promise.resolve(projectId));
 
       let projectName = 'projectName';
 
       let routeFactory = Mocks.object('routeFactory');
-      mockRouteFactoryService.landing.and.returnValue(routeFactory);
+      mockRouteFactoryService.project.and.returnValue(routeFactory);
 
       spyOn(Project.prototype, 'setName');
       spyOn(view['nameValueBridge_'], 'get').and.returnValue(projectName);
@@ -91,7 +91,8 @@ describe('landing.CreateProjectView', () => {
             assert(project.getId()).to.equal(projectId);
 
             assert(view['reset_']).to.haveBeenCalledWith();
-            assert(mockRouteService.goTo).to.haveBeenCalledWith(routeFactory, {});
+            assert(mockRouteService.goTo).to
+                .haveBeenCalledWith(routeFactory, {projectId: projectId});
             done();
           }, done.fail);
     });

@@ -11,12 +11,10 @@ export type ProjectSearchIndex = {
  */
 @Serializable('project')
 export class Project {
-  @Field('assets') private assetIds_: {[key: string]: string};
   @Field('id') private id_: string;
   @Field('name') private name_: string;
 
   constructor(id: string) {
-    this.assetIds_ = {};
     this.id_ = id;
     this.name_ = 'Unnamed Project';
   }
