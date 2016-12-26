@@ -1,10 +1,20 @@
 <style>
-  #createButton {
-    min-width: 6rem;
+  #assetType {
+    text-align: left;
+    text-transform: none;
   }
 
-  #nameRow {
+  #assetRow > label {
+    line-height: 3.5rem;
+    margin-right: 1rem;
+  }
+
+  #assetRow, #nameRow {
     padding: 1rem;
+  }
+
+  #createButton {
+    min-width: 6rem;
   }
 
   #nameRow gs-text-input {
@@ -20,6 +30,20 @@
       </label>
       <gs-text-input flex gs-value=""></gs-text-input>
     </div>
+  </div>
+  <div id="assetRow" layout="row">
+    <label>
+      Asset type:
+    </label>
+    <gs-basic-button flex>
+      <div gs-content layout="row">
+        <div flex id="assetType"></div>
+        <gs-icon>arrow_drop_down</gs-icon>
+      </div>
+      <gs-menu gs-anchor-point="top_left" gs-anchor-target="top_left">
+        <div gs-content id="assetTypeMenu"></div>
+      </gs-menu>
+    </gs-basic-button>
   </div>
   <div layout="row" flex-justify="flex-end">
     <gs-basic-button id="createButton" class="gs-primary">
