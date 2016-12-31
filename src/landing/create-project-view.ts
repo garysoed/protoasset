@@ -103,7 +103,7 @@ export class CreateProjectView extends BaseThemedElement {
         })
         .then(([, id]: [void, string]) => {
           this.reset_();
-          this.routeService_.goTo(this.routeFactoryService_.project(), {projectId: id});
+          this.routeService_.goTo(this.routeFactoryService_.assetList(), {projectId: id});
         });
   }
 }

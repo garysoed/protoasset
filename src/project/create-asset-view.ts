@@ -226,6 +226,9 @@ export class CreateAssetView extends BaseThemedElement {
   /**
    * Verifies the input values.
    */
+  @handle('#heightInput').attributeChange('gs-value', FloatParser)
+  @handle('#nameInput').attributeChange('gs-value', StringParser)
+  @handle('#widthInput').attributeChange('gs-value', FloatParser)
   private verifyInput_(): void {
     this.createButtonDisabledBridge_.set(
         !this.nameValueBridge_.get()
@@ -242,23 +245,8 @@ export class CreateAssetView extends BaseThemedElement {
     let projectId = this.getProjectId_();
     if (projectId !== null) {
       this.reset_();
-      this.routeService_.goTo(this.routeFactoryService_.project(), {projectId: projectId});
+      this.routeService_.goTo(this.routeFactoryService_.assetList(), {projectId: projectId});
     }
-  }
-
-  @handle('#heightInput').attributeChange('gs-value', FloatParser)
-  protected onHeightChange_(): void {
-    this.verifyInput_();
-  }
-
-  @handle('#nameInput').attributeChange('gs-value', StringParser)
-  protected onNameChange_(): void {
-    this.verifyInput_();
-  }
-
-  @handle('#widthInput').attributeChange('gs-value', FloatParser)
-  protected onWidthChange_(): void {
-    this.verifyInput_();
   }
 
   /**
@@ -306,7 +294,7 @@ export class CreateAssetView extends BaseThemedElement {
         .then(() => {
           this.reset_();
           this.routeService_
-              .goTo(this.routeFactoryService_.project(), {projectId: projectId});
+              .goTo(this.routeFactoryService_.assetList(), {projectId: projectId});
         });
   }
 

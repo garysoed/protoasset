@@ -8,7 +8,7 @@ import {Views} from './views';
 type Params = {projectId: string};
 
 
-export class ProjectRouteFactory extends AbstractRouteFactory<Views, {}, Params> {
+export class AssetListRouteFactory extends AbstractRouteFactory<Views, {}, Params> {
   private readonly projectCollection_: ProjectCollection;
 
   constructor(
@@ -22,14 +22,14 @@ export class ProjectRouteFactory extends AbstractRouteFactory<Views, {}, Params>
    * @override
    */
   protected getRelativeMatcher_(): string {
-    return `/project/:projectId`;
+    return `/project/:projectId/home`;
   }
 
   /**
    * @override
    */
   protected getRelativePath_(params: Params): string {
-    return `/project/${params.projectId}`;
+    return `/project/${params.projectId}/home`;
   }
 
   /**
@@ -45,7 +45,7 @@ export class ProjectRouteFactory extends AbstractRouteFactory<Views, {}, Params>
    * @override
    */
   getMatcher(): string {
-    return `/project/:projectId$`;
+    return `/project/:projectId/home$`;
   }
 
   /**

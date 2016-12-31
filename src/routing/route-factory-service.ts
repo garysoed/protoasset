@@ -6,9 +6,10 @@ import {
   IRouteFactoryService,
   SimpleRouteFactory} from 'external/gs_ui/src/routing';
 
-import {CreateAssetRouteFactory} from './create-asset-route-factory';
 import {ProjectCollection} from '../data/project-collection';
-import {ProjectRouteFactory} from './project-route-factory';
+
+import {AssetListRouteFactory} from './asset-list-route-factory';
+import {CreateAssetRouteFactory} from './create-asset-route-factory';
 import {Views} from './views';
 
 
@@ -20,7 +21,7 @@ export class RouteFactoryService implements IRouteFactoryService<Views> {
   private createAsset_: CreateAssetRouteFactory;
   private createProject_: SimpleRouteFactory<Views>;
   private landing_: SimpleRouteFactory<Views>;
-  private project_: ProjectRouteFactory;
+  private assetList_: AssetListRouteFactory;
 
   constructor(@inject('pa.data.ProjectCollection') projectCollection: ProjectCollection) {
     this.projectCollection_ = projectCollection;
@@ -37,11 +38,18 @@ export class RouteFactoryService implements IRouteFactoryService<Views> {
         '/create',
         'Create Project',
         this.landing_);
-    this.project_ = new ProjectRouteFactory(
+    this.assetList_ = new AssetListRouteFactory(
         this.projectCollection_,
         this.landing_);
 
-    this.createAsset_ = new CreateAssetRouteFactory(this.project_);
+    this.createAsset_ = new CreateAssetRouteFactory(this.assetList_);
+  }
+
+  /**
+   * @return The route factory for the asset list view.
+   */
+  assetList(): AssetListRouteFactory {
+    return this.assetList_;
   }
 
   /**
@@ -65,7 +73,7 @@ export class RouteFactoryService implements IRouteFactoryService<Views> {
     return [
       this.landing_,
       this.createProject_,
-      this.project_,
+      this.assetList_,
       this.createAsset_,
     ];
   }
@@ -75,12 +83,5 @@ export class RouteFactoryService implements IRouteFactoryService<Views> {
    */
   landing(): SimpleRouteFactory<Views> {
     return this.landing_;
-  }
-
-  /**
-   * @return The route factory for the project view.
-   */
-  project(): ProjectRouteFactory {
-    return this.project_;
   }
 }

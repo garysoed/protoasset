@@ -1,0 +1,43 @@
+<style>
+  #assets {
+    margin-left: -.5rem;
+    margin-right: -.5rem;
+  }
+
+  #assets pa-asset-item {
+    margin: .5rem;
+    width: 20rem;
+  }
+
+  #createButton {
+    bottom: 0;
+    left: 0;
+    position: fixed;
+  }
+
+  #main {
+    padding: 0 1rem;
+    overflow: scroll;
+  }
+
+  #filterButton {
+    position: fixed;
+    top: 3.5rem;
+    right: 0;
+  }
+
+  #projectName {
+    text-decoration: underline;
+  }
+</style>
+
+<gs-basic-button class="gs-theme-normal gs-primary" id="createButton">
+  <div gs-content>
+    <gs-icon>add</gs-icon>
+  </div>
+</gs-basic-button>
+<div id="main">
+  <h2>Choose Asset for project <span id="projectName"></span></h2>
+  <div flex-wrap id="assets" layout="row"></div>
+</div>
+<pa-filter-button id="filterButton"></pa-filter-button>

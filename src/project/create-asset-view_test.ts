@@ -102,7 +102,7 @@ describe('project.CreateAssetView', () => {
   beforeEach(() => {
     mockAssetCollection = jasmine.createSpyObj('AssetCollection', ['reserveId', 'update']);
     mockRouteFactoryService =
-        jasmine.createSpyObj('RouteFactoryService', ['createAsset', 'project']);
+        jasmine.createSpyObj('RouteFactoryService', ['createAsset', 'assetList']);
     mockRouteService = jasmine.createSpyObj('RouteService', ['getParams', 'goTo']);
     view = new CreateAssetView(
         Mocks.object('ThemeService'),
@@ -402,7 +402,7 @@ describe('project.CreateAssetView', () => {
   describe('onCancelAction_', () => {
     it('should reset the form and go to the project main view', () => {
       let routeFactory = Mocks.object('routeFactory');
-      mockRouteFactoryService.project.and.returnValue(routeFactory);
+      mockRouteFactoryService.assetList.and.returnValue(routeFactory);
 
       let projectId = 'projectId';
       spyOn(view, 'reset_');
@@ -425,40 +425,10 @@ describe('project.CreateAssetView', () => {
     });
   });
 
-  describe('onHeightChange_', () => {
-    it('should verify the input', () => {
-      spyOn(view, 'verifyInput_');
-
-      view['onHeightChange_']();
-
-      assert(view['verifyInput_']).to.haveBeenCalledWith();
-    });
-  });
-
-  describe('onNameChange_', () => {
-    it('should verify the input', () => {
-      spyOn(view, 'verifyInput_');
-
-      view['onNameChange_']();
-
-      assert(view['verifyInput_']).to.haveBeenCalledWith();
-    });
-  });
-
-  describe('onWidthChange_', () => {
-    it('should verify the input', () => {
-      spyOn(view, 'verifyInput_');
-
-      view['onWidthChange_']();
-
-      assert(view['verifyInput_']).to.haveBeenCalledWith();
-    });
-  });
-
   describe('onSubmitAction_', () => {
     it('should create the asset correctly and navigate to the project main view', (done: any) => {
       let routeFactory = Mocks.object('routeFactory');
-      mockRouteFactoryService.project.and.returnValue(routeFactory);
+      mockRouteFactoryService.assetList.and.returnValue(routeFactory);
 
       let projectId = 'projectId';
       spyOn(view, 'getProjectId_').and.returnValue(projectId);

@@ -1,18 +1,19 @@
-import {bind, customElement, DomBridge, handle, StringParser} from 'external/gs_tools/src/webc';
 import {inject} from 'external/gs_tools/src/inject';
+import {bind, customElement, DomBridge, handle, StringParser} from 'external/gs_tools/src/webc';
 
 import {BaseThemedElement} from 'external/gs_ui/src/common';
 import {Event} from 'external/gs_ui/src/const';
 import {RouteService, RouteServiceEvents} from 'external/gs_ui/src/routing';
 import {ThemeService} from 'external/gs_ui/src/theming';
 
-import {CollectionEvents} from '../data/collection-events';
 import {FilterButton} from '../common/filter-button';
+import {CollectionEvents} from '../data/collection-events';
 import {Project} from '../data/project';
 import {ProjectCollection} from '../data/project-collection';
-import {ProjectItem} from './project-item';
 import {RouteFactoryService} from '../routing/route-factory-service';
 import {Views} from '../routing/views';
+
+import {ProjectItem} from './project-item';
 
 /**
  * @param document The document to create the element in.

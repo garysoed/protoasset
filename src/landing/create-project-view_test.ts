@@ -4,8 +4,9 @@ TestBase.setup();
 import {Mocks} from 'external/gs_tools/src/mock';
 import {TestDispose} from 'external/gs_tools/src/testing';
 
-import {CreateProjectView} from './create-project-view';
 import {Project} from '../data/project';
+
+import {CreateProjectView} from './create-project-view';
 
 
 describe('landing.CreateProjectView', () => {
@@ -16,7 +17,7 @@ describe('landing.CreateProjectView', () => {
 
   beforeEach(() => {
     mockProjectCollection = jasmine.createSpyObj('ProjectCollection', ['reserveId', 'update']);
-    mockRouteFactoryService = jasmine.createSpyObj('RouteFactoryService', ['landing', 'project']);
+    mockRouteFactoryService = jasmine.createSpyObj('RouteFactoryService', ['assetList', 'landing']);
     mockRouteService = jasmine.createSpyObj('RouteService', ['goTo']);
     view = new CreateProjectView(
         Mocks.object('ThemeService'),
@@ -76,7 +77,7 @@ describe('landing.CreateProjectView', () => {
       let projectName = 'projectName';
 
       let routeFactory = Mocks.object('routeFactory');
-      mockRouteFactoryService.project.and.returnValue(routeFactory);
+      mockRouteFactoryService.assetList.and.returnValue(routeFactory);
 
       spyOn(Project.prototype, 'setName');
       spyOn(view['nameValueBridge_'], 'get').and.returnValue(projectName);

@@ -1,6 +1,6 @@
-import {bind, customElement, DomBridge, handle, StringParser} from 'external/gs_tools/src/webc';
 import {DomEvent} from 'external/gs_tools/src/event';
 import {inject} from 'external/gs_tools/src/inject';
+import {bind, customElement, DomBridge, handle, StringParser} from 'external/gs_tools/src/webc';
 
 import {BaseThemedElement} from 'external/gs_ui/src/common';
 import {RouteService} from 'external/gs_ui/src/routing';
@@ -46,7 +46,7 @@ export class ProjectItem extends BaseThemedElement {
   protected onElementClicked_(): void {
     let projectId = this.projectIdBridge_.get();
     if (projectId !== null) {
-      this.routeService_.goTo(this.routeFactoryService_.project(), {projectId: projectId});
+      this.routeService_.goTo(this.routeFactoryService_.assetList(), {projectId: projectId});
     }
   }
 

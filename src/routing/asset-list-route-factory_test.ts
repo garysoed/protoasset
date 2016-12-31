@@ -3,16 +3,16 @@ TestBase.setup();
 
 import {Mocks} from 'external/gs_tools/src/mock';
 
-import {ProjectRouteFactory} from './project-route-factory';
+import {AssetListRouteFactory} from './asset-list-route-factory';
 
 
-describe('routing.ProjectRouteFactory', () => {
+describe('routing.AssetListRouteFactory', () => {
   let mockProjectCollection;
-  let factory: ProjectRouteFactory;
+  let factory: AssetListRouteFactory;
 
   beforeEach(() => {
     mockProjectCollection = jasmine.createSpyObj('ProjectCollection', ['get']);
-    factory = new ProjectRouteFactory(
+    factory = new AssetListRouteFactory(
         mockProjectCollection,
         Mocks.object('parent'));
   });
@@ -20,7 +20,8 @@ describe('routing.ProjectRouteFactory', () => {
   describe('getRelativePath_', () => {
     it('should return the correct path', () => {
       let projectId = 'projectId';
-      assert(factory['getRelativePath_']({projectId: projectId})).to.equal(`/project/${projectId}`);
+      assert(factory['getRelativePath_']({projectId: projectId})).to
+          .equal(`/project/${projectId}/home`);
     });
   });
 

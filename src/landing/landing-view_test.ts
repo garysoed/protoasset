@@ -2,13 +2,14 @@ import {assert, TestBase} from '../test-base';
 TestBase.setup();
 
 import {DisposableFunction} from 'external/gs_tools/src/dispose';
-import {LocationServiceEvents} from 'external/gs_tools/src/ui';
 import {Mocks} from 'external/gs_tools/src/mock';
 import {TestDispose} from 'external/gs_tools/src/testing';
+import {LocationServiceEvents} from 'external/gs_tools/src/ui';
 
 import {CollectionEvents} from '../data/collection-events';
-import {LandingView, projectItemElGenerator, projectItemElDataSetter} from './landing-view';
 import {Views} from '../routing/views';
+
+import {LandingView, projectItemElDataSetter, projectItemElGenerator} from './landing-view';
 
 
 describe('landing.projectItemElGenerator', () => {

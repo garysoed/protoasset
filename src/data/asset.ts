@@ -6,7 +6,7 @@ import {Field, Serializable} from 'external/gs_tools/src/data';
  */
 export enum AssetType {
   UNKNOWN,
-  CARD
+  CARD,
 }
 
 @Serializable('asset')

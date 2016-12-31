@@ -15,7 +15,7 @@ describe('landing.ProjectItem', () => {
 
   beforeEach(() => {
     mockProjectCollection = jasmine.createSpyObj('ProjectCollection', ['get']);
-    mockRouteFactoryService = jasmine.createSpyObj('RouteFactoryService', ['project']);
+    mockRouteFactoryService = jasmine.createSpyObj('RouteFactoryService', ['assetList']);
     mockRouteService = jasmine.createSpyObj('RouteService', ['goTo']);
     item = new ProjectItem(
         mockProjectCollection,
@@ -31,7 +31,7 @@ describe('landing.ProjectItem', () => {
       spyOn(item['projectIdBridge_'], 'get').and.returnValue(projectId);
 
       let routeFactory = Mocks.object('routeFactory');
-      mockRouteFactoryService.project.and.returnValue(routeFactory);
+      mockRouteFactoryService.assetList.and.returnValue(routeFactory);
 
       item['onElementClicked_']();
 

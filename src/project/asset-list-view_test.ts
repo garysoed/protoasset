@@ -6,25 +6,25 @@ import {TestDispose} from 'external/gs_tools/src/testing';
 
 import {RouteServiceEvents} from 'external/gs_ui/src/routing';
 
-import {ProjectView} from './project-view';
+import {AssetListView} from './asset-list-view';
 
 
-describe('project.ProjectView', () => {
+describe('project.AssetListView', () => {
   let mockProjectCollection;
   let mockRouteFactoryService;
   let mockRouteService;
-  let view: ProjectView;
+  let view: AssetListView;
 
   beforeEach(() => {
     mockProjectCollection = jasmine.createSpyObj('ProjectCollection', ['get']);
     mockRouteFactoryService =
-        jasmine.createSpyObj('RouteFactoryService', ['createAsset', 'project']);
+        jasmine.createSpyObj('RouteFactoryService', ['assetList', 'createAsset']);
     mockRouteService = Mocks.listenable('RouteService');
     mockRouteService.getParams = jasmine.createSpy('RouteService.getParams');
     mockRouteService.goTo = jasmine.createSpy('RouteService.goTo');
     TestDispose.add(mockRouteService);
 
-    view = new ProjectView(
+    view = new AssetListView(
         mockProjectCollection,
         mockRouteFactoryService,
         mockRouteService,
@@ -37,7 +37,7 @@ describe('project.ProjectView', () => {
       let projectId = 'projectId';
 
       let routeFactory = Mocks.object('routeFactory');
-      mockRouteFactoryService.project.and.returnValue(routeFactory);
+      mockRouteFactoryService.assetList.and.returnValue(routeFactory);
 
       mockRouteService.getParams.and.returnValue({projectId: projectId});
 
@@ -47,7 +47,7 @@ describe('project.ProjectView', () => {
 
     it('should return null if there are no project IDs', () => {
       let routeFactory = Mocks.object('routeFactory');
-      mockRouteFactoryService.project.and.returnValue(routeFactory);
+      mockRouteFactoryService.assetList.and.returnValue(routeFactory);
 
       mockRouteService.getParams.and.returnValue(null);
 

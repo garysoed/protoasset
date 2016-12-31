@@ -1,3 +1,5 @@
+import {DomEvent} from 'external/gs_tools/src/event';
+import {inject} from 'external/gs_tools/src/inject';
 import {
   bind,
   BooleanParser,
@@ -5,8 +7,6 @@ import {
   DomBridge,
   handle,
   StringParser} from 'external/gs_tools/src/webc';
-import {DomEvent} from 'external/gs_tools/src/event';
-import {inject} from 'external/gs_tools/src/inject';
 
 import {BaseThemedElement} from 'external/gs_ui/src/common';
 import {Event} from 'external/gs_ui/src/const';

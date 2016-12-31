@@ -9,13 +9,13 @@ type Preset = {
 
 export enum Source {
   CUSTOM,
-  GAME_CRAFTER
+  GAME_CRAFTER,
 }
 
 export enum PresetType {
   CUSTOM,
   GAME_CRAFTER_DECK_POKER,
-  GAME_CRAFTER_DECK_SQUARE
+  GAME_CRAFTER_DECK_SQUARE,
 }
 
 export const ASSET_PRESETS: Map<PresetType, Preset> = new Map([
@@ -39,7 +39,7 @@ export const ASSET_PRESETS: Map<PresetType, Preset> = new Map([
       source: Source.GAME_CRAFTER,
       width: '3.5"',
       widthPx: 1125,
-    }
+    },
   ],
 ]);
 
@@ -74,5 +74,5 @@ export const Render = {
       default:
         return 'Custom';
     }
-  }
+  },
 };
