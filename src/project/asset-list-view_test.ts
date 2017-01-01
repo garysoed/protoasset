@@ -10,12 +10,14 @@ import {AssetListView} from './asset-list-view';
 
 
 describe('project.AssetListView', () => {
+  let mockAssetCollection;
   let mockProjectCollection;
   let mockRouteFactoryService;
   let mockRouteService;
   let view: AssetListView;
 
   beforeEach(() => {
+    mockAssetCollection = jasmine.createSpyObj('AssetCollection', ['list']);
     mockProjectCollection = jasmine.createSpyObj('ProjectCollection', ['get']);
     mockRouteFactoryService =
         jasmine.createSpyObj('RouteFactoryService', ['assetList', 'createAsset']);
@@ -25,6 +27,7 @@ describe('project.AssetListView', () => {
     TestDispose.add(mockRouteService);
 
     view = new AssetListView(
+        mockAssetCollection,
         mockProjectCollection,
         mockRouteFactoryService,
         mockRouteService,
@@ -56,7 +59,7 @@ describe('project.AssetListView', () => {
     });
   });
 
-  describe('updateProjectName_', () => {
+  describe('onProjectIdChanged_', () => {
     it('should update the project name corretly if there are matches', (done: any) => {
       let projectId = 'projectId';
       let projectName = 'projectName';
@@ -64,15 +67,36 @@ describe('project.AssetListView', () => {
       let mockProject = jasmine.createSpyObj('Project', ['getName']);
       mockProject.getName.and.returnValue(projectName);
 
+      mockAssetCollection.list.and.returnValue(Promise.resolve());
       mockProjectCollection.get.and.returnValue(Promise.resolve(mockProject));
 
       spyOn(view, 'getProjectId_').and.returnValue(projectId);
+      spyOn(view['assetsBridge_'], 'set');
       spyOn(view['projectNameTextBridge_'], 'set');
 
-      view['updateProjectName_']()
+      view['onProjectIdChanged_']()
           .then(() => {
             assert(view['projectNameTextBridge_'].set).to.haveBeenCalledWith(projectName);
             assert(mockProjectCollection.get).to.haveBeenCalledWith(projectId);
+            done();
+          }, done.fail);
+    });
+
+    it('should set the assets', (done: any) => {
+      let projectId = 'projectId';
+      let assets = Mocks.object('assets');
+
+      mockAssetCollection.list.and.returnValue(Promise.resolve(assets));
+      mockProjectCollection.get.and.returnValue(Promise.resolve(null));
+
+      spyOn(view, 'getProjectId_').and.returnValue(projectId);
+      spyOn(view['assetsBridge_'], 'set');
+      spyOn(view['projectNameTextBridge_'], 'set');
+
+      view['onProjectIdChanged_']()
+          .then(() => {
+            assert(view['assetsBridge_'].set).to.haveBeenCalledWith(assets);
+            assert(mockAssetCollection.list).to.haveBeenCalledWith(projectId);
             done();
           }, done.fail);
     });
@@ -81,11 +105,13 @@ describe('project.AssetListView', () => {
         (done: any) => {
           let projectId = 'projectId';
 
+          mockAssetCollection.list.and.returnValue(Promise.resolve());
           mockProjectCollection.get.and.returnValue(Promise.resolve(null));
           spyOn(view, 'getProjectId_').and.returnValue(projectId);
+          spyOn(view['assetsBridge_'], 'set');
           spyOn(view['projectNameTextBridge_'], 'set');
 
-          view['updateProjectName_']()
+          view['onProjectIdChanged_']()
               .then(() => {
                 assert(view['projectNameTextBridge_'].set).toNot.haveBeenCalled();
                 done();
@@ -96,7 +122,7 @@ describe('project.AssetListView', () => {
       spyOn(view, 'getProjectId_').and.returnValue(null);
       spyOn(view['projectNameTextBridge_'], 'set');
 
-      view['updateProjectName_']()
+      view['onProjectIdChanged_']()
           .then(() => {
             assert(view['projectNameTextBridge_'].set).toNot.haveBeenCalled();
             done();
@@ -127,15 +153,15 @@ describe('project.AssetListView', () => {
 
   describe('onCreated', () => {
     it('should update the project name and listen to changes to route', () => {
-      spyOn(view, 'updateProjectName_');
+      spyOn(view, 'onProjectIdChanged_');
       spyOn(mockRouteService, 'on').and.callThrough();
 
       view.onCreated(Mocks.object('element'));
 
-      assert(view['updateProjectName_']).to.haveBeenCalledWith();
+      assert(view['onProjectIdChanged_']).to.haveBeenCalledWith();
       assert(mockRouteService.on).to.haveBeenCalledWith(
           RouteServiceEvents.CHANGED,
-          view['updateProjectName_'],
+          view['onProjectIdChanged_'],
           view);
     });
   });

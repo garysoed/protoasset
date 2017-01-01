@@ -1,9 +1,10 @@
-import {assert, TestBase} from '../test-base';
+import {assert, Matchers, TestBase} from '../test-base';
 TestBase.setup();
 
 import {Mocks} from 'external/gs_tools/src/mock';
 import {TestDispose} from 'external/gs_tools/src/testing';
 
+import {CollectionEvents} from './collection-events';
 import {Project} from './project';
 import {ProjectCollection} from './project-collection';
 
@@ -16,89 +17,28 @@ describe('data.ProjectCollection', () => {
     TestDispose.add(collection);
   });
 
-  describe('getFusePromise_', () => {
-    it('should return the correctly initialized fuse object', (done: any) => {
-      let searchIndex1 = Mocks.object('searchIndex1');
-      let mockProject1 = jasmine.createSpyObj('Project1', ['getSearchIndex']);
-      mockProject1.getSearchIndex.and.returnValue(searchIndex1);
-
-      let searchIndex2 = Mocks.object('searchIndex2');
-      let mockProject2 = jasmine.createSpyObj('Project2', ['getSearchIndex']);
-      mockProject2.getSearchIndex.and.returnValue(searchIndex2);
-
-      let fuse = Mocks.object('fuse');
-      spyOn(collection, 'createFuse_').and.returnValue(fuse);
-
-      spyOn(collection, 'list').and.returnValue(Promise.resolve([mockProject1, mockProject2]));
-
-      collection['getFusePromise_']()
-          .then((actualFuse: any) => {
-            assert(actualFuse).to.equal(fuse);
-            assert(collection['createFuse_']).to.haveBeenCalledWith([searchIndex1, searchIndex2]);
-            done();
-          }, done.fail);
-    });
-
-    it('should reuse the existing fuse promise', () => {
-      let fusePromise = Mocks.object('fusePromise');
-      collection['fusePromise_'] = fusePromise;
-
-      spyOn(collection, 'createFuse_');
-
-      assert(collection['getFusePromise_']()).to.equal(fusePromise);
-      assert(collection['createFuse_']).toNot.haveBeenCalled();
-    });
-  });
-
   describe('get', () => {
     it('should return the value returned by the storage', () => {
       let projectId = 'projectId';
       let promise = Mocks.object('promise');
-      spyOn(collection['storage_'], 'read').and.returnValue(promise);
+      spyOn(collection['storage_'], 'get').and.returnValue(promise);
 
       assert(collection.get(projectId)).to.equal(promise);
-      assert(collection['storage_'].read).to.haveBeenCalledWith(projectId);
+      assert(collection['storage_'].get).to.haveBeenCalledWith(projectId);
     });
   });
 
   describe('list', () => {
     it('should return the correct projects', (done: any) => {
-      let project1 = Mocks.object('project1');
-      let project2 = Mocks.object('project2');
-      let id1 = 'id1';
-      let id2 = 'id2';
+      let projects = Mocks.object('projects');
 
-      spyOn(collection['storage_'], 'list').and.returnValue(Promise.resolve([id1, id2]));
-      spyOn(collection['storage_'], 'read').and.callFake((id: string) => {
-        switch (id) {
-          case id1:
-            return Promise.resolve(project1);
-          case id2:
-            return Promise.resolve(project2);
-        }
-      });
+      spyOn(collection['storage_'], 'list').and.returnValue(Promise.resolve(projects));
 
       collection
           .list()
-          .then((projects: any[]) => {
-            assert(projects).to.equal([project1, project2]);
-            assert(collection['storage_'].read).to.haveBeenCalledWith(id1);
-            assert(collection['storage_'].read).to.haveBeenCalledWith(id2);
-            done();
-          }, done.fail);
-    });
-
-    it('should skip null projects', (done: any) => {
-      let id = 'id';
-
-      spyOn(collection['storage_'], 'list').and.returnValue(Promise.resolve([id]));
-      spyOn(collection['storage_'], 'read').and.returnValue(Promise.resolve(null));
-
-      collection
-          .list()
-          .then((projects: any[]) => {
-            assert(projects).to.equal([]);
-            assert(collection['storage_'].read).to.haveBeenCalledWith(id);
+          .then((actualProjects: Project[]) => {
+            assert(actualProjects).to.equal(projects);
+            assert(collection['storage_'].list).to.haveBeenCalledWith();
             done();
           }, done.fail);
     });
@@ -107,11 +47,14 @@ describe('data.ProjectCollection', () => {
   describe('reserveId', () => {
     it('should return a promise that is resolved with the correct project ID', (done: any) => {
       let projectId = 'projectId';
-      spyOn(collection['storage_'], 'generateId').and.returnValue(Promise.resolve(projectId));
+
+      spyOn(collection['storage_'], 'reserveId').and.returnValue(Promise.resolve(projectId));
+
       collection
           .reserveId()
-          .then((result: string) => {
-            assert(result).to.equal(projectId);
+          .then((actualId: string) => {
+            assert(actualId).to.equal(projectId);
+            assert(collection['storage_'].reserveId).to.haveBeenCalledWith();
             done();
           }, done.fail);
     });
@@ -119,25 +62,16 @@ describe('data.ProjectCollection', () => {
 
   describe('search', () => {
     it('should return the correct projects', (done: any) => {
-      let project1 = Mocks.object('project1');
-      let result1 = Mocks.object('result1');
-      result1.this = project1;
+      let projects = Mocks.object('projects');
 
-      let project2 = Mocks.object('project2');
-      let result2 = Mocks.object('result2');
-      result2.this = project2;
+      spyOn(collection['storage_'], 'search').and.returnValue(Promise.resolve(projects));
 
       let token = 'token';
-      let mockFuse = jasmine.createSpyObj('Fuse', ['search']);
-      mockFuse.search.and.returnValue([result1, result2]);
-
-      spyOn(collection, 'getFusePromise_').and.returnValue(Promise.resolve(mockFuse));
-
       collection
           .search(token)
-          .then((projects: Project[]) => {
-            assert(projects).to.equal([project1, project2]);
-            assert(mockFuse.search).to.haveBeenCalledWith(token);
+          .then((actualProjects: Project[]) => {
+            assert(actualProjects).to.equal(projects);
+            assert(collection['storage_'].search).to.haveBeenCalledWith(token);
             done();
           }, done.fail);
     });
@@ -149,15 +83,44 @@ describe('data.ProjectCollection', () => {
       let mockProject = jasmine.createSpyObj('Project', ['getId']);
       mockProject.getId.and.returnValue(projectId);
 
-      spyOn(collection['storage_'], 'update').and.returnValue(Promise.resolve());
+      spyOn(collection, 'dispatch');
+      spyOn(collection['storage_'], 'update').and.returnValue(Promise.resolve(true));
 
       collection
           .update(mockProject)
           .then(() => {
             assert(collection['storage_'].update).to.haveBeenCalledWith(projectId, mockProject);
-            assert(collection['fusePromise_']).to.beNull();
+            assert(collection.dispatch).to.haveBeenCalledWith(
+                CollectionEvents.ADDED,
+                <any> Matchers.any(Function),
+                mockProject);
             done();
           }, done.fail);
+    });
+
+    it('should not dispatch the ADDED event if not a new project', (done: any) => {
+      let projectId = 'projectId';
+      let mockProject = jasmine.createSpyObj('Project', ['getId']);
+      mockProject.getId.and.returnValue(projectId);
+
+      spyOn(collection, 'dispatch');
+      spyOn(collection['storage_'], 'update').and.returnValue(Promise.resolve(false));
+
+      collection
+          .update(mockProject)
+          .then(() => {
+            assert(collection.dispatch).toNot.haveBeenCalled();
+            done();
+          }, done.fail);
+    });
+  });
+
+  describe('getSearchIndex_', () => {
+    it('should return the correct search index', () => {
+      let searchIndex = Mocks.object('searchIndex');
+      let mockProject = jasmine.createSpyObj('Project', ['getSearchIndex']);
+      mockProject.getSearchIndex.and.returnValue(searchIndex);
+      assert(ProjectCollection['getSearchIndex_'](mockProject)).to.equal(searchIndex);
     });
   });
 });

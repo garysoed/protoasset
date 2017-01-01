@@ -9,6 +9,11 @@ export enum AssetType {
   CARD,
 }
 
+export type AssetSearchIndex = {
+  name: string,
+  this: Asset,
+};
+
 @Serializable('asset')
 export class Asset {
   @Field('height') private height_: number;
@@ -46,6 +51,17 @@ export class Asset {
    */
   getName(): string {
     return this.name_;
+  }
+
+  getProjectId(): string {
+    return this.projectId_;
+  }
+
+  getSearchIndex(): AssetSearchIndex {
+    return {
+      name: this.name_,
+      this: this,
+    };
   }
 
   /**
