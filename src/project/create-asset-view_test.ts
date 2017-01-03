@@ -6,6 +6,8 @@ import {Mocks} from 'external/gs_tools/src/mock';
 import {TestDispose} from 'external/gs_tools/src/testing';
 
 import {Asset, AssetType} from '../data/asset';
+import {InMemoryDataSource} from '../data/in-memory-data-source';
+import {TsvDataSource} from '../data/tsv-data-source';
 
 import {ASSET_PRESETS, PresetType, Render} from './asset-presets';
 import {
@@ -95,20 +97,23 @@ describe('presetTypeMenuDataSetter', () => {
 
 describe('project.CreateAssetView', () => {
   let mockAssetCollection;
+  let mockFileService;
   let mockRouteFactoryService;
   let mockRouteService;
   let view: CreateAssetView;
 
   beforeEach(() => {
     mockAssetCollection = jasmine.createSpyObj('AssetCollection', ['reserveId', 'update']);
+    mockFileService = jasmine.createSpyObj('FileService', ['processBundle']);
     mockRouteFactoryService =
         jasmine.createSpyObj('RouteFactoryService', ['createAsset', 'assetList']);
     mockRouteService = jasmine.createSpyObj('RouteService', ['getParams', 'goTo']);
     view = new CreateAssetView(
-        Mocks.object('ThemeService'),
         mockAssetCollection,
+        mockFileService,
         mockRouteFactoryService,
-        mockRouteService);
+        mockRouteService,
+        Mocks.object('ThemeService'));
     TestDispose.add(view);
   });
 
@@ -154,6 +159,7 @@ describe('project.CreateAssetView', () => {
       let assetType = Mocks.object('assetType');
 
       spyOn(view, 'updateTemplateSection_');
+      spyOn(view, 'updateDataSection_');
       spyOn(view, 'verifyInput_');
       spyOn(view['assetTypeBridge_'], 'set');
 
@@ -162,11 +168,13 @@ describe('project.CreateAssetView', () => {
       assert(view['verifyInput_']).to.haveBeenCalledWith();
       assert(view['assetTypeBridge_'].set).to.haveBeenCalledWith(renderedType);
       assert(view['updateTemplateSection_']).to.haveBeenCalledWith();
+      assert(view['updateDataSection_']).to.haveBeenCalledWith();
       assert(Asset.renderType).to.haveBeenCalledWith(assetType);
     });
 
     it('should set the bridge correctly if the type is null', () => {
       spyOn(view, 'updateTemplateSection_');
+      spyOn(view, 'updateDataSection_');
       spyOn(view, 'verifyInput_');
       spyOn(view['assetTypeBridge_'], 'set');
 
@@ -174,6 +182,7 @@ describe('project.CreateAssetView', () => {
 
       assert(view['verifyInput_']).to.haveBeenCalledWith();
       assert(view['updateTemplateSection_']).to.haveBeenCalledWith();
+      assert(view['updateDataSection_']).to.haveBeenCalledWith();
       assert(view['assetTypeBridge_'].set).to
           .haveBeenCalledWith(Matchers.stringMatching(/Select a type/));
     });
@@ -243,11 +252,225 @@ describe('project.CreateAssetView', () => {
     });
   });
 
+  describe('updateDataSection_', () => {
+    it('should set show the data section and delete the bundle ID, start and end row if there ' +
+        'is asset type',
+        () => {
+          view['assetType_'] = Mocks.object('assetType');
+          spyOn(view['dataSectionHiddenBridge_'], 'set');
+          spyOn(view['dataSourceBundleIdBridge_'], 'delete');
+          spyOn(view['startRowValueBridge_'], 'delete');
+          spyOn(view['endRowValueBridge_'], 'delete');
+          spyOn(view, 'verifyInput_');
+
+          view['updateDataSection_']();
+
+          assert(view['dataSectionHiddenBridge_'].set).to.haveBeenCalledWith(false);
+          assert(view['dataSourceBundleIdBridge_'].delete).to.haveBeenCalledWith();
+          assert(view['startRowValueBridge_'].delete).to.haveBeenCalledWith();
+          assert(view['endRowValueBridge_'].delete).to.haveBeenCalledWith();
+          assert(view['verifyInput_']).to.haveBeenCalledWith();
+        });
+
+    it('should set hide the data section and delete the bundle ID, start and end row if there ' +
+        'are no asset types',
+        () => {
+          view['assetType_'] = null;
+          spyOn(view['dataSectionHiddenBridge_'], 'set');
+          spyOn(view['dataSourceBundleIdBridge_'], 'delete');
+          spyOn(view['startRowValueBridge_'], 'delete');
+          spyOn(view['endRowValueBridge_'], 'delete');
+          spyOn(view, 'verifyInput_');
+
+          view['updateDataSection_']();
+
+          assert(view['dataSectionHiddenBridge_'].set).to.haveBeenCalledWith(true);
+          assert(view['dataSourceBundleIdBridge_'].delete).to.haveBeenCalledWith();
+          assert(view['startRowValueBridge_'].delete).to.haveBeenCalledWith();
+          assert(view['endRowValueBridge_'].delete).to.haveBeenCalledWith();
+          assert(view['verifyInput_']).to.haveBeenCalledWith();
+        });
+  });
+
+  describe('updateDataSource_', () => {
+    it('should set the data source correctly', (done: any) => {
+      let bundleId = 'bundleId';
+      let startRow = 123;
+      let endRow = 456;
+      spyOn(view['dataSourceBundleIdBridge_'], 'get').and.returnValue(bundleId);
+      spyOn(view['startRowValueBridge_'], 'get').and.returnValue(startRow);
+      spyOn(view['endRowValueBridge_'], 'get').and.returnValue(endRow);
+      spyOn(view, 'verifyInput_');
+
+      let content = 'content';
+      mockFileService.processBundle.and
+          .returnValue(Promise.resolve(new Map([[bundleId, content]])));
+
+      let inMemoryDataSource = Mocks.object('inMemoryDataSource');
+      spyOn(InMemoryDataSource, 'of').and.returnValue(inMemoryDataSource);
+
+      let tsvDataSource = Mocks.object('tsvDataSource');
+      spyOn(TsvDataSource, 'of').and.returnValue(tsvDataSource);
+
+      view['updateDataSource_']()
+          .then(() => {
+            assert(view['verifyInput_']).to.haveBeenCalledWith();
+            assert(view['dataSource_']).to.equal(tsvDataSource);
+            assert(TsvDataSource.of).to.haveBeenCalledWith(inMemoryDataSource, startRow, endRow);
+            assert(InMemoryDataSource.of).to.haveBeenCalledWith(content);
+            assert(mockFileService.processBundle).to.haveBeenCalledWith(bundleId);
+            done();
+          }, done.fail);
+    });
+
+    it('should set the data source to null if there are no entries in the bundle', (done: any) => {
+      let oldDataSource = Mocks.object('oldDataSource');
+      view['dataSource_'] = oldDataSource;
+
+      spyOn(view['dataSourceBundleIdBridge_'], 'get').and.returnValue('bundleId');
+      spyOn(view['startRowValueBridge_'], 'get').and.returnValue(123);
+      spyOn(view['endRowValueBridge_'], 'get').and.returnValue(456);
+      spyOn(view, 'verifyInput_');
+
+      mockFileService.processBundle.and.returnValue(Promise.resolve(new Map()));
+
+      spyOn(TsvDataSource, 'of');
+
+      view['updateDataSource_']()
+          .then(() => {
+            assert(view['verifyInput_']).to.haveBeenCalledWith();
+            assert(view['dataSource_']).to.beNull();
+            assert(TsvDataSource.of).toNot.haveBeenCalled();
+            done();
+          }, done.fail);
+    });
+
+    it('should set the data source to null if there are no bundles', (done: any) => {
+      let oldDataSource = Mocks.object('oldDataSource');
+      view['dataSource_'] = oldDataSource;
+
+      spyOn(view['dataSourceBundleIdBridge_'], 'get').and.returnValue('bundleId');
+      spyOn(view['startRowValueBridge_'], 'get').and.returnValue(123);
+      spyOn(view['endRowValueBridge_'], 'get').and.returnValue(456);
+      spyOn(view, 'verifyInput_');
+
+      mockFileService.processBundle.and.returnValue(Promise.resolve(null));
+
+      spyOn(TsvDataSource, 'of');
+
+      view['updateDataSource_']()
+          .then(() => {
+            assert(view['verifyInput_']).to.haveBeenCalledWith();
+            assert(view['dataSource_']).to.beNull();
+            assert(TsvDataSource.of).toNot.haveBeenCalled();
+            done();
+          }, done.fail);
+    });
+
+    it('should set the data source to null if the start row is NaN', (done: any) => {
+      let oldDataSource = Mocks.object('oldDataSource');
+      view['dataSource_'] = oldDataSource;
+
+      spyOn(view['dataSourceBundleIdBridge_'], 'get').and.returnValue('bundleId');
+      spyOn(view['startRowValueBridge_'], 'get').and.returnValue(NaN);
+      spyOn(view['endRowValueBridge_'], 'get').and.returnValue(456);
+      spyOn(view, 'verifyInput_');
+
+      spyOn(TsvDataSource, 'of');
+
+      view['updateDataSource_']()
+          .then(() => {
+            assert(view['verifyInput_']).to.haveBeenCalledWith();
+            assert(mockFileService.processBundle).toNot.haveBeenCalled();
+            assert(view['dataSource_']).to.beNull();
+            done();
+          }, done.fail);
+    });
+
+    it('should set the data source to null if the start row is null', (done: any) => {
+      let oldDataSource = Mocks.object('oldDataSource');
+      view['dataSource_'] = oldDataSource;
+
+      spyOn(view['dataSourceBundleIdBridge_'], 'get').and.returnValue('bundleId');
+      spyOn(view['startRowValueBridge_'], 'get').and.returnValue(null);
+      spyOn(view['endRowValueBridge_'], 'get').and.returnValue(456);
+      spyOn(view, 'verifyInput_');
+
+      spyOn(TsvDataSource, 'of');
+
+      view['updateDataSource_']()
+          .then(() => {
+            assert(view['verifyInput_']).to.haveBeenCalledWith();
+            assert(mockFileService.processBundle).toNot.haveBeenCalled();
+            assert(view['dataSource_']).to.beNull();
+            done();
+          }, done.fail);
+    });
+
+    it('should set the data source to null if the end row is NaN', (done: any) => {
+      let oldDataSource = Mocks.object('oldDataSource');
+      view['dataSource_'] = oldDataSource;
+
+      spyOn(view['dataSourceBundleIdBridge_'], 'get').and.returnValue('bundleId');
+      spyOn(view['startRowValueBridge_'], 'get').and.returnValue(123);
+      spyOn(view['endRowValueBridge_'], 'get').and.returnValue(NaN);
+      spyOn(view, 'verifyInput_');
+
+      spyOn(TsvDataSource, 'of');
+
+      view['updateDataSource_']()
+          .then(() => {
+            assert(view['verifyInput_']).to.haveBeenCalledWith();
+            assert(mockFileService.processBundle).toNot.haveBeenCalled();
+            assert(view['dataSource_']).to.beNull();
+            done();
+          }, done.fail);
+    });
+
+    it('should set the data source to null if the end row is null', (done: any) => {
+      let oldDataSource = Mocks.object('oldDataSource');
+      view['dataSource_'] = oldDataSource;
+
+      spyOn(view['dataSourceBundleIdBridge_'], 'get').and.returnValue('bundleId');
+      spyOn(view['startRowValueBridge_'], 'get').and.returnValue(123);
+      spyOn(view['endRowValueBridge_'], 'get').and.returnValue(null);
+      spyOn(view, 'verifyInput_');
+
+      spyOn(TsvDataSource, 'of');
+
+      view['updateDataSource_']()
+          .then(() => {
+            assert(view['verifyInput_']).to.haveBeenCalledWith();
+            assert(mockFileService.processBundle).toNot.haveBeenCalled();
+            assert(view['dataSource_']).to.beNull();
+            done();
+          }, done.fail);
+    });
+
+    it('should set the data source to null if the bundle ID is null', (done: any) => {
+      let oldDataSource = Mocks.object('oldDataSource');
+      view['dataSource_'] = oldDataSource;
+
+      spyOn(view['dataSourceBundleIdBridge_'], 'get').and.returnValue(null);
+      spyOn(view['startRowValueBridge_'], 'get').and.returnValue(123);
+      spyOn(view['endRowValueBridge_'], 'get').and.returnValue(456);
+      spyOn(view, 'verifyInput_');
+
+      spyOn(TsvDataSource, 'of');
+
+      view['updateDataSource_']()
+          .then(() => {
+            assert(view['verifyInput_']).to.haveBeenCalledWith();
+            assert(mockFileService.processBundle).toNot.haveBeenCalled();
+            assert(view['dataSource_']).to.beNull();
+            done();
+          }, done.fail);
+    });
+  });
+
   describe('updateTemplateSection_', () => {
     it('should set the class and presets correctly, and verify inputs', () => {
-      let classes = new Set();
-      spyOn(view['templateSectionClassListBridge_'], 'get').and.returnValue(classes);
-      spyOn(view['templateSectionClassListBridge_'], 'set');
+      spyOn(view['templateSectionHiddenBridge_'], 'set');
 
       spyOn(view, 'verifyInput_');
       spyOn(view['presetTypeMenuBridge_'], 'set');
@@ -262,17 +485,14 @@ describe('project.CreateAssetView', () => {
       view['updateTemplateSection_']();
 
       assert(view['verifyInput_']).to.haveBeenCalledWith();
-      assert(view['templateSectionClassListBridge_'].set).to.haveBeenCalledWith(classes);
-      assert(classes).to.haveElements(['active']);
+      assert(view['templateSectionHiddenBridge_'].set).to.haveBeenCalledWith(false);
       assert(view['presetTypeMenuBridge_'].set).to.haveBeenCalledWith(presetSet);
       assert(view['presetTypeBridge_'].set).to.haveBeenCalledWith('');
       assert(ASSET_MAP_.get).to.haveBeenCalledWith(assetType);
     });
 
     it('should set the class and presets correctly if there are no asset types', () => {
-      let classes = new Set(['active']);
-      spyOn(view['templateSectionClassListBridge_'], 'get').and.returnValue(classes);
-      spyOn(view['templateSectionClassListBridge_'], 'set');
+      spyOn(view['templateSectionHiddenBridge_'], 'set');
 
       spyOn(view, 'verifyInput_');
       spyOn(view['presetTypeMenuBridge_'], 'set');
@@ -283,28 +503,9 @@ describe('project.CreateAssetView', () => {
       view['updateTemplateSection_']();
 
       assert(view['verifyInput_']).to.haveBeenCalledWith();
-      assert(view['templateSectionClassListBridge_'].set).to.haveBeenCalledWith(classes);
-      assert(classes).to.haveElements([]);
+      assert(view['templateSectionHiddenBridge_'].set).to.haveBeenCalledWith(true);
       assert(view['presetTypeMenuBridge_'].set).to.haveBeenCalledWith([]);
       assert(view['presetTypeBridge_'].set).to.haveBeenCalledWith('');
-    });
-
-    it('should handle when there class list returns null', () => {
-      spyOn(view['templateSectionClassListBridge_'], 'get').and.returnValue(null);
-      let classListSetSpy = spyOn(view['templateSectionClassListBridge_'], 'set');
-
-      spyOn(view, 'verifyInput_');
-      spyOn(view['presetTypeMenuBridge_'], 'set');
-      spyOn(view['presetTypeBridge_'], 'set');
-
-      spyOn(ASSET_MAP_, 'get').and.returnValue(Mocks.object('presetSet'));
-
-      view['assetType_'] = AssetType.CARD;
-
-      view['updateTemplateSection_']();
-
-      assert(view['templateSectionClassListBridge_'].set).to.haveBeenCalledWith(Matchers.any(Set));
-      assert(<Set<any>> classListSetSpy.calls.argsFor(0)[0]).to.haveElements(['active']);
     });
   });
 
@@ -316,6 +517,7 @@ describe('project.CreateAssetView', () => {
       spyOn(view['templateWidthBridge_'], 'get').and.returnValue(456);
 
       view['assetType_'] = Mocks.object('assetType');
+      view['dataSource_'] = Mocks.object('dataSource');
 
       view['verifyInput_']();
 
@@ -328,6 +530,7 @@ describe('project.CreateAssetView', () => {
       spyOn(view['templateHeightBridge_'], 'get').and.returnValue(123);
       spyOn(view['templateWidthBridge_'], 'get').and.returnValue(456);
       view['assetType_'] = Mocks.object('assetType');
+      view['dataSource_'] = Mocks.object('dataSource');
 
       view['verifyInput_']();
 
@@ -340,6 +543,7 @@ describe('project.CreateAssetView', () => {
       spyOn(view['templateHeightBridge_'], 'get').and.returnValue(123);
       spyOn(view['templateWidthBridge_'], 'get').and.returnValue(456);
       view['assetType_'] = null;
+      view['dataSource_'] = Mocks.object('dataSource');
 
       view['verifyInput_']();
 
@@ -353,6 +557,7 @@ describe('project.CreateAssetView', () => {
       spyOn(view['templateWidthBridge_'], 'get').and.returnValue(0);
 
       view['assetType_'] = Mocks.object('assetType');
+      view['dataSource_'] = Mocks.object('dataSource');
 
       view['verifyInput_']();
 
@@ -366,6 +571,7 @@ describe('project.CreateAssetView', () => {
       spyOn(view['templateWidthBridge_'], 'get').and.returnValue(NaN);
 
       view['assetType_'] = Mocks.object('assetType');
+      view['dataSource_'] = Mocks.object('dataSource');
 
       view['verifyInput_']();
 
@@ -379,6 +585,7 @@ describe('project.CreateAssetView', () => {
       spyOn(view['templateWidthBridge_'], 'get').and.returnValue(456);
 
       view['assetType_'] = Mocks.object('assetType');
+      view['dataSource_'] = Mocks.object('dataSource');
 
       view['verifyInput_']();
 
@@ -392,6 +599,21 @@ describe('project.CreateAssetView', () => {
       spyOn(view['templateWidthBridge_'], 'get').and.returnValue(456);
 
       view['assetType_'] = Mocks.object('assetType');
+      view['dataSource_'] = Mocks.object('dataSource');
+
+      view['verifyInput_']();
+
+      assert(view['createButtonDisabledBridge_'].set).to.haveBeenCalledWith(true);
+    });
+
+    it('should disable the create button if there are no data source', () => {
+      spyOn(view['createButtonDisabledBridge_'], 'set');
+      spyOn(view['nameValueBridge_'], 'get').and.returnValue('name');
+      spyOn(view['templateHeightBridge_'], 'get').and.returnValue(123);
+      spyOn(view['templateWidthBridge_'], 'get').and.returnValue(456);
+
+      view['assetType_'] = Mocks.object('assetType');
+      view['dataSource_'] = null;
 
       view['verifyInput_']();
 
@@ -444,6 +666,9 @@ describe('project.CreateAssetView', () => {
       let width = 456;
       spyOn(view['templateWidthBridge_'], 'get').and.returnValue(width);
 
+      let dataSource = Mocks.object('dataSource');
+      view['dataSource_'] = dataSource;
+
       let assetType = Mocks.object('assetType');
       view['assetType_'] = assetType;
 
@@ -464,6 +689,7 @@ describe('project.CreateAssetView', () => {
             assert(asset.getId()).to.equal(assetId);
             assert(asset.getHeight()).to.equal(height);
             assert(asset.getWidth()).to.equal(width);
+            assert(asset.getData()).to.equal(dataSource);
 
             assert(mockAssetCollection.reserveId).to.haveBeenCalledWith(projectId);
             done();
@@ -479,6 +705,7 @@ describe('project.CreateAssetView', () => {
       spyOn(view['templateHeightBridge_'], 'get').and.returnValue(123);
       spyOn(view['templateWidthBridge_'], 'get').and.returnValue(456);
 
+      view['dataSource_'] = Mocks.object('dataSource');
       view['assetType_'] = Mocks.object('assetType');
 
       view['onSubmitAction_']()
@@ -572,6 +799,23 @@ describe('project.CreateAssetView', () => {
       assert(() => {
         view['onSubmitAction_']();
       }).to.throwError(/Asset width/);
+    });
+
+    it('should throw error if there are data source', () => {
+      spyOn(view, 'getProjectId_').and.returnValue('projectId');
+
+      spyOn(view, 'reset_');
+
+      spyOn(view['nameValueBridge_'], 'get').and.returnValue('assetName');
+      spyOn(view['templateHeightBridge_'], 'get').and.returnValue(123);
+      spyOn(view['templateWidthBridge_'], 'get').and.returnValue(456);
+
+      view['dataSource_'] = null;
+      view['assetType_'] = Mocks.object('assetType');
+
+      assert(() => {
+        view['onSubmitAction_']();
+      }).to.throwError(/Data source/);
     });
   });
 

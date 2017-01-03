@@ -4,20 +4,13 @@
     position: relative;
     overflow: scroll;
   }
-
-  #leftMargin, #rightMargin {
-    max-width: var(--paMarginWidth);
-    min-width: var(--paMarginWidth);
-  }
 </style>
 
 <div fill-parent layout="row">
-  <div id="leftMargin"></div>
   <div flex id="main">
     <gs-view-slot flex>
       <pa-create-asset-view gs-view-path="/home/create"></pa-create-asset-view>
       <pa-asset-list-view gs-view-path="/home"></pa-asset-list-view>
     </gs-view-slot>
   </div>
-  <div id="rightMargin"></div>
 </div>

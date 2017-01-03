@@ -1,5 +1,7 @@
 import {Field, Serializable} from 'external/gs_tools/src/data';
 
+import {IDataSource} from './i-data-source';
+
 
 /**
  * Types of asset. DO NOT REORDER.
@@ -22,6 +24,7 @@ export class Asset {
   @Field('projectId') private projectId_: string;
   @Field('type') private type_: AssetType;
   @Field('width') private width_: number;
+  @Field('data') private data_: IDataSource<string[][]>;
 
   constructor(id: string, projectId: string) {
     this.height_ = NaN;
@@ -30,6 +33,13 @@ export class Asset {
     this.projectId_ = projectId;
     this.type_ = AssetType.UNKNOWN;
     this.width_ = NaN;
+  }
+
+  /**
+   * @return The data source for the asset.
+   */
+  getData(): IDataSource<string[][]> {
+    return this.data_;
   }
 
   /**
@@ -53,10 +63,16 @@ export class Asset {
     return this.name_;
   }
 
+  /**
+   * @return ID of the project that this asset was a part of.
+   */
   getProjectId(): string {
     return this.projectId_;
   }
 
+  /**
+   * @return Index for searching this asset.
+   */
   getSearchIndex(): AssetSearchIndex {
     return {
       name: this.name_,
@@ -76,6 +92,13 @@ export class Asset {
    */
   getWidth(): number {
     return this.width_;
+  }
+
+  /**
+   * @param data The data to set.
+   */
+  setData(data: IDataSource<string[][]>): void {
+    this.data_ = data;
   }
 
   /**
