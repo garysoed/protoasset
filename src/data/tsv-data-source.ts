@@ -77,7 +77,7 @@ export class TsvDataSource implements IDataSource<string[][]> {
    * @param endRow The last row to include in the returned data.
    * @return The new instance of the data source.
    */
-  static of(innerSource: IDataSource<string[][]>, startRow: number, endRow: number) {
+  static of(innerSource: IDataSource<string[][]>, startRow: number, endRow: number): TsvDataSource {
     return new TsvDataSource(innerSource, startRow, endRow);
   }
 }

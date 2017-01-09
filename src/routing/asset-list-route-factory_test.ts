@@ -7,7 +7,7 @@ import {AssetListRouteFactory} from './asset-list-route-factory';
 
 
 describe('routing.AssetListRouteFactory', () => {
-  let mockProjectCollection;
+  let mockProjectCollection: any;
   let factory: AssetListRouteFactory;
 
   beforeEach(() => {
@@ -21,7 +21,7 @@ describe('routing.AssetListRouteFactory', () => {
     it('should return the correct path', () => {
       let projectId = 'projectId';
       assert(factory['getRelativePath_']({projectId: projectId})).to
-          .equal(`/project/${projectId}/home`);
+          .equal(`/project/${projectId}`);
     });
   });
 

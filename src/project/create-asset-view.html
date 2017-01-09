@@ -10,7 +10,7 @@
     margin-right: 1rem;
   }
 
-  #assetRow, #nameRow, #startDataRow, #endDataRow {
+  #assetRow, #nameRow {
     padding: 1rem;
   }
 
@@ -18,19 +18,8 @@
     min-width: 6rem;
   }
 
-  #endDataRow > label,
-  #startDataRow > label {
-    width: 4rem;
-  }
-
   gs-float-input, gs-text-input {
     padding-left: 1rem;
-  }
-
-  #dataSourceInput {
-    height: 15rem;
-    position: relative;
-    width: 15rem;
   }
 
   #root {
@@ -90,23 +79,6 @@
         <label>Height</label>
         <gs-float-input flex id="heightInput"></gs-float-input>
         <div>px</div>
-      </div>
-    </div>
-  </fieldset>
-  <fieldset id="dataSection">
-    <legend>Data source</legend>
-    <div layout="row">
-      <gs-file-input id="dataSourceInput"></gs-file-input>
-      <div flex layout="column">
-        <!-- TODO: Use integer input -->
-        <div id="startDataRow" layout="row">
-          <label>Start Row:</label>
-          <gs-float-input flex id="startRowInput"></gs-float-input>
-        </div>
-        <div id="endDataRow" layout="row">
-          <label>End Row:</label>
-          <gs-float-input flex id="endRowInput"></gs-float-input>
-        </div>
       </div>
     </div>
   </fieldset>

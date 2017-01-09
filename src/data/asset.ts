@@ -24,7 +24,7 @@ export class Asset {
   @Field('projectId') private projectId_: string;
   @Field('type') private type_: AssetType;
   @Field('width') private width_: number;
-  @Field('data') private data_: IDataSource<string[][]>;
+  @Field('data') private data_: IDataSource<string[][]> | null;
 
   constructor(id: string, projectId: string) {
     this.height_ = NaN;
@@ -33,12 +33,13 @@ export class Asset {
     this.projectId_ = projectId;
     this.type_ = AssetType.UNKNOWN;
     this.width_ = NaN;
+    this.data_ = null;
   }
 
   /**
    * @return The data source for the asset.
    */
-  getData(): IDataSource<string[][]> {
+  getData(): IDataSource<string[][]> | null {
     return this.data_;
   }
 

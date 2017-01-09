@@ -46,6 +46,7 @@ karma_run(
 test_suite(
     name = "lint",
     tests = [
+        "//src/asset:lint",
         "//src/common:lint",
         "//src/data:lint",
         "//src/landing:lint",
@@ -58,6 +59,7 @@ filegroup(
     name = "pack_template",
     srcs = [
         "@gs_ui//:pack_template",
+        "//src/asset:template",
         "//src/common:template",
         "//src/landing:template",
         "//src/project:template",

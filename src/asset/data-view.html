@@ -1,0 +1,50 @@
+<style>
+  #endDataRow > label,
+  #startDataRow > label {
+    width: 4rem;
+  }
+
+  #fileInputContainer {
+    position: relative;
+  }
+
+  #startDataRow, #endDataRow {
+    padding: 1rem;
+  }
+
+  #root {
+    margin: 0 1rem;
+  }
+
+  #previewContainer {
+    overflow: scroll;
+  }
+</style>
+<div fill-parent id="root" layout="column">
+  <h2>Data source</h2>
+  <div flex layout="row">
+    <div flex layout="column">
+      <div flex id="fileInputContainer">
+        <gs-file-input
+            gs-label="Drop a TSV file"
+            gs-mime-types="text/tab-separated-values"
+            id="dataSourceInput">
+        </gs-file-input>
+      </div>
+      <div layout="row">
+        <!-- TODO: Use integer input -->
+        <div flex id="startDataRow" layout="row">
+          <label>Start Row:</label>
+          <gs-float-input flex id="startRowInput"></gs-float-input>
+        </div>
+        <div flex id="endDataRow" layout="row">
+          <label>End Row:</label>
+          <gs-float-input flex id="endRowInput"></gs-float-input>
+        </div>
+      </div>
+    </div>
+    <div flex id="previewContainer">
+      <table id="preview"></table>
+    </div>
+  </div>
+</div>

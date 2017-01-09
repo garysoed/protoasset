@@ -9,12 +9,63 @@ import {AssetItem} from './asset-item';
 
 describe('project.AssetItem', () => {
   let mockAssetCollection;
+  let mockRouteFactoryService;
+  let mockRouteService;
   let item: AssetItem;
 
   beforeEach(() => {
     mockAssetCollection = jasmine.createSpyObj('AssetCollection', ['get']);
-    item = new AssetItem(mockAssetCollection, Mocks.object('ThemeService'));
+    mockRouteFactoryService = jasmine.createSpyObj('RouteFactoryService', ['assetMain']);
+    mockRouteService = jasmine.createSpyObj('RouteService', ['goTo']);
+    item = new AssetItem(
+        mockAssetCollection,
+        mockRouteFactoryService,
+        mockRouteService,
+        Mocks.object('ThemeService'));
     TestDispose.add(item);
+  });
+
+  describe('onElementclicked_', () => {
+    it('should navigate to asset main view', () => {
+      let assetId = 'assetId';
+      let projectId = 'projectId';
+      spyOn(item['gsAssetIdBridge_'], 'get').and.returnValue(assetId);
+      spyOn(item['gsProjectIdBridge_'], 'get').and.returnValue(projectId);
+
+      let assetMainFactory = Mocks.object('assetMainFactory');
+      mockRouteFactoryService.assetMain.and.returnValue(assetMainFactory);
+
+      item['onElementClicked_']();
+
+      assert(mockRouteService.goTo).to
+          .haveBeenCalledWith(assetMainFactory, {assetId: assetId, projectId: projectId});
+    });
+
+    it('should not navigate if there are no asset IDs', () => {
+      let projectId = 'projectId';
+      spyOn(item['gsAssetIdBridge_'], 'get').and.returnValue(null);
+      spyOn(item['gsProjectIdBridge_'], 'get').and.returnValue(projectId);
+
+      let assetMainFactory = Mocks.object('assetMainFactory');
+      mockRouteFactoryService.assetMain.and.returnValue(assetMainFactory);
+
+      item['onElementClicked_']();
+
+      assert(mockRouteService.goTo).toNot.haveBeenCalled();
+    });
+
+    it('should not navigate if there are no project IDs', () => {
+      let assetId = 'assetId';
+      spyOn(item['gsAssetIdBridge_'], 'get').and.returnValue(assetId);
+      spyOn(item['gsProjectIdBridge_'], 'get').and.returnValue(null);
+
+      let assetMainFactory = Mocks.object('assetMainFactory');
+      mockRouteFactoryService.assetMain.and.returnValue(assetMainFactory);
+
+      item['onElementClicked_']();
+
+      assert(mockRouteService.goTo).toNot.haveBeenCalled();
+    });
   });
 
   describe('onGsAssetIdChanged_', () => {

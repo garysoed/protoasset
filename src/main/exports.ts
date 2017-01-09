@@ -13,7 +13,7 @@ import {RouteFactoryService} from '../routing/route-factory-service';
 function bootstrap(document: Document): void {
   let main = Main.newInstance({routeFactoryServiceCtor: RouteFactoryService});
   let theme = Theme.newInstance(
-      DefaultPalettes.egyptianblue,
+      DefaultPalettes.purpleheart,
       DefaultPalettes.orange);
   main.bootstrap(theme, [CreateProjectView, LandingView, ProjectView]);
   main.applyTheme(document);

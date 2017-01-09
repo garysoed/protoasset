@@ -1,4 +1,3 @@
-import {Arrays, Maps} from 'external/gs_tools/src/collection';
 import {DomEvent, ListenableDom} from 'external/gs_tools/src/event';
 import {inject} from 'external/gs_tools/src/inject';
 import {Validate} from 'external/gs_tools/src/valid';
@@ -14,14 +13,11 @@ import {
 
 import {BaseThemedElement} from 'external/gs_ui/src/common';
 import {Event} from 'external/gs_ui/src/const';
-import {FileService} from 'external/gs_ui/src/input';
 import {RouteService} from 'external/gs_ui/src/routing';
 import {ThemeService} from 'external/gs_ui/src/theming';
 
 import {Asset, AssetType} from '../data/asset';
 import {AssetCollection} from '../data/asset-collection';
-import {InMemoryDataSource} from '../data/in-memory-data-source';
-import {TsvDataSource} from '../data/tsv-data-source';
 import {RouteFactoryService} from '../routing/route-factory-service';
 import {Views} from '../routing/views';
 
@@ -108,15 +104,6 @@ export class CreateAssetView extends BaseThemedElement {
   @bind('#createButton').attribute('disabled', BooleanParser)
   private readonly createButtonDisabledBridge_: DomBridge<boolean>;
 
-  @bind('#dataSection').attribute('hidden', BooleanParser)
-  private readonly dataSectionHiddenBridge_: DomBridge<boolean>;
-
-  @bind('#dataSourceInput').attribute('gs-bundle-id', StringParser)
-  private readonly dataSourceBundleIdBridge_: DomBridge<string>;
-
-  @bind('#endRowInput').attribute('gs-value', FloatParser)
-  private readonly endRowValueBridge_: DomBridge<number>;
-
   @bind('#nameInput').attribute('gs-value', StringParser)
   private readonly nameValueBridge_: DomBridge<string>;
 
@@ -126,9 +113,6 @@ export class CreateAssetView extends BaseThemedElement {
 
   @bind('#presetType').innerText()
   private readonly presetTypeBridge_: DomBridge<string>;
-
-  @bind('#startRowInput').attribute('gs-value', FloatParser)
-  private readonly startRowValueBridge_: DomBridge<number>;
 
   @bind('#heightInput').attribute('gs-value', FloatParser)
   private readonly templateHeightBridge_: DomBridge<number>;
@@ -140,11 +124,9 @@ export class CreateAssetView extends BaseThemedElement {
   private readonly templateWidthBridge_: DomBridge<number>;
 
   private readonly assetCollection_: AssetCollection;
-  private readonly fileService_: FileService;
   private readonly routeFactoryService_: RouteFactoryService;
   private readonly routeService_: RouteService<Views>;
   private assetType_: AssetType | null;
-  private dataSource_: TsvDataSource | null;
   private presetType_: PresetType | null;
 
   /**
@@ -153,7 +135,6 @@ export class CreateAssetView extends BaseThemedElement {
    */
   constructor(
       @inject('pa.data.AssetCollection') assetCollection: AssetCollection,
-      @inject('gs.input.FileService') fileService: FileService,
       @inject('pa.routing.RouteFactoryService') routeFactoryService: RouteFactoryService,
       @inject('gs.routing.RouteService') routeService: RouteService<Views>,
       @inject('theming.ThemeService') themeService: ThemeService) {
@@ -163,17 +144,11 @@ export class CreateAssetView extends BaseThemedElement {
     this.assetTypeBridge_ = DomBridge.of<string>();
     this.assetTypeMenuBridge_ = DomBridge.of<number[]>();
     this.createButtonDisabledBridge_ = DomBridge.of<boolean>(true);
-    this.dataSectionHiddenBridge_ = DomBridge.of<boolean>(true);
-    this.dataSource_ = null;
-    this.dataSourceBundleIdBridge_ = DomBridge.of<string>();
-    this.endRowValueBridge_ = DomBridge.of<number>();
-    this.fileService_ = fileService;
     this.nameValueBridge_ = DomBridge.of<string>();
     this.presetTypeMenuBridge_ = DomBridge.of<PresetType[]>();
     this.presetTypeBridge_ = DomBridge.of<string>();
     this.routeFactoryService_ = routeFactoryService;
     this.routeService_ = routeService;
-    this.startRowValueBridge_ = DomBridge.of<number>();
     this.templateHeightBridge_ = DomBridge.of<number>();
     this.templateSectionHiddenBridge_ = DomBridge.of<boolean>(true);
     this.templateWidthBridge_ = DomBridge.of<number>();
@@ -207,7 +182,6 @@ export class CreateAssetView extends BaseThemedElement {
       this.assetTypeBridge_.set(Asset.renderType(type));
     }
     this.updateTemplateSection_();
-    this.updateDataSection_();
     this.verifyInput_();
   }
 
@@ -230,56 +204,6 @@ export class CreateAssetView extends BaseThemedElement {
     }
 
     this.verifyInput_();
-  }
-
-  /**
-   * Updates the section to specify the data source.
-   */
-  private updateDataSection_(): void {
-    this.dataSectionHiddenBridge_.set(this.assetType_ === null);
-    this.dataSourceBundleIdBridge_.delete();
-    this.startRowValueBridge_.delete();
-    this.endRowValueBridge_.delete();
-    this.verifyInput_();
-  }
-
-  @handle('#endRowInput').attributeChange('gs-value', FloatParser)
-  @handle('#startRowInput').attributeChange('gs-value', FloatParser)
-  @handle('#dataSourceInput').attributeChange('gs-bundle-id', StringParser)
-  protected updateDataSource_(): Promise<void> {
-    const bundleId = this.dataSourceBundleIdBridge_.get();
-    const startRow = this.startRowValueBridge_.get();
-    const endRow = this.endRowValueBridge_.get();
-    this.dataSource_ = null;
-    if (bundleId === null
-        || endRow === null
-        || Number.isNaN(endRow)
-        || startRow === null
-        || Number.isNaN(startRow)) {
-      this.verifyInput_();
-      return Promise.resolve();
-    }
-
-    return this.fileService_
-        .processBundle(bundleId)
-        .then((files: Map<File, string> | null) => {
-          if (files === null) {
-            return;
-          }
-
-          let entry = Maps.of(files).anyEntry();
-          if (entry === null) {
-            return;
-          }
-
-          this.dataSource_ = TsvDataSource.of(
-              InMemoryDataSource.of(entry[1]),
-              startRow,
-              endRow);
-        })
-        .then(() => {
-          this.verifyInput_();
-        });
   }
 
   /**
@@ -308,8 +232,7 @@ export class CreateAssetView extends BaseThemedElement {
         !this.nameValueBridge_.get()
         || this.assetType_ === null
         || Number.isNaN(this.templateWidthBridge_.get() || NaN)
-        || Number.isNaN(this.templateHeightBridge_.get() || NaN)
-        || this.dataSource_ === null);
+        || Number.isNaN(this.templateHeightBridge_.get() || NaN));
   }
 
   /**
@@ -351,11 +274,6 @@ export class CreateAssetView extends BaseThemedElement {
       throw Validate.fail('Asset width is not set');
     }
 
-    const dataSource = this.dataSource_;
-    if (dataSource === null) {
-      throw Validate.fail('Data source is not set');
-    }
-
     const projectId = this.getProjectId_();
     if (projectId === null) {
       return Promise.resolve();
@@ -369,7 +287,6 @@ export class CreateAssetView extends BaseThemedElement {
           asset.setType(assetType);
           asset.setHeight(height);
           asset.setWidth(width);
-          asset.setData(dataSource);
           return this.assetCollection_.update(asset, projectId);
         })
         .then(() => {

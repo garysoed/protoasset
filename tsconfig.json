@@ -14,7 +14,9 @@
         "noLib": false,
         "preserveConstEnums": true,
         "suppressImplicitAnyIndexErrors": true,
+        "outDir": "out/",
         "rootDir": "./",
+        "skipLibCheck": true,
         "strictNullChecks": true
     },
     "exclude": [
