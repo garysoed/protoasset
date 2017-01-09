@@ -11,7 +11,7 @@ import {DataView, previewRowDataSetter, previewRowGenerator} from './data-view';
 
 
 describe('previewRowDataSetter', () => {
-  fit('should generate additional cell elements if the are not enough elements', () => {
+  it('should generate additional cell elements if the are not enough elements', () => {
     let data1 = 'data1';
     let data2 = 'data2';
 
@@ -33,7 +33,7 @@ describe('previewRowDataSetter', () => {
     assert(mockDocument.createElement).to.haveBeenCalledWith('td');
   });
 
-  fit('should reuse existing cell elements if there are enough elements', () => {
+  it('should reuse existing cell elements if there are enough elements', () => {
     let data1 = 'data1';
     let data2 = 'data2';
 
@@ -66,7 +66,7 @@ describe('previewRowDataSetter', () => {
 });
 
 describe('previewRowGenerator', () => {
-  fit('should return the correct element', () => {
+  it('should return the correct element', () => {
     let element = Mocks.object('element');
     let mockDocument = jasmine.createSpyObj('Document', ['createElement']);
     assert(previewRowGenerator(mockDocument)).to.equal(element);
