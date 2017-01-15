@@ -69,7 +69,7 @@ export class HelperListView extends BaseThemedElement {
             this.assetCollection_.update(asset, params.projectId),
           ]);
         })
-        .then(([helperId, ]: [string | null, any]) => {
+        .then(([helperId]: [string | null, any]) => {
           if (helperId === null) {
             return;
           }

@@ -13,7 +13,7 @@ import {RouteFactoryService} from '../routing/route-factory-service';
 function bootstrap(document: Document): void {
   let main = Main.newInstance({
     ace: window['ace'],
-    routeFactoryServiceCtor: RouteFactoryService
+    routeFactoryServiceCtor: RouteFactoryService,
   });
   let theme = Theme.newInstance(
       DefaultPalettes.purpleheart,
