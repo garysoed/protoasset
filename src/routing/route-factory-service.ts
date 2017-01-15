@@ -11,6 +11,7 @@ import {ProjectCollection} from '../data/project-collection';
 
 import {AssetListRouteFactory} from './asset-list-route-factory';
 import {AssetMainRouteFactory} from './asset-main-route-factory';
+import {HelperRouteFactory} from './helper-route-factory';
 import {Views} from './views';
 
 
@@ -25,6 +26,8 @@ export class RouteFactoryService implements IRouteFactoryService<Views> {
   private assetMain_: AssetMainRouteFactory;
   private createAsset_: SimpleRouteFactory<Views, {projectId: string}>;
   private createProject_: SimpleRouteFactory<Views, {}>;
+  private helper_: HelperRouteFactory;
+  private helperList_: SimpleRouteFactory<Views, {assetId: string, projectId: string}>;
   private landing_: SimpleRouteFactory<Views, {}>;
 
   constructor(
@@ -69,6 +72,16 @@ export class RouteFactoryService implements IRouteFactoryService<Views> {
         '/data',
         'Asset Data',
         this.assetMain_);
+
+    // /home/project/:projectId/asset/:assetId/helper
+    this.helperList_ = new SimpleRouteFactory(
+        Views.HELPER_LIST,
+        '/helper',
+        'Helpers',
+        this.assetMain_);
+
+    // /home/project/:projectId/asset/:assetId/helper/:helperId
+    this.helper_ = new HelperRouteFactory(this.assetCollection_, this.helperList_);
   }
 
   assetData(): SimpleRouteFactory<Views, {assetId: string, projectId: string}> {
@@ -114,7 +127,23 @@ export class RouteFactoryService implements IRouteFactoryService<Views> {
       this.assetMain_,
       this.createAsset_,
       this.assetData_,
+      this.helper_,
+      this.helperList_,
     ];
+  }
+
+  /**
+   * @return The route factory for the helper view.
+   */
+  helper(): HelperRouteFactory {
+    return this.helper_;
+  }
+
+  /**
+   * @return The route factory for the helper list view.
+   */
+  helperList(): SimpleRouteFactory<Views, {assetId: string, projectId: string}> {
+    return this.helperList_;
   }
 
   /**

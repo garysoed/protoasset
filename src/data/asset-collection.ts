@@ -46,9 +46,7 @@ export class AssetCollection extends BaseListenable<CollectionEvents> {
    * @return Promise that will be resolved with the asset, or null if the asset cannot be found.
    */
   get(projectId: ProjectId, assetId: string): Promise<Asset | null> {
-    return this
-        .getStorage_(projectId)
-        .get(assetId);
+    return this.getStorage_(projectId).get(assetId);
   }
 
   /**

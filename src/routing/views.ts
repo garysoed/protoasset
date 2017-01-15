@@ -6,6 +6,8 @@ export enum Views {
   ASSET_MAIN,
   CREATE_ASSET,
   CREATE_PROJECT,
+  HELPER,
+  HELPER_LIST,
   LANDING,
   PROJECT,
 }

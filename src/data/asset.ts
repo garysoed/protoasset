@@ -1,5 +1,6 @@
 import {Field, Serializable} from 'external/gs_tools/src/data';
 
+import {Helper} from './helper';
 import {IDataSource} from './i-data-source';
 
 
@@ -25,6 +26,7 @@ export class Asset {
   @Field('type') private type_: AssetType;
   @Field('width') private width_: number;
   @Field('data') private data_: IDataSource<string[][]> | null;
+  @Field('helpers') private helpers_: {[id: string]: Helper};
 
   constructor(id: string, projectId: string) {
     this.height_ = NaN;
@@ -34,6 +36,7 @@ export class Asset {
     this.type_ = AssetType.UNKNOWN;
     this.width_ = NaN;
     this.data_ = null;
+    this.helpers_ = {};
   }
 
   /**
@@ -48,6 +51,13 @@ export class Asset {
    */
   getHeight(): number {
     return this.height_;
+  }
+
+  /**
+   * @return Map of helper IDs to the associated helper.
+   */
+  getHelpers(): {[id: string]: Helper} {
+    return this.helpers_;
   }
 
   /**
@@ -107,6 +117,13 @@ export class Asset {
    */
   setHeight(height: number): void {
     this.height_ = height;
+  }
+
+  /**
+   * @param helpers Map of helper IDs to the associated helper.
+   */
+  setHelpers(helpers: {[id: string]: Helper}): void {
+    this.helpers_ = helpers;
   }
 
   /**

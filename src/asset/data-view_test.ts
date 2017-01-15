@@ -18,7 +18,7 @@ describe('previewRowDataSetter', () => {
     let cell1 = Mocks.object('cell1');
     let cell2 = Mocks.object('cell2');
     let mockDocument = jasmine.createSpyObj('Document', ['createElement']);
-    mockDocument.createElement.and.returnValues([cell1, cell2]);
+    mockDocument.createElement.and.returnValues(cell1, cell2);
 
     let mockRoot = jasmine.createSpyObj('Root', ['appendChild']);
     mockRoot.ownerDocument = mockDocument;
@@ -58,8 +58,7 @@ describe('previewRowDataSetter', () => {
 
     assert(cell1.textContent).to.equal(data1);
     assert(cell2.textContent).to.equal(data2);
-    assert(mockRoot.appendChild).to.haveBeenCalledWith(cell1);
-    assert(mockRoot.appendChild).to.haveBeenCalledWith(cell2);
+    assert(mockRoot.appendChild).toNot.haveBeenCalled();
     assert(mockChildrenList.item).to.haveBeenCalledWith(0);
     assert(mockChildrenList.item).to.haveBeenCalledWith(1);
   });
@@ -69,6 +68,7 @@ describe('previewRowGenerator', () => {
   it('should return the correct element', () => {
     let element = Mocks.object('element');
     let mockDocument = jasmine.createSpyObj('Document', ['createElement']);
+    mockDocument.createElement.and.returnValue(element);
     assert(previewRowGenerator(mockDocument)).to.equal(element);
     assert(mockDocument.createElement).to.haveBeenCalledWith('tr');
   });
