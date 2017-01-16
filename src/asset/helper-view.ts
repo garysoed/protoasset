@@ -6,7 +6,6 @@ import {
   BooleanParser,
   customElement,
   DomBridge,
-  FloatParser,
   handle,
   StringParser} from 'external/gs_tools/src/webc';
 
