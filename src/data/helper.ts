@@ -68,6 +68,13 @@ export class Helper {
   }
 
   /**
+   * @param name Name of the helper.
+   */
+  setName(name: string): void {
+    this.name_ = name;
+  }
+
+  /**
    * @param id ID of the helper.
    * @param name Name of the helper.
    * @return A new instance of the helper object.

@@ -1,16 +1,45 @@
 <style>
-  #codeInput {
+  #args > * {
+    display: inline-block;
+  }
+
+  #args > div {
+    background-color: var(--gsColorPassivePrimaryBG);
+    border-radius: .85rem;
+    cursor: pointer;
+    margin-right: .2rem;
+    min-width: 2rem;
+    padding: .2rem;
+    text-align: center;
+  }
+
+  #bodyInput {
     position: relative;
+  }
+
+  label {
+    margin-right: 1rem;
   }
 </style>
 
 <div fill-parent layout="row">
   <div flex layout="column">
     <div layout="row">
-      <label>Name:</label>
-      <gs-text-input></gs-text-input>
+      <label>Arguments:</label>
+      <div flex flex-wrap id="args">
+        <gs-text-input id="argInput"></gs-text-input>
+      </div>
     </div>
-    <gs-code-input class="gs-theme-invert" flex id="codeInput"></gs-code-input>
+    <div layout="row">
+      <label>Name:</label>
+      <gs-text-input flex id="nameInput"></gs-text-input>
+    </div>
+    <gs-code-input
+        class="gs-theme-invert"
+        flex
+        gs-language="javascript"
+        id="bodyInput">
+    </gs-code-input>
   </div>
   <div flex>
     Test / preview
