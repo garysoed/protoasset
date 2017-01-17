@@ -29,7 +29,7 @@ export class TemplateCompiler {
    * @param handlebars The handlebars instance.
    * @return New instance of the compiler.
    */
-  static of(assetData: string[][], handlebars: typeof Handlebars) {
+  static of(assetData: string[][], handlebars: typeof Handlebars): TemplateCompiler {
     return new TemplateCompiler(assetData, handlebars);
   }
 }
