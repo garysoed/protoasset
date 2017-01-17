@@ -1,6 +1,7 @@
 import {assert, TestBase} from '../test-base';
 TestBase.setup();
 
+import {Arrays} from 'external/gs_tools/src/collection';
 import {DomEvent, ListenableDom} from 'external/gs_tools/src/event';
 import {Mocks} from 'external/gs_tools/src/mock';
 import {TestDispose} from 'external/gs_tools/src/testing';
@@ -8,6 +9,8 @@ import {TestDispose} from 'external/gs_tools/src/testing';
 import {
   argElementDataSetter,
   argElementGenerator,
+  consoleEntryDataSetter,
+  consoleEntryGenerator,
   HelperView} from './helper-view';
 
 
@@ -41,20 +44,87 @@ describe('argElementDataSetter', () => {
   });
 });
 
+describe('consoleEntryGenerator', () => {
+  it('should generate the console entry element correctly', () => {
+    let mockRootClassList = jasmine.createSpyObj('RootClassList', ['add']);
+    let mockRootEl = jasmine.createSpyObj('RootEl', ['appendChild']);
+    mockRootEl.classList = mockRootClassList;
+
+    let mockCommandClassList = jasmine.createSpyObj('CommandClassList', ['add']);
+    let commandEl = Mocks.object('commandEl');
+    commandEl.classList = mockCommandClassList;
+
+    let resultEl = Mocks.object('resultEl');
+
+    let mockDocument = jasmine.createSpyObj('Document', ['createElement']);
+    mockDocument.createElement.and.returnValues(mockRootEl, commandEl, resultEl);
+
+    assert(consoleEntryGenerator(mockDocument)).to.equal(mockRootEl);
+    assert(mockRootEl.appendChild).to.haveBeenCalledWith(resultEl);
+    assert(mockRootEl.appendChild).to.haveBeenCalledWith(commandEl);
+    assert(mockDocument.createElement).to.haveBeenCalledWith('div');
+    assert(mockCommandClassList.add).to.haveBeenCalledWith('gs-theme-invert');
+    assert(mockRootClassList.add).to.haveBeenCalledWith('consoleEntry');
+  });
+});
+
+describe('consoleEntryDataSetter', () => {
+  it('should set the data correctly', () => {
+    let command = 'command';
+    let line1 = 'line1';
+    let line2 = 'line2';
+    let result = `${line1}\n  ${line2}`;
+
+    let commandEl = document.createElement('div');
+    let resultEl = document.createElement('div');
+    let rootEl = document.createElement('div');
+    rootEl.appendChild(commandEl);
+    rootEl.appendChild(resultEl);
+
+    consoleEntryDataSetter({command, isError: false, result}, rootEl);
+
+    assert(Arrays.fromItemList(resultEl.classList).asArray()).to.equal([]);
+    assert(resultEl.innerHTML).to.equal(`<p>${line1}</p><p>&nbsp;&nbsp;${line2}</p>`);
+    assert(commandEl.textContent).to.equal(command);
+  });
+
+  it('should set the data correctly for errors', () => {
+    let command = 'command';
+    let line1 = 'line1';
+    let line2 = 'line2';
+    let result = `${line1}\n  ${line2}`;
+
+    let commandEl = document.createElement('div');
+    let resultEl = document.createElement('div');
+    let rootEl = document.createElement('div');
+    rootEl.appendChild(commandEl);
+    rootEl.appendChild(resultEl);
+
+    consoleEntryDataSetter({command, isError: true, result}, rootEl);
+
+    assert(Arrays.fromItemList(resultEl.classList).asArray()).to.equal(['error']);
+    assert(resultEl.innerHTML).to.equal(`<p>${line1}</p><p>&nbsp;&nbsp;${line2}</p>`);
+    assert(commandEl.textContent).to.equal(command);
+  });
+});
+
 describe('asset.HelperView', () => {
   let mockAssetCollection;
   let mockRouteFactoryService;
   let mockRouteService;
+  let mockTemplateCompilerService;
   let view: HelperView;
 
   beforeEach(() => {
     mockAssetCollection = jasmine.createSpyObj('AssetCollection', ['get', 'update']);
     mockRouteFactoryService = jasmine.createSpyObj('RouteFactoryService', ['helper']);
     mockRouteService = jasmine.createSpyObj('RouteService', ['getParams']);
+    mockTemplateCompilerService = jasmine.createSpyObj('TemplateCompilerService', ['create']);
     view = new HelperView(
         mockAssetCollection,
         mockRouteFactoryService,
         mockRouteService,
+        mockTemplateCompilerService,
         Mocks.object('ThemeService'));
     TestDispose.add(view);
   });
@@ -412,6 +482,189 @@ describe('asset.HelperView', () => {
       view['onChanges_']()
           .then(() => {
             assert(mockAssetCollection.update).toNot.haveBeenCalled();
+            done();
+          }, done.fail);
+    });
+  });
+
+  describe('onExecuteButtonClick_', () => {
+    it('should execute the code, update the console, and scroll to the bottom of the console',
+        (done: any) => {
+          let asset = Mocks.object('asset');
+          spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(asset));
+
+          let command = 'command';
+          spyOn(view['consoleInputBridge_'], 'get').and.returnValue(command);
+
+          let entry1 = Mocks.object('entry1');
+          let entry2 = Mocks.object('entry2');
+          spyOn(view['consoleEntryBridge_'], 'get').and.returnValue([entry1, entry2]);
+          spyOn(view['consoleEntryBridge_'], 'set');
+
+          let result = 'result';
+          let mockCompiledDelegate = jasmine.createSpy('CompiledDelegate');
+          mockCompiledDelegate.and.returnValue(result);
+
+          let mockCompiler = jasmine.createSpyObj('Compiler', ['compile']);
+          mockCompiler.compile.and.returnValue(mockCompiledDelegate);
+          mockTemplateCompilerService.create.and.returnValue(mockCompiler);
+
+          let scrollHeight = 123;
+          let containerEl = Mocks.object('containerEl');
+          containerEl.scrollHeight = scrollHeight;
+
+          let mockShadowRoot = jasmine.createSpyObj('ShadowRoot', ['querySelector']);
+          mockShadowRoot.querySelector.and.returnValue(containerEl);
+
+          let element = Mocks.object('element');
+          element.shadowRoot = mockShadowRoot;
+          let mockListenable = jasmine.createSpyObj('Listenable', ['getEventTarget']);
+          mockListenable.getEventTarget.and.returnValue(element);
+          spyOn(view, 'getElement').and.returnValue(mockListenable);
+
+          view['onExecuteButtonClick_']()
+              .then(() => {
+                assert(containerEl.scrollTop).to.equal(scrollHeight);
+                assert(mockShadowRoot.querySelector).to.haveBeenCalledWith('#consoleContainer');
+                assert(view['consoleEntryBridge_'].set).to.haveBeenCalledWith([
+                  entry1,
+                  entry2,
+                  {command, isError: false, result},
+                ]);
+                assert(mockCompiler.compile).to.haveBeenCalledWith(command);
+                assert(mockTemplateCompilerService.create).to.haveBeenCalledWith(asset);
+                done();
+              }, done.fail);
+        });
+
+    it('should handle error thrown during compile step correctly', (done: any) => {
+      let asset = Mocks.object('asset');
+      spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(asset));
+
+      let command = 'command';
+      spyOn(view['consoleInputBridge_'], 'get').and.returnValue(command);
+
+      let entry1 = Mocks.object('entry1');
+      let entry2 = Mocks.object('entry2');
+      spyOn(view['consoleEntryBridge_'], 'get').and.returnValue([entry1, entry2]);
+      spyOn(view['consoleEntryBridge_'], 'set');
+
+      let message = 'message';
+      let stack = 'stack';
+      let error = {message, stack};
+      Object.setPrototypeOf(error, Error.prototype);
+      let mockCompiler = jasmine.createSpyObj('Compiler', ['compile']);
+      mockCompiler.compile.and.throwError(error);
+      mockTemplateCompilerService.create.and.returnValue(mockCompiler);
+
+      let scrollHeight = 123;
+      let containerEl = Mocks.object('containerEl');
+      containerEl.scrollHeight = scrollHeight;
+
+      let mockShadowRoot = jasmine.createSpyObj('ShadowRoot', ['querySelector']);
+      mockShadowRoot.querySelector.and.returnValue(containerEl);
+
+      let element = Mocks.object('element');
+      element.shadowRoot = mockShadowRoot;
+      let mockListenable = jasmine.createSpyObj('Listenable', ['getEventTarget']);
+      mockListenable.getEventTarget.and.returnValue(element);
+      spyOn(view, 'getElement').and.returnValue(mockListenable);
+
+      view['onExecuteButtonClick_']()
+          .then(() => {
+            assert(containerEl.scrollTop).to.equal(scrollHeight);
+            assert(mockShadowRoot.querySelector).to.haveBeenCalledWith('#consoleContainer');
+            assert(view['consoleEntryBridge_'].set).to.haveBeenCalledWith([
+              entry1,
+              entry2,
+              {command, isError: true, result: `${message}\n\n${stack}`},
+            ]);
+            assert(mockCompiler.compile).to.haveBeenCalledWith(command);
+            assert(mockTemplateCompilerService.create).to.haveBeenCalledWith(asset);
+            done();
+          }, done.fail);
+    });
+
+    it('should not scroll to the bottom if the element cannot be found', (done: any) => {
+      let asset = Mocks.object('asset');
+      spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(asset));
+
+      let command = 'command';
+      spyOn(view['consoleInputBridge_'], 'get').and.returnValue(command);
+
+      let entry1 = Mocks.object('entry1');
+      let entry2 = Mocks.object('entry2');
+      spyOn(view['consoleEntryBridge_'], 'get').and.returnValue([entry1, entry2]);
+      spyOn(view['consoleEntryBridge_'], 'set');
+
+      let message = 'message';
+      let stack = 'stack';
+      let error = {message, stack};
+      Object.setPrototypeOf(error, Error.prototype);
+      let mockCompiler = jasmine.createSpyObj('Compiler', ['compile']);
+      mockCompiler.compile.and.throwError(error);
+      mockTemplateCompilerService.create.and.returnValue(mockCompiler);
+
+      spyOn(view, 'getElement').and.returnValue(null);
+
+      view['onExecuteButtonClick_']()
+          .then(() => {
+            assert(view['consoleEntryBridge_'].set).to.haveBeenCalledWith([
+              entry1,
+              entry2,
+              {command, isError: true, result: `${message}\n\n${stack}`},
+            ]);
+            assert(mockCompiler.compile).to.haveBeenCalledWith(command);
+            assert(mockTemplateCompilerService.create).to.haveBeenCalledWith(asset);
+            done();
+          }, done.fail);
+    });
+
+    it('should do nothing if the compiler cannot be created', (done: any) => {
+      let asset = Mocks.object('asset');
+      spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(asset));
+
+      let command = 'command';
+      spyOn(view['consoleInputBridge_'], 'get').and.returnValue(command);
+      spyOn(view['consoleEntryBridge_'], 'set');
+
+      mockTemplateCompilerService.create.and.returnValue(null);
+
+      view['onExecuteButtonClick_']()
+          .then(() => {
+            assert(view['consoleEntryBridge_'].set).toNot.haveBeenCalled();
+            assert(mockTemplateCompilerService.create).to.haveBeenCalledWith(asset);
+            done();
+          }, done.fail);
+    });
+
+    it('should do nothing if asset cannot be found', (done: any) => {
+      spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(null));
+
+      let command = 'command';
+      spyOn(view['consoleInputBridge_'], 'get').and.returnValue(command);
+      spyOn(view['consoleEntryBridge_'], 'set');
+
+      mockTemplateCompilerService.create.and.returnValue(null);
+
+      view['onExecuteButtonClick_']()
+          .then(() => {
+            assert(view['consoleEntryBridge_'].set).toNot.haveBeenCalled();
+            assert(mockTemplateCompilerService.create).toNot.haveBeenCalled();
+            done();
+          }, done.fail);
+    });
+
+    it('should do nothing if the console has no values', (done: any) => {
+      spyOn(view['consoleInputBridge_'], 'get').and.returnValue(null);
+      spyOn(view['consoleEntryBridge_'], 'set');
+
+      mockTemplateCompilerService.create.and.returnValue(null);
+
+      view['onExecuteButtonClick_']()
+          .then(() => {
+            assert(view['consoleEntryBridge_'].set).toNot.haveBeenCalled();
+            assert(mockTemplateCompilerService.create).toNot.haveBeenCalled();
             done();
           }, done.fail);
     });

@@ -17,13 +17,48 @@
     position: relative;
   }
 
+  #consoleContainer {
+    overflow: scroll;
+  }
+
+  #consoleInput {
+    height: 10rem;
+    position: relative;
+  }
+
+  #inputSection,
+  #previewSection {
+    width: 50%;
+  }
+
+  .consoleEntry {
+    font-family: var(--gsFontFamilyCode);
+  }
+
+  .consoleEntry p {
+    margin: 0;
+    word-break: break-all;
+  }
+
+  .consoleEntry:not(:last-child) {
+    opacity: .5;
+  }
+
+  .consoleEntry > div:nth-child(2) {
+    padding-left: 4ch;
+  }
+
+  .consoleEntry > .error {
+    color: red;
+  }
+
   label {
     margin-right: 1rem;
   }
 </style>
 
 <div fill-parent layout="row">
-  <div flex layout="column">
+  <div flex id="inputSection" layout="column">
     <div layout="row">
       <label>Arguments:</label>
       <div flex flex-wrap id="args">
@@ -41,7 +76,20 @@
         id="bodyInput">
     </gs-code-input>
   </div>
-  <div flex>
-    Test / preview
+  <div flex id="previewSection" layout="column">
+    <div flex id="consoleContainer">
+      <div id="console"></div>
+    </div>
+    <gs-code-input
+        class="gs-theme-invert"
+        gs-language="handlebars"
+        gs-show-gutter="false"
+        id="consoleInput">
+    </gs-code-input>
+    <div class="gs-theme-invert" layout="row" flex-justify="flex-end">
+      <gs-basic-button class="gs-primary" id="executeButton">
+        <div gs-content>Execute</div>
+      </gs-basic-button>
+    </div>
   </div>
 </div>

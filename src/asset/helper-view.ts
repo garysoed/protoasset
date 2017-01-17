@@ -16,11 +16,14 @@ import {ThemeService} from 'external/gs_ui/src/theming';
 import {Asset} from '../data/asset';
 import {AssetCollection} from '../data/asset-collection';
 import {Helper} from '../data/helper';
+import {TemplateCompiler} from '../data/template-compiler';
+import {TemplateCompilerService} from '../data/template-compiler-service';
 import {RouteFactoryService} from '../routing/route-factory-service';
 import {Views} from '../routing/views';
 
 
 type HelperIdParams = {assetId: string, helperId: string, projectId: string};
+type ConsoleEntry = {command: string, isError: boolean, result: string};
 
 /**
  * Generates a new element to represent a helper's arg.
@@ -46,9 +49,48 @@ export function argElementDataSetter(label: string, element: Element): void {
 }
 
 /**
+ * Generates a new element for the console entry.
+ * @param document The document that the element belongs to.
+ * @return The newly created element.
+ */
+export function consoleEntryGenerator(document: Document): Element {
+  let root = document.createElement('div');
+  root.classList.add('consoleEntry');
+  let command = document.createElement('div');
+  command.classList.add('gs-theme-invert');
+  let result = document.createElement('div');
+  root.appendChild(command);
+  root.appendChild(result);
+  return root;
+}
+
+/**
+ * Sets the data to the given console entry element.
+ * @param data The console entry data.
+ * @param element The console entry element.
+ */
+export function consoleEntryDataSetter(data: ConsoleEntry, element: Element): void {
+  element.children.item(0).textContent = data.command;
+
+  let resultEl = element.children.item(1);
+  resultEl.innerHTML = Arrays
+      .of(data.result.split('\n'))
+      .map((line: string) => {
+        return line.replace(/ /g, '&nbsp;');
+      })
+      .map((line: string) => {
+        return `<p>${line}</p>`;
+      })
+      .asArray()
+      .join('');
+  resultEl.classList.toggle('error', data.isError);
+}
+
+/**
  * Helper view
  */
 @customElement({
+  dependencies: [TemplateCompilerService],
   tag: 'pa-asset-helper-view',
   templateKey: 'src/asset/helper-view',
 })
@@ -62,26 +104,37 @@ export class HelperView extends BaseThemedElement {
   @bind('#bodyInput').attribute('gs-value', StringParser)
   private readonly bodyInputBridge_: DomBridge<string>;
 
+  @bind('#consoleInput').attribute('gs-value', StringParser)
+  private readonly consoleInputBridge_: DomBridge<string>;
+
   @bind('#nameInput').attribute('gs-value', StringParser)
   private readonly nameInputBridge_: DomBridge<string>;
+
+  @bind('#console').childrenElements<ConsoleEntry>(consoleEntryGenerator, consoleEntryDataSetter)
+  private readonly consoleEntryBridge_: DomBridge<ConsoleEntry[]>;
 
   private readonly assetCollection_: AssetCollection;
   private readonly routeFactoryService_: RouteFactoryService;
   private readonly routeService_: RouteService<Views>;
+  private readonly templateCompilerService_: TemplateCompilerService;
 
   constructor(
       @inject('pa.data.AssetCollection') assetCollection: AssetCollection,
       @inject('pa.routing.RouteFactoryService') routeFactoryService: RouteFactoryService,
       @inject('gs.routing.RouteService') routeService: RouteService<Views>,
+      @inject('pa.data.TemplateCompilerService') templateCompilerService: TemplateCompilerService,
       @inject('theming.ThemeService') themeService: ThemeService) {
     super(themeService);
     this.argElementsBridge_ = DomBridge.of<string[]>();
     this.argInputBridge_ = DomBridge.of<string>();
     this.assetCollection_ = assetCollection;
     this.bodyInputBridge_ = DomBridge.of<string>();
+    this.consoleEntryBridge_ = DomBridge.of<ConsoleEntry[]>();
+    this.consoleInputBridge_ = DomBridge.of<string>();
     this.nameInputBridge_ = DomBridge.of<string>();
     this.routeFactoryService_ = routeFactoryService;
     this.routeService_ = routeService;
+    this.templateCompilerService_ = templateCompilerService;
   }
 
   /**
@@ -194,6 +247,50 @@ export class HelperView extends BaseThemedElement {
           asset.setHelpers(helpers);
 
           return this.assetCollection_.update(asset, asset.getProjectId());
+        });
+  }
+
+  @handle('#executeButton').event(DomEvent.CLICK)
+  protected onExecuteButtonClick_(): Promise<void> {
+    const consoleValue = this.consoleInputBridge_.get();
+    if (consoleValue === null) {
+      return Promise.resolve();
+    }
+
+    return this.getAsset_()
+        .then((asset: Asset | null) => {
+          if (asset === null) {
+            return Promise.resolve(null);
+          }
+          return this.templateCompilerService_.create(asset);
+        })
+        .then((compiler: TemplateCompiler | null) => {
+          if (compiler === null) {
+            return;
+          }
+
+          let result;
+          let isError;
+          try {
+            result = compiler.compile(consoleValue)();
+            isError = false;
+          } catch (e) {
+            if (!(e instanceof Error)) {
+              return;
+            }
+            result = `${e.message}\n\n${e.stack}`;
+            isError = true;
+          }
+          let consoleEntries = this.consoleEntryBridge_.get() || [];
+          consoleEntries.push({command: consoleValue, isError: isError, result: result});
+          this.consoleEntryBridge_.set(consoleEntries);
+
+          let element = this.getElement();
+          if (element === null) {
+            return;
+          }
+          let containerEl = element.getEventTarget().shadowRoot.querySelector('#consoleContainer');
+          containerEl.scrollTop = containerEl.scrollHeight;
         });
   }
 

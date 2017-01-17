@@ -1,4 +1,5 @@
 import {Jsons} from 'external/gs_tools/src/collection';
+import {Injector} from 'external/gs_tools/src/inject';
 import {Templates} from 'external/gs_tools/src/webc';
 
 import {DefaultPalettes, Main} from 'external/gs_ui/src/bootstrap';
@@ -11,6 +12,7 @@ import {RouteFactoryService} from '../routing/route-factory-service';
 
 
 function bootstrap(document: Document): void {
+  Injector.bindProvider(() => Handlebars, 'x.Handlebars');
   let main = Main.newInstance({
     ace: window['ace'],
     routeFactoryServiceCtor: RouteFactoryService,

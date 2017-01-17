@@ -8,5 +8,6 @@ ts_library(
     srcs = glob(['*.d.ts']),
     deps = [
       "//typings/globals/fuse",
+      "//typings/globals/handlebars",
     ]
 )

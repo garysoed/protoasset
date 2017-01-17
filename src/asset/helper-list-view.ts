@@ -60,7 +60,7 @@ export class HelperListView extends BaseThemedElement {
             newHelperId = this.helperIdGenerator_.resolveConflict(newHelperId);
           }
 
-          let helper = Helper.of(newHelperId, `Helper ${newHelperId}`);
+          let helper = Helper.of(newHelperId, `helper_${newHelperId}`);
           helpers[newHelperId] = helper;
           asset.setHelpers(helpers);
 

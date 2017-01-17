@@ -66,7 +66,7 @@ describe('asset.HelperListView', () => {
               [existingHelperId]: existingHelper,
               [newHelperId]: mockHelper,
             });
-            assert(Helper.of).to.haveBeenCalledWith(newHelperId, `Helper ${newHelperId}`);
+            assert(Helper.of).to.haveBeenCalledWith(newHelperId, `helper_${newHelperId}`);
             assert(view['helperIdGenerator_'].resolveConflict).to
                 .haveBeenCalledWith(existingHelperId);
             assert(mockAssetCollection.get).to.haveBeenCalledWith(projectId, assetId);
