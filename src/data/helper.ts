@@ -1,17 +1,21 @@
 import {Field, Serializable} from 'external/gs_tools/src/data';
+import {BaseListenable} from 'external/gs_tools/src/event';
+
+import {DataEvents} from './data-events';
 
 
 /**
  * Represents a Handlebars helper function.
  */
 @Serializable('helper')
-export class Helper {
+export class Helper extends BaseListenable<DataEvents> {
   @Field('args') private args_: string[];
   @Field('id') private id_: string;
   @Field('name') private name_: string;
   @Field('fnString') private body_: string;
 
   constructor(id: string, name: string) {
+    super();
     this.args_ = ['a', 'b'];
     this.body_ = 'return a + b';
     this.id_ = id;
@@ -57,21 +61,35 @@ export class Helper {
    * @param args Arguments of the helper function.
    */
   setArgs(args: string[]): void {
-    this.args_ = args;
+    this.dispatch(DataEvents.CHANGED, () => {
+      this.args_ = args;
+    });
   }
 
   /**
    * @param body Body of the helper.
    */
   setBody(body: string): void {
-    this.body_ = body;
+    if (body === this.body_) {
+      return;
+    }
+
+    this.dispatch(DataEvents.CHANGED, () => {
+      this.body_ = body;
+    });
   }
 
   /**
    * @param name Name of the helper.
    */
   setName(name: string): void {
-    this.name_ = name;
+    if (name === this.name_) {
+      return;
+    }
+
+    this.dispatch(DataEvents.CHANGED, () => {
+      this.name_ = name;
+    });
   }
 
   /**

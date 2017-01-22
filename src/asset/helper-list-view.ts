@@ -54,19 +54,17 @@ export class HelperListView extends BaseThemedElement {
             return Promise.resolve([null]);
           }
 
-          let helpers = asset.getHelpers();
           let newHelperId = this.helperIdGenerator_.generate();
-          while (helpers[newHelperId] !== undefined) {
+          while (asset.getHelper(newHelperId) !== null) {
             newHelperId = this.helperIdGenerator_.resolveConflict(newHelperId);
           }
 
           let helper = Helper.of(newHelperId, `helper_${newHelperId}`);
-          helpers[newHelperId] = helper;
-          asset.setHelpers(helpers);
+          asset.setHelper(newHelperId, helper);
 
           return Promise.all([
             newHelperId,
-            this.assetCollection_.update(asset, params.projectId),
+            this.assetCollection_.update(asset),
           ]);
         })
         .then(([helperId]: [string | null, any]) => {

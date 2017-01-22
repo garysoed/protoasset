@@ -1,5 +1,8 @@
+import {Maps} from 'external/gs_tools/src/collection';
 import {Field, Serializable} from 'external/gs_tools/src/data';
+import {BaseListenable} from 'external/gs_tools/src/event';
 
+import {DataEvents} from './data-events';
 import {Helper} from './helper';
 import {IDataSource} from './i-data-source';
 
@@ -18,7 +21,7 @@ export type AssetSearchIndex = {
 };
 
 @Serializable('asset')
-export class Asset {
+export class Asset extends BaseListenable<DataEvents> {
   @Field('height') private height_: number;
   @Field('id') private id_: string;
   @Field('name') private name_: string;
@@ -29,6 +32,7 @@ export class Asset {
   @Field('helpers') private helpers_: {[id: string]: Helper};
 
   constructor(id: string, projectId: string) {
+    super();
     this.height_ = NaN;
     this.id_ = id;
     this.name_ = 'Unnamed Asset';
@@ -37,6 +41,26 @@ export class Asset {
     this.width_ = NaN;
     this.data_ = null;
     this.helpers_ = {};
+  }
+
+  /**
+   * Deletes the given helper.
+   */
+  deleteHelper(helperId: string): void {
+    if (!this.helpers_[helperId]) {
+      return;
+    }
+
+    this.dispatch(DataEvents.CHANGED, () => {
+      delete this.helpers_[helperId];
+    });
+  }
+
+  /**
+   * @return All helpers added to this asset..
+   */
+  getAllHelpers(): Helper[] {
+    return Maps.fromRecord(this.helpers_).values().asArray();
   }
 
   /**
@@ -54,10 +78,11 @@ export class Asset {
   }
 
   /**
-   * @return Map of helper IDs to the associated helper.
+   * @param helperId ID of the helper to return.
+   * @return The helper corresponding to the given ID or null if it doesn't exist.
    */
-  getHelpers(): {[id: string]: Helper} {
-    return this.helpers_;
+  getHelper(helperId: string): Helper | null {
+    return this.helpers_[helperId] || null;
   }
 
   /**
@@ -109,21 +134,35 @@ export class Asset {
    * @param data The data to set.
    */
   setData(data: IDataSource<string[][]>): void {
-    this.data_ = data;
+    this.dispatch(DataEvents.CHANGED, () => {
+      this.data_ = data;
+    });
   }
 
   /**
    * @param height The height of the asset, in pixels.
    */
   setHeight(height: number): void {
-    this.height_ = height;
+    if (this.height_ === height) {
+      return;
+    }
+
+    this.dispatch(DataEvents.CHANGED, () => {
+      this.height_ = height;
+    });
   }
 
   /**
    * @param helpers Map of helper IDs to the associated helper.
    */
-  setHelpers(helpers: {[id: string]: Helper}): void {
-    this.helpers_ = helpers;
+  setHelper(id: string, helper: Helper): void {
+    if (this.helpers_[id] === helper) {
+      return;
+    }
+
+    this.dispatch(DataEvents.CHANGED, () => {
+      this.helpers_[id] = helper;
+    });
   }
 
   /**
@@ -132,7 +171,13 @@ export class Asset {
    * @param name The name of the asset.
    */
   setName(name: string): void {
-    this.name_ = name;
+    if (name === this.name_) {
+      return;
+    }
+
+    this.dispatch(DataEvents.CHANGED, () => {
+      this.name_ = name;
+    });
   }
 
   /**
@@ -141,14 +186,26 @@ export class Asset {
    * @param type The type of the asset.
    */
   setType(type: AssetType): void {
-    this.type_ = type;
+    if (type === this.type_) {
+      return;
+    }
+
+    this.dispatch(DataEvents.CHANGED, () => {
+      this.type_ = type;
+    });
   }
 
   /**
    * @param width The width of the asset, in pixels.
    */
   setWidth(width: number): void {
-    this.width_ = width;
+    if (width === this.width_) {
+      return;
+    }
+
+    this.dispatch(DataEvents.CHANGED, () => {
+      this.width_ = width;
+    });
   }
 
   /**

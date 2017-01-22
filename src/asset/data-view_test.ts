@@ -152,7 +152,7 @@ describe('asset.DataView', () => {
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
       view['updateAsset_'](dataSource)
           .then(() => {
-            assert(mockAssetCollection.update).to.haveBeenCalledWith(mockAsset, projectId);
+            assert(mockAssetCollection.update).to.haveBeenCalledWith(mockAsset);
             assert(mockAsset.setData).to.haveBeenCalledWith(dataSource);
             done();
           }, done.fail);
@@ -160,8 +160,7 @@ describe('asset.DataView', () => {
 
     it('should not reject if asset cannot be found', (done: any) => {
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(null));
-      view['updateAsset_'](Mocks.object('dataSource'))
-          .then(done, done.fail);
+      view['updateAsset_'](Mocks.object('dataSource')).then(done, done.fail);
     });
   });
 

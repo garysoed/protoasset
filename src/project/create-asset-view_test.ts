@@ -425,14 +425,15 @@ describe('project.CreateAssetView', () => {
                 .haveBeenCalledWith(routeFactory, {projectId: projectId});
             assert(view['reset_']).to.haveBeenCalledWith();
 
-            assert(mockAssetCollection.update).to
-                .haveBeenCalledWith(Matchers.any(Asset), projectId);
+            assert(mockAssetCollection.update).to.haveBeenCalledWith(Matchers.any(Asset));
+
             let asset = mockAssetCollection.update.calls.argsFor(0)[0];
             assert(asset.getName()).to.equal(assetName);
             assert(asset.getType()).to.equal(assetType);
             assert(asset.getId()).to.equal(assetId);
             assert(asset.getHeight()).to.equal(height);
             assert(asset.getWidth()).to.equal(width);
+            TestDispose.add(asset);
 
             assert(mockAssetCollection.reserveId).to.haveBeenCalledWith(projectId);
             done();

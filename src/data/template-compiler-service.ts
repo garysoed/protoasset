@@ -1,4 +1,4 @@
-import {Maps} from 'external/gs_tools/src/collection';
+import {Arrays} from 'external/gs_tools/src/collection';
 import {bind, inject} from 'external/gs_tools/src/inject';
 
 import {Asset} from './asset';
@@ -31,8 +31,8 @@ export class TemplateCompilerService {
     }
 
     let handlebars = this.handlebars_.create();
-    Maps
-        .fromRecord(asset.getHelpers())
+    Arrays
+        .of(asset.getAllHelpers())
         .forEach((helper: Helper) => {
           handlebars.registerHelper(helper.getName(), helper.asFunction());
         });

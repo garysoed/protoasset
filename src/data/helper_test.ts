@@ -1,6 +1,10 @@
-import {assert, TestBase} from '../test-base';
+import {assert, Matchers, TestBase} from '../test-base';
 TestBase.setup();
 
+import {Mocks} from 'external/gs_tools/src/mock';
+import {TestDispose} from 'external/gs_tools/src/testing';
+
+import {DataEvents} from './data-events';
 import {Helper} from './helper';
 
 
@@ -9,6 +13,7 @@ describe('data.Helper', () => {
 
   beforeEach(() => {
     helper = new Helper('id', 'name');
+    TestDispose.add(helper);
   });
 
   describe('asFunction', () => {
@@ -17,6 +22,86 @@ describe('data.Helper', () => {
       helper.setArgs(['a']);
       let fn = helper.asFunction();
       assert(fn(1)).to.equal(2);
+    });
+  });
+
+  describe('setArgs', () => {
+    it('should dispatch the changed event', () => {
+      spyOn(helper, 'dispatch').and.callFake((event: any, callback: Function) => {
+        callback();
+      });
+
+      let args = Mocks.object('args');
+
+      helper.setArgs(args);
+
+      assert(helper.dispatch).to
+          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+      assert(helper.getArgs()).to.equal(args);
+    });
+  });
+
+  describe('setBody', () => {
+    it('should dispatch the changed event if the body are different', () => {
+      spyOn(helper, 'dispatch').and.callFake((event: any, callback: Function) => {
+        callback();
+      });
+
+      let oldBody = 'oldBody';
+      let newBody = 'newBody';
+      helper['body_'] = oldBody;
+
+      helper.setBody(newBody);
+
+      assert(helper.dispatch).to
+          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+      assert(helper.getBody()).to.equal(newBody);
+    });
+
+    it('should not dispatch the changed event if the body does not change', () => {
+      spyOn(helper, 'dispatch').and.callFake((event: any, callback: Function) => {
+        callback();
+      });
+
+      let newBody = 'newBody';
+      helper['body_'] = newBody;
+
+      helper.setBody(newBody);
+
+      assert(helper.dispatch).toNot.haveBeenCalled();
+      assert(helper.getBody()).to.equal(newBody);
+    });
+  });
+
+  describe('seteName', () => {
+    it('should dispatch the changed event if the name are different', () => {
+      spyOn(helper, 'dispatch').and.callFake((event: any, callback: Function) => {
+        callback();
+      });
+
+      let oldName = 'oldName';
+      let newName = 'newName';
+      helper['name_'] = oldName;
+
+      helper.setName(newName);
+
+      assert(helper.dispatch).to
+          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+      assert(helper.getName()).to.equal(newName);
+    });
+
+    it('should not dispatch the changed event if the name does not change', () => {
+      spyOn(helper, 'dispatch').and.callFake((event: any, callback: Function) => {
+        callback();
+      });
+
+      let newName = 'newName';
+      helper['name_'] = newName;
+
+      helper.setName(newName);
+
+      assert(helper.dispatch).toNot.haveBeenCalled();
+      assert(helper.getName()).to.equal(newName);
     });
   });
 });

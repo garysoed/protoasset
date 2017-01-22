@@ -1,4 +1,5 @@
 import {Arrays} from 'external/gs_tools/src/collection';
+import {DisposableFunction} from 'external/gs_tools/src/dispose';
 import {DomEvent, ListenableDom} from 'external/gs_tools/src/event';
 import {inject} from 'external/gs_tools/src/inject';
 import {
@@ -10,16 +11,19 @@ import {
   StringParser} from 'external/gs_tools/src/webc';
 
 import {BaseThemedElement} from 'external/gs_ui/src/common';
-import {RouteService} from 'external/gs_ui/src/routing';
+import {RouteService, RouteServiceEvents} from 'external/gs_ui/src/routing';
 import {ThemeService} from 'external/gs_ui/src/theming';
 
 import {Asset} from '../data/asset';
 import {AssetCollection} from '../data/asset-collection';
+import {DataEvents} from '../data/data-events';
 import {Helper} from '../data/helper';
 import {TemplateCompiler} from '../data/template-compiler';
 import {TemplateCompilerService} from '../data/template-compiler-service';
 import {RouteFactoryService} from '../routing/route-factory-service';
 import {Views} from '../routing/views';
+
+import {HelperItem} from './helper-item';
 
 
 type HelperIdParams = {assetId: string, helperId: string, projectId: string};
@@ -87,10 +91,30 @@ export function consoleEntryDataSetter(data: ConsoleEntry, element: Element): vo
 }
 
 /**
+ * Sets the data to the helper item.
+ * @param helperIdParams Data to set.
+ * @param element The helper item element.
+ */
+export function helperItemDataSetter(helperIdParams: HelperIdParams, element: Element): void {
+  element.setAttribute('helper-id', helperIdParams.helperId);
+  element.setAttribute('asset-id', helperIdParams.assetId);
+  element.setAttribute('project-id', helperIdParams.projectId);
+}
+
+/**
+ * Creates a new helper item element.
+ * @param document The document that the element belongs to.
+ * @return The newly created element.
+ */
+export function helperItemGenerator(document: Document): Element {
+  return document.createElement('pa-asset-helper-item');
+}
+
+/**
  * Helper view
  */
 @customElement({
-  dependencies: [TemplateCompilerService],
+  dependencies: [HelperItem, TemplateCompilerService],
   tag: 'pa-asset-helper-view',
   templateKey: 'src/asset/helper-view',
 })
@@ -107,6 +131,9 @@ export class HelperView extends BaseThemedElement {
   @bind('#consoleInput').attribute('gs-value', StringParser)
   private readonly consoleInputBridge_: DomBridge<string>;
 
+  @bind('#helpers').childrenElements<HelperIdParams>(helperItemGenerator, helperItemDataSetter)
+  private readonly helperItemsBridge_: DomBridge<HelperIdParams[]>;
+
   @bind('#nameInput').attribute('gs-value', StringParser)
   private readonly nameInputBridge_: DomBridge<string>;
 
@@ -118,6 +145,8 @@ export class HelperView extends BaseThemedElement {
   private readonly routeService_: RouteService<Views>;
   private readonly templateCompilerService_: TemplateCompilerService;
 
+  private assetUpdateDeregister_: DisposableFunction | null;
+
   constructor(
       @inject('pa.data.AssetCollection') assetCollection: AssetCollection,
       @inject('pa.routing.RouteFactoryService') routeFactoryService: RouteFactoryService,
@@ -128,9 +157,11 @@ export class HelperView extends BaseThemedElement {
     this.argElementsBridge_ = DomBridge.of<string[]>();
     this.argInputBridge_ = DomBridge.of<string>();
     this.assetCollection_ = assetCollection;
+    this.assetUpdateDeregister_ = null;
     this.bodyInputBridge_ = DomBridge.of<string>();
     this.consoleEntryBridge_ = DomBridge.of<ConsoleEntry[]>();
     this.consoleInputBridge_ = DomBridge.of<string>();
+    this.helperItemsBridge_ = DomBridge.of<HelperIdParams[]>();
     this.nameInputBridge_ = DomBridge.of<string>();
     this.routeFactoryService_ = routeFactoryService;
     this.routeService_ = routeService;
@@ -169,23 +200,27 @@ export class HelperView extends BaseThemedElement {
             return null;
           }
 
-          let helper = asset.getHelpers()[params.helperId];
-          return helper || null;
+          return asset.getHelper(params.helperId);
         });
   }
 
   @handle(null).attributeChange('gs-view-active', BooleanParser)
   protected onActiveChange_(isActive: boolean | null): Promise<void> {
     if (!!isActive) {
-      return this.getHelper_()
-          .then((helper: Helper | null) => {
-            if (helper === null) {
-              return;
+      return this.getAsset_()
+          .then((asset: Asset | null) => {
+            if (this.assetUpdateDeregister_ !== null) {
+              this.assetUpdateDeregister_.dispose();
+              this.assetUpdateDeregister_ = null;
             }
 
-            this.argElementsBridge_.set(helper.getArgs());
-            this.bodyInputBridge_.set(helper.getBody());
-            this.nameInputBridge_.set(helper.getName());
+            if (asset !== null) {
+              this.assetUpdateDeregister_ = asset.on(
+                  DataEvents.CHANGED,
+                  this.updateAsset_.bind(this, asset),
+                  this);
+              this.updateAsset_(asset);
+            }
           });
     } else {
       return Promise.resolve();
@@ -242,11 +277,8 @@ export class HelperView extends BaseThemedElement {
           helper.setBody(body);
           helper.setName(name);
 
-          let helpers = asset.getHelpers();
-          helpers[helper.getId()] = helper;
-          asset.setHelpers(helpers);
-
-          return this.assetCollection_.update(asset, asset.getProjectId());
+          asset.setHelper(helper.getId(), helper);
+          return this.assetCollection_.update(asset);
         });
   }
 
@@ -295,6 +327,60 @@ export class HelperView extends BaseThemedElement {
   }
 
   /**
+   * Handles event when the route is changed.
+   */
+  private onRouteChanged_(): void {
+    this.onActiveChange_(this.routeService_.getParams(this.routeFactoryService_.helper()) !== null);
+  }
+
+  /**
+   * Updates using the given asset.
+   */
+  private updateAsset_(asset: Asset): Promise<void> {
+    return this
+        .getHelper_()
+        .then((helper: Helper | null) => {
+          if (helper === null) {
+            return;
+          }
+
+          this.argElementsBridge_.set(helper.getArgs());
+          this.bodyInputBridge_.set(helper.getBody());
+          this.nameInputBridge_.set(helper.getName());
+
+          let otherHelpers = Arrays
+              .of(asset.getAllHelpers())
+              .filter((value: Helper) => {
+                return value.getId() !== helper.getId();
+              })
+              .asArray();
+          let helperIdParams = Arrays
+              .of([helper])
+              .addAllArray(otherHelpers)
+              .map((helper: Helper) => {
+                return {
+                  assetId: asset.getId(),
+                  helperId: helper.getId(),
+                  projectId: asset.getProjectId(),
+                };
+              })
+              .asIterable();
+          this.helperItemsBridge_.set(Arrays.fromIterable(helperIdParams).asArray());
+        });
+  }
+
+  /**
+   * @override
+   */
+  disposeInternal(): void {
+    if (this.assetUpdateDeregister_ !== null) {
+      this.assetUpdateDeregister_.dispose();
+    }
+
+    super.disposeInternal();
+  }
+
+  /**
    * Handles event when the arg element is clicked.
    * @param event The event object.
    */
@@ -321,5 +407,16 @@ export class HelperView extends BaseThemedElement {
 
     args.splice(removedIndex, 1);
     this.argElementsBridge_.set(args);
+  }
+
+  /**
+   * @override
+   */
+  onCreated(element: HTMLElement): void {
+    super.onCreated(element);
+    this.addDisposable(this.routeService_.on(
+        RouteServiceEvents.CHANGED,
+        this.onRouteChanged_,
+        this));
   }
 }

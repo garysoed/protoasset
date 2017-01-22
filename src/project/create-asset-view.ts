@@ -287,7 +287,7 @@ export class CreateAssetView extends BaseThemedElement {
           asset.setType(assetType);
           asset.setHeight(height);
           asset.setWidth(width);
-          return this.assetCollection_.update(asset, projectId);
+          return this.assetCollection_.update(asset);
         })
         .then(() => {
           this.reset_();

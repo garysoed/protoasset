@@ -27,8 +27,8 @@ describe('routing.HelperRouteFactory', () => {
       let mockHelper = jasmine.createSpyObj('Helper', ['getName']);
       mockHelper.getName.and.returnValue(name);
 
-      let mockAsset = jasmine.createSpyObj('Asset', ['getHelpers']);
-      mockAsset.getHelpers.and.returnValue({[helperId]: mockHelper});
+      let mockAsset = jasmine.createSpyObj('Asset', ['getHelper']);
+      mockAsset.getHelper.and.returnValue(mockHelper);
       mockAssetCollection.get.and.returnValue(Promise.resolve(mockAsset));
 
       factory
@@ -36,19 +36,23 @@ describe('routing.HelperRouteFactory', () => {
           .then((actualName: string) => {
             assert(actualName).to.equal(name);
             assert(mockAssetCollection.get).to.haveBeenCalledWith(projectId, assetId);
+            assert(mockAsset.getHelper).to.haveBeenCalledWith(helperId);
             done();
           }, done.fail);
     });
 
     it('should resolve with "Unknown helper" if the helper cannot be found', (done: any) => {
-      let mockAsset = jasmine.createSpyObj('Asset', ['getHelpers']);
-      mockAsset.getHelpers.and.returnValue({'otherHelperId': Mocks.object('Helper')});
+      let mockAsset = jasmine.createSpyObj('Asset', ['getHelper']);
+      mockAsset.getHelper.and.returnValue(null);
       mockAssetCollection.get.and.returnValue(Promise.resolve(mockAsset));
 
+      let helperId = 'helperId';
+
       factory
-          .getName({assetId: 'assetId', helperId: 'helperId', projectId: 'projectId'})
+          .getName({assetId: 'assetId', helperId: helperId, projectId: 'projectId'})
           .then((actualName: string) => {
             assert(actualName).to.match(/Unknown helper/);
+            assert(mockAsset.getHelper).to.haveBeenCalledWith(helperId);
             done();
           }, done.fail);
     });

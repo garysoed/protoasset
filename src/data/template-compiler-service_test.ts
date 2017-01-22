@@ -37,9 +37,9 @@ describe('data.TemplateCompilerService', () => {
       let mockData = jasmine.createSpyObj('Data', ['getData']);
       mockData.getData.and.returnValue(Promise.resolve(dataValue));
 
-      let mockAsset = jasmine.createSpyObj('Asset', ['getData', 'getHelpers']);
+      let mockAsset = jasmine.createSpyObj('Asset', ['getData', 'getAllHelpers']);
       mockAsset.getData.and.returnValue(mockData);
-      mockAsset.getHelpers.and.returnValue([mockHelper1, mockHelper2]);
+      mockAsset.getAllHelpers.and.returnValue([mockHelper1, mockHelper2]);
 
       let compiler = Mocks.object('compiler');
       spyOn(TemplateCompiler, 'of').and.returnValue(compiler);

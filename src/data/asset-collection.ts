@@ -1,6 +1,6 @@
 import {BaseListenable} from 'external/gs_tools/src/event';
 import {bind, inject} from 'external/gs_tools/src/inject';
-import {LocalStorage} from 'external/gs_tools/src/store';
+import {CachedStorage, LocalStorage} from 'external/gs_tools/src/store';
 
 import {Asset, AssetSearchIndex} from './asset';
 import {CollectionEvents} from './collection-events';
@@ -29,11 +29,12 @@ export class AssetCollection extends BaseListenable<CollectionEvents> {
    */
   private getStorage_(projectId: ProjectId): CollectionStorage<Asset, AssetSearchIndex> {
     if (!this.storageMap_.has(projectId)) {
+      let cachedStorage =
+          CachedStorage.of(LocalStorage.of<Asset>(this.window_, `pa.assets.${projectId}`));
+      this.addDisposable(cachedStorage);
       this.storageMap_.set(
           projectId,
-          CollectionStorage.of(
-              AssetCollection.getSearchIndex_,
-              LocalStorage.of<Asset>(this.window_, `pa.assets.${projectId}`)));
+          CollectionStorage.of(AssetCollection.getSearchIndex_, cachedStorage));
     }
     return this.storageMap_.get(projectId)!;
   }
@@ -83,9 +84,9 @@ export class AssetCollection extends BaseListenable<CollectionEvents> {
    * @param asset The asset to persist in the storage.
    * @return Promise that will be resolved when the update operation is completed.
    */
-  update(asset: Asset, projectId: ProjectId): Promise<void> {
+  update(asset: Asset): Promise<void> {
     return this
-        .getStorage_(projectId)
+        .getStorage_(asset.getProjectId())
         .update(asset.getId(), asset)
         .then((isNewProject: boolean) => {
           if (isNewProject) {

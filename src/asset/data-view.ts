@@ -127,7 +127,7 @@ export class DataView extends BaseThemedElement {
             return Promise.all([null]);
           }
           asset.setData(dataSource);
-          return this.assetCollection_.update(asset, asset.getProjectId());
+          return this.assetCollection_.update(asset);
         });
   }
 

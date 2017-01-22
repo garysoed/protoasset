@@ -48,8 +48,8 @@ describe('asset.HelperListView', () => {
       spyOn(Helper, 'of').and.returnValue(mockHelper);
 
       let existingHelper = Mocks.object('otherHelper');
-      let mockAsset = jasmine.createSpyObj('Asset', ['getHelpers', 'setHelpers']);
-      mockAsset.getHelpers.and.returnValue({[existingHelperId]: existingHelper});
+      let mockAsset = jasmine.createSpyObj('Asset', ['getHelper', 'setHelper']);
+      mockAsset.getHelper.and.returnValues(existingHelper, null);
       mockAssetCollection.get.and.returnValue(Promise.resolve(mockAsset));
 
       view['onCreateButtonClick_']()
@@ -61,16 +61,15 @@ describe('asset.HelperListView', () => {
                   helperId: newHelperId,
                   projectId: projectId,
                 });
-            assert(mockAssetCollection.update).to.haveBeenCalledWith(mockAsset, projectId);
-            assert(mockAsset.setHelpers).to.haveBeenCalledWith({
-              [existingHelperId]: existingHelper,
-              [newHelperId]: mockHelper,
-            });
+            assert(mockAssetCollection.update).to.haveBeenCalledWith(mockAsset);
+            assert(mockAsset.setHelper).to.haveBeenCalledWith(newHelperId, mockHelper);
             assert(Helper.of).to.haveBeenCalledWith(newHelperId, `helper_${newHelperId}`);
             assert(view['helperIdGenerator_'].resolveConflict).to
                 .haveBeenCalledWith(existingHelperId);
             assert(mockAssetCollection.get).to.haveBeenCalledWith(projectId, assetId);
             assert(mockRouteService.getParams).to.haveBeenCalledWith(helperListFactory);
+            assert(mockAsset.getHelper).to.haveBeenCalledWith(existingHelperId);
+            assert(mockAsset.getHelper).to.haveBeenCalledWith(newHelperId);
             done();
           }, done.fail);
     });

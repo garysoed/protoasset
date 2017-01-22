@@ -59,15 +59,22 @@
 
 <div fill-parent layout="row">
   <div flex id="inputSection" layout="column">
+    <gs-basic-button>
+      <div gs-content id="name" layout="row">
+        TODO: NAME OF HELPER
+      </div>
+      <gs-menu gs-anchor-point="top_left" gs-anchor-target="top_left" gs-fit-parent-width="true">
+        <div gs-content id="helpers"></div>
+      </gs-menu>
+    </gs-basic-button>
+    <div layout="row">
+      <gs-text-input flex id="nameInput"></gs-text-input>
+    </div>
     <div layout="row">
       <label>Arguments:</label>
       <div flex flex-wrap id="args">
         <gs-text-input id="argInput"></gs-text-input>
       </div>
-    </div>
-    <div layout="row">
-      <label>Name:</label>
-      <gs-text-input flex id="nameInput"></gs-text-input>
     </div>
     <gs-code-input
         class="gs-theme-invert"

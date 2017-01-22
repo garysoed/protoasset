@@ -1,6 +1,6 @@
 import {BaseListenable} from 'external/gs_tools/src/event';
 import {bind, inject} from 'external/gs_tools/src/inject';
-import {LocalStorage} from 'external/gs_tools/src/store';
+import {CachedStorage, LocalStorage} from 'external/gs_tools/src/store';
 
 import {CollectionEvents} from './collection-events';
 import {CollectionStorage} from './collection-storage';
@@ -16,9 +16,11 @@ export class ProjectCollection extends BaseListenable<CollectionEvents> {
 
   constructor(@inject('x.dom.window') window: Window) {
     super();
+    let cachedStorage = CachedStorage.of(LocalStorage.of<Project>(window, 'pa.projects'));
+    this.addDisposable(cachedStorage);
     this.storage_ = new CollectionStorage<Project, ProjectSearchIndex>(
         ProjectCollection.getSearchIndex_,
-        new LocalStorage<Project>(window, 'pa.projects'));
+        cachedStorage);
   }
 
   /**

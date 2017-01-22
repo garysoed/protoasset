@@ -52,7 +52,7 @@ export class HelperRouteFactory extends AbstractRouteFactory<Views, CP, CR, PR> 
             return `Unknown helper for asset ${params.assetId}`;
           }
 
-          let helper = asset.getHelpers()[params.helperId] || null;
+          let helper = asset.getHelper(params.helperId);
           if (helper === null) {
             return `Unknown helper ${params.helperId}`;
           }
