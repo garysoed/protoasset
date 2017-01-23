@@ -12,13 +12,14 @@ import {Views} from '../routing/views';
 import {DataView} from './data-view';
 import {HelperListView} from './helper-list-view';
 import {HelperView} from './helper-view';
+import {NavBar} from './nav-bar';
 
 
 /**
  * Main view for the asset section.
  */
 @customElement({
-  dependencies: [DataView, HelperListView, HelperView],
+  dependencies: [DataView, HelperListView, HelperView, NavBar],
   tag: 'pa-asset-view',
   templateKey: 'src/asset/asset-view',
 })

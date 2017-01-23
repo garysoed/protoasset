@@ -5,13 +5,25 @@
     position: fixed;
   }
 
+  #navBar {
+    bottom: 0;
+    position: absolute;
+    top: 0;
+    z-index: 10;
+  }
+
+  #navBarContainer {
+    width: 3.9rem;
+  }
+
   #viewSlot {
-    margin: 0 1rem;
     position: relative;
   }
 </style>
 <div fill-parent layout="row">
-  <div>Nav</div>
+  <div id="navBarContainer">
+    <pa-asset-nav-bar flex id="navBar"></pa-asset-nav-bar>
+  </div>
   <gs-view-slot flex id="viewSlot">
     <pa-asset-data-view gs-view-path="/data"></pa-asset-data-view>
     <pa-asset-helper-view gs-view-path="/helper/edit/:helperId"></pa-asset-helper-view>

@@ -1,0 +1,56 @@
+<style>
+  :host {
+    width: 3.9rem;
+  }
+
+  :host(:hover) {
+    width: 9.6rem;
+  }
+
+  gs-drawer[gs-is-expanded="true"] gs-basic-button {
+    width: 9.6rem;
+  }
+
+  gs-basic-button gs-icon {
+    margin-right: 1rem;
+  }
+
+  gs-basic-button {
+    overflow: hidden;
+    width: 3.5rem;
+  }
+</style>
+
+<gs-drawer
+    class="gs-theme-normal-hilite"
+    id="drawer"
+    gs-anchor-point="left"
+    gs-max-width="10rem"
+    gs-min-width="3.9rem">
+  <gs-vertical-tab gs-content id="tab">
+    <gs-basic-button gs-tab-id="data" id="data">
+      <div gs-content layout="row">
+        <gs-icon>insert_drive_file</gs-icon>
+        <div>Data</div>
+      </div>
+    </gs-basic-button>
+    <gs-basic-button gs-tab-id="helper" id="helper">
+      <div gs-content layout="row">
+        <gs-icon>code</gs-icon>
+        <div>Helpers</div>
+      </div>
+    </gs-basic-button>
+    <gs-basic-button gs-tab-id="layer" id="layer">
+      <div gs-content layout="row">
+        <gs-icon>view_quilt</gs-icon>
+        <div>Layers</div>
+      </div>
+    </gs-basic-button>
+    <gs-basic-button gs-tab-id="render" id="render">
+      <div gs-content layout="row">
+        <gs-icon>format_paint</gs-icon>
+        <div>Render</div>
+      </div>
+    </gs-basic-button>
+  </gs-vertical-tab>
+</gs-drawer>
