@@ -13,6 +13,10 @@
     text-align: center;
   }
 
+  #argsContainer {
+    margin: 1rem;
+  }
+
   #bodyInput {
     position: relative;
   }
@@ -26,12 +30,28 @@
     position: relative;
   }
 
+  #createButton {
+    bottom: 0;
+    left: 0;
+    position: fixed;
+    z-index: 20;
+  }
+
+  #createButtonContent {
+    margin: .2rem;
+  }
+
   #inputSection,
   #previewSection {
     width: 50%;
   }
 
-  .consoleEntry {
+  #name {
+    text-align: left;
+    text-transform: none;
+  }
+
+  #name, .consoleEntry {
     font-family: var(--gsFontFamilyCode);
   }
 
@@ -60,17 +80,15 @@
 <div fill-parent layout="row">
   <div flex id="inputSection" layout="column">
     <gs-basic-button>
-      <div gs-content id="name" layout="row">
-        TODO: NAME OF HELPER
+      <div gs-content layout="row">
+        <div flex id="name"></div>
+        <gs-icon>arrow_drop_down</gs-icon>
       </div>
       <gs-menu gs-anchor-point="top_left" gs-anchor-target="top_left" gs-fit-parent-width="true">
         <div gs-content id="helpers"></div>
       </gs-menu>
     </gs-basic-button>
-    <div layout="row">
-      <gs-text-input flex id="nameInput"></gs-text-input>
-    </div>
-    <div layout="row">
+    <div id="argsContainer" layout="row">
       <label>Arguments:</label>
       <div flex flex-wrap id="args">
         <gs-text-input id="argInput"></gs-text-input>
@@ -100,3 +118,8 @@
     </div>
   </div>
 </div>
+<gs-basic-button class="gs-theme-normal gs-primary" id="createButton">
+  <div gs-content id="createButtonContent">
+    <gs-icon>add</gs-icon>
+  </div>
+</gs-basic-button>

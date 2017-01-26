@@ -224,4 +224,12 @@ export class HelperItem extends BaseThemedElement {
     }
     super.disposeInternal();
   }
+
+  /**
+   * @override
+   */
+  onCreated(element: HTMLElement): void {
+    super.onCreated(element);
+    this.updateHelper_();
+  }
 }

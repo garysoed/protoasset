@@ -23,7 +23,7 @@ describe('asset.HelperItem', () => {
         mockAssetCollection,
         mockRouteFactoryService,
         mockRouteService,
-        Mocks.object('ThemeService'));
+        jasmine.createSpyObj('ThemeService', ['applyTheme']));
     TestDispose.add(item);
   });
 
@@ -448,6 +448,15 @@ describe('asset.HelperItem', () => {
       assert(() => {
         item.disposeInternal();
       }).toNot.throw();
+    });
+  });
+
+  describe('onCreated', () => {
+    it('should update the helper', () => {
+      let element = Mocks.object('element');
+      spyOn(item, 'updateHelper_');
+      item.onCreated(element);
+      assert(item['updateHelper_']).to.haveBeenCalledWith();
     });
   });
 });

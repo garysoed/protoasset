@@ -1,7 +1,6 @@
 import {assert, Matchers, TestBase} from '../test-base';
 TestBase.setup();
 
-import {Mocks} from 'external/gs_tools/src/mock';
 import {TestDispose} from 'external/gs_tools/src/testing';
 
 import {DataEvents} from './data-events';
@@ -31,13 +30,27 @@ describe('data.Helper', () => {
         callback();
       });
 
-      let args = Mocks.object('args');
+      let args = ['arg1', 'arg2'];
 
       helper.setArgs(args);
 
       assert(helper.dispatch).to
           .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
       assert(helper.getArgs()).to.equal(args);
+    });
+
+    it('should not dispatch the changed event if the args does not change', () => {
+      spyOn(helper, 'dispatch').and.callFake((event: any, callback: Function) => {
+        callback();
+      });
+
+      let newArgs = ['arg1', 'arg2'];
+      helper['args_'] = newArgs;
+
+      helper.setArgs(newArgs);
+
+      assert(helper.dispatch).toNot.haveBeenCalled();
+      assert(helper.getArgs()).to.equal(newArgs);
     });
   });
 

@@ -2,6 +2,7 @@ import {Arrays} from 'external/gs_tools/src/collection';
 import {DisposableFunction} from 'external/gs_tools/src/dispose';
 import {DomEvent, ListenableDom} from 'external/gs_tools/src/event';
 import {inject} from 'external/gs_tools/src/inject';
+import {IdGenerator, SimpleIdGenerator} from 'external/gs_tools/src/random';
 import {
   bind,
   BooleanParser,
@@ -134,18 +135,20 @@ export class HelperView extends BaseThemedElement {
   @bind('#helpers').childrenElements<HelperIdParams>(helperItemGenerator, helperItemDataSetter)
   private readonly helperItemsBridge_: DomBridge<HelperIdParams[]>;
 
-  @bind('#nameInput').attribute('gs-value', StringParser)
-  private readonly nameInputBridge_: DomBridge<string>;
+  @bind('#name').innerText()
+  private readonly nameBridge_: DomBridge<string>;
 
   @bind('#console').childrenElements<ConsoleEntry>(consoleEntryGenerator, consoleEntryDataSetter)
   private readonly consoleEntryBridge_: DomBridge<ConsoleEntry[]>;
 
   private readonly assetCollection_: AssetCollection;
+  private readonly helperIdGenerator_: IdGenerator;
   private readonly routeFactoryService_: RouteFactoryService;
   private readonly routeService_: RouteService<Views>;
   private readonly templateCompilerService_: TemplateCompilerService;
 
   private assetUpdateDeregister_: DisposableFunction | null;
+  private helperUpdateDeregister_: DisposableFunction | null;
 
   constructor(
       @inject('pa.data.AssetCollection') assetCollection: AssetCollection,
@@ -161,11 +164,41 @@ export class HelperView extends BaseThemedElement {
     this.bodyInputBridge_ = DomBridge.of<string>();
     this.consoleEntryBridge_ = DomBridge.of<ConsoleEntry[]>();
     this.consoleInputBridge_ = DomBridge.of<string>();
+    this.helperIdGenerator_ = new SimpleIdGenerator();
     this.helperItemsBridge_ = DomBridge.of<HelperIdParams[]>();
-    this.nameInputBridge_ = DomBridge.of<string>();
+    this.helperUpdateDeregister_ = null;
+    this.nameBridge_ = DomBridge.of<string>();
     this.routeFactoryService_ = routeFactoryService;
     this.routeService_ = routeService;
     this.templateCompilerService_ = templateCompilerService;
+  }
+
+  /**
+   * Creates a new helper object.
+   */
+  private createHelper_(asset: Asset): Promise<void> {
+    let newHelperId = this.helperIdGenerator_.generate();
+    while (asset.getHelper(newHelperId) !== null) {
+      newHelperId = this.helperIdGenerator_.resolveConflict(newHelperId);
+    }
+
+    let helper = Helper.of(newHelperId, `helper_${newHelperId}`);
+    asset.setHelper(newHelperId, helper);
+
+    return Promise
+        .all([
+          newHelperId,
+          this.assetCollection_.update(asset),
+        ])
+        .then(([helperId]: [string, any]) => {
+          this.routeService_.goTo<{assetId: string, helperId: string, projectId: string}>(
+              this.routeFactoryService_.helper(),
+              {
+                assetId: asset.getId(),
+                helperId: helperId,
+                projectId: asset.getProjectId(),
+              });
+        });
   }
 
   /**
@@ -209,18 +242,11 @@ export class HelperView extends BaseThemedElement {
     if (!!isActive) {
       return this.getAsset_()
           .then((asset: Asset | null) => {
-            if (this.assetUpdateDeregister_ !== null) {
-              this.assetUpdateDeregister_.dispose();
-              this.assetUpdateDeregister_ = null;
+            if (asset === null) {
+              this.routeService_.goTo(this.routeFactoryService_.landing(), {});
+              return;
             }
-
-            if (asset !== null) {
-              this.assetUpdateDeregister_ = asset.on(
-                  DataEvents.CHANGED,
-                  this.updateAsset_.bind(this, asset),
-                  this);
-              this.updateAsset_(asset);
-            }
+            this.updateAsset_(asset);
           });
     } else {
       return Promise.resolve();
@@ -251,15 +277,65 @@ export class HelperView extends BaseThemedElement {
     }
   }
 
+  /**
+   * Handles when the asset was updated.
+   * @param asset The updated asset;
+   */
+  protected onAssetChanged_(asset: Asset): Promise<void> {
+    return this
+        .getHelper_()
+        .then((helper: Helper | null) => {
+          if (helper === null) {
+            // Check for an existing helper.
+            let helpers = asset.getAllHelpers();
+            if (helpers.length <= 0) {
+              return this.createHelper_(asset).then(() => null);
+            } else {
+              this.routeService_.goTo(this.routeFactoryService_.helper(), {
+                assetId: asset.getId(),
+                helperId: helpers[0].getId(),
+                projectId: asset.getProjectId(),
+              });
+              return Promise.resolve(null);
+            }
+          }
+
+          return Promise.resolve(helper);
+        })
+        .then((helper: Helper | null) => {
+          if (helper === null) {
+            return;
+          }
+          this.updateHelper_(helper);
+
+          let otherHelpers = Arrays
+              .of(asset.getAllHelpers())
+              .filter((value: Helper) => {
+                return value.getId() !== helper.getId();
+              })
+              .asArray();
+          let helperIdParams = Arrays
+              .of([helper])
+              .addAllArray(otherHelpers)
+              .map((helper: Helper) => {
+                return {
+                  assetId: asset.getId(),
+                  helperId: helper.getId(),
+                  projectId: asset.getProjectId(),
+                };
+              })
+              .asIterable();
+          this.helperItemsBridge_.set(Arrays.fromIterable(helperIdParams).asArray());
+        });
+  }
+
   @handle('#args').childListChange()
   @handle('#bodyInput').attributeChange('gs-value', StringParser)
-  @handle('#nameInput').attributeChange('gs-value', StringParser)
   protected onChanges_(): Promise<void> {
     const args = this.argElementsBridge_.get();
-    const name = this.nameInputBridge_.get();
     const body = this.bodyInputBridge_.get();
 
-    if (args === null || name === null || body === null) {
+    if (args === null || body === null) {
       return Promise.resolve();
     }
 
@@ -275,10 +351,21 @@ export class HelperView extends BaseThemedElement {
 
           helper.setArgs(args);
           helper.setBody(body);
-          helper.setName(name);
 
           asset.setHelper(helper.getId(), helper);
           return this.assetCollection_.update(asset);
+        });
+  }
+
+  @handle('#createButton').event(DomEvent.CLICK)
+  protected onCreateButtonClick_(): Promise<void> {
+    return this.getAsset_()
+        .then((asset: Asset | null) => {
+          if (asset === null) {
+            return;
+          }
+
+          this.createHelper_(asset);
         });
   }
 
@@ -327,6 +414,16 @@ export class HelperView extends BaseThemedElement {
   }
 
   /**
+   * Handles when the helper was updated.
+   * @param helper The updated helper.
+   */
+  protected onHelperChanged_(helper: Helper): void {
+    this.nameBridge_.set(helper.getName());
+    this.argElementsBridge_.set(helper.getArgs());
+    this.bodyInputBridge_.set(helper.getBody());
+  }
+
+  /**
    * Handles event when the route is changed.
    */
   private onRouteChanged_(): void {
@@ -335,38 +432,37 @@ export class HelperView extends BaseThemedElement {
 
   /**
    * Updates using the given asset.
+   * @param asset The asset that should be applied.
    */
-  private updateAsset_(asset: Asset): Promise<void> {
-    return this
-        .getHelper_()
-        .then((helper: Helper | null) => {
-          if (helper === null) {
-            return;
-          }
+  private updateAsset_(asset: Asset): void {
+    // Update the asset
+    if (this.assetUpdateDeregister_ !== null) {
+      this.assetUpdateDeregister_.dispose();
+      this.assetUpdateDeregister_ = null;
+    }
 
-          this.argElementsBridge_.set(helper.getArgs());
-          this.bodyInputBridge_.set(helper.getBody());
-          this.nameInputBridge_.set(helper.getName());
+    this.assetUpdateDeregister_ = asset.on(
+        DataEvents.CHANGED,
+        this.onAssetChanged_.bind(this, asset),
+        this);
+    this.onAssetChanged_(asset);
+  }
 
-          let otherHelpers = Arrays
-              .of(asset.getAllHelpers())
-              .filter((value: Helper) => {
-                return value.getId() !== helper.getId();
-              })
-              .asArray();
-          let helperIdParams = Arrays
-              .of([helper])
-              .addAllArray(otherHelpers)
-              .map((helper: Helper) => {
-                return {
-                  assetId: asset.getId(),
-                  helperId: helper.getId(),
-                  projectId: asset.getProjectId(),
-                };
-              })
-              .asIterable();
-          this.helperItemsBridge_.set(Arrays.fromIterable(helperIdParams).asArray());
-        });
+  /**
+   * Updates using the given helper.
+   * @param helper The helper that should be applied.
+   */
+  private updateHelper_(helper: Helper): void {
+    if (this.helperUpdateDeregister_ !== null) {
+      this.helperUpdateDeregister_.dispose();
+      this.helperUpdateDeregister_ = null;
+    }
+
+    this.helperUpdateDeregister_ = helper.on(
+        DataEvents.CHANGED,
+        this.onHelperChanged_.bind(this, helper),
+        this);
+    this.onHelperChanged_(helper);
   }
 
   /**
@@ -375,6 +471,10 @@ export class HelperView extends BaseThemedElement {
   disposeInternal(): void {
     if (this.assetUpdateDeregister_ !== null) {
       this.assetUpdateDeregister_.dispose();
+    }
+
+    if (this.helperUpdateDeregister_ !== null) {
+      this.helperUpdateDeregister_.dispose();
     }
 
     super.disposeInternal();
@@ -418,5 +518,6 @@ export class HelperView extends BaseThemedElement {
         RouteServiceEvents.CHANGED,
         this.onRouteChanged_,
         this));
+    this.onRouteChanged_();
   }
 }

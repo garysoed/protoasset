@@ -1,3 +1,4 @@
+import {Arrays} from 'external/gs_tools/src/collection';
 import {Field, Serializable} from 'external/gs_tools/src/data';
 import {BaseListenable} from 'external/gs_tools/src/event';
 
@@ -61,6 +62,10 @@ export class Helper extends BaseListenable<DataEvents> {
    * @param args Arguments of the helper function.
    */
   setArgs(args: string[]): void {
+    if (Arrays.of(args).equalsTo(this.args_)) {
+      return;
+    }
+
     this.dispatch(DataEvents.CHANGED, () => {
       this.args_ = args;
     });

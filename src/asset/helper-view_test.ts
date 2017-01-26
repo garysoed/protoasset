@@ -9,6 +9,7 @@ import {TestDispose} from 'external/gs_tools/src/testing';
 import {RouteServiceEvents} from 'external/gs_ui/src/routing';
 
 import {DataEvents} from '../data/data-events';
+import {Helper} from '../data/helper';
 
 import {
   argElementDataSetter,
@@ -147,8 +148,8 @@ describe('asset.HelperView', () => {
 
   beforeEach(() => {
     mockAssetCollection = jasmine.createSpyObj('AssetCollection', ['get', 'update']);
-    mockRouteFactoryService = jasmine.createSpyObj('RouteFactoryService', ['helper']);
-    mockRouteService = jasmine.createSpyObj('RouteService', ['getParams', 'on']);
+    mockRouteFactoryService = jasmine.createSpyObj('RouteFactoryService', ['helper', 'landing']);
+    mockRouteService = jasmine.createSpyObj('RouteService', ['getParams', 'goTo', 'on']);
     mockTemplateCompilerService = jasmine.createSpyObj('TemplateCompilerService', ['create']);
     view = new HelperView(
         mockAssetCollection,
@@ -157,6 +158,52 @@ describe('asset.HelperView', () => {
         mockTemplateCompilerService,
         jasmine.createSpyObj('ThemeService', ['applyTheme']));
     TestDispose.add(view);
+  });
+
+  describe('createHelper_', () => {
+    it('should create a new helper, update the asset, and navigate to it', (done: any) => {
+      let helperFactory = Mocks.object('helperFactory');
+      mockRouteFactoryService.helper.and.returnValue(helperFactory);
+
+      let assetId = 'assetId';
+      let projectId = 'projectId';
+      let existingHelperId = 'existingHelperId';
+      spyOn(view['helperIdGenerator_'], 'generate').and.returnValue(existingHelperId);
+
+      let newHelperId = 'newHelperId';
+      spyOn(view['helperIdGenerator_'], 'resolveConflict').and.returnValue(newHelperId);
+
+      let mockHelper = Mocks.object('newHelper');
+      spyOn(Helper, 'of').and.returnValue(mockHelper);
+
+      let existingHelper = Mocks.object('otherHelper');
+      let mockAsset = jasmine.createSpyObj(
+          'Asset',
+          ['getHelper', 'getId', 'getProjectId', 'setHelper']);
+      mockAsset.getHelper.and.returnValues(existingHelper, null);
+      mockAsset.getId.and.returnValue(assetId);
+      mockAsset.getProjectId.and.returnValue(projectId);
+      mockAssetCollection.get.and.returnValue(Promise.resolve(mockAsset));
+
+      view['createHelper_'](mockAsset)
+          .then(() => {
+            assert(mockRouteService.goTo).to.haveBeenCalledWith(
+                helperFactory,
+                {
+                  assetId: assetId,
+                  helperId: newHelperId,
+                  projectId: projectId,
+                });
+            assert(mockAssetCollection.update).to.haveBeenCalledWith(mockAsset);
+            assert(mockAsset.setHelper).to.haveBeenCalledWith(newHelperId, mockHelper);
+            assert(Helper.of).to.haveBeenCalledWith(newHelperId, `helper_${newHelperId}`);
+            assert(view['helperIdGenerator_'].resolveConflict).to
+                .haveBeenCalledWith(existingHelperId);
+            assert(mockAsset.getHelper).to.haveBeenCalledWith(existingHelperId);
+            assert(mockAsset.getHelper).to.haveBeenCalledWith(newHelperId);
+            done();
+          }, done.fail);
+    });
   });
 
   describe('getAsset_', () => {
@@ -252,33 +299,37 @@ describe('asset.HelperView', () => {
   });
 
   describe('onActiveChange_', () => {
-    it('should dispose the previous deregister, listen to changed event, and update the asset',
-        (done: any) => {
-          let mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
-          view['assetUpdateDeregister_'] = mockDeregister;
+    it('should call updateAsset_', (done: any) => {
+      let asset = Mocks.object('asset');
+      spyOn(view, 'updateAsset_');
+      spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(asset));
+      view['onActiveChange_'](true)
+          .then(() => {
+            assert(view['updateAsset_']).to.haveBeenCalledWith(asset);
+            done();
+          }, done.fail);
+    });
 
-          let mockNewDeregister = jasmine.createSpyObj('NewDeregister', ['dispose']);
-          let mockAsset = jasmine.createSpyObj('Asset', ['on']);
-          mockAsset.on.and.returnValue(mockNewDeregister);
+    it('should redirect to landing page if asset cannot be found', (done: any) => {
+      let landingRouteFactory = Mocks.object('landingRouteFactory');
+      mockRouteFactoryService.landing.and.returnValue(landingRouteFactory);
+      spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(null));
+      view['onActiveChange_'](true)
+          .then(() => {
+            assert(mockRouteService.goTo).to.haveBeenCalledWith(landingRouteFactory, {});
+            done();
+          }, done.fail);
+    });
 
-          spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
-          let updateAssetSpy = spyOn(view, 'updateAsset_');
+    it('should do nothing if not activated', (done: any) => {
+      spyOn(view, 'getAsset_');
 
-          view['onActiveChange_'](true)
-              .then(() => {
-                assert(view['updateAsset_']).to.haveBeenCalledWith(mockAsset);
-                assert(mockAsset.on).to
-                    .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function), view);
-
-                updateAssetSpy.calls.reset();
-                mockAsset.on.calls.argsFor(0)[1]();
-                assert(view['updateAsset_']).to.haveBeenCalledWith(mockAsset);
-
-                assert(view['assetUpdateDeregister_']).to.equal(mockNewDeregister);
-                assert(mockDeregister.dispose).to.haveBeenCalledWith();
-                done();
-              }, done.fail);
-        });
+      view['onActiveChange_'](false)
+          .then(() => {
+            assert(view['getAsset_']).toNot.haveBeenCalled();
+            done();
+          }, done.fail);
+    });
 
     it('should not throw error if there are no previous deregisters', (done: any) => {
           let mockNewDeregister = jasmine.createSpyObj('NewDeregister', ['dispose']);
@@ -292,36 +343,6 @@ describe('asset.HelperView', () => {
               .then(() => {
                 done();
               }, done.fail);
-    });
-
-    it('should deregister the previous deregister even if there are no assets', (done: any) => {
-      let mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
-      view['assetUpdateDeregister_'] = mockDeregister;
-
-      spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(null));
-
-      view['onActiveChange_'](true)
-          .then(() => {
-            assert(view['assetUpdateDeregister_']).to.beNull();
-            assert(mockDeregister.dispose).to.haveBeenCalledWith();
-            done();
-          }, done.fail);
-    });
-
-    it('should do nothing if not activated', (done: any) => {
-      spyOn(view, 'getHelper_').and.returnValue(Promise.resolve(null));
-
-      spyOn(view['nameInputBridge_'], 'set');
-      spyOn(view['bodyInputBridge_'], 'set');
-      spyOn(view['argElementsBridge_'], 'set');
-
-      view['onActiveChange_'](false)
-          .then(() => {
-            assert(view['nameInputBridge_'].set).toNot.haveBeenCalled();
-            assert(view['bodyInputBridge_'].set).toNot.haveBeenCalled();
-            assert(view['argElementsBridge_'].set).toNot.haveBeenCalled();
-            done();
-          }, done.fail);
     });
   });
 
@@ -381,6 +402,101 @@ describe('asset.HelperView', () => {
     });
   });
 
+  describe('onAssetChanged_', () => {
+    it('should update the UI elements for asset and helper', (done: any) => {
+      let currentHelperId = 'currentHelperId';
+
+      let mockHelper = jasmine.createSpyObj('Helper', ['getArgs', 'getBody', 'getId', 'getName']);
+      mockHelper.getId.and.returnValue(currentHelperId);
+      spyOn(view, 'getHelper_').and.returnValue(Promise.resolve(mockHelper));
+
+      let helperId1 = 'helperId1';
+      let mockHelper1 = jasmine.createSpyObj('Helper1', ['getId']);
+      mockHelper1.getId.and.returnValue(helperId1);
+
+      let helperId2 = 'helperId2';
+      let mockHelper2 = jasmine.createSpyObj('Helper2', ['getId']);
+      mockHelper2.getId.and.returnValue(helperId2);
+
+      let assetId = 'assetId';
+      let projectId = 'projectId';
+      let mockAsset = jasmine.createSpyObj('Asset', ['getAllHelpers', 'getId', 'getProjectId']);
+      mockAsset.getAllHelpers.and.returnValue([mockHelper1, mockHelper2, mockHelper]);
+      mockAsset.getId.and.returnValue(assetId);
+      mockAsset.getProjectId.and.returnValue(projectId);
+
+      spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
+      spyOn(view, 'updateHelper_');
+      spyOn(view['helperItemsBridge_'], 'set');
+
+      view['onAssetChanged_'](mockAsset)
+          .then(() => {
+            assert(view['helperItemsBridge_'].set).to.haveBeenCalledWith([
+              {assetId, helperId: currentHelperId, projectId},
+              {assetId, helperId: helperId1, projectId},
+              {assetId, helperId: helperId2, projectId},
+            ]);
+            assert(view['updateHelper_']).to.haveBeenCalledWith(mockHelper);
+            done();
+          }, done.fail);
+    });
+
+    it('should pick the first helper if there are no helpers selected', (done: any) => {
+      spyOn(view, 'getHelper_').and.returnValue(Promise.resolve(null));
+
+      let helperId1 = 'helperId1';
+      let mockHelper1 = jasmine.createSpyObj('Helper1', ['getId']);
+      mockHelper1.getId.and.returnValue(helperId1);
+
+      let helperId2 = 'helperId2';
+      let mockHelper2 = jasmine.createSpyObj('Helper2', ['getId']);
+      mockHelper2.getId.and.returnValue(helperId2);
+
+      let assetId = 'assetId';
+      let projectId = 'projectId';
+      let mockAsset = jasmine.createSpyObj('Asset', ['getAllHelpers', 'getId', 'getProjectId']);
+      mockAsset.getAllHelpers.and.returnValue([mockHelper1, mockHelper2]);
+      mockAsset.getId.and.returnValue(assetId);
+      mockAsset.getProjectId.and.returnValue(projectId);
+
+      spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
+      spyOn(view, 'updateHelper_');
+
+      let helperFactoryService = Mocks.object('helperFactoryService');
+      mockRouteFactoryService.helper.and.returnValue(helperFactoryService);
+
+      view['onAssetChanged_'](mockAsset)
+          .then(() => {
+            assert(mockRouteService.goTo).to.haveBeenCalledWith(
+                helperFactoryService,
+                {assetId, helperId: helperId1, projectId});
+            assert(view['updateHelper_']).toNot.haveBeenCalled();
+            done();
+          }, done.fail);
+    });
+
+    it('should create a new helper if there are no helpers in the asset', (done: any) => {
+      spyOn(view, 'getHelper_').and.returnValue(Promise.resolve(null));
+
+      let mockAsset = jasmine.createSpyObj('Asset', ['getAllHelpers']);
+      mockAsset.getAllHelpers.and.returnValue([]);
+
+      spyOn(view, 'createHelper_').and.returnValue(Promise.resolve());
+      spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
+      spyOn(view, 'updateHelper_');
+
+      let helperFactoryService = Mocks.object('helperFactoryService');
+      mockRouteFactoryService.helper.and.returnValue(helperFactoryService);
+
+      view['onAssetChanged_'](mockAsset)
+          .then(() => {
+            assert(view['createHelper_']).to.haveBeenCalledWith(mockAsset);
+            assert(view['updateHelper_']).toNot.haveBeenCalled();
+            done();
+          }, done.fail);
+    });
+  });
+
   describe('onChanges_', () => {
     it('should update the helper and the asset correctly', (done: any) => {
       let args = Mocks.object('args');
@@ -388,9 +504,6 @@ describe('asset.HelperView', () => {
 
       let body = 'body';
       spyOn(view['bodyInputBridge_'], 'get').and.returnValue(body);
-
-      let name = 'name';
-      spyOn(view['nameInputBridge_'], 'get').and.returnValue(name);
 
       let helperId = 'helperId';
       let mockHelper = jasmine.createSpyObj('Helper', ['getId', 'setArgs', 'setBody', 'setName']);
@@ -404,7 +517,6 @@ describe('asset.HelperView', () => {
           .then(() => {
             assert(mockAssetCollection.update).to.haveBeenCalledWith(mockAsset);
             assert(mockAsset.setHelper).to.haveBeenCalledWith(helperId, mockHelper);
-            assert(mockHelper.setName).to.haveBeenCalledWith(name);
             assert(mockHelper.setBody).to.haveBeenCalledWith(body);
             assert(mockHelper.setArgs).to.haveBeenCalledWith(args);
             done();
@@ -417,9 +529,6 @@ describe('asset.HelperView', () => {
 
       let body = 'body';
       spyOn(view['bodyInputBridge_'], 'get').and.returnValue(body);
-
-      let name = 'name';
-      spyOn(view['nameInputBridge_'], 'get').and.returnValue(name);
 
       spyOn(view, 'getHelper_').and.returnValue(Promise.resolve(null));
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(Mocks.object('asset')));
@@ -438,9 +547,6 @@ describe('asset.HelperView', () => {
       let body = 'body';
       spyOn(view['bodyInputBridge_'], 'get').and.returnValue(body);
 
-      let name = 'name';
-      spyOn(view['nameInputBridge_'], 'get').and.returnValue(name);
-
       spyOn(view, 'getHelper_').and.returnValue(Promise.resolve(Mocks.object('helper')));
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(null));
 
@@ -457,27 +563,6 @@ describe('asset.HelperView', () => {
       let body = 'body';
       spyOn(view['bodyInputBridge_'], 'get').and.returnValue(body);
 
-      let name = 'name';
-      spyOn(view['nameInputBridge_'], 'get').and.returnValue(name);
-
-      spyOn(view, 'getHelper_').and.returnValue(Promise.resolve(Mocks.object('helper')));
-      spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(Mocks.object('asset')));
-
-      view['onChanges_']()
-          .then(() => {
-            assert(mockAssetCollection.update).toNot.haveBeenCalled();
-            done();
-          }, done.fail);
-    });
-
-    it('should do nothing if name is null', (done: any) => {
-      let args = Mocks.object('args');
-      spyOn(view['argElementsBridge_'], 'get').and.returnValue(args);
-
-      let body = 'body';
-      spyOn(view['bodyInputBridge_'], 'get').and.returnValue(body);
-      spyOn(view['nameInputBridge_'], 'get').and.returnValue(null);
-
       spyOn(view, 'getHelper_').and.returnValue(Promise.resolve(Mocks.object('helper')));
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(Mocks.object('asset')));
 
@@ -493,15 +578,35 @@ describe('asset.HelperView', () => {
       spyOn(view['argElementsBridge_'], 'get').and.returnValue(args);
       spyOn(view['bodyInputBridge_'], 'get').and.returnValue(null);
 
-      let name = 'name';
-      spyOn(view['nameInputBridge_'], 'get').and.returnValue(name);
-
       spyOn(view, 'getHelper_').and.returnValue(Promise.resolve(Mocks.object('helper')));
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(Mocks.object('asset')));
 
       view['onChanges_']()
           .then(() => {
             assert(mockAssetCollection.update).toNot.haveBeenCalled();
+            done();
+          }, done.fail);
+    });
+  });
+
+  describe('onCreateButtonClick_', () => {
+    it('should call creaateHelper_ correctly', (done: any) => {
+      let asset = Mocks.object('asset');
+      spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(asset));
+      spyOn(view, 'createHelper_');
+      view['onCreateButtonClick_']()
+          .then(() => {
+            assert(view['createHelper_']).to.haveBeenCalledWith(asset);
+            done();
+          }, done.fail);
+    });
+
+    it('should do nothing if there are no assets', (done: any) => {
+      spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(null));
+      spyOn(view, 'createHelper_');
+      view['onCreateButtonClick_']()
+          .then(() => {
+            assert(view['createHelper_']).toNot.haveBeenCalled();
             done();
           }, done.fail);
     });
@@ -690,6 +795,28 @@ describe('asset.HelperView', () => {
     });
   });
 
+  describe('onHelperChanged_', () => {
+    it('should update the name, argElements, and body input', () => {
+      let name = 'name';
+      let args = Mocks.object('args');
+      let body = 'body';
+      let mockHelper = jasmine.createSpyObj('Helper', ['getArgs', 'getBody', 'getName']);
+      mockHelper.getArgs.and.returnValue(args);
+      mockHelper.getBody.and.returnValue(body);
+      mockHelper.getName.and.returnValue(name);
+
+      spyOn(view['nameBridge_'], 'set');
+      spyOn(view['argElementsBridge_'], 'set');
+      spyOn(view['bodyInputBridge_'], 'set');
+
+      view['onHelperChanged_'](mockHelper);
+
+      assert(view['nameBridge_'].set).to.haveBeenCalledWith(name);
+      assert(view['argElementsBridge_'].set).to.haveBeenCalledWith(args);
+      assert(view['bodyInputBridge_'].set).to.haveBeenCalledWith(body);
+    });
+  });
+
   describe('onRouteChanged_', () => {
     it('should call onActiveChange_ with true if the view is active', () => {
       spyOn(view, 'onActiveChange_');
@@ -719,81 +846,100 @@ describe('asset.HelperView', () => {
   });
 
   describe('updateAsset_', () => {
-    it('should populate the UI elements with the helper when activated', (done: any) => {
-      let args = Mocks.object('args');
-      let body = 'body';
-      let name = 'name';
-      let currentHelperId = 'currentHelperId';
+    it('should dispose the previous deregister and listen to changed event', () => {
+      let mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
+      view['assetUpdateDeregister_'] = mockDeregister;
 
-      let mockHelper = jasmine.createSpyObj('Helper', ['getArgs', 'getBody', 'getId', 'getName']);
-      mockHelper.getArgs.and.returnValue(args);
-      mockHelper.getBody.and.returnValue(body);
-      mockHelper.getId.and.returnValue(currentHelperId);
-      mockHelper.getName.and.returnValue(name);
-      spyOn(view, 'getHelper_').and.returnValue(Promise.resolve(mockHelper));
+      let mockNewDeregister = jasmine.createSpyObj('NewDeregister', ['dispose']);
+      let mockAsset = jasmine.createSpyObj('Asset', ['on']);
+      mockAsset.on.and.returnValue(mockNewDeregister);
 
-      spyOn(view['nameInputBridge_'], 'set');
-      spyOn(view['bodyInputBridge_'], 'set');
-      spyOn(view['argElementsBridge_'], 'set');
-      spyOn(view['helperItemsBridge_'], 'set');
+      let assetChangedSpy = spyOn(view, 'onAssetChanged_');
 
-      let helperId1 = 'helperId1';
-      let mockHelper1 = jasmine.createSpyObj('Helper1', ['getId']);
-      mockHelper1.getId.and.returnValue(helperId1);
+      view['updateAsset_'](mockAsset);
+      assert(mockAsset.on).to
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function), view);
 
-      let helperId2 = 'helperId2';
-      let mockHelper2 = jasmine.createSpyObj('Helper2', ['getId']);
-      mockHelper2.getId.and.returnValue(helperId2);
+      assetChangedSpy.calls.reset();
+      mockAsset.on.calls.argsFor(0)[1]();
+      assert(view['onAssetChanged_']).to.haveBeenCalledWith(mockAsset);
 
-      let assetId = 'assetId';
-      let projectId = 'projectId';
-      let mockAsset = jasmine.createSpyObj('Asset', ['getAllHelpers', 'getId', 'getProjectId']);
-      mockAsset.getAllHelpers.and.returnValue([mockHelper1, mockHelper2, mockHelper]);
-      mockAsset.getId.and.returnValue(assetId);
-      mockAsset.getProjectId.and.returnValue(projectId);
-
-      view['updateAsset_'](mockAsset)
-          .then(() => {
-            assert(view['nameInputBridge_'].set).to.haveBeenCalledWith(name);
-            assert(view['bodyInputBridge_'].set).to.haveBeenCalledWith(body);
-            assert(view['argElementsBridge_'].set).to.haveBeenCalledWith(args);
-            assert(view['helperItemsBridge_'].set).to.haveBeenCalledWith([
-              {assetId, helperId: currentHelperId, projectId},
-              {assetId, helperId: helperId1, projectId},
-              {assetId, helperId: helperId2, projectId},
-            ]);
-            done();
-          }, done.fail);
+      assert(view['assetUpdateDeregister_']).to.equal(mockNewDeregister);
+      assert(mockDeregister.dispose).to.haveBeenCalledWith();
     });
 
-    it('should do nothing if the helper cannot be found', (done: any) => {
-      spyOn(view, 'getHelper_').and.returnValue(Promise.resolve(null));
+    it('should not throw error if there are no previous deregister functions', () => {
+      view['assetUpdateDeregister_'] = null;
 
-      spyOn(view['nameInputBridge_'], 'set');
-      spyOn(view['bodyInputBridge_'], 'set');
-      spyOn(view['argElementsBridge_'], 'set');
-      spyOn(view['helperItemsBridge_'], 'set');
+      let mockNewDeregister = jasmine.createSpyObj('NewDeregister', ['dispose']);
+      let mockAsset = jasmine.createSpyObj('Asset', ['on']);
+      mockAsset.on.and.returnValue(mockNewDeregister);
 
-      let asset = Mocks.object('asset');
+      spyOn(view, 'onAssetChanged_');
 
-      view['updateAsset_'](asset)
-          .then(() => {
-            assert(view['nameInputBridge_'].set).toNot.haveBeenCalled();
-            assert(view['bodyInputBridge_'].set).toNot.haveBeenCalled();
-            assert(view['argElementsBridge_'].set).toNot.haveBeenCalled();
-            assert(view['helperItemsBridge_'].set).toNot.haveBeenCalled();
-            done();
-          }, done.fail);
+      assert(() => {
+        view['updateAsset_'](mockAsset);
+      }).toNot.throw();
+
+      assert(mockAsset.on).to
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function), view);
+      assert(view['onAssetChanged_']).to.haveBeenCalledWith(mockAsset);
+    });
+  });
+
+  describe('updateHelper_', () => {
+    it('should dispose the previous deregister and listen to changed events to helper', () => {
+      let mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
+      view['helperUpdateDeregister_'] = mockDeregister;
+
+      let mockNewDeregister = jasmine.createSpyObj('NewDeregister', ['dispose']);
+      let mockHelper = jasmine.createSpyObj('Helper', ['on']);
+      mockHelper.on.and.returnValue(mockNewDeregister);
+
+      let helperChangedSpy = spyOn(view, 'onHelperChanged_');
+
+      view['updateHelper_'](mockHelper);
+      assert(mockHelper.on).to
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function), view);
+
+      helperChangedSpy.calls.reset();
+      mockHelper.on.calls.argsFor(0)[1]();
+      assert(view['onHelperChanged_']).to.haveBeenCalledWith(mockHelper);
+
+      assert(view['helperUpdateDeregister_']).to.equal(mockNewDeregister);
+      assert(mockDeregister.dispose).to.haveBeenCalledWith();
+  });
+
+    it('should not throw errors if there are no previous deregisters', () => {
+      view['helperUpdateDeregister_'] = null;
+
+      let mockNewDeregister = jasmine.createSpyObj('NewDeregister', ['dispose']);
+      let mockHelper = jasmine.createSpyObj('Helper', ['on']);
+      mockHelper.on.and.returnValue(mockNewDeregister);
+
+      spyOn(view, 'onHelperChanged_');
+
+      assert(() => {
+        view['updateHelper_'](mockHelper);
+      }).toNot.throw();
+
+      assert(mockHelper.on).to
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function), view);
+      assert(view['onHelperChanged_']).to.haveBeenCalledWith(mockHelper);
     });
   });
 
   describe('disposeInternal', () => {
-    it('should dispose the asset update deregister', () => {
-      let mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
-      view['assetUpdateDeregister_'] = mockDeregister;
+    it('should dispose the asset update deregister and helper update deregister', () => {
+      let mockAssetUpdateDeregister = jasmine.createSpyObj('AssetUpdateDeregister', ['dispose']);
+      view['assetUpdateDeregister_'] = mockAssetUpdateDeregister;
+
+      let mockHelperUpdateDeregister = jasmine.createSpyObj('HelperUpdateDeregister', ['dispose']);
+      view['helperUpdateDeregister_'] = mockHelperUpdateDeregister;
 
       view.disposeInternal();
-      assert(mockDeregister.dispose).to.haveBeenCalledWith();
+      assert(mockAssetUpdateDeregister.dispose).to.haveBeenCalledWith();
+      assert(mockHelperUpdateDeregister.dispose).to.haveBeenCalledWith();
     });
 
     it('should not throw error if there are no asset update deregisters', () => {
@@ -848,12 +994,14 @@ describe('asset.HelperView', () => {
       mockRouteService.on.and.returnValue(mockDeregister);
 
       spyOn(view, 'addDisposable').and.callThrough();
+      spyOn(view, 'onRouteChanged_');
 
       let element = Mocks.object('element');
       view.onCreated(element);
       assert(view.addDisposable).to.haveBeenCalledWith(mockDeregister);
       assert(mockRouteService.on).to
           .haveBeenCalledWith(RouteServiceEvents.CHANGED, view['onRouteChanged_'], view);
+      assert(view['onRouteChanged_']).to.haveBeenCalledWith();
     });
   });
 });
