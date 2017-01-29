@@ -1,7 +1,8 @@
-import {Maps} from 'external/gs_tools/src/collection';
+import {Arrays, Maps} from 'external/gs_tools/src/collection';
 import {Field, Serializable} from 'external/gs_tools/src/data';
 import {BaseListenable} from 'external/gs_tools/src/event';
 
+import {BaseLayer} from './base-layer';
 import {DataEvents} from './data-events';
 import {Helper} from './helper';
 import {IDataSource} from './i-data-source';
@@ -30,6 +31,7 @@ export class Asset extends BaseListenable<DataEvents> {
   @Field('width') private width_: number;
   @Field('data') private data_: IDataSource<string[][]> | null;
   @Field('helpers') private helpers_: {[id: string]: Helper};
+  @Field('layers') private layers_: BaseLayer[];
 
   constructor(id: string, projectId: string) {
     super();
@@ -41,6 +43,7 @@ export class Asset extends BaseListenable<DataEvents> {
     this.width_ = NaN;
     this.data_ = null;
     this.helpers_ = {};
+    this.layers_ = [];
   }
 
   /**
@@ -90,6 +93,13 @@ export class Asset extends BaseListenable<DataEvents> {
    */
   getId(): string {
     return this.id_;
+  }
+
+  /**
+   * @return The layers in the asset.
+   */
+  getLayers(): BaseLayer[] {
+    return this.layers_;
   }
 
   /**
@@ -162,6 +172,19 @@ export class Asset extends BaseListenable<DataEvents> {
 
     this.dispatch(DataEvents.CHANGED, () => {
       this.helpers_[id] = helper;
+    });
+  }
+
+  /**
+   * @param layers Layers to set to the asset.
+   */
+  setLayers(layers: BaseLayer[]): void {
+    if (Arrays.of(this.layers_).equalsTo(layers)) {
+      return;
+    }
+
+    this.dispatch(DataEvents.CHANGED, () => {
+      this.layers_ = layers;
     });
   }
 

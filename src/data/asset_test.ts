@@ -159,6 +159,35 @@ describe('data.Asset', () => {
     });
   });
 
+  describe('setLayers', () => {
+    it('should dispatch the CHANGED event', () => {
+      spyOn(asset, 'dispatch').and.callFake((event: any, callback: Function) => {
+        callback();
+      });
+
+      let layers = [Mocks.object('layer')];
+      asset.setLayers(layers);
+
+      assert(asset.dispatch).to
+          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+      assert(asset.getLayers()).to.equal(layers);
+    });
+
+    it('should not dispatch the CHANGED event if the layers do not change', () => {
+      spyOn(asset, 'dispatch').and.callFake((event: any, callback: Function) => {
+        callback();
+      });
+
+      let layers = [Mocks.object('layer')];
+      asset['layers_'] = layers;
+
+      asset.setLayers(layers);
+
+      assert(asset.dispatch).toNot.haveBeenCalled();
+      assert(asset.getLayers()).to.equal(layers);
+    });
+  });
+
   describe('setName', () => {
     it('should dispatch the CHANGED event', () => {
       spyOn(asset, 'dispatch').and.callFake((event: any, callback: Function) => {
