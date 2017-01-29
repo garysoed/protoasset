@@ -29,6 +29,7 @@ export class RouteFactoryService implements IRouteFactoryService<Views> {
   private helper_: HelperRouteFactory;
   private helperList_: SimpleRouteFactory<Views, {assetId: string, projectId: string}>;
   private landing_: SimpleRouteFactory<Views, {}>;
+  private layer_: SimpleRouteFactory<Views, {assetId: string, projectId: string}>;
 
   constructor(
       @inject('pa.data.AssetCollection') assetCollection: AssetCollection,
@@ -82,6 +83,13 @@ export class RouteFactoryService implements IRouteFactoryService<Views> {
 
     // /home/project/:projectId/asset/:assetId/helper/:helperId
     this.helper_ = new HelperRouteFactory(this.assetCollection_, this.helperList_);
+
+    // /home/project/:projectId/asset/:assetId/layer
+    this.layer_ = new SimpleRouteFactory(
+        Views.LAYER,
+        '/layer',
+        'Layers',
+        this.assetMain_);
   }
 
   assetData(): SimpleRouteFactory<Views, {assetId: string, projectId: string}> {
@@ -129,6 +137,7 @@ export class RouteFactoryService implements IRouteFactoryService<Views> {
       this.assetData_,
       this.helper_,
       this.helperList_,
+      this.layer_,
     ];
   }
 
@@ -151,5 +160,12 @@ export class RouteFactoryService implements IRouteFactoryService<Views> {
    */
   landing(): SimpleRouteFactory<Views, {}> {
     return this.landing_;
+  }
+
+  /**
+   * @return The route factory for the layer view.
+   */
+  layer(): SimpleRouteFactory<Views, {assetId: string, projectId: string}> {
+    return this.layer_;
   }
 }

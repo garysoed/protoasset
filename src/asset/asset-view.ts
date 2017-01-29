@@ -11,6 +11,7 @@ import {Views} from '../routing/views';
 
 import {DataView} from './data-view';
 import {HelperView} from './helper-view';
+import {LayerView} from './layer-view';
 import {NavBar} from './nav-bar';
 
 
@@ -18,7 +19,7 @@ import {NavBar} from './nav-bar';
  * Main view for the asset section.
  */
 @customElement({
-  dependencies: [DataView, HelperView, NavBar],
+  dependencies: [DataView, HelperView, LayerView, NavBar],
   tag: 'pa-asset-view',
   templateKey: 'src/asset/asset-view',
 })

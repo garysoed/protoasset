@@ -15,7 +15,8 @@ describe('asset.NavBar', () => {
   let navbar: NavBar;
 
   beforeEach(() => {
-    mockRouteFactoryService = jasmine.createSpyObj('RouteFactoryService', ['assetData', 'helper']);
+    mockRouteFactoryService = jasmine
+        .createSpyObj('RouteFactoryService', ['assetData', 'helper', 'layer']);
     mockRouteService = jasmine.createSpyObj('RouteService', ['getParams', 'goTo', 'on']);
     navbar = new NavBar(
         mockRouteFactoryService,
@@ -155,6 +156,8 @@ describe('asset.NavBar', () => {
           mockRouteFactoryService.helper.and.returnValue(helperRouteFactory);
           let assetDataRouteFactory = Mocks.object('assetDataRouteFactory');
           mockRouteFactoryService.assetData.and.returnValue(assetDataRouteFactory);
+          let layerRouteFactory = Mocks.object('layerRouteFactory');
+          mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
 
           let mockDisposable = jasmine.createSpyObj('Disposable', ['dispose']);
           mockRouteService.on.and.returnValue(mockDisposable);
@@ -172,6 +175,7 @@ describe('asset.NavBar', () => {
           assert(navbar['routeMap_']).to.haveEntries([
             ['data', assetDataRouteFactory],
             ['helper', helperRouteFactory],
+            ['layer', layerRouteFactory],
           ]);
         });
   });

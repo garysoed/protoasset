@@ -1,0 +1,28 @@
+<style>
+  #createButton {
+    bottom: 0;
+    left: 0;
+    position: fixed;
+    z-index: 20;
+  }
+
+  #createButtonContent {
+    margin: .2rem;
+  }
+</style>
+<div layout="row">
+  <div flex layout="column">
+    <gs-basic-button><div gs-content>Layer selector</div></gs-basic-button>
+    <gs-switch flex>
+      <pa-asset-html-layer></pa-asset-html-layer>
+      <pa-asset-image-layer></pa-asset-image-layer>
+      <pa-asset-text-layer></pa-asset-text-layer>
+    </gs-switch>
+  </div>
+  <div flex>Preview</div>
+</div>
+<gs-basic-button class="gs-theme-normal gs-primary" id="createButton">
+  <div gs-content id="createButtonContent">
+    <gs-icon>add</gs-icon>
+  </div>
+</gs-basic-button>

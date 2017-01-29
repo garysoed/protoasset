@@ -9,5 +9,6 @@ export enum Views {
   HELPER,
   HELPER_LIST,
   LANDING,
+  LAYER,
   PROJECT,
 }

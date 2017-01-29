@@ -125,6 +125,7 @@ export class NavBar extends BaseThemedElement {
     super.onCreated(element);
     this.routeMap_.set('data', this.routeFactoryService_.assetData());
     this.routeMap_.set('helper', this.routeFactoryService_.helper());
+    this.routeMap_.set('layer', this.routeFactoryService_.layer());
 
     this.addDisposable(this.routeService_.on(
         RouteServiceEvents.CHANGED,
