@@ -9,12 +9,22 @@
   #createButtonContent {
     margin: .2rem;
   }
+
+  #selectedLayerName {
+    text-align: left;
+    text-transform: none;
+  }
 </style>
 <div layout="row">
   <div flex layout="column">
-    <gs-basic-button><div gs-content>Layer selector</div></gs-basic-button>
-    <gs-switch flex>
-      <pa-asset-html-layer></pa-asset-html-layer>
+    <gs-basic-button>
+      <div gs-content layout="row">
+        <div flex id="selectedLayerName"></div>
+        <gs-icon>arrow_drop_down</gs-icon>
+      </div>
+    </gs-basic-button>
+    <gs-switch flex id="layerTypeSwitch">
+      <pa-asset-html-layer gs-when=""></pa-asset-html-layer>
       <pa-asset-image-layer></pa-asset-image-layer>
       <pa-asset-text-layer></pa-asset-text-layer>
     </gs-switch>
@@ -25,4 +35,17 @@
   <div gs-content id="createButtonContent">
     <gs-icon>add</gs-icon>
   </div>
+  <gs-menu gs-anchor-point="bottom_left" gs-anchor-target="bottom_left">
+    <div gs-content id="layerTypes">
+      <gs-basic-button id="createImageLayer" style="white-space: nowrap;">
+        <div gs-content>New Image Layer</div>
+      </gs-basic-button>
+      <gs-basic-button id="createTextLayer" style="white-space: nowrap;">
+        <div gs-content>New Text Layer</div>
+      </gs-basic-button>
+      <gs-basic-button id="createHtmlLayer" style="white-space: nowrap;">
+        <div gs-content>New HTML Layer</div>
+      </gs-basic-button>
+    </div>
+  </gs-menu>
 </gs-basic-button>

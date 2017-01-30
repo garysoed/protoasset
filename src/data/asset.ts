@@ -46,6 +46,20 @@ export class Asset extends BaseListenable<DataEvents> {
     this.layers_ = [];
   }
 
+  disposeInternal(): void {
+    Arrays
+        .of(this.layers_)
+        .forEach((layer: BaseLayer) => {
+          layer.dispose();
+        });
+    Maps
+        .fromRecord(this.helpers_)
+        .forEach((helper: Helper) => {
+          helper.dispose();
+        });
+    super.disposeInternal();
+  }
+
   /**
    * Deletes the given helper.
    */

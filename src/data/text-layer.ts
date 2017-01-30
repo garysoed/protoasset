@@ -2,6 +2,7 @@ import {Field, Serializable} from 'external/gs_tools/src/data';
 
 import {BaseLayer} from './base-layer';
 import {DataEvents} from './data-events';
+import {LayerType} from './layer-type';
 
 
 @Serializable('textLayer')
@@ -14,8 +15,8 @@ export class TextLayer extends BaseLayer {
   @Field('text') private text_: string;
   @Field('top') private top_: number | null;
 
-  constructor(name: string) {
-    super(name);
+  constructor(id: string, name: string) {
+    super(id, name, LayerType.TEXT);
     this.bottom_ = null;
     this.fontFamily_ = 'Sans';
     this.fontUrl_ = null;

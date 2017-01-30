@@ -2,6 +2,7 @@ import {Field, Serializable} from 'external/gs_tools/src/data';
 
 import {BaseLayer} from './base-layer';
 import {DataEvents} from './data-events';
+import {LayerType} from './layer-type';
 
 
 @Serializable('htmlLayer')
@@ -9,8 +10,8 @@ export class HtmlLayer extends BaseLayer {
   @Field('css') private css_: string;
   @Field('html') private html_: string;
 
-  constructor(name: string) {
-    super(name);
+  constructor(id: string, name: string) {
+    super(id, name, LayerType.HTML);
     this.css_ = '';
     this.html_ = '';
   }

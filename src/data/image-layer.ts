@@ -2,6 +2,7 @@ import {Field, Serializable} from 'external/gs_tools/src/data';
 
 import {BaseLayer} from './base-layer';
 import {DataEvents} from './data-events';
+import {LayerType} from './layer-type';
 
 
 /**
@@ -15,8 +16,8 @@ export class ImageLayer extends BaseLayer {
   @Field('right') private right_: number | null;
   @Field('top') private top_: number | null;
 
-  constructor(name: string) {
-    super(name);
+  constructor(id: string, name: string) {
+    super(id, name, LayerType.IMAGE);
     this.bottom_ = null;
     this.imageUrl_ = '';
     this.left_ = null;
