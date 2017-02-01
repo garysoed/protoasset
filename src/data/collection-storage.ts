@@ -81,17 +81,15 @@ export class CollectionStorage<T, I extends {this: T}> {
    * @param token The search token.
    * @return Promise that will be resolved with the items.
    */
-  search(token: string): Promise<T[]> {
-    return this.getFusePromise_()
-        .then((fuse: Fuse<I>) => {
-          let results = fuse.search(token);
-          return Arrays
-              .of(results)
-              .map((result: I) => {
-                return result.this;
-              })
-              .asArray();
-        });
+  async search(token: string): Promise<T[]> {
+    let fuse = await this.getFusePromise_();
+    let results = fuse.search(token);
+    return Arrays
+        .of(results)
+        .map((result: I) => {
+          return result.this;
+        })
+        .asArray();
   }
 
   /**
@@ -101,19 +99,14 @@ export class CollectionStorage<T, I extends {this: T}> {
    * @param item The item to update.
    * @return Promise that will be resolved with true iff the item is new.
    */
-  update(itemId: string, item: T): Promise<boolean> {
-    return this.storage_
-        .read(itemId)
-        .then((existingItem: T | null) => {
-          return Promise.all([
-            existingItem === null,
-            this.storage_.update(itemId, item),
-          ]);
-        })
-        .then(([isNewItem]: [boolean, void]) => {
-          this.fusePromise_ = null;
-          return isNewItem;
-        });
+  async update(itemId: string, item: T): Promise<boolean> {
+    let existingItem = await this.storage_.read(itemId);
+    let [isNewItem] = await Promise.all([
+      existingItem === null,
+      this.storage_.update(itemId, item),
+    ]);
+    this.fusePromise_ = null;
+    return isNewItem;
   }
 
   /**

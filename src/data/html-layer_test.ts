@@ -11,7 +11,7 @@ describe('data.HtmlLayer', () => {
   let layer: HtmlLayer;
 
   beforeEach(() => {
-    layer = new HtmlLayer('name');
+    layer = new HtmlLayer('id', 'name');
     TestDispose.add(layer);
   });
 

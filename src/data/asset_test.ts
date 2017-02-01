@@ -49,9 +49,9 @@ describe('data.Asset', () => {
       let helperId1 = 'helperId1';
       let helperId2 = 'helperId2';
       let helperId3 = 'helperId3';
-      let helper1 = Mocks.object('helper1');
-      let helper2 = Mocks.object('helper2');
-      let helper3 = Mocks.object('helper3');
+      let helper1 = jasmine.createSpyObj('helper1', ['dispose']);
+      let helper2 = jasmine.createSpyObj('helper2', ['dispose']);
+      let helper3 = jasmine.createSpyObj('helper3', ['dispose']);
       asset['helpers_'] = {
         [helperId1]: helper1,
         [helperId2]: helper2,
@@ -64,7 +64,7 @@ describe('data.Asset', () => {
   describe('getHelper', () => {
     it('should return the correct helper', () => {
       let helperId = 'helperId';
-      let helper = Mocks.object('helper');
+      let helper = jasmine.createSpyObj('helper', ['dispose']);
       asset['helpers_'] = {
         [helperId]: helper,
       };
@@ -73,7 +73,7 @@ describe('data.Asset', () => {
 
     it('should return null if the helper does not exist', () => {
       let helperId = 'helperId';
-      let helper = Mocks.object('helper');
+      let helper = jasmine.createSpyObj('helper', ['dispose']);
       asset['helpers_'] = {
         [helperId]: helper,
       };
@@ -134,7 +134,7 @@ describe('data.Asset', () => {
       });
 
       let helperId = 'helperId';
-      let helper = Mocks.object('helper');
+      let helper = jasmine.createSpyObj('helper', ['dispose']);
 
       asset.setHelper(helperId, helper);
 
@@ -149,7 +149,7 @@ describe('data.Asset', () => {
       });
 
       let helperId = 'helperId';
-      let helper = Mocks.object('helper');
+      let helper = jasmine.createSpyObj('helper', ['dispose']);
       asset['helpers_'] = {[helperId]: helper};
 
       asset.setHelper(helperId, helper);
@@ -165,7 +165,7 @@ describe('data.Asset', () => {
         callback();
       });
 
-      let layers = [Mocks.object('layer')];
+      let layers = [jasmine.createSpyObj('layer', ['dispose'])];
       asset.setLayers(layers);
 
       assert(asset.dispatch).to
@@ -178,7 +178,7 @@ describe('data.Asset', () => {
         callback();
       });
 
-      let layers = [Mocks.object('layer')];
+      let layers = [jasmine.createSpyObj('layer', ['dispose'])];
       asset['layers_'] = layers;
 
       asset.setLayers(layers);

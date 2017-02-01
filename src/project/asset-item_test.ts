@@ -69,7 +69,7 @@ describe('project.AssetItem', () => {
   });
 
   describe('onGsAssetIdChanged_', () => {
-    it('should set the asset name correctly', (done: any) => {
+    it('should set the asset name correctly', async (done: any) => {
       let assetId = 'assetId';
       spyOn(item['gsAssetIdBridge_'], 'get').and.returnValue(assetId);
 
@@ -83,15 +83,12 @@ describe('project.AssetItem', () => {
 
       spyOn(item['assetNameBridge_'], 'set');
 
-      item['onGsAssetIdChanged_']()
-          .then(() => {
-            assert(item['assetNameBridge_'].set).to.haveBeenCalledWith(name);
-            assert(mockAssetCollection.get).to.haveBeenCalledWith(projectId, assetId);
-            done();
-          }, done.fail);
+      await item['onGsAssetIdChanged_']();
+      assert(item['assetNameBridge_'].set).to.haveBeenCalledWith(name);
+      assert(mockAssetCollection.get).to.haveBeenCalledWith(projectId, assetId);
     });
 
-    it('should not set the name if the asset is not found', (done: any) => {
+    it('should not set the name if the asset is not found', async (done: any) => {
       let assetId = 'assetId';
       spyOn(item['gsAssetIdBridge_'], 'get').and.returnValue(assetId);
 
@@ -102,14 +99,11 @@ describe('project.AssetItem', () => {
 
       spyOn(item['assetNameBridge_'], 'set');
 
-      item['onGsAssetIdChanged_']()
-          .then(() => {
-            assert(item['assetNameBridge_'].set).toNot.haveBeenCalled();
-            done();
-          }, done.fail);
+      await item['onGsAssetIdChanged_']();
+      assert(item['assetNameBridge_'].set).toNot.haveBeenCalled();
     });
 
-    it('should delete the name if the asset ID is null', (done: any) => {
+    it('should delete the name if the asset ID is null', async (done: any) => {
       spyOn(item['gsAssetIdBridge_'], 'get').and.returnValue(null);
 
       let projectId = 'projectId';
@@ -120,15 +114,12 @@ describe('project.AssetItem', () => {
       spyOn(item['assetNameBridge_'], 'set');
       spyOn(item['assetNameBridge_'], 'delete');
 
-      item['onGsAssetIdChanged_']()
-          .then(() => {
-            assert(item['assetNameBridge_'].set).toNot.haveBeenCalled();
-            assert(item['assetNameBridge_'].delete).to.haveBeenCalledWith();
-            done();
-          }, done.fail);
+      await item['onGsAssetIdChanged_']();
+      assert(item['assetNameBridge_'].set).toNot.haveBeenCalled();
+      assert(item['assetNameBridge_'].delete).to.haveBeenCalledWith();
     });
 
-    it('should delete the name if the project ID is null', (done: any) => {
+    it('should delete the name if the project ID is null', async (done: any) => {
       let assetId = 'assetId';
       spyOn(item['gsAssetIdBridge_'], 'get').and.returnValue(assetId);
 
@@ -139,12 +130,9 @@ describe('project.AssetItem', () => {
       spyOn(item['assetNameBridge_'], 'set');
       spyOn(item['assetNameBridge_'], 'delete');
 
-      item['onGsAssetIdChanged_']()
-          .then(() => {
-            assert(item['assetNameBridge_'].set).toNot.haveBeenCalled();
-            assert(item['assetNameBridge_'].delete).to.haveBeenCalledWith();
-            done();
-          }, done.fail);
+      await item['onGsAssetIdChanged_']();
+      assert(item['assetNameBridge_'].set).toNot.haveBeenCalled();
+      assert(item['assetNameBridge_'].delete).to.haveBeenCalledWith();
     });
   });
 });

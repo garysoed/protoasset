@@ -82,20 +82,18 @@ export class HelperItem extends BaseThemedElement {
   /**
    * @return Promise that will be resolved with the helper, or null if the helper cannot be found.
    */
-  private getHelper_(): Promise<Helper | null> {
+  private async getHelper_(): Promise<Helper | null> {
     const helperId = this.helperIdBridge_.get();
     if (helperId === null) {
-      return Promise.resolve(null);
+      return null;
     }
 
-    return this.getAsset_()
-        .then((asset: Asset | null) => {
-          if (asset === null) {
-            return null;
-          }
+    let asset = await this.getAsset_();
+    if (asset === null) {
+      return null;
+    }
 
-          return asset.getHelper(helperId);
-        });
+    return asset.getHelper(helperId);
   }
 
   /**
@@ -112,107 +110,83 @@ export class HelperItem extends BaseThemedElement {
   }
 
   @handle('#delete').event(DomEvent.CLICK)
-  protected onDeleteClick_(): Promise<void> {
-    return Promise
-        .all([
-          this.getAsset_(),
-          this.getHelper_(),
-        ])
-        .then((result: [Asset | null, Helper | null]) => {
-          let [asset, helper] = result;
-          if (asset === null || helper === null) {
-            return [];
-          }
+  protected async onDeleteClick_(): Promise<void> {
+    let [asset, helper] = await Promise.all([this.getAsset_(), this.getHelper_()]);
+    if (asset === null || helper === null) {
+      return;
+    }
 
-          asset.deleteHelper(helper.getId());
-          return [this.updateHelper_(), this.assetCollection_.update(asset)];
+    asset.deleteHelper(helper.getId());
 
-          // TODO: Move to next helper if currently selected helper is deleted.
-        })
-        .then((promises: Promise<any>[]) => {
-          return Promise.all(promises);
-        });
+    await Promise.all([this.updateHelper_(), this.assetCollection_.update(asset)]);
   }
 
   @handle('#edit').event(DomEvent.CLICK)
-  protected onEditClick_(): Promise<void> {
-    return this.getHelper_()
-        .then((helper: Helper | null) => {
-          if (helper !== null) {
-            this.nameInputBridge_.set(helper.getName());
-          } else {
-            this.nameInputBridge_.delete();
-          }
-          this.rootValueBridge_.set('edit');
-        });
+  protected async onEditClick_(): Promise<void> {
+    let helper = await this.getHelper_();
+    if (helper !== null) {
+      this.nameInputBridge_.set(helper.getName());
+    } else {
+      this.nameInputBridge_.delete();
+    }
+    this.rootValueBridge_.set('edit');
   }
 
   @handle('#name').event(DomEvent.CLICK)
-  protected onNameClick_(): Promise<void> {
-    return Promise
-        .all([
-          this.getAsset_(),
-          this.getHelper_(),
-        ])
-        .then((result: [Asset | null, Helper | null]) => {
-          let [asset, helper] = result;
-          if (asset === null || helper === null) {
-            return;
-          }
+  protected async onNameClick_(): Promise<void> {
+    let [asset, helper] = await Promise.all([this.getAsset_(), this.getHelper_()]);
+    if (asset === null || helper === null) {
+      return;
+    }
 
-          this.routeService_.goTo(this.routeFactoryService_.helper(), {
-            assetId: asset.getId(),
-            helperId: helper.getId(),
-            projectId: asset.getProjectId(),
-          });
-        });
+    this.routeService_.goTo(this.routeFactoryService_.helper(), {
+      assetId: asset.getId(),
+      helperId: helper.getId(),
+      projectId: asset.getProjectId(),
+    });
   }
 
   @handle('#ok').event(DomEvent.CLICK)
-  protected onOkClick_(): Promise<void> {
+  protected async onOkClick_(): Promise<void> {
     const helperId = this.helperIdBridge_.get();
     if (helperId === null) {
       return Promise.resolve();
     }
 
-    return this.getAsset_()
-        .then((asset: Asset | null) => {
-          if (asset === null) {
-            return;
-          }
+    let asset = await this.getAsset_();
+    if (asset === null) {
+      return;
+    }
 
-          let helper = asset.getHelper(helperId);
-          if (helper === null) {
-            return;
-          }
+    let helper = asset.getHelper(helperId);
+    if (helper === null) {
+      return;
+    }
 
-          helper.setName(this.nameInputBridge_.get() || '');
+    helper.setName(this.nameInputBridge_.get() || '');
 
-          this.rootValueBridge_.set('read');
+    this.rootValueBridge_.set('read');
 
-          return this.assetCollection_.update(asset);
-        });
+    await this.assetCollection_.update(asset);
   }
 
   @handle(null).attributeChange('asset-id', StringParser)
   @handle(null).attributeChange('helper-id', StringParser)
   @handle(null).attributeChange('project-id', StringParser)
-  protected updateHelper_(): Promise<void> {
-    return this.getHelper_()
-        .then((helper: Helper | null) => {
-          if (this.helperUpdateDeregister_ !== null) {
-            this.helperUpdateDeregister_.dispose();
-            this.helperUpdateDeregister_ = null;
-          }
+  protected async updateHelper_(): Promise<void> {
+    let helper = await this.getHelper_();
+    if (this.helperUpdateDeregister_ !== null) {
+      this.helperUpdateDeregister_.dispose();
+      this.helperUpdateDeregister_ = null;
+    }
 
-          if (helper === null) {
-            return;
-          }
+    if (helper === null) {
+      return;
+    }
 
-          this.helperUpdateDeregister_ = helper
-              .on(DataEvents.CHANGED, this.onHelperUpdated_.bind(this, helper), this);
-          this.onHelperUpdated_(helper);
-        });
+    this.helperUpdateDeregister_ = helper
+        .on(DataEvents.CHANGED, this.onHelperUpdated_.bind(this, helper), this);
+    this.onHelperUpdated_(helper);
   }
 
   /**

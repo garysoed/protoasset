@@ -70,7 +70,8 @@ describe('landing.CreateProjectView', () => {
   });
 
   describe('onSubmitAction_', () => {
-    it('should create the project correctly, reset, and redirect to project page', (done: any) => {
+    it('should create the project correctly, reset, and redirect to project page',
+    async (done: any) => {
       let projectId = 'projectId';
       mockProjectCollection.reserveId.and.returnValue(Promise.resolve(projectId));
 
@@ -83,27 +84,28 @@ describe('landing.CreateProjectView', () => {
       spyOn(view['nameValueBridge_'], 'get').and.returnValue(projectName);
       spyOn(view, 'reset_');
 
-      view['onSubmitAction_']()
-          .then(() => {
-            assert(mockProjectCollection.update).to.haveBeenCalledWith(Matchers.any(Project));
+      await view['onSubmitAction_']();
+      assert(mockProjectCollection.update).to.haveBeenCalledWith(Matchers.any(Project));
 
-            let project = mockProjectCollection.update.calls.argsFor(0)[0];
-            assert(project.setName).to.haveBeenCalledWith(projectName);
-            assert(project.getId()).to.equal(projectId);
+      let project = mockProjectCollection.update.calls.argsFor(0)[0];
+      assert(project.setName).to.haveBeenCalledWith(projectName);
+      assert(project.getId()).to.equal(projectId);
 
-            assert(view['reset_']).to.haveBeenCalledWith();
-            assert(mockRouteService.goTo).to
-                .haveBeenCalledWith(routeFactory, {projectId: projectId});
-            done();
-          }, done.fail);
+      assert(view['reset_']).to.haveBeenCalledWith();
+      assert(mockRouteService.goTo).to
+          .haveBeenCalledWith(routeFactory, {projectId: projectId});
     });
 
-    it('should throw error if name is not set', () => {
+    it('should reject if name is not set', async (done: any) => {
       spyOn(view['nameValueBridge_'], 'get').and.returnValue(null);
 
-      assert(() => {
-        view['onSubmitAction_']();
-      }).to.throwError(/Project name is not set/);
+      try {
+        await view['onSubmitAction_']();
+        done.fail();
+      } catch (e) {
+        const error: Error = e;
+        assert(error.message).to.equal(Matchers.stringMatching(/Project name is not set/));
+      }
     });
   });
 });

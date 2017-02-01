@@ -1,6 +1,5 @@
 import {AbstractRouteFactory} from 'external/gs_ui/src/routing';
 
-import {Project} from '../data/project';
 import {ProjectCollection} from '../data/project-collection';
 import {Views} from './views';
 
@@ -46,15 +45,12 @@ export class AssetListRouteFactory extends AbstractRouteFactory<Views, CP, CR, P
   /**
    * @override
    */
-  getName(params: CR): Promise<string> {
-    return this.projectCollection_
-        .get(params.projectId)
-        .then((project: Project | null) => {
-          if (project === null) {
-            return `Unknown project ${params.projectId}`;
-          }
+  async getName(params: CR): Promise<string> {
+    let project = await this.projectCollection_.get(params.projectId);
+    if (project === null) {
+      return `Unknown project ${params.projectId}`;
+    }
 
-          return project.getName();
-        });
+    return project.getName();
   }
 }

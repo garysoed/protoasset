@@ -9,7 +9,6 @@ import {ThemeService} from 'external/gs_ui/src/theming';
 import {FilterButton} from '../common/filter-button';
 import {Asset} from '../data/asset';
 import {AssetCollection} from '../data/asset-collection';
-import {Project} from '../data/project';
 import {ProjectCollection} from '../data/project-collection';
 import {RouteFactoryService} from '../routing/route-factory-service';
 import {Views} from '../routing/views';
@@ -72,24 +71,21 @@ export class AssetListView extends BaseThemedElement {
   /**
    * Updates the project name.
    */
-  private onProjectIdChanged_(): Promise<void> {
+  private async onProjectIdChanged_(): Promise<void> {
     let projectId = this.getProjectId_();
-    if (projectId !== null) {
-      let listPromise = this.assetCollection_
-          .list(projectId)
-          .then((assets: Asset[]) => {
-            this.assetsBridge_.set(assets);
-          });
-      let namePromise = this.projectCollection_
-          .get(projectId)
-          .then((project: Project | null) => {
-            if (project !== null) {
-              this.projectNameTextBridge_.set(project.getName());
-            }
-          });
-      return Promise.all([listPromise, namePromise]);
+    if (projectId === null) {
+      return;
     }
-    return Promise.resolve();
+
+    let [assets, project] = await Promise.all([
+      this.assetCollection_.list(projectId),
+      this.projectCollection_.get(projectId),
+    ]);
+
+    this.assetsBridge_.set(assets);
+    if (project !== null) {
+      this.projectNameTextBridge_.set(project.getName());
+    }
   }
 
   @handle('#createButton').event(Event.ACTION)

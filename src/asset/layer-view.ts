@@ -1,23 +1,21 @@
 import {Arrays} from 'external/gs_tools/src/collection';
 import {DomEvent} from 'external/gs_tools/src/event';
 import {inject} from 'external/gs_tools/src/inject';
-import {Validate} from 'external/gs_tools/src/valid';
 import {IdGenerator, SimpleIdGenerator} from 'external/gs_tools/src/random';
 import {Enums} from 'external/gs_tools/src/typescript';
+import {Validate} from 'external/gs_tools/src/valid';
 import {
   bind,
   customElement,
   DomBridge,
   EnumParser,
-  handle,
-  StringParser} from 'external/gs_tools/src/webc';
+  handle} from 'external/gs_tools/src/webc';
 
 import {BaseThemedElement} from 'external/gs_ui/src/common';
-import {RouteService, RouteServiceEvents} from 'external/gs_ui/src/routing';
+import {RouteService} from 'external/gs_ui/src/routing';
 import {ThemeService} from 'external/gs_ui/src/theming';
 import {OverlayService} from 'external/gs_ui/src/tool';
 
-import {Asset} from '../data/asset';
 import {AssetCollection} from '../data/asset-collection';
 import {BaseLayer} from '../data/base-layer';
 import {HtmlLayer} from '../data/html-layer';

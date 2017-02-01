@@ -61,14 +61,11 @@ export class ProjectCollection extends BaseListenable<CollectionEvents> {
    *
    * @param project
    */
-  update(project: Project): Promise<void> {
-    return this.storage_
-        .update(project.getId(), project)
-        .then((isNewProject: boolean) => {
-          if (isNewProject) {
-            this.dispatch(CollectionEvents.ADDED, () => undefined, project);
-          }
-        });
+  async update(project: Project): Promise<void> {
+    let isNewProject = await this.storage_.update(project.getId(), project);
+    if (isNewProject) {
+      this.dispatch(CollectionEvents.ADDED, () => undefined, project);
+    }
   }
 
   /**

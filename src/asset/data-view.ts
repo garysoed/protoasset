@@ -120,21 +120,19 @@ export class DataView extends BaseThemedElement {
    *
    * @return Promise that will be resolved when the update process is done.
    */
-  private updateAsset_(dataSource: TsvDataSource): Promise<void> {
-    return this.getAsset_()
-        .then((asset: Asset | null) => {
-          if (asset === null) {
-            return Promise.all([null]);
-          }
-          asset.setData(dataSource);
-          return this.assetCollection_.update(asset);
-        });
+  private async updateAsset_(dataSource: TsvDataSource): Promise<void> {
+    let asset = await this.getAsset_();
+    if (asset === null) {
+      return;
+    }
+    asset.setData(dataSource);
+    await this.assetCollection_.update(asset);
   }
 
   @handle('#endRowInput').attributeChange('gs-value', FloatParser)
   @handle('#startRowInput').attributeChange('gs-value', FloatParser)
   @handle('#dataSourceInput').attributeChange('gs-bundle-id', StringParser)
-  protected updateDataSource_(): Promise<void> {
+  protected async updateDataSource_(): Promise<void> {
     const bundleId = this.dataSourceBundleIdBridge_.get();
     const startRow = this.startRowValueBridge_.get();
     const endRow = this.endRowValueBridge_.get();
@@ -146,32 +144,19 @@ export class DataView extends BaseThemedElement {
       return Promise.resolve();
     }
 
-    return this.fileService_
-        .processBundle(bundleId)
-        .then((files: Map<File, string> | null) => {
-          if (files === null) {
-            return null;
-          }
+    let files = await this.fileService_.processBundle(bundleId);
+    if (files !== null) {
+      let entry = Maps.of(files).anyEntry();
+      if (entry !== null) {
+        let dataSource = TsvDataSource.of(
+            InMemoryDataSource.of(entry[1]),
+            startRow,
+            endRow);
+        await this.updateAsset_(dataSource);
+      }
+    }
 
-          let entry = Maps.of(files).anyEntry();
-          if (entry === null) {
-            return null;
-          }
-
-          return TsvDataSource.of(
-              InMemoryDataSource.of(entry[1]),
-              startRow,
-              endRow);
-        })
-        .then((dataSource: TsvDataSource | null) => {
-          if (dataSource === null) {
-            return Promise.resolve(null);
-          }
-          return this.updateAsset_(dataSource);
-        })
-        .then(() => {
-          return this.updatePreview_();
-        });
+    await this.updatePreview_();
   }
 
   /**
@@ -179,28 +164,23 @@ export class DataView extends BaseThemedElement {
    *
    * @return Promise that will be resolved when the update process is done.
    */
-  private updatePreview_(): Promise<void> {
+  private async updatePreview_(): Promise<void> {
     this.previewChildrenBridge_.delete();
-    return this
-        .getAsset_()
-        .then((asset: Asset | null) => {
-          if (asset === null) {
-            return Promise.resolve(null);
-          }
+    let asset = await this.getAsset_();
+    if (asset === null) {
+      return;
+    }
 
-          const dataSource = asset.getData();
-          if (dataSource === null) {
-            return null;
-          }
+    const dataSource = asset.getData();
+    if (dataSource === null) {
+      return;
+    }
 
-          return dataSource.getData();
-        })
-        .then((data: string[][] | null) => {
-          if (data === null) {
-            return;
-          }
+    let data = await dataSource.getData();
+    if (data === null) {
+      return;
+    }
 
-          this.previewChildrenBridge_.set(data);
-        });
+    this.previewChildrenBridge_.set(data);
   }
 }

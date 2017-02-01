@@ -71,43 +71,34 @@ describe('landing.LandingView', () => {
 
   describe('onFilterButtonTextAttrChange_', () => {
     it('should set the project collection to the search results if there is filter text',
-        (done: any) => {
+        async (done: any) => {
           let newValue = 'newValue';
           let projects = Mocks.object('projects');
           mockProjectCollection.search.and.returnValue(Promise.resolve(projects));
           spyOn(view['projectCollectionBridge_'], 'set');
-          view['onFilterButtonTextAttrChange_'](newValue)
-              .then(() => {
-                assert(view['projectCollectionBridge_'].set).to.haveBeenCalledWith(projects);
-                assert(mockProjectCollection.search).to.haveBeenCalledWith(newValue);
-                done();
-              }, done.fail);
+          await view['onFilterButtonTextAttrChange_'](newValue);
+          assert(view['projectCollectionBridge_'].set).to.haveBeenCalledWith(projects);
+          assert(mockProjectCollection.search).to.haveBeenCalledWith(newValue);
         });
 
     it('should set the project collection to all projects if the filter text is null',
-        (done: any) => {
+        async (done: any) => {
           let newValue = null;
           let projects = Mocks.object('projects');
           mockProjectCollection.list.and.returnValue(Promise.resolve(projects));
           spyOn(view['projectCollectionBridge_'], 'set');
-          view['onFilterButtonTextAttrChange_'](newValue)
-              .then(() => {
-                assert(view['projectCollectionBridge_'].set).to.haveBeenCalledWith(projects);
-                done();
-              }, done.fail);
+          await view['onFilterButtonTextAttrChange_'](newValue);
+          assert(view['projectCollectionBridge_'].set).to.haveBeenCalledWith(projects);
         });
 
     it('should set the project collection to all projects if the filter text is empty string',
-        (done: any) => {
+        async (done: any) => {
           let newValue = '';
           let projects = Mocks.object('projects');
           mockProjectCollection.list.and.returnValue(Promise.resolve(projects));
           spyOn(view['projectCollectionBridge_'], 'set');
-          view['onFilterButtonTextAttrChange_'](newValue)
-              .then(() => {
-                assert(view['projectCollectionBridge_'].set).to.haveBeenCalledWith(projects);
-                done();
-              }, done.fail);
+          await view['onFilterButtonTextAttrChange_'](newValue);
+          assert(view['projectCollectionBridge_'].set).to.haveBeenCalledWith(projects);
         });
   });
 
@@ -137,7 +128,7 @@ describe('landing.LandingView', () => {
 
   describe('onRouteChanged_', () => {
     it('should redirect to create page if the new location is landing but there are no projects',
-        (done: any) => {
+        async (done: any) => {
           let mockRoute = jasmine.createSpyObj('Route', ['getType']);
           mockRoute.getType.and.returnValue(Views.LANDING);
           mockRouteService.getRoute.and.returnValue(mockRoute);
@@ -147,53 +138,41 @@ describe('landing.LandingView', () => {
 
           mockProjectCollection.list.and.returnValue(Promise.resolve([]));
 
-          view['onRouteChanged_']()
-              .then(() => {
-                assert(mockRouteService.goTo).to.haveBeenCalledWith(routeFactory, {});
-                done();
-              }, done.fail);
+          await view['onRouteChanged_']();
+          assert(mockRouteService.goTo).to.haveBeenCalledWith(routeFactory, {});
         });
 
     it('should not redirect if the new location is landing but there are projects',
-        (done: any) => {
+        async (done: any) => {
           let mockRoute = jasmine.createSpyObj('Route', ['getType']);
           mockRoute.getType.and.returnValue(Views.LANDING);
           mockRouteService.getRoute.and.returnValue(mockRoute);
 
           mockProjectCollection.list.and.returnValue(Promise.resolve([Mocks.object('project')]));
 
-          view['onRouteChanged_']()
-              .then(() => {
-                assert(mockRouteService.goTo).toNot.haveBeenCalled();
-                done();
-              }, done.fail);
+          await view['onRouteChanged_']();
+          assert(mockRouteService.goTo).toNot.haveBeenCalled();
         });
 
-    it('should redirect to landing page if there are no valid routes', (done: any) => {
+    it('should redirect to landing page if there are no valid routes', async (done: any) => {
       mockRouteService.getRoute.and.returnValue(null);
 
       let routeFactory = Mocks.object('routeFactory');
       mockRouteFactoryService.landing.and.returnValue(routeFactory);
 
-      view['onRouteChanged_']()
-          .then(() => {
-            assert(mockRouteService.goTo).to.haveBeenCalledWith(routeFactory, {});
-            done();
-          }, done.fail);
+      await view['onRouteChanged_']();
+      assert(mockRouteService.goTo).to.haveBeenCalledWith(routeFactory, {});
     });
 
-    it('should not redirect if the new location is not landing', (done: any) => {
+    it('should not redirect if the new location is not landing', async (done: any) => {
       let mockRoute = jasmine.createSpyObj('Route', ['getType']);
       mockRoute.getType.and.returnValue(Views.CREATE_ASSET);
       mockRouteService.getRoute.and.returnValue(mockRoute);
 
       mockProjectCollection.list.and.returnValue(Promise.resolve([]));
 
-      view['onRouteChanged_']()
-          .then(() => {
-            assert(mockRouteService.goTo).toNot.haveBeenCalled();
-            done();
-          }, done.fail);
+      await view['onRouteChanged_']();
+      assert(mockRouteService.goTo).toNot.haveBeenCalled();
     });
   });
 
@@ -219,7 +198,7 @@ describe('landing.LandingView', () => {
   });
 
   describe('onInserted', () => {
-    it('should populate the project collection bridge correctly', (done: any) => {
+    it('should populate the project collection bridge correctly', async (done: any) => {
       let projectName1 = 'projectName1';
       let mockProject1 = jasmine.createSpyObj('Project1', ['getName']);
       mockProject1.getName.and.returnValue(projectName1);
@@ -233,12 +212,9 @@ describe('landing.LandingView', () => {
       spyOn(view['projectCollectionBridge_'], 'set');
 
       let element = Mocks.object('element');
-      view.onInserted(element)
-          .then(() => {
-            assert(view['projectCollectionBridge_'].set).to
-                .haveBeenCalledWith([mockProject1, mockProject2]);
-            done();
-          }, done.fail);
+      await view.onInserted(element);
+      assert(view['projectCollectionBridge_'].set).to
+          .haveBeenCalledWith([mockProject1, mockProject2]);
     });
   });
 });

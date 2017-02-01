@@ -5,7 +5,6 @@ import {Mocks} from 'external/gs_tools/src/mock';
 import {TestDispose} from 'external/gs_tools/src/testing';
 
 import {CollectionEvents} from './collection-events';
-import {Project} from './project';
 import {ProjectCollection} from './project-collection';
 
 
@@ -29,56 +28,45 @@ describe('data.ProjectCollection', () => {
   });
 
   describe('list', () => {
-    it('should return the correct projects', (done: any) => {
+    it('should return the correct projects', async (done: any) => {
       let projects = Mocks.object('projects');
 
       spyOn(collection['storage_'], 'list').and.returnValue(Promise.resolve(projects));
 
-      collection
-          .list()
-          .then((actualProjects: Project[]) => {
-            assert(actualProjects).to.equal(projects);
-            assert(collection['storage_'].list).to.haveBeenCalledWith();
-            done();
-          }, done.fail);
+      let actualProjects = await collection.list();
+      assert(actualProjects).to.equal(projects);
+      assert(collection['storage_'].list).to.haveBeenCalledWith();
     });
   });
 
   describe('reserveId', () => {
-    it('should return a promise that is resolved with the correct project ID', (done: any) => {
-      let projectId = 'projectId';
+    it('should return a promise that is resolved with the correct project ID',
+        async (done: any) => {
+          let projectId = 'projectId';
 
-      spyOn(collection['storage_'], 'reserveId').and.returnValue(Promise.resolve(projectId));
+          spyOn(collection['storage_'], 'reserveId').and.returnValue(Promise.resolve(projectId));
 
-      collection
-          .reserveId()
-          .then((actualId: string) => {
-            assert(actualId).to.equal(projectId);
-            assert(collection['storage_'].reserveId).to.haveBeenCalledWith();
-            done();
-          }, done.fail);
-    });
+          let actualId = await collection.reserveId();
+          assert(actualId).to.equal(projectId);
+          assert(collection['storage_'].reserveId).to.haveBeenCalledWith();
+        });
   });
 
   describe('search', () => {
-    it('should return the correct projects', (done: any) => {
+    it('should return the correct projects', async (done: any) => {
       let projects = Mocks.object('projects');
 
       spyOn(collection['storage_'], 'search').and.returnValue(Promise.resolve(projects));
 
       let token = 'token';
-      collection
-          .search(token)
-          .then((actualProjects: Project[]) => {
-            assert(actualProjects).to.equal(projects);
-            assert(collection['storage_'].search).to.haveBeenCalledWith(token);
-            done();
-          }, done.fail);
+      let actualProjects = await collection.search(token);
+      assert(actualProjects).to.equal(projects);
+      assert(collection['storage_'].search).to.haveBeenCalledWith(token);
     });
   });
 
   describe('update', () => {
-    it('should update the project correctly', (done: any) => {
+    it('should update the project correctly', async (done: any) => {
       let projectId = 'projectId';
       let mockProject = jasmine.createSpyObj('Project', ['getId']);
       mockProject.getId.and.returnValue(projectId);
@@ -86,19 +74,15 @@ describe('data.ProjectCollection', () => {
       spyOn(collection, 'dispatch');
       spyOn(collection['storage_'], 'update').and.returnValue(Promise.resolve(true));
 
-      collection
-          .update(mockProject)
-          .then(() => {
-            assert(collection['storage_'].update).to.haveBeenCalledWith(projectId, mockProject);
-            assert(collection.dispatch).to.haveBeenCalledWith(
-                CollectionEvents.ADDED,
-                <any> Matchers.any(Function),
-                mockProject);
-            done();
-          }, done.fail);
+      await collection.update(mockProject);
+      assert(collection['storage_'].update).to.haveBeenCalledWith(projectId, mockProject);
+      assert(collection.dispatch).to.haveBeenCalledWith(
+          CollectionEvents.ADDED,
+          <any> Matchers.any(Function),
+          mockProject);
     });
 
-    it('should not dispatch the ADDED event if not a new project', (done: any) => {
+    it('should not dispatch the ADDED event if not a new project', async (done: any) => {
       let projectId = 'projectId';
       let mockProject = jasmine.createSpyObj('Project', ['getId']);
       mockProject.getId.and.returnValue(projectId);
@@ -106,12 +90,8 @@ describe('data.ProjectCollection', () => {
       spyOn(collection, 'dispatch');
       spyOn(collection['storage_'], 'update').and.returnValue(Promise.resolve(false));
 
-      collection
-          .update(mockProject)
-          .then(() => {
-            assert(collection.dispatch).toNot.haveBeenCalled();
-            done();
-          }, done.fail);
+      await collection.update(mockProject);
+      assert(collection.dispatch).toNot.haveBeenCalled();
     });
   });
 

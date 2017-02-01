@@ -85,25 +85,18 @@ export class CreateProjectView extends BaseThemedElement {
    * @return Promise that will be resolved when all handling logic have completed.
    */
   @handle('#createButton').event(Event.ACTION)
-  protected onSubmitAction_(): Promise<void> {
+  protected async onSubmitAction_(): Promise<void> {
     let projectName = this.nameValueBridge_.get();
     if (projectName === null) {
       Validate.fail('Project name is not set');
     }
 
-    return this.projectCollection_
-        .reserveId()
-        .then((id: string) => {
-          let project = new Project(id);
-          project.setName(projectName!);
-          return Promise.all([
-            this.projectCollection_.update(project),
-            id,
-          ]);
-        })
-        .then(([, id]: [void, string]) => {
-          this.reset_();
-          this.routeService_.goTo(this.routeFactoryService_.assetList(), {projectId: id});
-        });
+    let id = await this.projectCollection_.reserveId();
+    let project = new Project(id);
+    project.setName(projectName!);
+    await this.projectCollection_.update(project),
+
+    this.reset_();
+    this.routeService_.goTo(this.routeFactoryService_.assetList(), {projectId: id});
   }
 }

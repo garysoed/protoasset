@@ -35,44 +35,37 @@ describe('data.TsvDataSource', () => {
   });
 
   describe('getData', () => {
-    it('should resolve with the parsed data', (done: any) => {
+    it('should resolve with the parsed data', async (done: any) => {
       let parsedData = Mocks.object('parsedData');
       spyOn(source, 'parseData_').and.returnValue(parsedData);
 
       let innerData = 'innerData';
       mockInnerSource.getData.and.returnValue(Promise.resolve(innerData));
 
-      source
-          .getData()
-          .then((actualData: string[][]) => {
-            assert(actualData).to.equal(parsedData);
-            assert(source['cachedInnerSourceData_']).to.equal(innerData);
-            assert(source['cache_']).to.equal(parsedData);
-            assert(source['parseData_']).to.haveBeenCalledWith(innerData);
-            done();
-          }, done.fail);
+      let actualData = await source.getData();
+      assert(actualData).to.equal(parsedData);
+      assert(source['cachedInnerSourceData_']).to.equal(innerData);
+      assert(source['cache_']).to.equal(parsedData);
+      assert(source['parseData_']).to.haveBeenCalledWith(innerData);
     });
 
-    it('should use the cache if available and the inner data has not changed', (done: any) => {
-      let cachedData = Mocks.object('cachedData');
-      source['cache_'] = cachedData;
+    it('should use the cache if available and the inner data has not changed',
+        async (done: any) => {
+          let cachedData = Mocks.object('cachedData');
+          source['cache_'] = cachedData;
 
-      spyOn(source, 'parseData_');
+          spyOn(source, 'parseData_');
 
-      let innerData = 'innerData';
-      source['cachedInnerSourceData_'] = innerData;
-      mockInnerSource.getData.and.returnValue(Promise.resolve(innerData));
+          let innerData = 'innerData';
+          source['cachedInnerSourceData_'] = innerData;
+          mockInnerSource.getData.and.returnValue(Promise.resolve(innerData));
 
-      source
-          .getData()
-          .then((actualData: string[][]) => {
-            assert(actualData).to.equal(cachedData);
-            assert(source['parseData_']).toNot.haveBeenCalled();
-            done();
-          }, done.fail);
-    });
+          let actualData = await source.getData();
+          assert(actualData).to.equal(cachedData);
+          assert(source['parseData_']).toNot.haveBeenCalled();
+        });
 
-    it('should not use the cache if inner data has been changed', (done: any) => {
+    it('should not use the cache if inner data has been changed', async (done: any) => {
       let cachedData = Mocks.object('cachedData');
       source['cache_'] = cachedData;
 
@@ -83,15 +76,11 @@ describe('data.TsvDataSource', () => {
       source['cachedInnerSourceData_'] = 'oldInnerData';
       mockInnerSource.getData.and.returnValue(Promise.resolve(innerData));
 
-      source
-          .getData()
-          .then((actualData: string[][]) => {
-            assert(actualData).to.equal(parsedData);
-            assert(source['cachedInnerSourceData_']).to.equal(innerData);
-            assert(source['cache_']).to.equal(parsedData);
-            assert(source['parseData_']).to.haveBeenCalledWith(innerData);
-            done();
-          }, done.fail);
+      let actualData = await source.getData();
+      assert(actualData).to.equal(parsedData);
+      assert(source['cachedInnerSourceData_']).to.equal(innerData);
+      assert(source['cache_']).to.equal(parsedData);
+      assert(source['parseData_']).to.haveBeenCalledWith(innerData);
     });
   });
 });

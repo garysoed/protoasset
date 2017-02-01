@@ -11,7 +11,7 @@ describe('data.TextLayer', () => {
   let layer: TextLayer;
 
   beforeEach(() => {
-    layer = new TextLayer('name');
+    layer = new TextLayer('id', 'name');
     TestDispose.add(layer);
   });
 

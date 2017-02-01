@@ -17,7 +17,7 @@ describe('data.TemplateCompilerService', () => {
   });
 
   describe('create', () => {
-    it('should create the compiler correctly', (done: any) => {
+    it('should create the compiler correctly', async (done: any) => {
       let mockHandlebarsInstance = jasmine.createSpyObj('HandlebarsInstance', ['registerHelper']);
       mockHandlebars.create.and.returnValue(mockHandlebarsInstance);
 
@@ -44,30 +44,22 @@ describe('data.TemplateCompilerService', () => {
       let compiler = Mocks.object('compiler');
       spyOn(TemplateCompiler, 'of').and.returnValue(compiler);
 
-      service
-          .create(mockAsset)
-          .then((actualCompiler: any) => {
-            assert(actualCompiler).to.equal(compiler);
-            assert(TemplateCompiler.of).to.haveBeenCalledWith(dataValue, mockHandlebarsInstance);
-            assert(mockHandlebarsInstance.registerHelper).to.haveBeenCalledWith(name1, function1);
-            assert(mockHandlebarsInstance.registerHelper).to.haveBeenCalledWith(name2, function2);
-            done();
-          }, done.fail);
+      let actualCompiler = await service.create(mockAsset);
+      assert(actualCompiler).to.equal(compiler);
+      assert(TemplateCompiler.of).to.haveBeenCalledWith(dataValue, mockHandlebarsInstance);
+      assert(mockHandlebarsInstance.registerHelper).to.haveBeenCalledWith(name1, function1);
+      assert(mockHandlebarsInstance.registerHelper).to.haveBeenCalledWith(name2, function2);
     });
 
-    it('should resolve with null if data cannot be found', (done: any) => {
+    it('should resolve with null if data cannot be found', async (done: any) => {
       let mockHandlebarsInstance = jasmine.createSpyObj('HandlebarsInstance', ['registerHelper']);
       mockHandlebars.create.and.returnValue(mockHandlebarsInstance);
 
       let mockAsset = jasmine.createSpyObj('Asset', ['getData', 'getHelpers']);
       mockAsset.getData.and.returnValue(null);
 
-      service
-          .create(mockAsset)
-          .then((actualCompiler: any) => {
-            assert(actualCompiler).to.equal(null);
-            done();
-          }, done.fail);
+      let actualCompiler = await service.create(mockAsset);
+      assert(actualCompiler).to.equal(null);
     });
   });
 });

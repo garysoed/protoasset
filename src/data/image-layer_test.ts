@@ -11,7 +11,7 @@ describe('data.ImageLayer', () => {
   let layer: ImageLayer;
 
   beforeEach(() => {
-    layer = new ImageLayer('name');
+    layer = new ImageLayer('id', 'name');
     TestDispose.add(layer);
   });
 

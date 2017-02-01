@@ -42,19 +42,16 @@ export class TsvDataSource implements IDataSource<string[][]> {
   /**
    * @override
    */
-  getData(): Promise<string[][]> {
-    return this.innerSource_
-        .getData()
-        .then((data: string) => {
-          if (this.cache_ === null || data !== this.cachedInnerSourceData_) {
-            let tsvData = this.parseData_(data);
-            this.cache_ = tsvData;
-            this.cachedInnerSourceData_ = data;
-            return tsvData;
-          } else {
-            return this.cache_;
-          }
-        });
+  async getData(): Promise<string[][]> {
+    let data = await this.innerSource_.getData();
+    if (this.cache_ === null || data !== this.cachedInnerSourceData_) {
+      let tsvData = this.parseData_(data);
+      this.cache_ = tsvData;
+      this.cachedInnerSourceData_ = data;
+      return tsvData;
+    } else {
+      return this.cache_;
+    }
   }
 
   /**

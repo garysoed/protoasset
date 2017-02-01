@@ -24,7 +24,7 @@ export class TemplateCompilerService {
    * @return Promise that will be resolved with the newly created TemplateCompiler, or null if it
    *    cannot be created.
    */
-  create(asset: Asset): Promise<TemplateCompiler | null> {
+  async create(asset: Asset): Promise<TemplateCompiler | null> {
     let data = asset.getData();
     if (data === null) {
       return Promise.resolve(null);
@@ -36,9 +36,7 @@ export class TemplateCompilerService {
         .forEach((helper: Helper) => {
           handlebars.registerHelper(helper.getName(), helper.asFunction());
         });
-    return data.getData()
-        .then((dataValue: string[][]) => {
-          return TemplateCompiler.of(dataValue, handlebars);
-        });
+    let dataValue = await data.getData();
+    return TemplateCompiler.of(dataValue, handlebars);
   }
 }

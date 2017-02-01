@@ -35,7 +35,7 @@ describe('routing.AssetListRouteFactory', () => {
   });
 
   describe('getName', () => {
-    it('should return the correct name', (done: any) => {
+    it('should return the correct name', async (done: any) => {
       let name = 'name';
       let mockProject = jasmine.createSpyObj('Project', ['getName']);
       mockProject.getName.and.returnValue(name);
@@ -43,25 +43,17 @@ describe('routing.AssetListRouteFactory', () => {
 
       let projectId = 'projectId';
 
-      factory
-          .getName({projectId: projectId})
-          .then((actualName: string) => {
-            assert(actualName).to.equal(name);
-            assert(mockProjectCollection.get).to.haveBeenCalledWith(projectId);
-            done();
-          }, done.fail);
+      let actualName = await factory.getName({projectId: projectId});
+      assert(actualName).to.equal(name);
+      assert(mockProjectCollection.get).to.haveBeenCalledWith(projectId);
     });
 
-    it('should return the project ID if the project is unknown', (done: any) => {
+    it('should return the project ID if the project is unknown', async (done: any) => {
       mockProjectCollection.get.and.returnValue(Promise.resolve(null));
 
       let projectId = 'projectId';
-      factory
-          .getName({projectId: projectId})
-          .then((actualName: string) => {
-            assert(actualName).to.equal(`Unknown project ${projectId}`);
-            done();
-          }, done.fail);
+      let actualName = await factory.getName({projectId: projectId});
+      assert(actualName).to.equal(`Unknown project ${projectId}`);
     });
   });
 });

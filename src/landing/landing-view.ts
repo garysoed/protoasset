@@ -64,21 +64,18 @@ export class LandingView extends BaseThemedElement {
   /**
    * Handles event when the location was changed.
    */
-  private onRouteChanged_(): Promise<void> {
+  private async onRouteChanged_(): Promise<void> {
     let route = this.routeService_.getRoute();
     if (route === null) {
       this.routeService_.goTo(this.routeFactoryService_.landing(), {});
-      return Promise.resolve();
-    } else if (route.getType() === Views.LANDING) {
-      return this.projectCollection_
-          .list()
-          .then((projects: Project[]) => {
-            if (projects.length === 0) {
-              this.routeService_.goTo(this.routeFactoryService_.createProject(), {});
-            }
-          });
-    } else {
-      return Promise.resolve();
+      return;
+    }
+
+    if (route.getType() === Views.LANDING) {
+      let projects = await this.projectCollection_.list();
+      if (projects.length === 0) {
+        this.routeService_.goTo(this.routeFactoryService_.createProject(), {});
+      }
     }
   }
 
@@ -91,15 +88,13 @@ export class LandingView extends BaseThemedElement {
   }
 
   @handle('#filterButton').attributeChange('filter-text', StringParser)
-  protected onFilterButtonTextAttrChange_(newValue: string | null): Promise<void> {
+  protected async onFilterButtonTextAttrChange_(newValue: string | null): Promise<void> {
     let projectsPromise = (newValue === null || newValue === '')
         ? this.projectCollection_.list()
         : this.projectCollection_.search(newValue);
 
-    return projectsPromise
-        .then((projects: Project[]) => {
-          this.projectCollectionBridge_.set(projects);
-        });
+    let projects = await projectsPromise;
+    this.projectCollectionBridge_.set(projects);
   }
 
   /**
@@ -131,12 +126,9 @@ export class LandingView extends BaseThemedElement {
   /**
    * @override
    */
-  onInserted(element: HTMLElement): Promise<void> {
+  async onInserted(element: HTMLElement): Promise<void> {
     super.onInserted(element);
-    return this.projectCollection_
-        .list()
-        .then((projects: Project[]) => {
-          this.projectCollectionBridge_.set(projects);
-        });
+    let projects = await this.projectCollection_.list();
+    this.projectCollectionBridge_.set(projects);
   }
 }

@@ -60,7 +60,7 @@ describe('project.AssetListView', () => {
   });
 
   describe('onProjectIdChanged_', () => {
-    it('should update the project name corretly if there are matches', (done: any) => {
+    it('should update the project name corretly if there are matches', async (done: any) => {
       let projectId = 'projectId';
       let projectName = 'projectName';
 
@@ -74,15 +74,12 @@ describe('project.AssetListView', () => {
       spyOn(view['assetsBridge_'], 'set');
       spyOn(view['projectNameTextBridge_'], 'set');
 
-      view['onProjectIdChanged_']()
-          .then(() => {
-            assert(view['projectNameTextBridge_'].set).to.haveBeenCalledWith(projectName);
-            assert(mockProjectCollection.get).to.haveBeenCalledWith(projectId);
-            done();
-          }, done.fail);
+      await view['onProjectIdChanged_']();
+      assert(view['projectNameTextBridge_'].set).to.haveBeenCalledWith(projectName);
+      assert(mockProjectCollection.get).to.haveBeenCalledWith(projectId);
     });
 
-    it('should set the assets', (done: any) => {
+    it('should set the assets', async (done: any) => {
       let projectId = 'projectId';
       let assets = Mocks.object('assets');
 
@@ -93,16 +90,13 @@ describe('project.AssetListView', () => {
       spyOn(view['assetsBridge_'], 'set');
       spyOn(view['projectNameTextBridge_'], 'set');
 
-      view['onProjectIdChanged_']()
-          .then(() => {
-            assert(view['assetsBridge_'].set).to.haveBeenCalledWith(assets);
-            assert(mockAssetCollection.list).to.haveBeenCalledWith(projectId);
-            done();
-          }, done.fail);
+      await view['onProjectIdChanged_']();
+      assert(view['assetsBridge_'].set).to.haveBeenCalledWith(assets);
+      assert(mockAssetCollection.list).to.haveBeenCalledWith(projectId);
     });
 
     it('should not throw error if there are no projects corresponding to the project ID',
-        (done: any) => {
+        async (done: any) => {
           let projectId = 'projectId';
 
           mockAssetCollection.list.and.returnValue(Promise.resolve());
@@ -111,22 +105,16 @@ describe('project.AssetListView', () => {
           spyOn(view['assetsBridge_'], 'set');
           spyOn(view['projectNameTextBridge_'], 'set');
 
-          view['onProjectIdChanged_']()
-              .then(() => {
-                assert(view['projectNameTextBridge_'].set).toNot.haveBeenCalled();
-                done();
-              }, done.fail);
+          await view['onProjectIdChanged_']();
+          assert(view['projectNameTextBridge_'].set).toNot.haveBeenCalled();
         });
 
-    it('should not throw error if there are no project IDs', (done: any) => {
+    it('should not throw error if there are no project IDs', async (done: any) => {
       spyOn(view, 'getProjectId_').and.returnValue(null);
       spyOn(view['projectNameTextBridge_'], 'set');
 
-      view['onProjectIdChanged_']()
-          .then(() => {
-            assert(view['projectNameTextBridge_'].set).toNot.haveBeenCalled();
-            done();
-          }, done.fail);
+      await view['onProjectIdChanged_']();
+      assert(view['projectNameTextBridge_'].set).toNot.haveBeenCalled();
     });
   });
 

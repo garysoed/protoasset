@@ -6,7 +6,6 @@ import {BaseThemedElement} from 'external/gs_ui/src/common';
 import {RouteService} from 'external/gs_ui/src/routing';
 import {ThemeService} from 'external/gs_ui/src/theming';
 
-import {Project} from '../data/project';
 import {ProjectCollection} from '../data/project-collection';
 import {RouteFactoryService} from '../routing/route-factory-service';
 import {Views} from '../routing/views';
@@ -51,15 +50,12 @@ export class ProjectItem extends BaseThemedElement {
   }
 
   @handle(null).attributeChange('project-id', StringParser)
-  protected onProjectIdChanged_(newId: string): Promise<void> {
-    return this.projectCollection_
-        .get(newId)
-        .then((project: Project | null) => {
-          if (project !== null) {
-            this.projectNameBridge_.set(project.getName());
-          } else {
-            this.projectNameBridge_.delete();
-          }
-        });
+  protected async onProjectIdChanged_(newId: string): Promise<void> {
+    let project = await this.projectCollection_.get(newId);
+    if (project !== null) {
+      this.projectNameBridge_.set(project.getName());
+    } else {
+      this.projectNameBridge_.delete();
+    }
   }
 }

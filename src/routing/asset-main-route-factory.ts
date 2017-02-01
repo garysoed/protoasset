@@ -1,6 +1,5 @@
 import {AbstractRouteFactory} from 'external/gs_ui/src/routing';
 
-import {Asset} from '../data/asset';
 import {AssetCollection} from '../data/asset-collection';
 
 import {Views} from './views';
@@ -46,15 +45,12 @@ export class AssetMainRouteFactory extends AbstractRouteFactory<Views, CP, CR, P
   /**
    * @override
    */
-  getName(params: CR): Promise<string> {
-    return this.assetCollection_
-        .get(params.projectId, params.assetId)
-        .then((asset: Asset | null) => {
-          if (asset === null) {
-            return 'Unknown asset';
-          } else {
-            return asset.getName();
-          }
-        });
+  async getName(params: CR): Promise<string> {
+    let asset = await this.assetCollection_.get(params.projectId, params.assetId);
+    if (asset === null) {
+      return 'Unknown asset';
+    } else {
+      return asset.getName();
+    }
   }
 }

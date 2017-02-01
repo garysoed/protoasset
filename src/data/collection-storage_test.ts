@@ -18,7 +18,7 @@ describe('project.CollectionStorage', () => {
   });
 
   describe('getFusePromise_', () => {
-    it('should return the correct fuse object', (done: any) => {
+    it('should return the correct fuse object', async (done: any) => {
       let item1 = Mocks.object('item1');
       let searchIndex1 = Mocks.object('searchIndex1');
 
@@ -38,29 +38,23 @@ describe('project.CollectionStorage', () => {
       let fuse = Mocks.object('fuse');
       spyOn(storage, 'createFuse_').and.returnValue(fuse);
 
-      storage['getFusePromise_']()
-          .then((actualFuse: any) => {
-            assert(actualFuse).to.equal(fuse);
-            assert(storage['createFuse_']).to.haveBeenCalledWith([searchIndex1, searchIndex2]);
-            assert(mockGetSearchIndex).to.haveBeenCalledWith(item1);
-            assert(mockGetSearchIndex).to.haveBeenCalledWith(item2);
-            done();
-          }, done.fail);
+      let actualFuse = await storage['getFusePromise_']();
+      assert(actualFuse).to.equal(fuse);
+      assert(storage['createFuse_']).to.haveBeenCalledWith([searchIndex1, searchIndex2]);
+      assert(mockGetSearchIndex).to.haveBeenCalledWith(item1);
+      assert(mockGetSearchIndex).to.haveBeenCalledWith(item2);
     });
 
-    it('should return the cached fuse object', (done: any) => {
+    it('should return the cached fuse object', async (done: any) => {
       let fuse = Mocks.object('fuse');
       storage['fusePromise_'] = Promise.resolve(fuse);
 
       spyOn(storage, 'createFuse_');
 
-      storage['getFusePromise_']()
-          .then((actualFuse: any) => {
-            assert(actualFuse).to.equal(fuse);
-            assert(storage['createFuse_']).toNot.haveBeenCalled();
-            assert(mockGetSearchIndex).toNot.haveBeenCalled();
-            done();
-          }, done.fail);
+      let actualFuse = await storage['getFusePromise_']();
+      assert(actualFuse).to.equal(fuse);
+      assert(storage['createFuse_']).toNot.haveBeenCalled();
+      assert(mockGetSearchIndex).toNot.haveBeenCalled();
     });
   });
 
@@ -93,7 +87,7 @@ describe('project.CollectionStorage', () => {
   });
 
   describe('search', () => {
-    it('should return the correct result from fuse', (done: any) => {
+    it('should return the correct result from fuse', async (done: any) => {
       let item1 = Mocks.object('item1');
       let item2 = Mocks.object('item2');
       let mockFuse = jasmine.createSpyObj('Fuse', ['search']);
@@ -104,46 +98,34 @@ describe('project.CollectionStorage', () => {
       spyOn(storage, 'getFusePromise_').and.returnValue(Promise.resolve(mockFuse));
 
       let token = 'token';
-      storage
-          .search(token)
-          .then((results: any) => {
-            assert(results).to.equal([item1, item2]);
-            assert(mockFuse.search).to.haveBeenCalledWith(token);
-            done();
-          }, done.fail);
+      let results = await storage.search(token);
+      assert(results).to.equal([item1, item2]);
+      assert(mockFuse.search).to.haveBeenCalledWith(token);
     });
   });
 
   describe('update', () => {
     it('should update the storage, resolve true if the item is new, and clear the fuse cache',
-        (done: any) => {
+        async (done: any) => {
           let item = Mocks.object('item');
           let itemId = 'itemId';
 
           mockStorage.update.and.returnValue(Promise.resolve());
           mockStorage.read.and.returnValue(Promise.resolve(null));
 
-          storage
-              .update(itemId, item)
-              .then((isNewItem: boolean) => {
-                assert(isNewItem).to.beTrue();
-                assert(storage['fusePromise_']).to.beNull();
-                assert(mockStorage.update).to.haveBeenCalledWith(itemId, item);
-                assert(mockStorage.read).to.haveBeenCalledWith(itemId);
-                done();
-              }, done.fail);
+          let isNewItem = await storage.update(itemId, item);
+          assert(isNewItem).to.beTrue();
+          assert(storage['fusePromise_']).to.beNull();
+          assert(mockStorage.update).to.haveBeenCalledWith(itemId, item);
+          assert(mockStorage.read).to.haveBeenCalledWith(itemId);
         });
 
-    it('should resolve false if the item is not new', (done: any) => {
+    it('should resolve false if the item is not new', async (done: any) => {
       mockStorage.update.and.returnValue(Promise.resolve());
       mockStorage.read.and.returnValue(Promise.resolve(Mocks.object('existingItem')));
 
-      storage
-          .update('itemId', Mocks.object('item'))
-          .then((isNewItem: boolean) => {
-            assert(isNewItem).to.beFalse();
-            done();
-          }, done.fail);
-      });
+      let isNewItem = await storage.update('itemId', Mocks.object('item'));
+      assert(isNewItem).to.beFalse();
+    });
   });
 });

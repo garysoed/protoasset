@@ -28,7 +28,7 @@ describe('asset.HelperItem', () => {
   });
 
   describe('getAsset_', () => {
-    it('should resolve with the correct asset', (done: any) => {
+    it('should resolve with the correct asset', async (done: any) => {
       let projectId = 'projectId';
       let assetId = 'assetId';
       spyOn(item['assetIdBridge_'], 'get').and.returnValue(assetId);
@@ -37,41 +37,32 @@ describe('asset.HelperItem', () => {
       let asset = Mocks.object('asset');
       mockAssetCollection.get.and.returnValue(Promise.resolve(asset));
 
-      item['getAsset_']()
-          .then((actualAsset: any) => {
-            assert(actualAsset).to.equal(asset);
-            assert(mockAssetCollection.get).to.haveBeenCalledWith(projectId, assetId);
-            done();
-          }, done.fail);
+      let actualAsset = await item['getAsset_']();
+      assert(actualAsset).to.equal(asset);
+      assert(mockAssetCollection.get).to.haveBeenCalledWith(projectId, assetId);
     });
 
-    it('should resolve with null if there are no asset IDs', (done: any) => {
+    it('should resolve with null if there are no asset IDs', async (done: any) => {
       let projectId = 'projectId';
       spyOn(item['assetIdBridge_'], 'get').and.returnValue(null);
       spyOn(item['projectIdBridge_'], 'get').and.returnValue(projectId);
 
-      item['getAsset_']()
-          .then((actualAsset: any) => {
-            assert(actualAsset).to.beNull();
-            done();
-          }, done.fail);
+      let actualAsset = await item['getAsset_']();
+      assert(actualAsset).to.beNull();
     });
 
-    it('should resolve with null if there are no project IDs', (done: any) => {
+    it('should resolve with null if there are no project IDs', async (done: any) => {
       let assetId = 'assetId';
       spyOn(item['assetIdBridge_'], 'get').and.returnValue(assetId);
       spyOn(item['projectIdBridge_'], 'get').and.returnValue(null);
 
-      item['getAsset_']()
-          .then((actualAsset: any) => {
-            assert(actualAsset).to.beNull();
-            done();
-          }, done.fail);
+      let actualAsset = await item['getAsset_']();
+      assert(actualAsset).to.beNull();
     });
   });
 
   describe('getHelper_', () => {
-    it('should resolve with the correct helper', (done: any) => {
+    it('should resolve with the correct helper', async (done: any) => {
       let helperId = 'helperId';
       spyOn(item['helperIdBridge_'], 'get').and.returnValue(helperId);
 
@@ -80,35 +71,26 @@ describe('asset.HelperItem', () => {
       mockAsset.getHelper.and.returnValue(helper);
       spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
 
-      item['getHelper_']()
-          .then((actualHelper: any) => {
-            assert(actualHelper).to.equal(helper);
-            assert(mockAsset.getHelper).to.haveBeenCalledWith(helperId);
-            done();
-          }, done.fail);
+      let actualHelper = await item['getHelper_']();
+      assert(actualHelper).to.equal(helper);
+      assert(mockAsset.getHelper).to.haveBeenCalledWith(helperId);
     });
 
-    it('should resolve with null if asset cannot be found', (done: any) => {
+    it('should resolve with null if asset cannot be found', async (done: any) => {
       let helperId = 'helperId';
       spyOn(item['helperIdBridge_'], 'get').and.returnValue(helperId);
 
       spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(null));
 
-      item['getHelper_']()
-          .then((actualHelper: any) => {
-            assert(actualHelper).to.beNull();
-            done();
-          }, done.fail);
+      let actualHelper = await item['getHelper_']();
+      assert(actualHelper).to.beNull();
     });
 
-    it('should resolve with null if there are no helper IDs', (done: any) => {
+    it('should resolve with null if there are no helper IDs', async (done: any) => {
       spyOn(item['helperIdBridge_'], 'get').and.returnValue(null);
 
-      item['getHelper_']()
-          .then((actualHelper: any) => {
-            assert(actualHelper).to.beNull();
-            done();
-          }, done.fail);
+      let actualHelper = await item['getHelper_']();
+      assert(actualHelper).to.beNull();
     });
   });
 
@@ -134,7 +116,7 @@ describe('asset.HelperItem', () => {
   });
 
   describe('onDeleteClick_', () => {
-    it('should delete the helper and update the asset and helper', (done: any) => {
+    it('should delete the helper and update the asset and helper', async (done: any) => {
       let mockAsset = jasmine.createSpyObj('Asset', ['deleteHelper']);
       spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
 
@@ -147,16 +129,13 @@ describe('asset.HelperItem', () => {
 
       mockAssetCollection.update.and.returnValue(Promise.resolve());
 
-      item['onDeleteClick_']()
-          .then(() => {
-            assert(item['updateHelper_']).to.haveBeenCalledWith();
-            assert(mockAssetCollection.update).to.haveBeenCalledWith(mockAsset);
-            assert(mockAsset.deleteHelper).to.haveBeenCalledWith(helperId);
-            done();
-          }, done.fail);
+      await item['onDeleteClick_']();
+      assert(item['updateHelper_']).to.haveBeenCalledWith();
+      assert(mockAssetCollection.update).to.haveBeenCalledWith(mockAsset);
+      assert(mockAsset.deleteHelper).to.haveBeenCalledWith(helperId);
     });
 
-    it('should do nothing if the asset cannot be found', (done: any) => {
+    it('should do nothing if the asset cannot be found', async (done: any) => {
       spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(null));
 
       let helperId = 'helperId';
@@ -168,14 +147,11 @@ describe('asset.HelperItem', () => {
 
       mockAssetCollection.update.and.returnValue(Promise.resolve());
 
-      item['onDeleteClick_']()
-          .then(() => {
-            assert(item['updateHelper_']).toNot.haveBeenCalled();
-            done();
-          }, done.fail);
+      await item['onDeleteClick_']();
+      assert(item['updateHelper_']).toNot.haveBeenCalled();
     });
 
-    it('should do nothing if the helper cannot be found', (done: any) => {
+    it('should do nothing if the helper cannot be found', async (done: any) => {
       let mockAsset = jasmine.createSpyObj('Asset', ['deleteHelper']);
       spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
       spyOn(item, 'getHelper_').and.returnValue(Promise.resolve(null));
@@ -184,16 +160,13 @@ describe('asset.HelperItem', () => {
 
       mockAssetCollection.update.and.returnValue(Promise.resolve());
 
-      item['onDeleteClick_']()
-          .then(() => {
-            assert(item['updateHelper_']).toNot.haveBeenCalled();
-            done();
-          }, done.fail);
+      await item['onDeleteClick_']();
+      assert(item['updateHelper_']).toNot.haveBeenCalled();
     });
   });
 
   describe('onEditClick_', () => {
-    it('should update the input name and set the root value to edit', (done: any) => {
+    it('should update the input name and set the root value to edit', async (done: any) => {
       let name = 'name';
       let mockHelper = jasmine.createSpyObj('Helper', ['getName']);
       mockHelper.getName.and.returnValue(name);
@@ -201,30 +174,24 @@ describe('asset.HelperItem', () => {
       spyOn(item['rootValueBridge_'], 'set');
       spyOn(item['nameInputBridge_'], 'set');
 
-      item['onEditClick_']()
-          .then(() => {
-            assert(item['rootValueBridge_'].set).to.haveBeenCalledWith('edit');
-            assert(item['nameInputBridge_'].set).to.haveBeenCalledWith(name);
-            done();
-          }, done.fail);
+      await item['onEditClick_']();
+      assert(item['rootValueBridge_'].set).to.haveBeenCalledWith('edit');
+      assert(item['nameInputBridge_'].set).to.haveBeenCalledWith(name);
     });
 
-    it('should delete the input name if the helper does not exist', (done: any) => {
+    it('should delete the input name if the helper does not exist', async (done: any) => {
       spyOn(item, 'getHelper_').and.returnValue(Promise.resolve(null));
       spyOn(item['rootValueBridge_'], 'set');
       spyOn(item['nameInputBridge_'], 'delete');
 
-      item['onEditClick_']()
-          .then(() => {
-            assert(item['rootValueBridge_'].set).to.haveBeenCalledWith('edit');
-            assert(item['nameInputBridge_'].delete).to.haveBeenCalledWith();
-            done();
-          }, done.fail);
+      await item['onEditClick_']();
+      assert(item['rootValueBridge_'].set).to.haveBeenCalledWith('edit');
+      assert(item['nameInputBridge_'].delete).to.haveBeenCalledWith();
     });
   });
 
   describe('onNameClick_', () => {
-    it('should navigate to the correct helper', (done: any) => {
+    it('should navigate to the correct helper', async (done: any) => {
       let assetId = 'assetId';
       let projectId = 'projectId';
       let mockAsset = jasmine.createSpyObj('Asset', ['getId', 'getProjectId']);
@@ -240,30 +207,24 @@ describe('asset.HelperItem', () => {
       let helperRouteFactory = Mocks.object('helperRouteFactory');
       mockRouteFactoryService.helper.and.returnValue(helperRouteFactory);
 
-      item['onNameClick_']()
-          .then(() => {
-            assert(mockRouteService.goTo).to.haveBeenCalledWith(
-                helperRouteFactory,
-                {assetId, helperId, projectId});
-            done();
-          }, done.fail);
+      await item['onNameClick_']();
+      assert(mockRouteService.goTo).to.haveBeenCalledWith(
+          helperRouteFactory,
+          {assetId, helperId, projectId});
     });
 
-    it('should do nothing if the asset does not exist', (done: any) => {
+    it('should do nothing if the asset does not exist', async (done: any) => {
       spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(null));
 
       let mockHelper = jasmine.createSpyObj('Helper', ['getId']);
       mockHelper.getId.and.returnValue('helperId');
       spyOn(item, 'getHelper_').and.returnValue(Promise.resolve(mockHelper));
 
-      item['onNameClick_']()
-          .then(() => {
-            assert(mockRouteService.goTo).toNot.haveBeenCalled();
-            done();
-          }, done.fail);
+      await item['onNameClick_']();
+      assert(mockRouteService.goTo).toNot.haveBeenCalled();
     });
 
-    it('should do nothing if the helper cannot be found', (done: any) => {
+    it('should do nothing if the helper cannot be found', async (done: any) => {
       let mockAsset = jasmine.createSpyObj('Asset', ['getId', 'getProjectId']);
       mockAsset.getId.and.returnValue('assetId');
       mockAsset.getProjectId.and.returnValue('projectId');
@@ -271,39 +232,34 @@ describe('asset.HelperItem', () => {
 
       spyOn(item, 'getHelper_').and.returnValue(Promise.resolve(null));
 
-      item['onNameClick_']()
-          .then(() => {
-            assert(mockRouteService.goTo).toNot.haveBeenCalled();
-            done();
-          }, done.fail);
+      await item['onNameClick_']();
+      assert(mockRouteService.goTo).toNot.haveBeenCalled();
     });
   });
 
   describe('onOkClick_', () => {
-    it('should update the helper, save the asset, and set the root value to read', (done: any) => {
-      let helperId = 'helperId';
-      spyOn(item['helperIdBridge_'], 'get').and.returnValue(helperId);
+    it('should update the helper, save the asset, and set the root value to read',
+        async (done: any) => {
+          let helperId = 'helperId';
+          spyOn(item['helperIdBridge_'], 'get').and.returnValue(helperId);
 
-      let mockHelper = jasmine.createSpyObj('Helper', ['setName']);
-      let mockAsset = jasmine.createSpyObj('Asset', ['getHelper']);
-      mockAsset.getHelper.and.returnValue(mockHelper);
-      spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
+          let mockHelper = jasmine.createSpyObj('Helper', ['setName']);
+          let mockAsset = jasmine.createSpyObj('Asset', ['getHelper']);
+          mockAsset.getHelper.and.returnValue(mockHelper);
+          spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
 
-      let name = 'name';
-      spyOn(item['nameInputBridge_'], 'get').and.returnValue(name);
-      spyOn(item['rootValueBridge_'], 'set');
+          let name = 'name';
+          spyOn(item['nameInputBridge_'], 'get').and.returnValue(name);
+          spyOn(item['rootValueBridge_'], 'set');
 
-      item['onOkClick_']()
-          .then(() => {
-            assert(mockAssetCollection.update).to.haveBeenCalledWith(mockAsset);
-            assert(item['rootValueBridge_'].set).to.haveBeenCalledWith('read');
-            assert(mockHelper.setName).to.haveBeenCalledWith(name);
-            assert(mockAsset.getHelper).to.haveBeenCalledWith(helperId);
-            done();
-          }, done.fail);
-    });
+          await item['onOkClick_']();
+          assert(mockAssetCollection.update).to.haveBeenCalledWith(mockAsset);
+          assert(item['rootValueBridge_'].set).to.haveBeenCalledWith('read');
+          assert(mockHelper.setName).to.haveBeenCalledWith(name);
+          assert(mockAsset.getHelper).to.haveBeenCalledWith(helperId);
+        });
 
-    it('should set the name to "" if null', (done: any) => {
+    it('should set the name to "" if null', async (done: any) => {
       let helperId = 'helperId';
       spyOn(item['helperIdBridge_'], 'get').and.returnValue(helperId);
 
@@ -315,14 +271,11 @@ describe('asset.HelperItem', () => {
       spyOn(item['nameInputBridge_'], 'get').and.returnValue(null);
       spyOn(item['rootValueBridge_'], 'set');
 
-      item['onOkClick_']()
-          .then(() => {
-            assert(mockHelper.setName).to.haveBeenCalledWith('');
-            done();
-          }, done.fail);
+      await item['onOkClick_']();
+      assert(mockHelper.setName).to.haveBeenCalledWith('');
     });
 
-    it('should do nothing if the helper does not exist', (done: any) => {
+    it('should do nothing if the helper does not exist', async (done: any) => {
       let helperId = 'helperId';
       spyOn(item['helperIdBridge_'], 'get').and.returnValue(helperId);
 
@@ -334,16 +287,13 @@ describe('asset.HelperItem', () => {
       spyOn(item['nameInputBridge_'], 'get').and.returnValue(name);
       spyOn(item['rootValueBridge_'], 'set');
 
-      item['onOkClick_']()
-          .then(() => {
-            assert(mockAssetCollection.update).toNot.haveBeenCalled();
-            assert(item['rootValueBridge_'].set).toNot.haveBeenCalled();
-            assert(mockAsset.getHelper).to.haveBeenCalledWith(helperId);
-            done();
-          }, done.fail);
+      await item['onOkClick_']();
+      assert(mockAssetCollection.update).toNot.haveBeenCalled();
+      assert(item['rootValueBridge_'].set).toNot.haveBeenCalled();
+      assert(mockAsset.getHelper).to.haveBeenCalledWith(helperId);
     });
 
-    it('should do nothing if the asset does not exist', (done: any) => {
+    it('should do nothing if the asset does not exist', async (done: any) => {
       let helperId = 'helperId';
       spyOn(item['helperIdBridge_'], 'get').and.returnValue(helperId);
 
@@ -353,32 +303,26 @@ describe('asset.HelperItem', () => {
       spyOn(item['nameInputBridge_'], 'get').and.returnValue(name);
       spyOn(item['rootValueBridge_'], 'set');
 
-      item['onOkClick_']()
-          .then(() => {
-            assert(mockAssetCollection.update).toNot.haveBeenCalled();
-            assert(item['rootValueBridge_'].set).toNot.haveBeenCalled();
-            done();
-          }, done.fail);
+      await item['onOkClick_']();
+      assert(mockAssetCollection.update).toNot.haveBeenCalled();
+      assert(item['rootValueBridge_'].set).toNot.haveBeenCalled();
     });
 
-    it('should do nothing if the helper ID does not exist', (done: any) => {
+    it('should do nothing if the helper ID does not exist', async (done: any) => {
       spyOn(item['helperIdBridge_'], 'get').and.returnValue(null);
 
       spyOn(item['rootValueBridge_'], 'set');
 
-      item['onOkClick_']()
-          .then(() => {
-            assert(mockAssetCollection.update).toNot.haveBeenCalled();
-            assert(item['rootValueBridge_'].set).toNot.haveBeenCalled();
-            done();
-          }, done.fail);
+      await item['onOkClick_']();
+      assert(mockAssetCollection.update).toNot.haveBeenCalled();
+      assert(item['rootValueBridge_'].set).toNot.haveBeenCalled();
     });
   });
 
   describe('updateHelper_', () => {
     it('should dispose the previous helper deregister, listen to the CHANGED event, and call ' +
         'helperUpdated_',
-        (done: any) => {
+        async (done: any) => {
           let mockPreviousDeregister = jasmine.createSpyObj('PreviousDeregister', ['dispose']);
           item['helperUpdateDeregister_'] = mockPreviousDeregister;
 
@@ -389,50 +333,41 @@ describe('asset.HelperItem', () => {
 
           let onHelperUpdatedSpy = spyOn(item, 'onHelperUpdated_');
 
-          item['updateHelper_']()
-              .then(() => {
-                assert(item['onHelperUpdated_']).to.haveBeenCalledWith(mockHelper);
+          await item['updateHelper_']();
+          assert(item['onHelperUpdated_']).to.haveBeenCalledWith(mockHelper);
 
-                assert(mockHelper.on).to
-                    .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function), item);
-                onHelperUpdatedSpy.calls.reset();
-                mockHelper.on.calls.argsFor(0)[1]();
-                assert(item['onHelperUpdated_']).to.haveBeenCalledWith(mockHelper);
-                assert(item['helperUpdateDeregister_']).to.equal(mockDeregister);
+          assert(mockHelper.on).to
+              .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function), item);
+          onHelperUpdatedSpy.calls.reset();
+          mockHelper.on.calls.argsFor(0)[1]();
+          assert(item['onHelperUpdated_']).to.haveBeenCalledWith(mockHelper);
+          assert(item['helperUpdateDeregister_']).to.equal(mockDeregister);
 
-                assert(mockPreviousDeregister.dispose).to.haveBeenCalledWith();
-                done();
-              }, done.fail);
+          assert(mockPreviousDeregister.dispose).to.haveBeenCalledWith();
         });
 
     it('should still dispose the previous helper deregister when the new helper is null',
-        (done: any) => {
+        async (done: any) => {
           let mockPreviousDeregister = jasmine.createSpyObj('PreviousDeregister', ['dispose']);
           item['helperUpdateDeregister_'] = mockPreviousDeregister;
 
           spyOn(item, 'getHelper_').and.returnValue(Promise.resolve(null));
           spyOn(item, 'onHelperUpdated_');
 
-          item['updateHelper_']()
-              .then(() => {
-                assert(item['onHelperUpdated_']).toNot.haveBeenCalled();
-                assert(mockPreviousDeregister.dispose).to.haveBeenCalledWith();
-                done();
-              }, done.fail);
+          await item['updateHelper_']();
+          assert(item['onHelperUpdated_']).toNot.haveBeenCalled();
+          assert(mockPreviousDeregister.dispose).to.haveBeenCalledWith();
         });
 
-    it('should not throw error if there are no previous helper deregisters', (done: any) => {
+    it('should not throw error if there are no previous helper deregisters', async (done: any) => {
       let mockHelper = jasmine.createSpyObj('Helper', ['on']);
       mockHelper.on.and.returnValue(jasmine.createSpyObj('Deregister', ['dispose']));
       spyOn(item, 'getHelper_').and.returnValue(Promise.resolve(mockHelper));
 
       spyOn(item, 'onHelperUpdated_');
 
-      item['updateHelper_']()
-          .then(() => {
-            assert(item['onHelperUpdated_']).to.haveBeenCalledWith(mockHelper);
-            done();
-          }, done.fail);
+      await item['updateHelper_']();
+      assert(item['onHelperUpdated_']).to.haveBeenCalledWith(mockHelper);
     });
   });
 

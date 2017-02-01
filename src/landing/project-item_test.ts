@@ -48,7 +48,7 @@ describe('landing.ProjectItem', () => {
   });
 
   describe('onProjectIdChanged_', () => {
-    it('should set the project name correctly if found', (done: any) => {
+    it('should set the project name correctly if found', async (done: any) => {
       let projectId = 'projectId';
       let name = 'name';
       let mockProject = jasmine.createSpyObj('Project', ['getName']);
@@ -58,27 +58,21 @@ describe('landing.ProjectItem', () => {
 
       spyOn(item['projectNameBridge_'], 'set');
 
-      item['onProjectIdChanged_'](projectId)
-          .then(() => {
-            assert(mockProjectCollection.get).to.haveBeenCalledWith(projectId);
-            assert(item['projectNameBridge_'].set).to.haveBeenCalledWith(name);
-            done();
-          }, done.fail);
+      await item['onProjectIdChanged_'](projectId);
+      assert(mockProjectCollection.get).to.haveBeenCalledWith(projectId);
+      assert(item['projectNameBridge_'].set).to.haveBeenCalledWith(name);
     });
 
-    it('should delete the project name if not found', (done: any) => {
+    it('should delete the project name if not found', async (done: any) => {
       let projectId = 'projectId';
 
       mockProjectCollection.get.and.returnValue(Promise.resolve(null));
 
       spyOn(item['projectNameBridge_'], 'delete');
 
-      item['onProjectIdChanged_'](projectId)
-          .then(() => {
-            assert(mockProjectCollection.get).to.haveBeenCalledWith(projectId);
-            assert(item['projectNameBridge_'].delete).to.haveBeenCalledWith();
-            done();
-          }, done.fail);
+      await item['onProjectIdChanged_'](projectId);
+      assert(mockProjectCollection.get).to.haveBeenCalledWith(projectId);
+      assert(item['projectNameBridge_'].delete).to.haveBeenCalledWith();
     });
   });
 });

@@ -18,7 +18,7 @@ describe('routing.HelperRouteFactory', () => {
   });
 
   describe('getName', () => {
-    it('should resolve with the correct name', (done: any) => {
+    it('should resolve with the correct name', async (done: any) => {
       let assetId = 'assetId';
       let helperId = 'helperId';
       let projectId = 'projectId';
@@ -31,42 +31,33 @@ describe('routing.HelperRouteFactory', () => {
       mockAsset.getHelper.and.returnValue(mockHelper);
       mockAssetCollection.get.and.returnValue(Promise.resolve(mockAsset));
 
-      factory
-          .getName({assetId: assetId, helperId: helperId, projectId: projectId})
-          .then((actualName: string) => {
-            assert(actualName).to.equal(name);
-            assert(mockAssetCollection.get).to.haveBeenCalledWith(projectId, assetId);
-            assert(mockAsset.getHelper).to.haveBeenCalledWith(helperId);
-            done();
-          }, done.fail);
+      let actualName = await factory
+          .getName({assetId: assetId, helperId: helperId, projectId: projectId});
+      assert(actualName).to.equal(name);
+      assert(mockAssetCollection.get).to.haveBeenCalledWith(projectId, assetId);
+      assert(mockAsset.getHelper).to.haveBeenCalledWith(helperId);
     });
 
-    it('should resolve with "Unknown helper" if the helper cannot be found', (done: any) => {
+    it('should resolve with "Unknown helper" if the helper cannot be found', async (done: any) => {
       let mockAsset = jasmine.createSpyObj('Asset', ['getHelper']);
       mockAsset.getHelper.and.returnValue(null);
       mockAssetCollection.get.and.returnValue(Promise.resolve(mockAsset));
 
       let helperId = 'helperId';
 
-      factory
-          .getName({assetId: 'assetId', helperId: helperId, projectId: 'projectId'})
-          .then((actualName: string) => {
-            assert(actualName).to.match(/Unknown helper/);
-            assert(mockAsset.getHelper).to.haveBeenCalledWith(helperId);
-            done();
-          }, done.fail);
+      let actualName = await factory
+          .getName({assetId: 'assetId', helperId: helperId, projectId: 'projectId'});
+      assert(actualName).to.match(/Unknown helper/);
+      assert(mockAsset.getHelper).to.haveBeenCalledWith(helperId);
     });
 
     it('should resolve with "Unknown helper for asset" if the asset cannot be found',
-        (done: any) => {
+        async (done: any) => {
           mockAssetCollection.get.and.returnValue(Promise.resolve(null));
 
-          factory
-              .getName({assetId: 'assetId', helperId: 'helperId', projectId: 'projectId'})
-              .then((actualName: string) => {
-                assert(actualName).to.match(/Unknown helper for asset/);
-                done();
-              }, done.fail);
+          let actualName = await factory
+              .getName({assetId: 'assetId', helperId: 'helperId', projectId: 'projectId'});
+          assert(actualName).to.match(/Unknown helper for asset/);
         });
   });
 });

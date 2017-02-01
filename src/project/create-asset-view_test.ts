@@ -395,7 +395,8 @@ describe('project.CreateAssetView', () => {
   });
 
   describe('onSubmitAction_', () => {
-    it('should create the asset correctly and navigate to the project main view', (done: any) => {
+    it('should create the asset correctly and navigate to the project main view',
+    async (done: any) => {
       let routeFactory = Mocks.object('routeFactory');
       mockRouteFactoryService.assetList.and.returnValue(routeFactory);
 
@@ -419,28 +420,25 @@ describe('project.CreateAssetView', () => {
       let assetId = 'assetId';
       mockAssetCollection.reserveId.and.returnValue(Promise.resolve(assetId));
 
-      view['onSubmitAction_']()
-          .then(() => {
-            assert(mockRouteService.goTo).to
-                .haveBeenCalledWith(routeFactory, {projectId: projectId});
-            assert(view['reset_']).to.haveBeenCalledWith();
+      await view['onSubmitAction_']();
+      assert(mockRouteService.goTo).to
+          .haveBeenCalledWith(routeFactory, {projectId: projectId});
+      assert(view['reset_']).to.haveBeenCalledWith();
 
-            assert(mockAssetCollection.update).to.haveBeenCalledWith(Matchers.any(Asset));
+      assert(mockAssetCollection.update).to.haveBeenCalledWith(Matchers.any(Asset));
 
-            let asset = mockAssetCollection.update.calls.argsFor(0)[0];
-            assert(asset.getName()).to.equal(assetName);
-            assert(asset.getType()).to.equal(assetType);
-            assert(asset.getId()).to.equal(assetId);
-            assert(asset.getHeight()).to.equal(height);
-            assert(asset.getWidth()).to.equal(width);
-            TestDispose.add(asset);
+      let asset = mockAssetCollection.update.calls.argsFor(0)[0];
+      assert(asset.getName()).to.equal(assetName);
+      assert(asset.getType()).to.equal(assetType);
+      assert(asset.getId()).to.equal(assetId);
+      assert(asset.getHeight()).to.equal(height);
+      assert(asset.getWidth()).to.equal(width);
+      TestDispose.add(asset);
 
-            assert(mockAssetCollection.reserveId).to.haveBeenCalledWith(projectId);
-            done();
-          }, done.fail);
+      assert(mockAssetCollection.reserveId).to.haveBeenCalledWith(projectId);
     });
 
-    it('should do nothing if there are no project IDs', (done: any) => {
+    it('should do nothing if there are no project IDs', async (done: any) => {
       spyOn(view, 'getProjectId_').and.returnValue(null);
 
       spyOn(view, 'reset_');
@@ -452,36 +450,41 @@ describe('project.CreateAssetView', () => {
       let assetType = Mocks.object('assetType');
       view['assetType_'] = assetType;
 
-      view['onSubmitAction_']()
-          .then(() => {
-            assert(mockRouteService.goTo).toNot.haveBeenCalled();
-            assert(view['reset_']).toNot.haveBeenCalled();
+      await view['onSubmitAction_']();
+      assert(mockRouteService.goTo).toNot.haveBeenCalled();
+      assert(view['reset_']).toNot.haveBeenCalled();
 
-            assert(mockAssetCollection.update).toNot.haveBeenCalled();
-            done();
-          }, done.fail);
+      assert(mockAssetCollection.update).toNot.haveBeenCalled();
     });
 
-    it('should throw error if project name is not set', () => {
+    it('should reject if project name is not set', async (done: any) => {
       spyOn(view['nameValueBridge_'], 'get').and.returnValue(null);
 
-      assert(() => {
-        view['onSubmitAction_']();
-      }).to.throwError(/Project name/);
+      try {
+        await view['onSubmitAction_']();
+        done.fail();
+      } catch (e) {
+        const error: Error = e;
+        assert(error.message).to.equal(Matchers.stringMatching(/Project name/));
+      }
     });
 
-    it('should throw error if the asset type is not set', () => {
+    it('should reject if the asset type is not set', async (done: any) => {
       let assetName = 'assetName';
       spyOn(view['nameValueBridge_'], 'get').and.returnValue(assetName);
 
       view['assetType_'] = null;
 
-      assert(() => {
-        view['onSubmitAction_']();
-      }).to.throwError(/Asset type/);
+      try {
+        await view['onSubmitAction_']();
+        done.fail();
+      } catch (e) {
+        const error: Error = e;
+        assert(error.message).to.equal(Matchers.stringMatching(/Asset type/));
+      }
     });
 
-    it('should throw error if the height is null', () => {
+    it('should reject if the height is null', async (done: any) => {
       spyOn(view, 'getProjectId_').and.returnValue(null);
 
       spyOn(view, 'reset_');
@@ -492,12 +495,16 @@ describe('project.CreateAssetView', () => {
 
       view['assetType_'] = Mocks.object('assetType');
 
-      assert(() => {
-        view['onSubmitAction_']();
-      }).to.throwError(/Asset height/);
+      try {
+        await view['onSubmitAction_']();
+        done.fail();
+      } catch (e) {
+        const error: Error = e;
+        assert(error.message).to.equal(Matchers.stringMatching(/Asset height/));
+      }
     });
 
-    it('should throw error if the height is NaN', () => {
+    it('should reject if the height is NaN', async (done: any) => {
       spyOn(view, 'getProjectId_').and.returnValue(null);
 
       spyOn(view, 'reset_');
@@ -508,12 +515,16 @@ describe('project.CreateAssetView', () => {
 
       view['assetType_'] = Mocks.object('assetType');
 
-      assert(() => {
-        view['onSubmitAction_']();
-      }).to.throwError(/Asset height/);
+      try {
+        await view['onSubmitAction_']();
+        done.fail();
+      } catch (e) {
+        const error: Error = e;
+        assert(error.message).to.equal(Matchers.stringMatching(/Asset height/));
+      }
     });
 
-    it('should throw error if the width is null', () => {
+    it('should reject if the width is null', async (done: any) => {
       spyOn(view, 'getProjectId_').and.returnValue(null);
 
       spyOn(view, 'reset_');
@@ -524,12 +535,16 @@ describe('project.CreateAssetView', () => {
 
       view['assetType_'] = Mocks.object('assetType');
 
-      assert(() => {
-        view['onSubmitAction_']();
-      }).to.throwError(/Asset width/);
+      try {
+        await view['onSubmitAction_']();
+        done.fail();
+      } catch (e) {
+        const error: Error = e;
+        assert(error.message).to.equal(Matchers.stringMatching(/Asset width/));
+      }
     });
 
-    it('should throw error if the width is NaN', () => {
+    it('should reject if the width is NaN', async (done: any) => {
       spyOn(view, 'getProjectId_').and.returnValue(null);
 
       spyOn(view, 'reset_');
@@ -540,9 +555,13 @@ describe('project.CreateAssetView', () => {
 
       view['assetType_'] = Mocks.object('assetType');
 
-      assert(() => {
-        view['onSubmitAction_']();
-      }).to.throwError(/Asset width/);
+      try {
+        await view['onSubmitAction_']();
+        done.fail();
+      } catch (e) {
+        const error: Error = e;
+        assert(error.message).to.equal(Matchers.stringMatching(/Asset width/));
+      }
     });
   });
 

@@ -19,7 +19,6 @@ import {Asset} from '../data/asset';
 import {AssetCollection} from '../data/asset-collection';
 import {DataEvents} from '../data/data-events';
 import {Helper} from '../data/helper';
-import {TemplateCompiler} from '../data/template-compiler';
 import {TemplateCompilerService} from '../data/template-compiler-service';
 import {RouteFactoryService} from '../routing/route-factory-service';
 import {Views} from '../routing/views';
@@ -176,7 +175,7 @@ export class HelperView extends BaseThemedElement {
   /**
    * Creates a new helper object.
    */
-  private createHelper_(asset: Asset): Promise<void> {
+  private async createHelper_(asset: Asset): Promise<void> {
     let newHelperId = this.helperIdGenerator_.generate();
     while (asset.getHelper(newHelperId) !== null) {
       newHelperId = this.helperIdGenerator_.resolveConflict(newHelperId);
@@ -185,19 +184,13 @@ export class HelperView extends BaseThemedElement {
     let helper = Helper.of(newHelperId, `helper_${newHelperId}`);
     asset.setHelper(newHelperId, helper);
 
-    return Promise
-        .all([
-          newHelperId,
-          this.assetCollection_.update(asset),
-        ])
-        .then(([helperId]: [string, any]) => {
-          this.routeService_.goTo<{assetId: string, helperId: string, projectId: string}>(
-              this.routeFactoryService_.helper(),
-              {
-                assetId: asset.getId(),
-                helperId: helperId,
-                projectId: asset.getProjectId(),
-              });
+    let [helperId] = await Promise.all([newHelperId, this.assetCollection_.update(asset)]);
+    this.routeService_.goTo<{assetId: string, helperId: string, projectId: string}>(
+        this.routeFactoryService_.helper(),
+        {
+          assetId: asset.getId(),
+          helperId: helperId,
+          projectId: asset.getProjectId(),
         });
   }
 
@@ -219,38 +212,32 @@ export class HelperView extends BaseThemedElement {
    * @return Promise that will be resolved with the helper for the current view, or null if it
    *     cannot be determined.
    */
-  private getHelper_(): Promise<Helper | null> {
+  private async getHelper_(): Promise<Helper | null> {
     const params = this.routeService_
         .getParams<HelperIdParams>(this.routeFactoryService_.helper());
     if (params === null) {
       return Promise.resolve(null);
     }
 
-    return this
-        .getAsset_()
-        .then((asset: Asset | null) => {
-          if (asset === null) {
-            return null;
-          }
+    let asset = await this.getAsset_();
+    if (asset === null) {
+      return null;
+    }
 
-          return asset.getHelper(params.helperId);
-        });
+    return asset.getHelper(params.helperId);
   }
 
   @handle(null).attributeChange('gs-view-active', BooleanParser)
-  protected onActiveChange_(isActive: boolean | null): Promise<void> {
-    if (!!isActive) {
-      return this.getAsset_()
-          .then((asset: Asset | null) => {
-            if (asset === null) {
-              this.routeService_.goTo(this.routeFactoryService_.landing(), {});
-              return;
-            }
-            this.updateAsset_(asset);
-          });
-    } else {
-      return Promise.resolve();
+  protected async onActiveChange_(isActive: boolean | null): Promise<void> {
+    if (!isActive) {
+      return;
     }
+    let asset = await this.getAsset_();
+    if (asset === null) {
+      this.routeService_.goTo(this.routeFactoryService_.landing(), {});
+      return;
+    }
+    this.updateAsset_(asset);
   }
 
   @handle('#argInput').attributeChange('gs-value', StringParser)
@@ -281,137 +268,117 @@ export class HelperView extends BaseThemedElement {
    * Handles when the asset was updated.
    * @param asset The updated asset;
    */
-  protected onAssetChanged_(asset: Asset): Promise<void> {
-    return this
-        .getHelper_()
-        .then((helper: Helper | null) => {
-          if (helper === null) {
-            // Check for an existing helper.
-            let helpers = asset.getAllHelpers();
-            if (helpers.length <= 0) {
-              return this.createHelper_(asset).then(() => null);
-            } else {
-              this.routeService_.goTo(this.routeFactoryService_.helper(), {
-                assetId: asset.getId(),
-                helperId: helpers[0].getId(),
-                projectId: asset.getProjectId(),
-              });
-              return Promise.resolve(null);
-            }
-          }
-
-          return Promise.resolve(helper);
-        })
-        .then((helper: Helper | null) => {
-          if (helper === null) {
-            return;
-          }
-          this.updateHelper_(helper);
-
-          let otherHelpers = Arrays
-              .of(asset.getAllHelpers())
-              .filter((value: Helper) => {
-                return value.getId() !== helper.getId();
-              })
-              .asArray();
-          let helperIdParams = Arrays
-              .of([helper])
-              .addAllArray(otherHelpers)
-              .map((helper: Helper) => {
-                return {
-                  assetId: asset.getId(),
-                  helperId: helper.getId(),
-                  projectId: asset.getProjectId(),
-                };
-              })
-              .asIterable();
-          this.helperItemsBridge_.set(Arrays.fromIterable(helperIdParams).asArray());
+  protected async onAssetChanged_(asset: Asset): Promise<void> {
+    const helper = await this.getHelper_();
+    if (helper === null) {
+      // Check for an existing helper.
+      let helpers = asset.getAllHelpers();
+      if (helpers.length <= 0) {
+        await this.createHelper_(asset);
+      } else {
+        this.routeService_.goTo(this.routeFactoryService_.helper(), {
+          assetId: asset.getId(),
+          helperId: helpers[0].getId(),
+          projectId: asset.getProjectId(),
         });
+      }
+      return;
+    }
+
+    this.updateHelper_(helper);
+
+    let otherHelpers = Arrays
+        .of(asset.getAllHelpers())
+        .filter((value: Helper) => {
+          return value.getId() !== helper.getId();
+        })
+        .asArray();
+    let helperIdParams = Arrays
+        .of([helper])
+        .addAllArray(otherHelpers)
+        .map((helper: Helper) => {
+          return {
+            assetId: asset.getId(),
+            helperId: helper.getId(),
+            projectId: asset.getProjectId(),
+          };
+        })
+        .asIterable();
+    this.helperItemsBridge_.set(Arrays.fromIterable(helperIdParams).asArray());
   }
 
   @handle('#args').childListChange()
   @handle('#bodyInput').attributeChange('gs-value', StringParser)
-  protected onChanges_(): Promise<void> {
+  protected async onChanges_(): Promise<void> {
     const args = this.argElementsBridge_.get();
     const body = this.bodyInputBridge_.get();
 
     if (args === null || body === null) {
-      return Promise.resolve();
+      return;
     }
 
-    return Promise
-        .all([
-          this.getHelper_(),
-          this.getAsset_(),
-        ])
-        .then(([helper, asset]: [Helper | null, Asset | null]) => {
-          if (helper === null || asset === null) {
-            return;
-          }
+    let [helper, asset] = await Promise.all([this.getHelper_(), this.getAsset_()]);
+    if (helper === null || asset === null) {
+      return;
+    }
 
-          helper.setArgs(args);
-          helper.setBody(body);
+    helper.setArgs(args);
+    helper.setBody(body);
 
-          asset.setHelper(helper.getId(), helper);
-          return this.assetCollection_.update(asset);
-        });
-  }
+    asset.setHelper(helper.getId(), helper);
+    await this.assetCollection_.update(asset);
+  };
 
   @handle('#createButton').event(DomEvent.CLICK)
-  protected onCreateButtonClick_(): Promise<void> {
-    return this.getAsset_()
-        .then((asset: Asset | null) => {
-          if (asset === null) {
-            return;
-          }
-
-          this.createHelper_(asset);
-        });
-  }
-
-  @handle('#executeButton').event(DomEvent.CLICK)
-  protected onExecuteButtonClick_(): Promise<void> {
-    const consoleValue = this.consoleInputBridge_.get();
-    if (consoleValue === null) {
-      return Promise.resolve();
+  protected async onCreateButtonClick_(): Promise<void> {
+    let asset = await this.getAsset_();
+    if (asset === null) {
+      return;
     }
 
-    return this.getAsset_()
-        .then((asset: Asset | null) => {
-          if (asset === null) {
-            return Promise.resolve(null);
-          }
-          return this.templateCompilerService_.create(asset);
-        })
-        .then((compiler: TemplateCompiler | null) => {
-          if (compiler === null) {
-            return;
-          }
+    await this.createHelper_(asset);
+  };
 
-          let result;
-          let isError;
-          try {
-            result = compiler.compile(consoleValue)();
-            isError = false;
-          } catch (e) {
-            if (!(e instanceof Error)) {
-              return;
-            }
-            result = `${e.message}\n\n${e.stack}`;
-            isError = true;
-          }
-          let consoleEntries = this.consoleEntryBridge_.get() || [];
-          consoleEntries.push({command: consoleValue, isError: isError, result: result});
-          this.consoleEntryBridge_.set(consoleEntries);
+  @handle('#executeButton').event(DomEvent.CLICK)
+  protected async onExecuteButtonClick_(): Promise<void> {
+    const consoleValue = this.consoleInputBridge_.get();
+    if (consoleValue === null) {
+      return;
+    }
 
-          let element = this.getElement();
-          if (element === null) {
-            return;
-          }
-          let containerEl = element.getEventTarget().shadowRoot.querySelector('#consoleContainer');
-          containerEl.scrollTop = containerEl.scrollHeight;
-        });
-  }
+    let asset = await this.getAsset_();
+    if (asset === null) {
+      return;
+    }
+
+    let compiler = await this.templateCompilerService_.create(asset);
+    if (compiler === null) {
+      return;
+    }
+
+    let result;
+    let isError;
+    try {
+      result = compiler.compile(consoleValue)();
+      isError = false;
+    } catch (e) {
+      if (!(e instanceof Error)) {
+        return;
+      }
+      result = `${e.message}\n\n${e.stack}`;
+      isError = true;
+    }
+    let consoleEntries = this.consoleEntryBridge_.get() || [];
+    consoleEntries.push({command: consoleValue, isError: isError, result: result});
+    this.consoleEntryBridge_.set(consoleEntries);
+
+    let element = this.getElement();
+    if (element === null) {
+      return;
+    }
+    let containerEl = element.getEventTarget().shadowRoot.querySelector('#consoleContainer');
+    containerEl.scrollTop = containerEl.scrollHeight;
+  };
 
   /**
    * Handles when the helper was updated.
@@ -421,14 +388,14 @@ export class HelperView extends BaseThemedElement {
     this.nameBridge_.set(helper.getName());
     this.argElementsBridge_.set(helper.getArgs());
     this.bodyInputBridge_.set(helper.getBody());
-  }
+  };
 
   /**
    * Handles event when the route is changed.
    */
   private onRouteChanged_(): void {
     this.onActiveChange_(this.routeService_.getParams(this.routeFactoryService_.helper()) !== null);
-  }
+  };
 
   /**
    * Updates using the given asset.
@@ -446,7 +413,7 @@ export class HelperView extends BaseThemedElement {
         this.onAssetChanged_.bind(this, asset),
         this);
     this.onAssetChanged_(asset);
-  }
+  };
 
   /**
    * Updates using the given helper.
@@ -463,7 +430,7 @@ export class HelperView extends BaseThemedElement {
         this.onHelperChanged_.bind(this, helper),
         this);
     this.onHelperChanged_(helper);
-  }
+  };
 
   /**
    * @override
@@ -478,7 +445,7 @@ export class HelperView extends BaseThemedElement {
     }
 
     super.disposeInternal();
-  }
+  };
 
   /**
    * Handles event when the arg element is clicked.
@@ -519,5 +486,5 @@ export class HelperView extends BaseThemedElement {
         this.onRouteChanged_,
         this));
     this.onRouteChanged_();
-  }
+  };
 }

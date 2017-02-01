@@ -84,15 +84,11 @@ export class AssetCollection extends BaseListenable<CollectionEvents> {
    * @param asset The asset to persist in the storage.
    * @return Promise that will be resolved when the update operation is completed.
    */
-  update(asset: Asset): Promise<void> {
-    return this
-        .getStorage_(asset.getProjectId())
-        .update(asset.getId(), asset)
-        .then((isNewProject: boolean) => {
-          if (isNewProject) {
-            this.dispatch(CollectionEvents.ADDED, () => undefined, asset);
-          }
-        });
+  async update(asset: Asset): Promise<void> {
+    let isNewProject = await this.getStorage_(asset.getProjectId()).update(asset.getId(), asset);
+    if (isNewProject) {
+      this.dispatch(CollectionEvents.ADDED, () => undefined, asset);
+    }
   }
 
   /**

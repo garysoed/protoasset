@@ -253,7 +253,7 @@ export class CreateAssetView extends BaseThemedElement {
    * @return Promise that will be resolved when all handling logic have completed.
    */
   @handle('#createButton').event(Event.ACTION)
-  protected onSubmitAction_(): Promise<void> {
+  protected async onSubmitAction_(): Promise<void> {
     const assetName = this.nameValueBridge_.get();
     if (!assetName) {
       throw Validate.fail('Project name is not set');
@@ -279,21 +279,15 @@ export class CreateAssetView extends BaseThemedElement {
       return Promise.resolve();
     }
 
-    return this.assetCollection_
-        .reserveId(projectId)
-        .then((id: string) => {
-          let asset = new Asset(id, projectId);
-          asset.setName(assetName);
-          asset.setType(assetType);
-          asset.setHeight(height);
-          asset.setWidth(width);
-          return this.assetCollection_.update(asset);
-        })
-        .then(() => {
-          this.reset_();
-          this.routeService_
-              .goTo(this.routeFactoryService_.assetList(), {projectId: projectId});
-        });
+    let id = await this.assetCollection_.reserveId(projectId);
+    let asset = new Asset(id, projectId);
+    asset.setName(assetName);
+    asset.setType(assetType);
+    asset.setHeight(height);
+    asset.setWidth(width);
+    await this.assetCollection_.update(asset);
+    this.reset_();
+    this.routeService_.goTo(this.routeFactoryService_.assetList(), {projectId: projectId});
   }
 
   /**

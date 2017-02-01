@@ -97,7 +97,7 @@ describe('asset.DataView', () => {
   });
 
   describe('getAsset_', () => {
-    it('should return the asset', (done: any) => {
+    it('should return the asset', async (done: any) => {
       let assetId = 'assetId';
       let projectId = 'projectId';
       mockRouteService.getParams.and.returnValue({assetId, projectId});
@@ -108,24 +108,18 @@ describe('asset.DataView', () => {
       let asset = Mocks.object('asset');
       mockAssetCollection.get.and.returnValue(Promise.resolve(asset));
 
-      view['getAsset_']()
-          .then((actualAsset: any) => {
-            assert(actualAsset).to.equal(asset);
-            assert(mockAssetCollection.get).to.haveBeenCalledWith(projectId, assetId);
-            assert(mockRouteService.getParams).to.haveBeenCalledWith(assetDataFactory);
-            done();
-          }, done.fail);
+      let actualAsset = await view['getAsset_']();
+      assert(actualAsset).to.equal(asset);
+      assert(mockAssetCollection.get).to.haveBeenCalledWith(projectId, assetId);
+      assert(mockRouteService.getParams).to.haveBeenCalledWith(assetDataFactory);
     });
 
-    it('should return null if route params cannot be resolved', (done: any) => {
+    it('should return null if route params cannot be resolved', async (done: any) => {
       mockRouteService.getParams.and.returnValue(null);
       mockRouteFactoryService.assetData.and.returnValue(Mocks.object('assetDataFactory'));
 
-      view['getAsset_']()
-          .then((actualAsset: any) => {
-            assert(actualAsset).to.beNull();
-            done();
-          }, done.fail);
+      let actualAsset = await view['getAsset_']();
+      assert(actualAsset).to.beNull();
     });
   });
 
@@ -144,28 +138,25 @@ describe('asset.DataView', () => {
   });
 
   describe('updateAsset_', () => {
-    it('should update the asset correctly with the given data source', (done: any) => {
+    it('should update the asset correctly with the given data source', async (done: any) => {
       let dataSource = Mocks.object('dataSource');
       let projectId = 'projectId';
       let mockAsset = jasmine.createSpyObj('Asset', ['getProjectId', 'setData']);
       mockAsset.getProjectId.and.returnValue(projectId);
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
-      view['updateAsset_'](dataSource)
-          .then(() => {
-            assert(mockAssetCollection.update).to.haveBeenCalledWith(mockAsset);
-            assert(mockAsset.setData).to.haveBeenCalledWith(dataSource);
-            done();
-          }, done.fail);
+      await view['updateAsset_'](dataSource);
+      assert(mockAssetCollection.update).to.haveBeenCalledWith(mockAsset);
+      assert(mockAsset.setData).to.haveBeenCalledWith(dataSource);
     });
 
-    it('should not reject if asset cannot be found', (done: any) => {
+    it('should not reject if asset cannot be found', async (done: any) => {
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(null));
-      view['updateAsset_'](Mocks.object('dataSource')).then(done, done.fail);
+      await view['updateAsset_'](Mocks.object('dataSource'));
     });
   });
 
   describe('updateDataSource_', () => {
-    it('should update the asset and preview correctly', (done: any) => {
+    it('should update the asset and preview correctly', async (done: any) => {
       let bundleId = 'bundleId';
       spyOn(view['dataSourceBundleIdBridge_'], 'get').and.returnValue(bundleId);
 
@@ -188,20 +179,17 @@ describe('asset.DataView', () => {
       spyOn(view, 'updateAsset_').and.returnValue(Promise.resolve());
       spyOn(view, 'updatePreview_').and.returnValue(Promise.resolve());
 
-      view['updateDataSource_']()
-          .then(() => {
-            assert(view['updateAsset_']).to.haveBeenCalledWith(dataSource);
-            assert(view['updatePreview_']).to.haveBeenCalledWith();
-            assert(TsvDataSource.of).to.haveBeenCalledWith(inMemoryDataSource, startRow, endRow);
-            assert(InMemoryDataSource.of).to.haveBeenCalledWith(content);
-            assert(mockFileService.processBundle).to.haveBeenCalledWith(bundleId);
-            done();
-          }, done.fail);
+      await view['updateDataSource_']();
+      assert(view['updateAsset_']).to.haveBeenCalledWith(dataSource);
+      assert(view['updatePreview_']).to.haveBeenCalledWith();
+      assert(TsvDataSource.of).to.haveBeenCalledWith(inMemoryDataSource, startRow, endRow);
+      assert(InMemoryDataSource.of).to.haveBeenCalledWith(content);
+      assert(mockFileService.processBundle).to.haveBeenCalledWith(bundleId);
     });
 
     it('should not update the asset, but still update the preview, if there are no files in the '
         + 'bundle',
-        (done: any) => {
+        async (done: any) => {
           let bundleId = 'bundleId';
           spyOn(view['dataSourceBundleIdBridge_'], 'get').and.returnValue(bundleId);
 
@@ -222,17 +210,14 @@ describe('asset.DataView', () => {
           spyOn(view, 'updateAsset_').and.returnValue(Promise.resolve());
           spyOn(view, 'updatePreview_').and.returnValue(Promise.resolve());
 
-          view['updateDataSource_']()
-              .then(() => {
-                assert(view['updateAsset_']).toNot.haveBeenCalled();
-                assert(view['updatePreview_']).to.haveBeenCalledWith();
-                done();
-              }, done.fail);
+          await view['updateDataSource_']();
+          assert(view['updateAsset_']).toNot.haveBeenCalled();
+          assert(view['updatePreview_']).to.haveBeenCalledWith();
         });
 
     it('should not update the asset, but still update the preview, if the bundle cannot be '
         + 'processed',
-        (done: any) => {
+        async (done: any) => {
           let bundleId = 'bundleId';
           spyOn(view['dataSourceBundleIdBridge_'], 'get').and.returnValue(bundleId);
           spyOn(view['startRowValueBridge_'], 'get').and.returnValue(123);
@@ -248,92 +233,74 @@ describe('asset.DataView', () => {
           spyOn(view, 'updateAsset_');
           spyOn(view, 'updatePreview_');
 
-          view['updateDataSource_']()
-              .then(() => {
-                assert(view['updateAsset_']).toNot.haveBeenCalled();
-                assert(view['updatePreview_']).to.haveBeenCalledWith();
-                done();
-              }, done.fail);
+          await view['updateDataSource_']();
+          assert(view['updateAsset_']).toNot.haveBeenCalled();
+          assert(view['updatePreview_']).to.haveBeenCalledWith();
         });
 
-    it('should do nothing if the start row is NaN', (done: any) => {
+    it('should do nothing if the start row is NaN', async (done: any) => {
       spyOn(view['dataSourceBundleIdBridge_'], 'get').and.returnValue('bundleId');
       spyOn(view['startRowValueBridge_'], 'get').and.returnValue(NaN);
       spyOn(view['endRowValueBridge_'], 'get').and.returnValue(456);
       spyOn(view, 'updateAsset_');
       spyOn(view, 'updatePreview_');
 
-      view['updateDataSource_']()
-          .then(() => {
-            assert(view['updateAsset_']).toNot.haveBeenCalled();
-            assert(view['updatePreview_']).toNot.haveBeenCalled();
-            done();
-          }, done.fail);
+      await view['updateDataSource_']();
+      assert(view['updateAsset_']).toNot.haveBeenCalled();
+      assert(view['updatePreview_']).toNot.haveBeenCalled();
     });
 
-    it('should do nothing if the start row is null', (done: any) => {
+    it('should do nothing if the start row is null', async (done: any) => {
       spyOn(view['dataSourceBundleIdBridge_'], 'get').and.returnValue('bundleId');
       spyOn(view['startRowValueBridge_'], 'get').and.returnValue(null);
       spyOn(view['endRowValueBridge_'], 'get').and.returnValue(456);
       spyOn(view, 'updateAsset_');
       spyOn(view, 'updatePreview_');
 
-      view['updateDataSource_']()
-          .then(() => {
-            assert(view['updateAsset_']).toNot.haveBeenCalled();
-            assert(view['updatePreview_']).toNot.haveBeenCalled();
-            done();
-          }, done.fail);
+      await view['updateDataSource_']();
+      assert(view['updateAsset_']).toNot.haveBeenCalled();
+      assert(view['updatePreview_']).toNot.haveBeenCalled();
     });
 
-    it('should do nothing if the end row is NaN', (done: any) => {
+    it('should do nothing if the end row is NaN', async (done: any) => {
       spyOn(view['dataSourceBundleIdBridge_'], 'get').and.returnValue('bundleId');
       spyOn(view['startRowValueBridge_'], 'get').and.returnValue(123);
       spyOn(view['endRowValueBridge_'], 'get').and.returnValue(NaN);
       spyOn(view, 'updateAsset_');
       spyOn(view, 'updatePreview_');
 
-      view['updateDataSource_']()
-          .then(() => {
-            assert(view['updateAsset_']).toNot.haveBeenCalled();
-            assert(view['updatePreview_']).toNot.haveBeenCalled();
-            done();
-          }, done.fail);
+      await view['updateDataSource_']();
+      assert(view['updateAsset_']).toNot.haveBeenCalled();
+      assert(view['updatePreview_']).toNot.haveBeenCalled();
     });
 
-    it('should do nothing if the end row is null', (done: any) => {
+    it('should do nothing if the end row is null', async (done: any) => {
       spyOn(view['dataSourceBundleIdBridge_'], 'get').and.returnValue('bundleId');
       spyOn(view['startRowValueBridge_'], 'get').and.returnValue(123);
       spyOn(view['endRowValueBridge_'], 'get').and.returnValue(null);
       spyOn(view, 'updateAsset_');
       spyOn(view, 'updatePreview_');
 
-      view['updateDataSource_']()
-          .then(() => {
-            assert(view['updateAsset_']).toNot.haveBeenCalled();
-            assert(view['updatePreview_']).toNot.haveBeenCalled();
-            done();
-          }, done.fail);
+      await view['updateDataSource_']();
+      assert(view['updateAsset_']).toNot.haveBeenCalled();
+      assert(view['updatePreview_']).toNot.haveBeenCalled();
     });
 
-    it('should do nothing if the bundle ID cannot be found', (done: any) => {
+    it('should do nothing if the bundle ID cannot be found', async (done: any) => {
       spyOn(view['dataSourceBundleIdBridge_'], 'get').and.returnValue(null);
       spyOn(view['startRowValueBridge_'], 'get').and.returnValue(123);
       spyOn(view['endRowValueBridge_'], 'get').and.returnValue(456);
       spyOn(view, 'updateAsset_');
       spyOn(view, 'updatePreview_');
 
-      view['updateDataSource_']()
-          .then(() => {
-            assert(view['updateAsset_']).toNot.haveBeenCalled();
-            assert(view['updatePreview_']).toNot.haveBeenCalled();
-            done();
-          }, done.fail);
+      await view['updateDataSource_']();
+      assert(view['updateAsset_']).toNot.haveBeenCalled();
+      assert(view['updatePreview_']).toNot.haveBeenCalled();
     });
   });
 
   describe('updatePreview_', () => {
-    it('should update the preview correctly', (done: any) => {
+    it('should update the preview correctly', async (done: any) => {
       let data = Mocks.object('data');
       let mockDataSource = jasmine.createSpyObj('DataSource', ['getData']);
       mockDataSource.getData.and.returnValue(data);
@@ -345,15 +312,12 @@ describe('asset.DataView', () => {
       spyOn(view['previewChildrenBridge_'], 'delete');
       spyOn(view['previewChildrenBridge_'], 'set');
 
-      view['updatePreview_']()
-          .then(() => {
-            assert(view['previewChildrenBridge_'].delete).to.haveBeenCalledWith();
-            assert(view['previewChildrenBridge_'].set).to.haveBeenCalledWith(data);
-            done();
-          }, done.fail);
+      await view['updatePreview_']();
+      assert(view['previewChildrenBridge_'].delete).to.haveBeenCalledWith();
+      assert(view['previewChildrenBridge_'].set).to.haveBeenCalledWith(data);
     });
 
-    it('should clear the preview if the data cannot be loaded', (done: any) => {
+    it('should clear the preview if the data cannot be loaded', async (done: any) => {
       let mockDataSource = jasmine.createSpyObj('DataSource', ['getData']);
       mockDataSource.getData.and.returnValue(null);
 
@@ -364,15 +328,12 @@ describe('asset.DataView', () => {
       spyOn(view['previewChildrenBridge_'], 'delete');
       spyOn(view['previewChildrenBridge_'], 'set');
 
-      view['updatePreview_']()
-          .then(() => {
-            assert(view['previewChildrenBridge_'].delete).to.haveBeenCalledWith();
-            assert(view['previewChildrenBridge_'].set).toNot.haveBeenCalled();
-            done();
-          }, done.fail);
+      await view['updatePreview_']();
+      assert(view['previewChildrenBridge_'].delete).to.haveBeenCalledWith();
+      assert(view['previewChildrenBridge_'].set).toNot.haveBeenCalled();
     });
 
-    it('should clear the preview if the asset has no data source', (done: any) => {
+    it('should clear the preview if the asset has no data source', async (done: any) => {
       let mockAsset = jasmine.createSpyObj('Asset', ['getData']);
       mockAsset.getData.and.returnValue(null);
 
@@ -380,25 +341,19 @@ describe('asset.DataView', () => {
       spyOn(view['previewChildrenBridge_'], 'delete');
       spyOn(view['previewChildrenBridge_'], 'set');
 
-      view['updatePreview_']()
-          .then(() => {
-            assert(view['previewChildrenBridge_'].delete).to.haveBeenCalledWith();
-            assert(view['previewChildrenBridge_'].set).toNot.haveBeenCalled();
-            done();
-          }, done.fail);
+      await view['updatePreview_']();
+      assert(view['previewChildrenBridge_'].delete).to.haveBeenCalledWith();
+      assert(view['previewChildrenBridge_'].set).toNot.haveBeenCalled();
     });
 
-    it('should clear the preview if asset cannot be found', (done: any) => {
+    it('should clear the preview if asset cannot be found', async (done: any) => {
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(null));
       spyOn(view['previewChildrenBridge_'], 'delete');
       spyOn(view['previewChildrenBridge_'], 'set');
 
-      view['updatePreview_']()
-          .then(() => {
-            assert(view['previewChildrenBridge_'].delete).to.haveBeenCalledWith();
-            assert(view['previewChildrenBridge_'].set).toNot.haveBeenCalled();
-            done();
-          }, done.fail);
+      await view['updatePreview_']();
+      assert(view['previewChildrenBridge_'].delete).to.haveBeenCalledWith();
+      assert(view['previewChildrenBridge_'].set).toNot.haveBeenCalled();
     });
   });
 }); ;

@@ -6,7 +6,6 @@ import {BaseThemedElement} from 'external/gs_ui/src/common';
 import {RouteService} from 'external/gs_ui/src/routing';
 import {ThemeService} from 'external/gs_ui/src/theming';
 
-import {Asset} from '../data/asset';
 import {AssetCollection} from '../data/asset-collection';
 import {RouteFactoryService} from '../routing/route-factory-service';
 import {Views} from '../routing/views';
@@ -59,20 +58,17 @@ export class AssetItem extends BaseThemedElement {
   }
 
   @handle(null).attributeChange('gs-asset-id', StringParser)
-  protected onGsAssetIdChanged_(): Promise<any> {
+  protected async onGsAssetIdChanged_(): Promise<any> {
     let assetId = this.gsAssetIdBridge_.get();
     let projectId = this.gsProjectIdBridge_.get();
     if (assetId === null || projectId === null) {
       this.assetNameBridge_.delete();
-      return Promise.resolve();
+      return;
     }
 
-    return this.assetCollection_
-        .get(projectId, assetId)
-        .then((asset: Asset | null) => {
-          if (asset !== null) {
-            this.assetNameBridge_.set(asset.getName());
-          }
-        });
+    let asset = await this.assetCollection_.get(projectId, assetId);
+    if (asset !== null) {
+      this.assetNameBridge_.set(asset.getName());
+    }
   }
 }
