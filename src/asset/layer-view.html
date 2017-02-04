@@ -10,12 +10,16 @@
     margin: .2rem;
   }
 
+  #layerTypeSwitch {
+    position: relative;
+  }
+
   #selectedLayerName {
     text-align: left;
     text-transform: none;
   }
 </style>
-<div layout="row">
+<div fill-parent layout="row">
   <div flex layout="column">
     <gs-basic-button>
       <div gs-content layout="row">
@@ -24,9 +28,9 @@
       </div>
     </gs-basic-button>
     <gs-switch flex id="layerTypeSwitch">
-      <pa-asset-html-layer gs-when=""></pa-asset-html-layer>
-      <pa-asset-image-layer></pa-asset-image-layer>
-      <pa-asset-text-layer></pa-asset-text-layer>
+      <pa-asset-html-layer-editor gs-when="html" id="htmlEditor"></pa-asset-html-layer-editor>
+      <pa-asset-image-layer-editor gs-when="image" id="imageEditor"></pa-asset-image-layer-editor>
+      <pa-asset-text-layer-editor gs-when="text" id="textEditor"></pa-asset-text-layer-editor>
     </gs-switch>
   </div>
   <div flex>Preview</div>
@@ -49,3 +53,5 @@
     </div>
   </gs-menu>
 </gs-basic-button>
+
+
