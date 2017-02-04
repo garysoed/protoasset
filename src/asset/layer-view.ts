@@ -220,7 +220,7 @@ export class LayerView extends BaseThemedElement {
       await this.createLayer_(LayerType.IMAGE);
       return;
     }
-g
+
     this.selectLayer_(layers[0]);
   }
 
