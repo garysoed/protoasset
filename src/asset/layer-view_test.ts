@@ -122,27 +122,70 @@ describe('asset.LayerView', () => {
   });
 
   describe('onAssetChanged_', () => {
-    it('should update the UI correctly', () => {
+    it('should update the UI correctly', async (done: any) => {
       let id = 'id';
       let projectId = 'projectId';
-      let mockAsset = jasmine.createSpyObj('Asset', ['getId', 'getProjectId']);
+      let mockDataSource = jasmine.createSpyObj('DataSource', ['getData']);
+      mockDataSource.getData.and.returnValue(Promise.resolve(['data']));
+      let mockAsset = jasmine.createSpyObj('Asset', ['getData', 'getId', 'getProjectId']);
+      mockAsset.getData.and.returnValue(mockDataSource);
       mockAsset.getId.and.returnValue(id);
       mockAsset.getProjectId.and.returnValue(projectId);
 
       spyOn(view['htmlEditorAssetIdBridge_'], 'set');
       spyOn(view['htmlEditorProjectIdBridge_'], 'set');
       spyOn(view['imageEditorAssetIdBridge_'], 'set');
+      spyOn(view['imageEditorDataRowBridge_'], 'set');
       spyOn(view['imageEditorProjectIdBridge_'], 'set');
       spyOn(view['textEditorAssetIdBridge_'], 'set');
       spyOn(view['textEditorProjectIdBridge_'], 'set');
 
-      view['onAssetChanged_'](mockAsset);
+      await view['onAssetChanged_'](mockAsset);
+      assert(view['imageEditorDataRowBridge_'].set).to.haveBeenCalledWith(0);
       assert(view['htmlEditorAssetIdBridge_'].set).to.haveBeenCalledWith(id);
       assert(view['htmlEditorProjectIdBridge_'].set).to.haveBeenCalledWith(projectId);
       assert(view['imageEditorAssetIdBridge_'].set).to.haveBeenCalledWith(id);
       assert(view['imageEditorProjectIdBridge_'].set).to.haveBeenCalledWith(projectId);
       assert(view['textEditorAssetIdBridge_'].set).to.haveBeenCalledWith(id);
       assert(view['textEditorProjectIdBridge_'].set).to.haveBeenCalledWith(projectId);
+    });
+
+    it('should not set the data row if the data length is 0', async (done: any) => {
+      let mockDataSource = jasmine.createSpyObj('DataSource', ['getData']);
+      mockDataSource.getData.and.returnValue(Promise.resolve([]));
+      let mockAsset = jasmine.createSpyObj('Asset', ['getData', 'getId', 'getProjectId']);
+      mockAsset.getData.and.returnValue(mockDataSource);
+      mockAsset.getId.and.returnValue('id');
+      mockAsset.getProjectId.and.returnValue('projectId');
+
+      spyOn(view['htmlEditorAssetIdBridge_'], 'set');
+      spyOn(view['htmlEditorProjectIdBridge_'], 'set');
+      spyOn(view['imageEditorAssetIdBridge_'], 'set');
+      spyOn(view['imageEditorDataRowBridge_'], 'set');
+      spyOn(view['imageEditorProjectIdBridge_'], 'set');
+      spyOn(view['textEditorAssetIdBridge_'], 'set');
+      spyOn(view['textEditorProjectIdBridge_'], 'set');
+
+      await view['onAssetChanged_'](mockAsset);
+      assert(view['imageEditorDataRowBridge_'].set).toNot.haveBeenCalled();
+    });
+
+    it('should not set the data row if there are no data source', async (done: any) => {
+      let mockAsset = jasmine.createSpyObj('Asset', ['getData', 'getId', 'getProjectId']);
+      mockAsset.getData.and.returnValue(null);
+      mockAsset.getId.and.returnValue('id');
+      mockAsset.getProjectId.and.returnValue('projectId');
+
+      spyOn(view['htmlEditorAssetIdBridge_'], 'set');
+      spyOn(view['htmlEditorProjectIdBridge_'], 'set');
+      spyOn(view['imageEditorAssetIdBridge_'], 'set');
+      spyOn(view['imageEditorDataRowBridge_'], 'set');
+      spyOn(view['imageEditorProjectIdBridge_'], 'set');
+      spyOn(view['textEditorAssetIdBridge_'], 'set');
+      spyOn(view['textEditorProjectIdBridge_'], 'set');
+
+      await view['onAssetChanged_'](mockAsset);
+      assert(view['imageEditorDataRowBridge_'].set).toNot.haveBeenCalled();
     });
   });
 

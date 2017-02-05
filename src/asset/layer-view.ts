@@ -11,6 +11,7 @@ import {
   DomBridge,
   EnumParser,
   handle,
+  IntegerParser,
   StringParser} from 'external/gs_tools/src/webc';
 
 import {BaseThemedElement} from 'external/gs_ui/src/common';
@@ -59,6 +60,9 @@ export class LayerView extends BaseThemedElement {
   @bind('#imageEditor').attribute('asset-id', StringParser)
   private readonly imageEditorAssetIdBridge_: DomBridge<string>;
 
+  @bind('#imageEditor').attribute('data-row', IntegerParser)
+  private readonly imageEditorDataRowBridge_: DomBridge<number>;
+
   @bind('#imageEditor').attribute('layer-id', StringParser)
   private readonly imageEditorLayerIdBridge_: DomBridge<string>;
 
@@ -96,6 +100,7 @@ export class LayerView extends BaseThemedElement {
     this.htmlEditorLayerIdBridge_ = DomBridge.of<string>();
     this.htmlEditorProjectIdBridge_ = DomBridge.of<string>();
     this.imageEditorAssetIdBridge_ = DomBridge.of<string>();
+    this.imageEditorDataRowBridge_ = DomBridge.of<number>();
     this.imageEditorLayerIdBridge_ = DomBridge.of<string>();
     this.imageEditorProjectIdBridge_ = DomBridge.of<string>();
     this.layerChangedDeregister_ = null;
@@ -167,13 +172,27 @@ export class LayerView extends BaseThemedElement {
    * Handles when the asset was changed.
    * @param asset The changed asset.
    */
-  private onAssetChanged_(asset: Asset): void {
+  private async onAssetChanged_(asset: Asset): Promise<void> {
     this.htmlEditorAssetIdBridge_.set(asset.getId());
     this.htmlEditorProjectIdBridge_.set(asset.getProjectId());
     this.imageEditorAssetIdBridge_.set(asset.getId());
     this.imageEditorProjectIdBridge_.set(asset.getProjectId());
     this.textEditorAssetIdBridge_.set(asset.getId());
     this.textEditorProjectIdBridge_.set(asset.getProjectId());
+
+    let dataSource = asset.getData();
+    if (dataSource === null) {
+      return;
+    }
+
+    let data = await dataSource.getData();
+    if (data.length <= 0) {
+      return;
+      // TODO: Display error if there are no data.
+    }
+
+    // TODO: Let user pick the data row.
+    this.imageEditorDataRowBridge_.set(0);
     // TODO: Populate the layer picker.
   }
 
