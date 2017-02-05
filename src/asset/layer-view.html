@@ -26,6 +26,9 @@
         <div flex id="selectedLayerName"></div>
         <gs-icon>arrow_drop_down</gs-icon>
       </div>
+      <gs-menu gs-anchor-point="top_left" gs-anchor-target="top_left" gs-fit-parent-width="true">
+        <div gs-content id="layers"></div>
+      </gs-menu>
     </gs-basic-button>
     <gs-switch flex id="layerTypeSwitch">
       <pa-asset-html-layer-editor gs-when="html" id="htmlEditor"></pa-asset-html-layer-editor>

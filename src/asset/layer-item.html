@@ -7,6 +7,9 @@
 
   #name {
     cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   #name, #nameInput {
@@ -17,11 +20,18 @@
     background-color: var(--gsColorPassiveBG);
   }
 </style>
+
 <gs-switch fill-parent gs-value="read" id="root">
   <div gs-when="read" layout="row">
     <div flex id="name"></div>
     <gs-basic-button id="edit">
       <gs-icon gs-content>edit</gs-icon>
+    </gs-basic-button>
+    <gs-basic-button id="up">
+      <gs-icon gs-content>arrow_upward</gs-icon>
+    </gs-basic-button>
+    <gs-basic-button id="down">
+      <gs-icon gs-content>arrow_downward</gs-icon>
     </gs-basic-button>
     <gs-basic-button id="delete">
       <gs-icon gs-content>delete</gs-icon>

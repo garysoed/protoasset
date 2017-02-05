@@ -10,8 +10,31 @@ import {DataEvents} from '../data/data-events';
 import {HtmlLayer} from '../data/html-layer';
 import {LayerType} from '../data/layer-type';
 
-import {LayerView} from './layer-view';
+import {layerItemDataSetter, layerItemGenerator, LayerView} from './layer-view';
 
+
+describe('layerItemGenerator', () => {
+  it('should generate the correct element', () => {
+    const element = Mocks.object('element');
+    const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
+    mockDocument.createElement.and.returnValue(element);
+    assert(layerItemGenerator(mockDocument)).to.equal(element);
+    assert(mockDocument.createElement).to.haveBeenCalledWith('pa-asset-layer-item');
+  });
+});
+
+describe('layerItemDataSetter', () => {
+  it('should set the correct attributes', () => {
+    const assetId = 'assetId';
+    const layerId = 'layerId';
+    const projectId = 'projectId';
+    const mockElement = jasmine.createSpyObj('Element', ['setAttribute']);
+    layerItemDataSetter({assetId, layerId, projectId}, mockElement);
+    assert(mockElement.setAttribute).to.haveBeenCalledWith('asset-id', assetId);
+    assert(mockElement.setAttribute).to.haveBeenCalledWith('layer-id', layerId);
+    assert(mockElement.setAttribute).to.haveBeenCalledWith('project-id', projectId);
+  });
+});
 
 describe('asset.LayerView', () => {
   let mockAssetCollection;
@@ -123,31 +146,52 @@ describe('asset.LayerView', () => {
 
   describe('onAssetChanged_', () => {
     it('should update the UI correctly', async (done: any) => {
-      let id = 'id';
-      let projectId = 'projectId';
-      let mockDataSource = jasmine.createSpyObj('DataSource', ['getData']);
+      const id = 'id';
+      const projectId = 'projectId';
+      const mockDataSource = jasmine.createSpyObj('DataSource', ['getData']);
       mockDataSource.getData.and.returnValue(Promise.resolve(['data']));
-      let mockAsset = jasmine.createSpyObj('Asset', ['getData', 'getId', 'getProjectId']);
+
+      const layerId1 = 'layerId1';
+      const mockLayer1 = jasmine.createSpyObj('Layer1', ['getId']);
+      mockLayer1.getId.and.returnValue(layerId1);
+
+      const layerId2 = 'layerId2';
+      const mockLayer2 = jasmine.createSpyObj('Layer2', ['getId']);
+      mockLayer2.getId.and.returnValue(layerId2);
+
+      const layerId3 = 'layerId3';
+      const mockLayer3 = jasmine.createSpyObj('Layer3', ['getId']);
+      mockLayer3.getId.and.returnValue(layerId3);
+
+      const mockAsset =
+          jasmine.createSpyObj('Asset', ['getData', 'getId', 'getLayers', 'getProjectId']);
       mockAsset.getData.and.returnValue(mockDataSource);
       mockAsset.getId.and.returnValue(id);
       mockAsset.getProjectId.and.returnValue(projectId);
+      mockAsset.getLayers.and.returnValue([mockLayer1, mockLayer2, mockLayer3]);
 
-      spyOn(view['htmlEditorAssetIdBridge_'], 'set');
-      spyOn(view['htmlEditorProjectIdBridge_'], 'set');
-      spyOn(view['imageEditorAssetIdBridge_'], 'set');
-      spyOn(view['imageEditorDataRowBridge_'], 'set');
-      spyOn(view['imageEditorProjectIdBridge_'], 'set');
-      spyOn(view['textEditorAssetIdBridge_'], 'set');
-      spyOn(view['textEditorProjectIdBridge_'], 'set');
+      spyOn(view.htmlEditorAssetIdBridge_, 'set');
+      spyOn(view.htmlEditorProjectIdBridge_, 'set');
+      spyOn(view.imageEditorAssetIdBridge_, 'set');
+      spyOn(view.imageEditorDataRowBridge_, 'set');
+      spyOn(view.imageEditorProjectIdBridge_, 'set');
+      spyOn(view.textEditorAssetIdBridge_, 'set');
+      spyOn(view.textEditorProjectIdBridge_, 'set');
+      spyOn(view.layersChildElementHook_, 'set');
 
       await view['onAssetChanged_'](mockAsset);
-      assert(view['imageEditorDataRowBridge_'].set).to.haveBeenCalledWith(0);
-      assert(view['htmlEditorAssetIdBridge_'].set).to.haveBeenCalledWith(id);
-      assert(view['htmlEditorProjectIdBridge_'].set).to.haveBeenCalledWith(projectId);
-      assert(view['imageEditorAssetIdBridge_'].set).to.haveBeenCalledWith(id);
-      assert(view['imageEditorProjectIdBridge_'].set).to.haveBeenCalledWith(projectId);
-      assert(view['textEditorAssetIdBridge_'].set).to.haveBeenCalledWith(id);
-      assert(view['textEditorProjectIdBridge_'].set).to.haveBeenCalledWith(projectId);
+      assert(view.imageEditorDataRowBridge_.set).to.haveBeenCalledWith(0);
+      assert(view.htmlEditorAssetIdBridge_.set).to.haveBeenCalledWith(id);
+      assert(view.htmlEditorProjectIdBridge_.set).to.haveBeenCalledWith(projectId);
+      assert(view.imageEditorAssetIdBridge_.set).to.haveBeenCalledWith(id);
+      assert(view.imageEditorProjectIdBridge_.set).to.haveBeenCalledWith(projectId);
+      assert(view.textEditorAssetIdBridge_.set).to.haveBeenCalledWith(id);
+      assert(view.textEditorProjectIdBridge_.set).to.haveBeenCalledWith(projectId);
+      assert(view.layersChildElementHook_.set).to.haveBeenCalledWith([
+        {assetId: id, layerId: layerId1, projectId},
+        {assetId: id, layerId: layerId2, projectId},
+        {assetId: id, layerId: layerId3, projectId},
+      ]);
     });
 
     it('should not set the data row if the data length is 0', async (done: any) => {

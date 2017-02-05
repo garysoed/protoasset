@@ -31,52 +31,70 @@ import {RouteFactoryService} from '../routing/route-factory-service';
 import {Views} from '../routing/views';
 
 import {ImageLayerEditor} from './image-layer-editor';
+import {LayerItem} from './layer-item';
+
+
+type LayerItemData = {assetId: string, layerId: string, projectId: string};
+
+
+export function layerItemGenerator(document: Document): Element {
+  return document.createElement('pa-asset-layer-item');
+}
+
+export function layerItemDataSetter(data: LayerItemData, element: Element): void {
+  element.setAttribute('asset-id', data.assetId);
+  element.setAttribute('layer-id', data.layerId);
+  element.setAttribute('project-id', data.projectId);
+}
 
 
 /**
  * Displays layer editor
  */
 @customElement({
-  dependencies: [ImageLayerEditor],
+  dependencies: [ImageLayerEditor, LayerItem],
   tag: 'pa-asset-layer-view',
   templateKey: 'src/asset/layer-view',
 })
 export class LayerView extends BaseThemedElement {
-  @bind('#selectedLayerName').innerText()
-  private readonly layerNameBridge_: DomBridge<string>;
-
-  @bind('#layerTypeSwitch').attribute('gs-value', EnumParser(LayerType))
-  private readonly layerTypeSwitchBridge_: DomBridge<LayerType>;
-
   @bind('#htmlEditor').attribute('asset-id', StringParser)
-  private readonly htmlEditorAssetIdBridge_: DomBridge<string>;
+  readonly htmlEditorAssetIdBridge_: DomBridge<string>;
 
   @bind('#htmlEditor').attribute('layer-id', StringParser)
-  private readonly htmlEditorLayerIdBridge_: DomBridge<string>;
+  readonly htmlEditorLayerIdBridge_: DomBridge<string>;
 
   @bind('#htmlEditor').attribute('project-id', StringParser)
-  private readonly htmlEditorProjectIdBridge_: DomBridge<string>;
+  readonly htmlEditorProjectIdBridge_: DomBridge<string>;
 
   @bind('#imageEditor').attribute('asset-id', StringParser)
-  private readonly imageEditorAssetIdBridge_: DomBridge<string>;
+  readonly imageEditorAssetIdBridge_: DomBridge<string>;
 
   @bind('#imageEditor').attribute('data-row', IntegerParser)
-  private readonly imageEditorDataRowBridge_: DomBridge<number>;
+  readonly imageEditorDataRowBridge_: DomBridge<number>;
 
   @bind('#imageEditor').attribute('layer-id', StringParser)
-  private readonly imageEditorLayerIdBridge_: DomBridge<string>;
+  readonly imageEditorLayerIdBridge_: DomBridge<string>;
 
   @bind('#imageEditor').attribute('project-id', StringParser)
-  private readonly imageEditorProjectIdBridge_: DomBridge<string>;
+  readonly imageEditorProjectIdBridge_: DomBridge<string>;
+
+  @bind('#selectedLayerName').innerText()
+  readonly layerNameBridge_: DomBridge<string>;
+
+  @bind('#layerTypeSwitch').attribute('gs-value', EnumParser(LayerType))
+  readonly layerTypeSwitchBridge_: DomBridge<LayerType>;
+
+  @bind('#layers').childrenElements<LayerItemData>(layerItemGenerator, layerItemDataSetter)
+  readonly layersChildElementHook_: DomBridge<LayerItemData[]>;
 
   @bind('#textEditor').attribute('asset-id', StringParser)
-  private readonly textEditorAssetIdBridge_: DomBridge<string>;
+  readonly textEditorAssetIdBridge_: DomBridge<string>;
 
   @bind('#textEditor').attribute('layer-id', StringParser)
-  private readonly textEditorLayerIdBridge_: DomBridge<string>;
+  readonly textEditorLayerIdBridge_: DomBridge<string>;
 
   @bind('#textEditor').attribute('project-id', StringParser)
-  private readonly textEditorProjectIdBridge_: DomBridge<string>;
+  readonly textEditorProjectIdBridge_: DomBridge<string>;
 
   private readonly assetCollection_: AssetCollection;
   private readonly layerIdGenerator_: IdGenerator;
@@ -107,6 +125,7 @@ export class LayerView extends BaseThemedElement {
     this.layerIdGenerator_ = new SimpleIdGenerator();
     this.layerNameBridge_ = DomBridge.of<string>();
     this.layerTypeSwitchBridge_ = DomBridge.of<LayerType>();
+    this.layersChildElementHook_ = DomBridge.of<LayerItemData[]>();
     this.overlayService_ = overlayService;
     this.routeFactoryService_ = routeFactoryService;
     this.routeService_ = routeService;
@@ -193,7 +212,18 @@ export class LayerView extends BaseThemedElement {
 
     // TODO: Let user pick the data row.
     this.imageEditorDataRowBridge_.set(0);
-    // TODO: Populate the layer picker.
+
+    let layerItemData = Arrays
+        .of(asset.getLayers())
+        .map((layer: BaseLayer) => {
+          return {
+            assetId: asset.getId(),
+            layerId: layer.getId(),
+            projectId: asset.getProjectId(),
+          };
+        })
+        .asArray();
+    this.layersChildElementHook_.set(layerItemData);
   }
 
   /**
