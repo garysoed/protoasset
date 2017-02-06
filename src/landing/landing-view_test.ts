@@ -75,9 +75,9 @@ describe('landing.LandingView', () => {
           let newValue = 'newValue';
           let projects = Mocks.object('projects');
           mockProjectCollection.search.and.returnValue(Promise.resolve(projects));
-          spyOn(view['projectCollectionBridge_'], 'set');
+          spyOn(view['projectCollectionHook_'], 'set');
           await view['onFilterButtonTextAttrChange_'](newValue);
-          assert(view['projectCollectionBridge_'].set).to.haveBeenCalledWith(projects);
+          assert(view['projectCollectionHook_'].set).to.haveBeenCalledWith(projects);
           assert(mockProjectCollection.search).to.haveBeenCalledWith(newValue);
         });
 
@@ -86,9 +86,9 @@ describe('landing.LandingView', () => {
           let newValue = null;
           let projects = Mocks.object('projects');
           mockProjectCollection.list.and.returnValue(Promise.resolve(projects));
-          spyOn(view['projectCollectionBridge_'], 'set');
+          spyOn(view['projectCollectionHook_'], 'set');
           await view['onFilterButtonTextAttrChange_'](newValue);
-          assert(view['projectCollectionBridge_'].set).to.haveBeenCalledWith(projects);
+          assert(view['projectCollectionHook_'].set).to.haveBeenCalledWith(projects);
         });
 
     it('should set the project collection to all projects if the filter text is empty string',
@@ -96,33 +96,33 @@ describe('landing.LandingView', () => {
           let newValue = '';
           let projects = Mocks.object('projects');
           mockProjectCollection.list.and.returnValue(Promise.resolve(projects));
-          spyOn(view['projectCollectionBridge_'], 'set');
+          spyOn(view['projectCollectionHook_'], 'set');
           await view['onFilterButtonTextAttrChange_'](newValue);
-          assert(view['projectCollectionBridge_'].set).to.haveBeenCalledWith(projects);
+          assert(view['projectCollectionHook_'].set).to.haveBeenCalledWith(projects);
         });
   });
 
   describe('onProjectAdded_', () => {
     it('should add the project to the bridge', () => {
       let project = Mocks.object('project');
-      spyOn(view['projectCollectionBridge_'], 'get').and.returnValue([]);
+      spyOn(view['projectCollectionHook_'], 'get').and.returnValue([]);
 
-      spyOn(view['projectCollectionBridge_'], 'set');
+      spyOn(view['projectCollectionHook_'], 'set');
 
       view['onProjectAdded_'](project);
 
-      assert(view['projectCollectionBridge_'].set).to.haveBeenCalledWith([project]);
+      assert(view['projectCollectionHook_'].set).to.haveBeenCalledWith([project]);
     });
 
     it('should handle the case when project collection bridge has null value', () => {
       let project = Mocks.object('project');
-      spyOn(view['projectCollectionBridge_'], 'get').and.returnValue(null);
+      spyOn(view['projectCollectionHook_'], 'get').and.returnValue(null);
 
-      spyOn(view['projectCollectionBridge_'], 'set');
+      spyOn(view['projectCollectionHook_'], 'set');
 
       view['onProjectAdded_'](project);
 
-      assert(view['projectCollectionBridge_'].set).to.haveBeenCalledWith([project]);
+      assert(view['projectCollectionHook_'].set).to.haveBeenCalledWith([project]);
     });
   });
 
@@ -209,11 +209,11 @@ describe('landing.LandingView', () => {
 
       mockProjectCollection.list.and.returnValue(Promise.resolve([mockProject1, mockProject2]));
 
-      spyOn(view['projectCollectionBridge_'], 'set');
+      spyOn(view['projectCollectionHook_'], 'set');
 
       let element = Mocks.object('element');
       await view.onInserted(element);
-      assert(view['projectCollectionBridge_'].set).to
+      assert(view['projectCollectionHook_'].set).to
           .haveBeenCalledWith([mockProject1, mockProject2]);
     });
   });

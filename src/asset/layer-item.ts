@@ -6,7 +6,7 @@ import {
   bind,
   BooleanParser,
   customElement,
-  DomBridge,
+  DomHook,
   EnumParser,
   handle,
   StringParser} from 'external/gs_tools/src/webc';
@@ -35,28 +35,28 @@ export enum Mode {
 })
 export class LayerItem extends BaseThemedElement {
   @bind(null).attribute('asset-id', StringParser)
-  readonly assetIdHook_: DomBridge<string>;
+  readonly assetIdHook_: DomHook<string>;
 
   @bind('#down').attribute('disabled', BooleanParser)
-  readonly downDisabledHook_: DomBridge<boolean>;
+  readonly downDisabledHook_: DomHook<boolean>;
 
   @bind(null).attribute('layer-id', StringParser)
-  readonly layerIdHook_: DomBridge<string>;
+  readonly layerIdHook_: DomHook<string>;
 
   @bind('#name').innerText()
-  readonly nameHook_: DomBridge<string>;
+  readonly nameHook_: DomHook<string>;
 
   @bind('#nameInput').attribute('gs-value', StringParser)
-  readonly nameInputHook_: DomBridge<string>;
+  readonly nameInputHook_: DomHook<string>;
 
   @bind(null).attribute('project-id', StringParser)
-  readonly projectIdHook_: DomBridge<string>;
+  readonly projectIdHook_: DomHook<string>;
 
   @bind('#root').attribute('gs-value', EnumParser(Mode))
-  readonly rootModeHook_: DomBridge<Mode>;
+  readonly rootModeHook_: DomHook<Mode>;
 
   @bind('#up').attribute('disabled', BooleanParser)
-  readonly upDisabledHook_: DomBridge<boolean>;
+  readonly upDisabledHook_: DomHook<boolean>;
 
   private readonly assetCollection_: AssetCollection;
 
@@ -69,15 +69,15 @@ export class LayerItem extends BaseThemedElement {
     super(themeService);
     this.assetCollection_ = assetCollection;
     this.assetDeregister_ = null;
-    this.assetIdHook_ = DomBridge.of<string>();
-    this.downDisabledHook_ = DomBridge.of<boolean>(true);
+    this.assetIdHook_ = DomHook.of<string>();
+    this.downDisabledHook_ = DomHook.of<boolean>(true);
     this.layerDeregister_ = null;
-    this.layerIdHook_ = DomBridge.of<string>();
-    this.nameHook_ = DomBridge.of<string>();
-    this.nameInputHook_ = DomBridge.of<string>();
-    this.projectIdHook_ = DomBridge.of<string>();
-    this.rootModeHook_ = DomBridge.of<Mode>();
-    this.upDisabledHook_ = DomBridge.of<boolean>(true);
+    this.layerIdHook_ = DomHook.of<string>();
+    this.nameHook_ = DomHook.of<string>();
+    this.nameInputHook_ = DomHook.of<string>();
+    this.projectIdHook_ = DomHook.of<string>();
+    this.rootModeHook_ = DomHook.of<Mode>();
+    this.upDisabledHook_ = DomHook.of<boolean>(true);
   }
 
   /**

@@ -5,7 +5,7 @@ import {
   bind,
   BooleanParser,
   customElement,
-  DomBridge,
+  DomHook,
   handle,
   StringParser} from 'external/gs_tools/src/webc';
 
@@ -26,10 +26,10 @@ import {Views} from '../routing/views';
 })
 export class NavBar extends BaseThemedElement {
   @bind('#drawer').attribute('gs-is-expanded', BooleanParser)
-  private readonly drawerBridge_: DomBridge<boolean>;
+  private readonly drawerHook_: DomHook<boolean>;
 
   @bind('#tab').attribute('gs-selected-tab', StringParser)
-  private readonly selectedTabBridge_: DomBridge<string>;
+  private readonly selectedTabHook_: DomHook<string>;
 
   private readonly routeFactoryService_: RouteFactoryService;
   private readonly routeService_: RouteService<Views>;
@@ -40,11 +40,11 @@ export class NavBar extends BaseThemedElement {
       @inject('gs.routing.RouteService') routeService: RouteService<Views>,
       @inject('theming.ThemeService') themeService: ThemeService) {
     super(themeService);
-    this.drawerBridge_ = DomBridge.of<boolean>();
+    this.drawerHook_ = DomHook.of<boolean>();
     this.routeFactoryService_ = routeFactoryService;
     this.routeMap_ = new Map<string, AbstractRouteFactory<any, any, any, any>>();
     this.routeService_ = routeService;
-    this.selectedTabBridge_ = DomBridge.of<string>();
+    this.selectedTabHook_ = DomHook.of<string>();
   }
 
   /**
@@ -58,7 +58,7 @@ export class NavBar extends BaseThemedElement {
         });
 
     if (tabId !== null) {
-      this.selectedTabBridge_.set(tabId);
+      this.selectedTabHook_.set(tabId);
     }
   }
 
@@ -105,12 +105,12 @@ export class NavBar extends BaseThemedElement {
 
   @handle(null).event(DomEvent.MOUSEENTER)
   protected onMouseEnter_(): void {
-    this.drawerBridge_.set(true);
+    this.drawerHook_.set(true);
   }
 
   @handle(null).event(DomEvent.MOUSELEAVE)
   protected onMouseLeave_(): void {
-    this.drawerBridge_.set(false);
+    this.drawerHook_.set(false);
   }
 
   @handle('#render').event(DomEvent.CLICK)

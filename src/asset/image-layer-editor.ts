@@ -4,7 +4,7 @@ import {inject} from 'external/gs_tools/src/inject';
 import {
   bind,
   customElement,
-  DomBridge,
+  DomHook,
   FloatParser,
   handle,
   IntegerParser,
@@ -30,34 +30,34 @@ import {ImageLayer} from '../data/image-layer';
 })
 export class ImageLayerEditor extends BaseThemedElement {
   @bind(null).attribute('asset-id', StringParser)
-  private assetIdHook_: DomBridge<string>;
+  private assetIdHook_: DomHook<string>;
 
   @bind('#bottom').attribute('gs-value', FloatParser)
-  private bottomHook_: DomBridge<number | null>;
+  private bottomHook_: DomHook<number | null>;
 
   @bind(null).attribute('data-row', IntegerParser)
-  private dataRowHook_: DomBridge<number>;
+  private dataRowHook_: DomHook<number>;
 
   @bind('#imagePreview').property('style')
-  private imagePreviewStyleHook_: DomBridge<CSSStyleDeclaration>;
+  private imagePreviewStyleHook_: DomHook<CSSStyleDeclaration>;
 
   @bind('#imageUrl').attribute('gs-value', StringParser)
-  private imageUrlHook_: DomBridge<string>;
+  private imageUrlHook_: DomHook<string>;
 
   @bind(null).attribute('layer-id', StringParser)
-  private layerIdHook_: DomBridge<string>;
+  private layerIdHook_: DomHook<string>;
 
   @bind('#left').attribute('gs-value', FloatParser)
-  private leftHook_: DomBridge<number | null>;
+  private leftHook_: DomHook<number | null>;
 
   @bind(null).attribute('project-id', StringParser)
-  private projectIdHook_: DomBridge<string>;
+  private projectIdHook_: DomHook<string>;
 
   @bind('#right').attribute('gs-value', FloatParser)
-  private rightHook_: DomBridge<number | null>;
+  private rightHook_: DomHook<number | null>;
 
   @bind('#top').attribute('gs-value', FloatParser)
-  private topHook_: DomBridge<number | null>;
+  private topHook_: DomHook<number | null>;
 
   private readonly assetCollection_: AssetCollection;
 
@@ -68,17 +68,17 @@ export class ImageLayerEditor extends BaseThemedElement {
       @inject('theming.ThemeService') themeService: ThemeService) {
     super(themeService);
     this.assetCollection_ = assetCollection;
-    this.assetIdHook_ = DomBridge.of<string>();
-    this.bottomHook_ = DomBridge.of<number>();
-    this.dataRowHook_ = DomBridge.of<number>();
-    this.imagePreviewStyleHook_ = DomBridge.of<CSSStyleDeclaration>();
-    this.imageUrlHook_ = DomBridge.of<string>();
+    this.assetIdHook_ = DomHook.of<string>();
+    this.bottomHook_ = DomHook.of<number>();
+    this.dataRowHook_ = DomHook.of<number>();
+    this.imagePreviewStyleHook_ = DomHook.of<CSSStyleDeclaration>();
+    this.imageUrlHook_ = DomHook.of<string>();
     this.layerDeregister_ = null;
-    this.layerIdHook_ = DomBridge.of<string>();
-    this.leftHook_ = DomBridge.of<number>();
-    this.projectIdHook_ = DomBridge.of<string>();
-    this.rightHook_ = DomBridge.of<number>();
-    this.topHook_ = DomBridge.of<number>();
+    this.layerIdHook_ = DomHook.of<string>();
+    this.leftHook_ = DomHook.of<number>();
+    this.projectIdHook_ = DomHook.of<string>();
+    this.rightHook_ = DomHook.of<number>();
+    this.topHook_ = DomHook.of<number>();
   }
 
   /**

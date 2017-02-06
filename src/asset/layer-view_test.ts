@@ -170,23 +170,23 @@ describe('asset.LayerView', () => {
       mockAsset.getProjectId.and.returnValue(projectId);
       mockAsset.getLayers.and.returnValue([mockLayer1, mockLayer2, mockLayer3]);
 
-      spyOn(view.htmlEditorAssetIdBridge_, 'set');
-      spyOn(view.htmlEditorProjectIdBridge_, 'set');
-      spyOn(view.imageEditorAssetIdBridge_, 'set');
-      spyOn(view.imageEditorDataRowBridge_, 'set');
-      spyOn(view.imageEditorProjectIdBridge_, 'set');
-      spyOn(view.textEditorAssetIdBridge_, 'set');
-      spyOn(view.textEditorProjectIdBridge_, 'set');
+      spyOn(view.htmlEditorAssetIdHook_, 'set');
+      spyOn(view.htmlEditorProjectIdHook_, 'set');
+      spyOn(view.imageEditorAssetIdHook_, 'set');
+      spyOn(view.imageEditorDataRowHook_, 'set');
+      spyOn(view.imageEditorProjectIdHook_, 'set');
+      spyOn(view.textEditorAssetIdHook_, 'set');
+      spyOn(view.textEditorProjectIdHook_, 'set');
       spyOn(view.layersChildElementHook_, 'set');
 
       await view['onAssetChanged_'](mockAsset);
-      assert(view.imageEditorDataRowBridge_.set).to.haveBeenCalledWith(0);
-      assert(view.htmlEditorAssetIdBridge_.set).to.haveBeenCalledWith(id);
-      assert(view.htmlEditorProjectIdBridge_.set).to.haveBeenCalledWith(projectId);
-      assert(view.imageEditorAssetIdBridge_.set).to.haveBeenCalledWith(id);
-      assert(view.imageEditorProjectIdBridge_.set).to.haveBeenCalledWith(projectId);
-      assert(view.textEditorAssetIdBridge_.set).to.haveBeenCalledWith(id);
-      assert(view.textEditorProjectIdBridge_.set).to.haveBeenCalledWith(projectId);
+      assert(view.imageEditorDataRowHook_.set).to.haveBeenCalledWith(0);
+      assert(view.htmlEditorAssetIdHook_.set).to.haveBeenCalledWith(id);
+      assert(view.htmlEditorProjectIdHook_.set).to.haveBeenCalledWith(projectId);
+      assert(view.imageEditorAssetIdHook_.set).to.haveBeenCalledWith(id);
+      assert(view.imageEditorProjectIdHook_.set).to.haveBeenCalledWith(projectId);
+      assert(view.textEditorAssetIdHook_.set).to.haveBeenCalledWith(id);
+      assert(view.textEditorProjectIdHook_.set).to.haveBeenCalledWith(projectId);
       assert(view.layersChildElementHook_.set).to.haveBeenCalledWith([
         {assetId: id, layerId: layerId1, projectId},
         {assetId: id, layerId: layerId2, projectId},
@@ -202,16 +202,16 @@ describe('asset.LayerView', () => {
       mockAsset.getId.and.returnValue('id');
       mockAsset.getProjectId.and.returnValue('projectId');
 
-      spyOn(view['htmlEditorAssetIdBridge_'], 'set');
-      spyOn(view['htmlEditorProjectIdBridge_'], 'set');
-      spyOn(view['imageEditorAssetIdBridge_'], 'set');
-      spyOn(view['imageEditorDataRowBridge_'], 'set');
-      spyOn(view['imageEditorProjectIdBridge_'], 'set');
-      spyOn(view['textEditorAssetIdBridge_'], 'set');
-      spyOn(view['textEditorProjectIdBridge_'], 'set');
+      spyOn(view['htmlEditorAssetIdHook_'], 'set');
+      spyOn(view['htmlEditorProjectIdHook_'], 'set');
+      spyOn(view['imageEditorAssetIdHook_'], 'set');
+      spyOn(view['imageEditorDataRowHook_'], 'set');
+      spyOn(view['imageEditorProjectIdHook_'], 'set');
+      spyOn(view['textEditorAssetIdHook_'], 'set');
+      spyOn(view['textEditorProjectIdHook_'], 'set');
 
       await view['onAssetChanged_'](mockAsset);
-      assert(view['imageEditorDataRowBridge_'].set).toNot.haveBeenCalled();
+      assert(view['imageEditorDataRowHook_'].set).toNot.haveBeenCalled();
     });
 
     it('should not set the data row if there are no data source', async (done: any) => {
@@ -220,16 +220,16 @@ describe('asset.LayerView', () => {
       mockAsset.getId.and.returnValue('id');
       mockAsset.getProjectId.and.returnValue('projectId');
 
-      spyOn(view['htmlEditorAssetIdBridge_'], 'set');
-      spyOn(view['htmlEditorProjectIdBridge_'], 'set');
-      spyOn(view['imageEditorAssetIdBridge_'], 'set');
-      spyOn(view['imageEditorDataRowBridge_'], 'set');
-      spyOn(view['imageEditorProjectIdBridge_'], 'set');
-      spyOn(view['textEditorAssetIdBridge_'], 'set');
-      spyOn(view['textEditorProjectIdBridge_'], 'set');
+      spyOn(view['htmlEditorAssetIdHook_'], 'set');
+      spyOn(view['htmlEditorProjectIdHook_'], 'set');
+      spyOn(view['imageEditorAssetIdHook_'], 'set');
+      spyOn(view['imageEditorDataRowHook_'], 'set');
+      spyOn(view['imageEditorProjectIdHook_'], 'set');
+      spyOn(view['textEditorAssetIdHook_'], 'set');
+      spyOn(view['textEditorProjectIdHook_'], 'set');
 
       await view['onAssetChanged_'](mockAsset);
-      assert(view['imageEditorDataRowBridge_'].set).toNot.haveBeenCalled();
+      assert(view['imageEditorDataRowHook_'].set).toNot.haveBeenCalled();
     });
   });
 
@@ -243,18 +243,18 @@ describe('asset.LayerView', () => {
       mockLayer.getName.and.returnValue(name);
       mockLayer.getType.and.returnValue(type);
 
-      spyOn(view['layerNameBridge_'], 'set');
-      spyOn(view['layerTypeSwitchBridge_'], 'set');
-      spyOn(view['htmlEditorLayerIdBridge_'], 'set');
-      spyOn(view['imageEditorLayerIdBridge_'], 'set');
-      spyOn(view['textEditorLayerIdBridge_'], 'set');
+      spyOn(view['layerNameHook_'], 'set');
+      spyOn(view['layerTypeSwitchHook_'], 'set');
+      spyOn(view['htmlEditorLayerIdHook_'], 'set');
+      spyOn(view['imageEditorLayerIdHook_'], 'set');
+      spyOn(view['textEditorLayerIdHook_'], 'set');
 
       view['onLayerChanged_'](mockLayer);
-      assert(view['layerNameBridge_'].set).to.haveBeenCalledWith(name);
-      assert(view['layerTypeSwitchBridge_'].set).to.haveBeenCalledWith(type);
-      assert(view['htmlEditorLayerIdBridge_'].set).to.haveBeenCalledWith(id);
-      assert(view['imageEditorLayerIdBridge_'].set).to.haveBeenCalledWith(id);
-      assert(view['textEditorLayerIdBridge_'].set).to.haveBeenCalledWith(id);
+      assert(view['layerNameHook_'].set).to.haveBeenCalledWith(name);
+      assert(view['layerTypeSwitchHook_'].set).to.haveBeenCalledWith(type);
+      assert(view['htmlEditorLayerIdHook_'].set).to.haveBeenCalledWith(id);
+      assert(view['imageEditorLayerIdHook_'].set).to.haveBeenCalledWith(id);
+      assert(view['textEditorLayerIdHook_'].set).to.haveBeenCalledWith(id);
     });
   });
 

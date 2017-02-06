@@ -7,7 +7,7 @@ import {
   bind,
   BooleanParser,
   customElement,
-  DomBridge,
+  DomHook,
   handle,
   StringParser} from 'external/gs_tools/src/webc';
 
@@ -120,25 +120,25 @@ export function helperItemGenerator(document: Document): Element {
 })
 export class HelperView extends BaseThemedElement {
   @bind('#args').childrenElements<string>(argElementGenerator, argElementDataSetter, 0)
-  private readonly argElementsBridge_: DomBridge<string[]>;
+  private readonly argElementsHook_: DomHook<string[]>;
 
   @bind('#argInput').attribute('gs-value', StringParser)
-  private readonly argInputBridge_: DomBridge<string>;
+  private readonly argInputHook_: DomHook<string>;
 
   @bind('#bodyInput').attribute('gs-value', StringParser)
-  private readonly bodyInputBridge_: DomBridge<string>;
+  private readonly bodyInputHook_: DomHook<string>;
 
   @bind('#consoleInput').attribute('gs-value', StringParser)
-  private readonly consoleInputBridge_: DomBridge<string>;
+  private readonly consoleInputHook_: DomHook<string>;
 
   @bind('#helpers').childrenElements<HelperIdParams>(helperItemGenerator, helperItemDataSetter)
-  private readonly helperItemsBridge_: DomBridge<HelperIdParams[]>;
+  private readonly helperItemsHook_: DomHook<HelperIdParams[]>;
 
   @bind('#name').innerText()
-  private readonly nameBridge_: DomBridge<string>;
+  private readonly nameHook_: DomHook<string>;
 
   @bind('#console').childrenElements<ConsoleEntry>(consoleEntryGenerator, consoleEntryDataSetter)
-  private readonly consoleEntryBridge_: DomBridge<ConsoleEntry[]>;
+  private readonly consoleEntryHook_: DomHook<ConsoleEntry[]>;
 
   private readonly assetCollection_: AssetCollection;
   private readonly helperIdGenerator_: IdGenerator;
@@ -156,17 +156,17 @@ export class HelperView extends BaseThemedElement {
       @inject('pa.data.TemplateCompilerService') templateCompilerService: TemplateCompilerService,
       @inject('theming.ThemeService') themeService: ThemeService) {
     super(themeService);
-    this.argElementsBridge_ = DomBridge.of<string[]>();
-    this.argInputBridge_ = DomBridge.of<string>();
+    this.argElementsHook_ = DomHook.of<string[]>();
+    this.argInputHook_ = DomHook.of<string>();
     this.assetCollection_ = assetCollection;
     this.assetUpdateDeregister_ = null;
-    this.bodyInputBridge_ = DomBridge.of<string>();
-    this.consoleEntryBridge_ = DomBridge.of<ConsoleEntry[]>();
-    this.consoleInputBridge_ = DomBridge.of<string>();
+    this.bodyInputHook_ = DomHook.of<string>();
+    this.consoleEntryHook_ = DomHook.of<ConsoleEntry[]>();
+    this.consoleInputHook_ = DomHook.of<string>();
     this.helperIdGenerator_ = new SimpleIdGenerator();
-    this.helperItemsBridge_ = DomBridge.of<HelperIdParams[]>();
+    this.helperItemsHook_ = DomHook.of<HelperIdParams[]>();
     this.helperUpdateDeregister_ = null;
-    this.nameBridge_ = DomBridge.of<string>();
+    this.nameHook_ = DomHook.of<string>();
     this.routeFactoryService_ = routeFactoryService;
     this.routeService_ = routeService;
     this.templateCompilerService_ = templateCompilerService;
@@ -248,7 +248,7 @@ export class HelperView extends BaseThemedElement {
 
     let commaIndex = newValue.indexOf(',');
     if (commaIndex >= 0) {
-      let existingArgs = this.argElementsBridge_.get() || [];
+      let existingArgs = this.argElementsHook_.get() || [];
       let newArgs = Arrays
           .of(newValue.split(','))
           .map((arg: string) => {
@@ -259,8 +259,8 @@ export class HelperView extends BaseThemedElement {
           })
           .asArray();
 
-      this.argElementsBridge_.set(existingArgs.concat(newArgs));
-      this.argInputBridge_.delete();
+      this.argElementsHook_.set(existingArgs.concat(newArgs));
+      this.argInputHook_.delete();
     }
   }
 
@@ -304,14 +304,14 @@ export class HelperView extends BaseThemedElement {
           };
         })
         .asIterable();
-    this.helperItemsBridge_.set(Arrays.fromIterable(helperIdParams).asArray());
+    this.helperItemsHook_.set(Arrays.fromIterable(helperIdParams).asArray());
   }
 
   @handle('#args').childListChange()
   @handle('#bodyInput').attributeChange('gs-value', StringParser)
   protected async onChanges_(): Promise<void> {
-    const args = this.argElementsBridge_.get();
-    const body = this.bodyInputBridge_.get();
+    const args = this.argElementsHook_.get();
+    const body = this.bodyInputHook_.get();
 
     if (args === null || body === null) {
       return;
@@ -341,7 +341,7 @@ export class HelperView extends BaseThemedElement {
 
   @handle('#executeButton').event(DomEvent.CLICK)
   protected async onExecuteButtonClick_(): Promise<void> {
-    const consoleValue = this.consoleInputBridge_.get();
+    const consoleValue = this.consoleInputHook_.get();
     if (consoleValue === null) {
       return;
     }
@@ -368,9 +368,9 @@ export class HelperView extends BaseThemedElement {
       result = `${e.message}\n\n${e.stack}`;
       isError = true;
     }
-    let consoleEntries = this.consoleEntryBridge_.get() || [];
+    let consoleEntries = this.consoleEntryHook_.get() || [];
     consoleEntries.push({command: consoleValue, isError: isError, result: result});
-    this.consoleEntryBridge_.set(consoleEntries);
+    this.consoleEntryHook_.set(consoleEntries);
 
     let element = this.getElement();
     if (element === null) {
@@ -385,9 +385,9 @@ export class HelperView extends BaseThemedElement {
    * @param helper The updated helper.
    */
   protected onHelperChanged_(helper: Helper): void {
-    this.nameBridge_.set(helper.getName());
-    this.argElementsBridge_.set(helper.getArgs());
-    this.bodyInputBridge_.set(helper.getBody());
+    this.nameHook_.set(helper.getName());
+    this.argElementsHook_.set(helper.getArgs());
+    this.bodyInputHook_.set(helper.getBody());
   };
 
   /**
@@ -457,7 +457,7 @@ export class HelperView extends BaseThemedElement {
       return;
     }
 
-    let args = this.argElementsBridge_.get();
+    let args = this.argElementsHook_.get();
     if (args === null) {
       return;
     }
@@ -473,7 +473,7 @@ export class HelperView extends BaseThemedElement {
     }
 
     args.splice(removedIndex, 1);
-    this.argElementsBridge_.set(args);
+    this.argElementsHook_.set(args);
   }
 
   /**

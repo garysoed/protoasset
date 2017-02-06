@@ -42,11 +42,11 @@ describe('asset.NavBar', () => {
         return factory === routeFactory2 ? {} : null;
       });
 
-      spyOn(navbar['selectedTabBridge_'], 'set');
+      spyOn(navbar['selectedTabHook_'], 'set');
 
       navbar['onRouteChanged_']();
 
-      assert(navbar['selectedTabBridge_'].set).to.haveBeenCalledWith(tabId2);
+      assert(navbar['selectedTabHook_'].set).to.haveBeenCalledWith(tabId2);
     });
 
     it('should not set the selected tab if there are no corresponding tab IDs', () => {
@@ -57,11 +57,11 @@ describe('asset.NavBar', () => {
 
       mockRouteService.getParams.and.returnValue(null);
 
-      spyOn(navbar['selectedTabBridge_'], 'set');
+      spyOn(navbar['selectedTabHook_'], 'set');
 
       navbar['onRouteChanged_']();
 
-      assert(navbar['selectedTabBridge_'].set).toNot.haveBeenCalled();
+      assert(navbar['selectedTabHook_'].set).toNot.haveBeenCalled();
     });
   });
 
@@ -126,17 +126,17 @@ describe('asset.NavBar', () => {
 
   describe('onMouseEnter_', () => {
     it('should set the drawer to be expanded', () => {
-      spyOn(navbar['drawerBridge_'], 'set');
+      spyOn(navbar['drawerHook_'], 'set');
       navbar['onMouseEnter_']();
-      assert(navbar['drawerBridge_'].set).to.haveBeenCalledWith(true);
+      assert(navbar['drawerHook_'].set).to.haveBeenCalledWith(true);
     });
   });
 
   describe('onMouseLeave_', () => {
     it('should set the drawer to be collapsed', () => {
-      spyOn(navbar['drawerBridge_'], 'set');
+      spyOn(navbar['drawerHook_'], 'set');
       navbar['onMouseLeave_']();
-      assert(navbar['drawerBridge_'].set).to.haveBeenCalledWith(false);
+      assert(navbar['drawerHook_'].set).to.haveBeenCalledWith(false);
     });
   });
 

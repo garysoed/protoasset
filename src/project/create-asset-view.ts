@@ -5,7 +5,7 @@ import {
     bind,
     BooleanParser,
     customElement,
-    DomBridge,
+    DomHook,
     EnumParser,
     FloatParser,
     handle,
@@ -96,32 +96,32 @@ export function presetTypeMenuDataSetter(data: PresetType, element: Element): vo
 export class CreateAssetView extends BaseThemedElement {
   @bind('#assetTypeMenu')
       .childrenElements<AssetType>(assetTypeMenuGenerator, assetTypeMenuDataSetter)
-  private readonly assetTypeMenuBridge_: DomBridge<AssetType[]>;
+  private readonly assetTypeMenuHook_: DomHook<AssetType[]>;
 
   @bind('#assetType').innerText()
-  private readonly assetTypeBridge_: DomBridge<string>;
+  private readonly assetTypeHook_: DomHook<string>;
 
   @bind('#createButton').attribute('disabled', BooleanParser)
-  private readonly createButtonDisabledBridge_: DomBridge<boolean>;
+  private readonly createButtonDisabledHook_: DomHook<boolean>;
 
   @bind('#nameInput').attribute('gs-value', StringParser)
-  private readonly nameValueBridge_: DomBridge<string>;
+  private readonly nameValueHook_: DomHook<string>;
 
   @bind('#presetTypeMenu')
       .childrenElements<PresetType>(presetTypeMenuGenerator, presetTypeMenuDataSetter)
-  private readonly presetTypeMenuBridge_: DomBridge<PresetType[]>;
+  private readonly presetTypeMenuHook_: DomHook<PresetType[]>;
 
   @bind('#presetType').innerText()
-  private readonly presetTypeBridge_: DomBridge<string>;
+  private readonly presetTypeHook_: DomHook<string>;
 
   @bind('#heightInput').attribute('gs-value', FloatParser)
-  private readonly templateHeightBridge_: DomBridge<number>;
+  private readonly templateHeightHook_: DomHook<number>;
 
   @bind('#templateSection').attribute('hidden', BooleanParser)
-  private readonly templateSectionHiddenBridge_: DomBridge<boolean>;
+  private readonly templateSectionHiddenHook_: DomHook<boolean>;
 
   @bind('#widthInput').attribute('gs-value', FloatParser)
-  private readonly templateWidthBridge_: DomBridge<number>;
+  private readonly templateWidthHook_: DomHook<number>;
 
   private readonly assetCollection_: AssetCollection;
   private readonly routeFactoryService_: RouteFactoryService;
@@ -141,17 +141,17 @@ export class CreateAssetView extends BaseThemedElement {
     super(themeService);
     this.assetCollection_ = assetCollection;
     this.assetType_ = null;
-    this.assetTypeBridge_ = DomBridge.of<string>();
-    this.assetTypeMenuBridge_ = DomBridge.of<number[]>();
-    this.createButtonDisabledBridge_ = DomBridge.of<boolean>(true);
-    this.nameValueBridge_ = DomBridge.of<string>();
-    this.presetTypeMenuBridge_ = DomBridge.of<PresetType[]>();
-    this.presetTypeBridge_ = DomBridge.of<string>();
+    this.assetTypeHook_ = DomHook.of<string>();
+    this.assetTypeMenuHook_ = DomHook.of<number[]>();
+    this.createButtonDisabledHook_ = DomHook.of<boolean>(true);
+    this.nameValueHook_ = DomHook.of<string>();
+    this.presetTypeMenuHook_ = DomHook.of<PresetType[]>();
+    this.presetTypeHook_ = DomHook.of<string>();
     this.routeFactoryService_ = routeFactoryService;
     this.routeService_ = routeService;
-    this.templateHeightBridge_ = DomBridge.of<number>();
-    this.templateSectionHiddenBridge_ = DomBridge.of<boolean>(true);
-    this.templateWidthBridge_ = DomBridge.of<number>();
+    this.templateHeightHook_ = DomHook.of<number>();
+    this.templateSectionHiddenHook_ = DomHook.of<boolean>(true);
+    this.templateWidthHook_ = DomHook.of<number>();
   }
 
   /**
@@ -167,7 +167,7 @@ export class CreateAssetView extends BaseThemedElement {
    */
   private reset_(): void {
     this.setAssetType_(null);
-    this.nameValueBridge_.set('');
+    this.nameValueHook_.set('');
   }
 
   /**
@@ -177,9 +177,9 @@ export class CreateAssetView extends BaseThemedElement {
   private setAssetType_(type: AssetType | null): void {
     this.assetType_ = type;
     if (type === null) {
-      this.assetTypeBridge_.set('Select a type ...');
+      this.assetTypeHook_.set('Select a type ...');
     } else {
-      this.assetTypeBridge_.set(Asset.renderType(type));
+      this.assetTypeHook_.set(Asset.renderType(type));
     }
     this.updateTemplateSection_();
     this.verifyInput_();
@@ -192,14 +192,14 @@ export class CreateAssetView extends BaseThemedElement {
   private setPresetType_(type: PresetType | null): void {
     this.presetType_ = type;
     if (type === null) {
-      this.presetTypeBridge_.set('Select a preset ...');
+      this.presetTypeHook_.set('Select a preset ...');
     } else {
-      this.presetTypeBridge_.set(Render.preset(type));
+      this.presetTypeHook_.set(Render.preset(type));
 
       let presetObj = ASSET_PRESETS.get(type);
       if (presetObj !== undefined) {
-        this.templateHeightBridge_.set(presetObj.heightPx);
-        this.templateWidthBridge_.set(presetObj.widthPx);
+        this.templateHeightHook_.set(presetObj.heightPx);
+        this.templateWidthHook_.set(presetObj.widthPx);
       }
     }
 
@@ -211,13 +211,13 @@ export class CreateAssetView extends BaseThemedElement {
    */
   private updateTemplateSection_(): void {
     if (this.assetType_ === null) {
-      this.templateSectionHiddenBridge_.set(true);
-      this.presetTypeMenuBridge_.set([]);
+      this.templateSectionHiddenHook_.set(true);
+      this.presetTypeMenuHook_.set([]);
     } else {
-      this.templateSectionHiddenBridge_.set(false);
-      this.presetTypeMenuBridge_.set(ASSET_MAP_.get(this.assetType_) || []);
+      this.templateSectionHiddenHook_.set(false);
+      this.presetTypeMenuHook_.set(ASSET_MAP_.get(this.assetType_) || []);
     }
-    this.presetTypeBridge_.set('');
+    this.presetTypeHook_.set('');
     this.verifyInput_();
   }
 
@@ -228,11 +228,11 @@ export class CreateAssetView extends BaseThemedElement {
   @handle('#nameInput').attributeChange('gs-value', StringParser)
   @handle('#widthInput').attributeChange('gs-value', FloatParser)
   private verifyInput_(): void {
-    this.createButtonDisabledBridge_.set(
-        !this.nameValueBridge_.get()
+    this.createButtonDisabledHook_.set(
+        !this.nameValueHook_.get()
         || this.assetType_ === null
-        || Number.isNaN(this.templateWidthBridge_.get() || NaN)
-        || Number.isNaN(this.templateHeightBridge_.get() || NaN));
+        || Number.isNaN(this.templateWidthHook_.get() || NaN)
+        || Number.isNaN(this.templateHeightHook_.get() || NaN));
   }
 
   /**
@@ -254,7 +254,7 @@ export class CreateAssetView extends BaseThemedElement {
    */
   @handle('#createButton').event(Event.ACTION)
   protected async onSubmitAction_(): Promise<void> {
-    const assetName = this.nameValueBridge_.get();
+    const assetName = this.nameValueHook_.get();
     if (!assetName) {
       throw Validate.fail('Project name is not set');
     }
@@ -264,12 +264,12 @@ export class CreateAssetView extends BaseThemedElement {
       throw Validate.fail('Asset type is not set');
     }
 
-    const height = this.templateHeightBridge_.get();
+    const height = this.templateHeightHook_.get();
     if (height === null || Number.isNaN(height)) {
       throw Validate.fail('Asset height is not set');
     }
 
-    const width = this.templateWidthBridge_.get();
+    const width = this.templateWidthHook_.get();
     if (width === null || Number.isNaN(width)) {
       throw Validate.fail('Asset width is not set');
     }
@@ -295,7 +295,7 @@ export class CreateAssetView extends BaseThemedElement {
    */
   onCreated(element: HTMLElement): void {
     super.onCreated(element);
-    this.assetTypeMenuBridge_.set([AssetType.CARD]);
+    this.assetTypeMenuHook_.set([AssetType.CARD]);
     this.setAssetType_(null);
   }
 

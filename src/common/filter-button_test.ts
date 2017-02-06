@@ -17,56 +17,56 @@ describe('common.FilterButton', () => {
 
   describe('onClearButtonAction_', () => {
     it('should clear the search text value and the filter text attribute', () => {
-      spyOn(button['searchTextValueBridge_'], 'set');
-      spyOn(button['filterTextAttrBridge_'], 'set');
-      spyOn(button['drawerExpandedBridge_'], 'set');
+      spyOn(button['searchTextValueHook_'], 'set');
+      spyOn(button['filterTextAttrHook_'], 'set');
+      spyOn(button['drawerExpandedHook_'], 'set');
 
       button['onClearButtonAction_']();
 
-      assert(button['searchTextValueBridge_'].set).to.haveBeenCalledWith('');
-      assert(button['filterTextAttrBridge_'].set).to.haveBeenCalledWith('');
-      assert(button['drawerExpandedBridge_'].set).to.haveBeenCalledWith(false);
+      assert(button['searchTextValueHook_'].set).to.haveBeenCalledWith('');
+      assert(button['filterTextAttrHook_'].set).to.haveBeenCalledWith('');
+      assert(button['drawerExpandedHook_'].set).to.haveBeenCalledWith(false);
     });
   });
 
   describe('onSearchButtonAction_', () => {
     it('should expand the drawer if it is collapsed', () => {
-      spyOn(button['drawerExpandedBridge_'], 'get').and.returnValue(false);
-      spyOn(button['drawerExpandedBridge_'], 'set');
+      spyOn(button['drawerExpandedHook_'], 'get').and.returnValue(false);
+      spyOn(button['drawerExpandedHook_'], 'set');
 
       button['onSearchButtonAction_']();
 
-      assert(button['drawerExpandedBridge_'].set).to.haveBeenCalledWith(true);
+      assert(button['drawerExpandedHook_'].set).to.haveBeenCalledWith(true);
     });
 
     it('should collapse the drawer if it is expanded', () => {
-      spyOn(button['drawerExpandedBridge_'], 'get').and.returnValue(true);
-      spyOn(button['drawerExpandedBridge_'], 'set');
+      spyOn(button['drawerExpandedHook_'], 'get').and.returnValue(true);
+      spyOn(button['drawerExpandedHook_'], 'set');
 
       button['onSearchButtonAction_']();
 
-      assert(button['drawerExpandedBridge_'].set).to.haveBeenCalledWith(false);
+      assert(button['drawerExpandedHook_'].set).to.haveBeenCalledWith(false);
     });
   });
 
   describe('onSearchTextChange_', () => {
     it('should set the filter text attribute to the value of the search text', () => {
       let searchText = 'searchText';
-      spyOn(button['searchTextValueBridge_'], 'get').and.returnValue(searchText);
-      spyOn(button['filterTextAttrBridge_'], 'set');
+      spyOn(button['searchTextValueHook_'], 'get').and.returnValue(searchText);
+      spyOn(button['filterTextAttrHook_'], 'set');
 
       button['onSearchTextChange_']();
 
-      assert(button['filterTextAttrBridge_'].set).to.haveBeenCalledWith(searchText);
+      assert(button['filterTextAttrHook_'].set).to.haveBeenCalledWith(searchText);
     });
 
     it('should set the filter text attribute to "" if search text value is null', () => {
-      spyOn(button['searchTextValueBridge_'], 'get').and.returnValue(null);
-      spyOn(button['filterTextAttrBridge_'], 'set');
+      spyOn(button['searchTextValueHook_'], 'get').and.returnValue(null);
+      spyOn(button['filterTextAttrHook_'], 'set');
 
       button['onSearchTextChange_']();
 
-      assert(button['filterTextAttrBridge_'].set).to.haveBeenCalledWith('');
+      assert(button['filterTextAttrHook_'].set).to.haveBeenCalledWith('');
     });
   });
 });

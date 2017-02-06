@@ -3,7 +3,7 @@ import {
     bind,
     BooleanParser,
     customElement,
-    DomBridge,
+    DomHook,
     handle,
     StringParser} from 'external/gs_tools/src/webc';
 
@@ -29,10 +29,10 @@ import {Views} from '../routing/views';
 })
 export class CreateProjectView extends BaseThemedElement {
   @bind('gs-text-input').attribute('gs-value', StringParser)
-  private readonly nameValueBridge_: DomBridge<string>;
+  private readonly nameValueHook_: DomHook<string>;
 
   @bind('gs-basic-button#createButton').attribute('disabled', BooleanParser)
-  private readonly createButtonDisabledBridge_: DomBridge<boolean>;
+  private readonly createButtonDisabledHook_: DomHook<boolean>;
 
   private readonly projectCollection_: ProjectCollection;
   private readonly routeFactoryService_: RouteFactoryService;
@@ -48,8 +48,8 @@ export class CreateProjectView extends BaseThemedElement {
       @inject('pa.routing.RouteFactoryService') routeFactoryService: RouteFactoryService,
       @inject('gs.routing.RouteService') routeService: RouteService<Views>) {
     super(themeService);
-    this.createButtonDisabledBridge_ = DomBridge.of<boolean>(true);
-    this.nameValueBridge_ = DomBridge.of<string>();
+    this.createButtonDisabledHook_ = DomHook.of<boolean>(true);
+    this.nameValueHook_ = DomHook.of<string>();
     this.projectCollection_ = projectCollection;
     this.routeFactoryService_ = routeFactoryService;
     this.routeService_ = routeService;
@@ -59,7 +59,7 @@ export class CreateProjectView extends BaseThemedElement {
    * Resets the form.
    */
   private reset_(): void {
-    this.nameValueBridge_.set('');
+    this.nameValueHook_.set('');
   }
 
   /**
@@ -76,7 +76,7 @@ export class CreateProjectView extends BaseThemedElement {
    */
   @handle('gs-text-input').attributeChange('gs-value', StringParser)
   protected onNameChange_(): void {
-    this.createButtonDisabledBridge_.set(!this.nameValueBridge_.get());
+    this.createButtonDisabledHook_.set(!this.nameValueHook_.get());
   }
 
   /**
@@ -86,7 +86,7 @@ export class CreateProjectView extends BaseThemedElement {
    */
   @handle('#createButton').event(Event.ACTION)
   protected async onSubmitAction_(): Promise<void> {
-    let projectName = this.nameValueBridge_.get();
+    let projectName = this.nameValueHook_.get();
     if (projectName === null) {
       Validate.fail('Project name is not set');
     }

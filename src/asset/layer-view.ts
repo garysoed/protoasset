@@ -8,7 +8,7 @@ import {Validate} from 'external/gs_tools/src/valid';
 import {
   bind,
   customElement,
-  DomBridge,
+  DomHook,
   EnumParser,
   handle,
   IntegerParser,
@@ -58,43 +58,43 @@ export function layerItemDataSetter(data: LayerItemData, element: Element): void
 })
 export class LayerView extends BaseThemedElement {
   @bind('#htmlEditor').attribute('asset-id', StringParser)
-  readonly htmlEditorAssetIdBridge_: DomBridge<string>;
+  readonly htmlEditorAssetIdHook_: DomHook<string>;
 
   @bind('#htmlEditor').attribute('layer-id', StringParser)
-  readonly htmlEditorLayerIdBridge_: DomBridge<string>;
+  readonly htmlEditorLayerIdHook_: DomHook<string>;
 
   @bind('#htmlEditor').attribute('project-id', StringParser)
-  readonly htmlEditorProjectIdBridge_: DomBridge<string>;
+  readonly htmlEditorProjectIdHook_: DomHook<string>;
 
   @bind('#imageEditor').attribute('asset-id', StringParser)
-  readonly imageEditorAssetIdBridge_: DomBridge<string>;
+  readonly imageEditorAssetIdHook_: DomHook<string>;
 
   @bind('#imageEditor').attribute('data-row', IntegerParser)
-  readonly imageEditorDataRowBridge_: DomBridge<number>;
+  readonly imageEditorDataRowHook_: DomHook<number>;
 
   @bind('#imageEditor').attribute('layer-id', StringParser)
-  readonly imageEditorLayerIdBridge_: DomBridge<string>;
+  readonly imageEditorLayerIdHook_: DomHook<string>;
 
   @bind('#imageEditor').attribute('project-id', StringParser)
-  readonly imageEditorProjectIdBridge_: DomBridge<string>;
+  readonly imageEditorProjectIdHook_: DomHook<string>;
 
   @bind('#selectedLayerName').innerText()
-  readonly layerNameBridge_: DomBridge<string>;
+  readonly layerNameHook_: DomHook<string>;
 
   @bind('#layerTypeSwitch').attribute('gs-value', EnumParser(LayerType))
-  readonly layerTypeSwitchBridge_: DomBridge<LayerType>;
+  readonly layerTypeSwitchHook_: DomHook<LayerType>;
 
   @bind('#layers').childrenElements<LayerItemData>(layerItemGenerator, layerItemDataSetter)
-  readonly layersChildElementHook_: DomBridge<LayerItemData[]>;
+  readonly layersChildElementHook_: DomHook<LayerItemData[]>;
 
   @bind('#textEditor').attribute('asset-id', StringParser)
-  readonly textEditorAssetIdBridge_: DomBridge<string>;
+  readonly textEditorAssetIdHook_: DomHook<string>;
 
   @bind('#textEditor').attribute('layer-id', StringParser)
-  readonly textEditorLayerIdBridge_: DomBridge<string>;
+  readonly textEditorLayerIdHook_: DomHook<string>;
 
   @bind('#textEditor').attribute('project-id', StringParser)
-  readonly textEditorProjectIdBridge_: DomBridge<string>;
+  readonly textEditorProjectIdHook_: DomHook<string>;
 
   private readonly assetCollection_: AssetCollection;
   private readonly layerIdGenerator_: IdGenerator;
@@ -114,24 +114,24 @@ export class LayerView extends BaseThemedElement {
     super(themeService);
     this.assetChangedDeregister_ = null;
     this.assetCollection_ = assetCollection;
-    this.htmlEditorAssetIdBridge_ = DomBridge.of<string>();
-    this.htmlEditorLayerIdBridge_ = DomBridge.of<string>();
-    this.htmlEditorProjectIdBridge_ = DomBridge.of<string>();
-    this.imageEditorAssetIdBridge_ = DomBridge.of<string>();
-    this.imageEditorDataRowBridge_ = DomBridge.of<number>();
-    this.imageEditorLayerIdBridge_ = DomBridge.of<string>();
-    this.imageEditorProjectIdBridge_ = DomBridge.of<string>();
+    this.htmlEditorAssetIdHook_ = DomHook.of<string>();
+    this.htmlEditorLayerIdHook_ = DomHook.of<string>();
+    this.htmlEditorProjectIdHook_ = DomHook.of<string>();
+    this.imageEditorAssetIdHook_ = DomHook.of<string>();
+    this.imageEditorDataRowHook_ = DomHook.of<number>();
+    this.imageEditorLayerIdHook_ = DomHook.of<string>();
+    this.imageEditorProjectIdHook_ = DomHook.of<string>();
     this.layerChangedDeregister_ = null;
     this.layerIdGenerator_ = new SimpleIdGenerator();
-    this.layerNameBridge_ = DomBridge.of<string>();
-    this.layerTypeSwitchBridge_ = DomBridge.of<LayerType>();
-    this.layersChildElementHook_ = DomBridge.of<LayerItemData[]>();
+    this.layerNameHook_ = DomHook.of<string>();
+    this.layerTypeSwitchHook_ = DomHook.of<LayerType>();
+    this.layersChildElementHook_ = DomHook.of<LayerItemData[]>();
     this.overlayService_ = overlayService;
     this.routeFactoryService_ = routeFactoryService;
     this.routeService_ = routeService;
-    this.textEditorAssetIdBridge_ = DomBridge.of<string>();
-    this.textEditorLayerIdBridge_ = DomBridge.of<string>();
-    this.textEditorProjectIdBridge_ = DomBridge.of<string>();
+    this.textEditorAssetIdHook_ = DomHook.of<string>();
+    this.textEditorLayerIdHook_ = DomHook.of<string>();
+    this.textEditorProjectIdHook_ = DomHook.of<string>();
   }
 
   @handle('#createHtmlLayer').event(DomEvent.CLICK, [LayerType.HTML])
@@ -192,12 +192,12 @@ export class LayerView extends BaseThemedElement {
    * @param asset The changed asset.
    */
   private async onAssetChanged_(asset: Asset): Promise<void> {
-    this.htmlEditorAssetIdBridge_.set(asset.getId());
-    this.htmlEditorProjectIdBridge_.set(asset.getProjectId());
-    this.imageEditorAssetIdBridge_.set(asset.getId());
-    this.imageEditorProjectIdBridge_.set(asset.getProjectId());
-    this.textEditorAssetIdBridge_.set(asset.getId());
-    this.textEditorProjectIdBridge_.set(asset.getProjectId());
+    this.htmlEditorAssetIdHook_.set(asset.getId());
+    this.htmlEditorProjectIdHook_.set(asset.getProjectId());
+    this.imageEditorAssetIdHook_.set(asset.getId());
+    this.imageEditorProjectIdHook_.set(asset.getProjectId());
+    this.textEditorAssetIdHook_.set(asset.getId());
+    this.textEditorProjectIdHook_.set(asset.getProjectId());
 
     let dataSource = asset.getData();
     if (dataSource === null) {
@@ -211,7 +211,7 @@ export class LayerView extends BaseThemedElement {
     }
 
     // TODO: Let user pick the data row.
-    this.imageEditorDataRowBridge_.set(0);
+    this.imageEditorDataRowHook_.set(0);
 
     let layerItemData = Arrays
         .of(asset.getLayers())
@@ -231,11 +231,11 @@ export class LayerView extends BaseThemedElement {
    * @param layer The changed layer.
    */
   private onLayerChanged_(layer: BaseLayer): void {
-    this.layerNameBridge_.set(layer.getName());
-    this.layerTypeSwitchBridge_.set(layer.getType());
-    this.htmlEditorLayerIdBridge_.set(layer.getId());
-    this.imageEditorLayerIdBridge_.set(layer.getId());
-    this.textEditorLayerIdBridge_.set(layer.getId());
+    this.layerNameHook_.set(layer.getName());
+    this.layerTypeSwitchHook_.set(layer.getType());
+    this.htmlEditorLayerIdHook_.set(layer.getId());
+    this.imageEditorLayerIdHook_.set(layer.getId());
+    this.textEditorLayerIdHook_.set(layer.getId());
   }
 
   /**

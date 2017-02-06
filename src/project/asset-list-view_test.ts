@@ -71,11 +71,11 @@ describe('project.AssetListView', () => {
       mockProjectCollection.get.and.returnValue(Promise.resolve(mockProject));
 
       spyOn(view, 'getProjectId_').and.returnValue(projectId);
-      spyOn(view['assetsBridge_'], 'set');
-      spyOn(view['projectNameTextBridge_'], 'set');
+      spyOn(view['assetsHook_'], 'set');
+      spyOn(view['projectNameTextHook_'], 'set');
 
       await view['onProjectIdChanged_']();
-      assert(view['projectNameTextBridge_'].set).to.haveBeenCalledWith(projectName);
+      assert(view['projectNameTextHook_'].set).to.haveBeenCalledWith(projectName);
       assert(mockProjectCollection.get).to.haveBeenCalledWith(projectId);
     });
 
@@ -87,11 +87,11 @@ describe('project.AssetListView', () => {
       mockProjectCollection.get.and.returnValue(Promise.resolve(null));
 
       spyOn(view, 'getProjectId_').and.returnValue(projectId);
-      spyOn(view['assetsBridge_'], 'set');
-      spyOn(view['projectNameTextBridge_'], 'set');
+      spyOn(view['assetsHook_'], 'set');
+      spyOn(view['projectNameTextHook_'], 'set');
 
       await view['onProjectIdChanged_']();
-      assert(view['assetsBridge_'].set).to.haveBeenCalledWith(assets);
+      assert(view['assetsHook_'].set).to.haveBeenCalledWith(assets);
       assert(mockAssetCollection.list).to.haveBeenCalledWith(projectId);
     });
 
@@ -102,19 +102,19 @@ describe('project.AssetListView', () => {
           mockAssetCollection.list.and.returnValue(Promise.resolve());
           mockProjectCollection.get.and.returnValue(Promise.resolve(null));
           spyOn(view, 'getProjectId_').and.returnValue(projectId);
-          spyOn(view['assetsBridge_'], 'set');
-          spyOn(view['projectNameTextBridge_'], 'set');
+          spyOn(view['assetsHook_'], 'set');
+          spyOn(view['projectNameTextHook_'], 'set');
 
           await view['onProjectIdChanged_']();
-          assert(view['projectNameTextBridge_'].set).toNot.haveBeenCalled();
+          assert(view['projectNameTextHook_'].set).toNot.haveBeenCalled();
         });
 
     it('should not throw error if there are no project IDs', async (done: any) => {
       spyOn(view, 'getProjectId_').and.returnValue(null);
-      spyOn(view['projectNameTextBridge_'], 'set');
+      spyOn(view['projectNameTextHook_'], 'set');
 
       await view['onProjectIdChanged_']();
-      assert(view['projectNameTextBridge_'].set).toNot.haveBeenCalled();
+      assert(view['projectNameTextHook_'].set).toNot.haveBeenCalled();
     });
   });
 

@@ -324,14 +324,14 @@ describe('asset.HelperView', () => {
       let newArg2 = 'newArg2';
       let newValue = `${newArg1}, ${newArg2}, ,`;
 
-      spyOn(view['argElementsBridge_'], 'get').and.returnValue([arg1, arg2]);
-      spyOn(view['argElementsBridge_'], 'set');
-      spyOn(view['argInputBridge_'], 'delete');
+      spyOn(view['argElementsHook_'], 'get').and.returnValue([arg1, arg2]);
+      spyOn(view['argElementsHook_'], 'set');
+      spyOn(view['argInputHook_'], 'delete');
 
       view['onArgInputValueChange_'](newValue);
 
-      assert(view['argInputBridge_'].delete).to.haveBeenCalledWith();
-      assert(view['argElementsBridge_'].set).to.haveBeenCalledWith([arg1, arg2, newArg1, newArg2]);
+      assert(view['argInputHook_'].delete).to.haveBeenCalledWith();
+      assert(view['argElementsHook_'].set).to.haveBeenCalledWith([arg1, arg2, newArg1, newArg2]);
     });
 
     it('should work if there are no existing args', () => {
@@ -339,36 +339,36 @@ describe('asset.HelperView', () => {
       let newArg2 = 'newArg2';
       let newValue = `${newArg1}, ${newArg2}, ,`;
 
-      spyOn(view['argElementsBridge_'], 'get').and.returnValue(null);
-      spyOn(view['argElementsBridge_'], 'set');
-      spyOn(view['argInputBridge_'], 'delete');
+      spyOn(view['argElementsHook_'], 'get').and.returnValue(null);
+      spyOn(view['argElementsHook_'], 'set');
+      spyOn(view['argInputHook_'], 'delete');
 
       view['onArgInputValueChange_'](newValue);
 
-      assert(view['argInputBridge_'].delete).to.haveBeenCalledWith();
-      assert(view['argElementsBridge_'].set).to.haveBeenCalledWith([newArg1, newArg2]);
+      assert(view['argInputHook_'].delete).to.haveBeenCalledWith();
+      assert(view['argElementsHook_'].set).to.haveBeenCalledWith([newArg1, newArg2]);
     });
 
     it('should do nothing if there are no commas in the input element', () => {
       let newValue = 'newValue';
 
-      spyOn(view['argElementsBridge_'], 'set');
-      spyOn(view['argInputBridge_'], 'delete');
+      spyOn(view['argElementsHook_'], 'set');
+      spyOn(view['argInputHook_'], 'delete');
 
       view['onArgInputValueChange_'](newValue);
 
-      assert(view['argInputBridge_'].delete).toNot.haveBeenCalled();
-      assert(view['argElementsBridge_'].set).toNot.haveBeenCalled();
+      assert(view['argInputHook_'].delete).toNot.haveBeenCalled();
+      assert(view['argElementsHook_'].set).toNot.haveBeenCalled();
     });
 
     it('should do nothing if the new input value is null', () => {
-      spyOn(view['argElementsBridge_'], 'set');
-      spyOn(view['argInputBridge_'], 'delete');
+      spyOn(view['argElementsHook_'], 'set');
+      spyOn(view['argInputHook_'], 'delete');
 
       view['onArgInputValueChange_'](null);
 
-      assert(view['argInputBridge_'].delete).toNot.haveBeenCalled();
-      assert(view['argElementsBridge_'].set).toNot.haveBeenCalled();
+      assert(view['argInputHook_'].delete).toNot.haveBeenCalled();
+      assert(view['argElementsHook_'].set).toNot.haveBeenCalled();
     });
   });
 
@@ -397,10 +397,10 @@ describe('asset.HelperView', () => {
 
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
       spyOn(view, 'updateHelper_');
-      spyOn(view['helperItemsBridge_'], 'set');
+      spyOn(view['helperItemsHook_'], 'set');
 
       await view['onAssetChanged_'](mockAsset);
-      assert(view['helperItemsBridge_'].set).to.haveBeenCalledWith([
+      assert(view['helperItemsHook_'].set).to.haveBeenCalledWith([
         {assetId, helperId: currentHelperId, projectId},
         {assetId, helperId: helperId1, projectId},
         {assetId, helperId: helperId2, projectId},
@@ -461,10 +461,10 @@ describe('asset.HelperView', () => {
   describe('onChanges_', () => {
     it('should update the helper and the asset correctly', async (done: any) => {
       let args = Mocks.object('args');
-      spyOn(view['argElementsBridge_'], 'get').and.returnValue(args);
+      spyOn(view['argElementsHook_'], 'get').and.returnValue(args);
 
       let body = 'body';
-      spyOn(view['bodyInputBridge_'], 'get').and.returnValue(body);
+      spyOn(view['bodyInputHook_'], 'get').and.returnValue(body);
 
       let helperId = 'helperId';
       let mockHelper = jasmine.createSpyObj('Helper', ['getId', 'setArgs', 'setBody', 'setName']);
@@ -483,10 +483,10 @@ describe('asset.HelperView', () => {
 
     it('should do nothing if the helper cannot be found', async (done: any) => {
       let args = Mocks.object('args');
-      spyOn(view['argElementsBridge_'], 'get').and.returnValue(args);
+      spyOn(view['argElementsHook_'], 'get').and.returnValue(args);
 
       let body = 'body';
-      spyOn(view['bodyInputBridge_'], 'get').and.returnValue(body);
+      spyOn(view['bodyInputHook_'], 'get').and.returnValue(body);
 
       spyOn(view, 'getHelper_').and.returnValue(Promise.resolve(null));
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(Mocks.object('asset')));
@@ -497,10 +497,10 @@ describe('asset.HelperView', () => {
 
     it('should do nothing if the asset cannot be found', async (done: any) => {
       let args = Mocks.object('args');
-      spyOn(view['argElementsBridge_'], 'get').and.returnValue(args);
+      spyOn(view['argElementsHook_'], 'get').and.returnValue(args);
 
       let body = 'body';
-      spyOn(view['bodyInputBridge_'], 'get').and.returnValue(body);
+      spyOn(view['bodyInputHook_'], 'get').and.returnValue(body);
 
       spyOn(view, 'getHelper_').and.returnValue(Promise.resolve(Mocks.object('helper')));
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(null));
@@ -510,10 +510,10 @@ describe('asset.HelperView', () => {
     });
 
     it('should do nothing if args is null', async (done: any) => {
-      spyOn(view['argElementsBridge_'], 'get').and.returnValue(null);
+      spyOn(view['argElementsHook_'], 'get').and.returnValue(null);
 
       let body = 'body';
-      spyOn(view['bodyInputBridge_'], 'get').and.returnValue(body);
+      spyOn(view['bodyInputHook_'], 'get').and.returnValue(body);
 
       spyOn(view, 'getHelper_').and.returnValue(Promise.resolve(Mocks.object('helper')));
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(Mocks.object('asset')));
@@ -524,8 +524,8 @@ describe('asset.HelperView', () => {
 
     it('should do nothing if body is null', async (done: any) => {
       let args = Mocks.object('args');
-      spyOn(view['argElementsBridge_'], 'get').and.returnValue(args);
-      spyOn(view['bodyInputBridge_'], 'get').and.returnValue(null);
+      spyOn(view['argElementsHook_'], 'get').and.returnValue(args);
+      spyOn(view['bodyInputHook_'], 'get').and.returnValue(null);
 
       spyOn(view, 'getHelper_').and.returnValue(Promise.resolve(Mocks.object('helper')));
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(Mocks.object('asset')));
@@ -559,12 +559,12 @@ describe('asset.HelperView', () => {
           spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(asset));
 
           let command = 'command';
-          spyOn(view['consoleInputBridge_'], 'get').and.returnValue(command);
+          spyOn(view['consoleInputHook_'], 'get').and.returnValue(command);
 
           let entry1 = Mocks.object('entry1');
           let entry2 = Mocks.object('entry2');
-          spyOn(view['consoleEntryBridge_'], 'get').and.returnValue([entry1, entry2]);
-          spyOn(view['consoleEntryBridge_'], 'set');
+          spyOn(view['consoleEntryHook_'], 'get').and.returnValue([entry1, entry2]);
+          spyOn(view['consoleEntryHook_'], 'set');
 
           let result = 'result';
           let mockCompiledDelegate = jasmine.createSpy('CompiledDelegate');
@@ -590,7 +590,7 @@ describe('asset.HelperView', () => {
           await view['onExecuteButtonClick_']();
           assert(containerEl.scrollTop).to.equal(scrollHeight);
           assert(mockShadowRoot.querySelector).to.haveBeenCalledWith('#consoleContainer');
-          assert(view['consoleEntryBridge_'].set).to.haveBeenCalledWith([
+          assert(view['consoleEntryHook_'].set).to.haveBeenCalledWith([
             entry1,
             entry2,
             {command, isError: false, result},
@@ -604,12 +604,12 @@ describe('asset.HelperView', () => {
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(asset));
 
       let command = 'command';
-      spyOn(view['consoleInputBridge_'], 'get').and.returnValue(command);
+      spyOn(view['consoleInputHook_'], 'get').and.returnValue(command);
 
       let entry1 = Mocks.object('entry1');
       let entry2 = Mocks.object('entry2');
-      spyOn(view['consoleEntryBridge_'], 'get').and.returnValue([entry1, entry2]);
-      spyOn(view['consoleEntryBridge_'], 'set');
+      spyOn(view['consoleEntryHook_'], 'get').and.returnValue([entry1, entry2]);
+      spyOn(view['consoleEntryHook_'], 'set');
 
       let message = 'message';
       let stack = 'stack';
@@ -635,7 +635,7 @@ describe('asset.HelperView', () => {
       await view['onExecuteButtonClick_']();
       assert(containerEl.scrollTop).to.equal(scrollHeight);
       assert(mockShadowRoot.querySelector).to.haveBeenCalledWith('#consoleContainer');
-      assert(view['consoleEntryBridge_'].set).to.haveBeenCalledWith([
+      assert(view['consoleEntryHook_'].set).to.haveBeenCalledWith([
         entry1,
         entry2,
         {command, isError: true, result: `${message}\n\n${stack}`},
@@ -649,12 +649,12 @@ describe('asset.HelperView', () => {
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(asset));
 
       let command = 'command';
-      spyOn(view['consoleInputBridge_'], 'get').and.returnValue(command);
+      spyOn(view['consoleInputHook_'], 'get').and.returnValue(command);
 
       let entry1 = Mocks.object('entry1');
       let entry2 = Mocks.object('entry2');
-      spyOn(view['consoleEntryBridge_'], 'get').and.returnValue([entry1, entry2]);
-      spyOn(view['consoleEntryBridge_'], 'set');
+      spyOn(view['consoleEntryHook_'], 'get').and.returnValue([entry1, entry2]);
+      spyOn(view['consoleEntryHook_'], 'set');
 
       let message = 'message';
       let stack = 'stack';
@@ -667,7 +667,7 @@ describe('asset.HelperView', () => {
       spyOn(view, 'getElement').and.returnValue(null);
 
       await view['onExecuteButtonClick_']();
-      assert(view['consoleEntryBridge_'].set).to.haveBeenCalledWith([
+      assert(view['consoleEntryHook_'].set).to.haveBeenCalledWith([
         entry1,
         entry2,
         {command, isError: true, result: `${message}\n\n${stack}`},
@@ -681,13 +681,13 @@ describe('asset.HelperView', () => {
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(asset));
 
       let command = 'command';
-      spyOn(view['consoleInputBridge_'], 'get').and.returnValue(command);
-      spyOn(view['consoleEntryBridge_'], 'set');
+      spyOn(view['consoleInputHook_'], 'get').and.returnValue(command);
+      spyOn(view['consoleEntryHook_'], 'set');
 
       mockTemplateCompilerService.create.and.returnValue(null);
 
       await view['onExecuteButtonClick_']();
-      assert(view['consoleEntryBridge_'].set).toNot.haveBeenCalled();
+      assert(view['consoleEntryHook_'].set).toNot.haveBeenCalled();
       assert(mockTemplateCompilerService.create).to.haveBeenCalledWith(asset);
     });
 
@@ -695,24 +695,24 @@ describe('asset.HelperView', () => {
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(null));
 
       let command = 'command';
-      spyOn(view['consoleInputBridge_'], 'get').and.returnValue(command);
-      spyOn(view['consoleEntryBridge_'], 'set');
+      spyOn(view['consoleInputHook_'], 'get').and.returnValue(command);
+      spyOn(view['consoleEntryHook_'], 'set');
 
       mockTemplateCompilerService.create.and.returnValue(null);
 
       await view['onExecuteButtonClick_']();
-      assert(view['consoleEntryBridge_'].set).toNot.haveBeenCalled();
+      assert(view['consoleEntryHook_'].set).toNot.haveBeenCalled();
       assert(mockTemplateCompilerService.create).toNot.haveBeenCalled();
     });
 
     it('should do nothing if the console has no values', async (done: any) => {
-      spyOn(view['consoleInputBridge_'], 'get').and.returnValue(null);
-      spyOn(view['consoleEntryBridge_'], 'set');
+      spyOn(view['consoleInputHook_'], 'get').and.returnValue(null);
+      spyOn(view['consoleEntryHook_'], 'set');
 
       mockTemplateCompilerService.create.and.returnValue(null);
 
       await view['onExecuteButtonClick_']();
-      assert(view['consoleEntryBridge_'].set).toNot.haveBeenCalled();
+      assert(view['consoleEntryHook_'].set).toNot.haveBeenCalled();
       assert(mockTemplateCompilerService.create).toNot.haveBeenCalled();
     });
   });
@@ -727,15 +727,15 @@ describe('asset.HelperView', () => {
       mockHelper.getBody.and.returnValue(body);
       mockHelper.getName.and.returnValue(name);
 
-      spyOn(view['nameBridge_'], 'set');
-      spyOn(view['argElementsBridge_'], 'set');
-      spyOn(view['bodyInputBridge_'], 'set');
+      spyOn(view['nameHook_'], 'set');
+      spyOn(view['argElementsHook_'], 'set');
+      spyOn(view['bodyInputHook_'], 'set');
 
       view['onHelperChanged_'](mockHelper);
 
-      assert(view['nameBridge_'].set).to.haveBeenCalledWith(name);
-      assert(view['argElementsBridge_'].set).to.haveBeenCalledWith(args);
-      assert(view['bodyInputBridge_'].set).to.haveBeenCalledWith(body);
+      assert(view['nameHook_'].set).to.haveBeenCalledWith(name);
+      assert(view['argElementsHook_'].set).to.haveBeenCalledWith(args);
+      assert(view['bodyInputHook_'].set).to.haveBeenCalledWith(body);
     });
   });
 
@@ -876,8 +876,8 @@ describe('asset.HelperView', () => {
       let arg1 = 'arg1';
       let arg2 = 'arg2';
       let arg3 = 'arg3';
-      spyOn(view['argElementsBridge_'], 'get').and.returnValue([arg1, arg2, arg3]);
-      spyOn(view['argElementsBridge_'], 'set');
+      spyOn(view['argElementsHook_'], 'get').and.returnValue([arg1, arg2, arg3]);
+      spyOn(view['argElementsHook_'], 'set');
 
       let child1 = document.createElement('child1');
       let child2 = document.createElement('child2');
@@ -889,24 +889,24 @@ describe('asset.HelperView', () => {
 
       view.onArgClick(<Event> <any> {target: child2});
 
-      assert(view['argElementsBridge_'].set).to.haveBeenCalledWith([arg1, arg3]);
+      assert(view['argElementsHook_'].set).to.haveBeenCalledWith([arg1, arg3]);
     });
 
     it('should do nothing if there are no args', () => {
-      spyOn(view['argElementsBridge_'], 'get').and.returnValue(null);
-      spyOn(view['argElementsBridge_'], 'set');
+      spyOn(view['argElementsHook_'], 'get').and.returnValue(null);
+      spyOn(view['argElementsHook_'], 'set');
 
       view.onArgClick(<Event> <any> {target: document.createElement('child')});
 
-      assert(view['argElementsBridge_'].set).toNot.haveBeenCalled();
+      assert(view['argElementsHook_'].set).toNot.haveBeenCalled();
     });
 
     it('should do nothing if the event target is not an element', () => {
-      spyOn(view['argElementsBridge_'], 'set');
+      spyOn(view['argElementsHook_'], 'set');
 
       view.onArgClick(<Event> <any> {target: {}});
 
-      assert(view['argElementsBridge_'].set).toNot.haveBeenCalled();
+      assert(view['argElementsHook_'].set).toNot.haveBeenCalled();
     });
   });
 

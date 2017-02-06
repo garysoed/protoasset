@@ -4,7 +4,7 @@ import {
     bind,
     BooleanParser,
     customElement,
-    DomBridge,
+    DomHook,
     FloatParser,
     handle,
     StringParser} from 'external/gs_tools/src/webc';
@@ -62,16 +62,16 @@ export function previewRowGenerator(document: Document): Element {
 export class DataView extends BaseThemedElement {
 
   @bind('#dataSourceInput').attribute('gs-bundle-id', StringParser)
-  private readonly dataSourceBundleIdBridge_: DomBridge<string>;
+  private readonly dataSourceBundleIdHook_: DomHook<string>;
 
   @bind('#endRowInput').attribute('gs-value', FloatParser)
-  private readonly endRowValueBridge_: DomBridge<number>;
+  private readonly endRowValueHook_: DomHook<number>;
 
   @bind('#preview').childrenElements(previewRowGenerator, previewRowDataSetter)
-  private readonly previewChildrenBridge_: DomBridge<string[][]>;
+  private readonly previewChildrenHook_: DomHook<string[][]>;
 
   @bind('#startRowInput').attribute('gs-value', FloatParser)
-  private readonly startRowValueBridge_: DomBridge<number>;
+  private readonly startRowValueHook_: DomHook<number>;
 
   private readonly assetCollection_: AssetCollection;
   private readonly fileService_: FileService;
@@ -86,13 +86,13 @@ export class DataView extends BaseThemedElement {
       @inject('theming.ThemeService') themeService: ThemeService) {
     super(themeService);
     this.assetCollection_ = assetCollection;
-    this.dataSourceBundleIdBridge_ = DomBridge.of<string>();
-    this.endRowValueBridge_ = DomBridge.of<number>();
+    this.dataSourceBundleIdHook_ = DomHook.of<string>();
+    this.endRowValueHook_ = DomHook.of<number>();
     this.fileService_ = fileService;
-    this.previewChildrenBridge_ = DomBridge.of<string[][]>();
+    this.previewChildrenHook_ = DomHook.of<string[][]>();
     this.routeFactoryService_ = routeFactoryService;
     this.routeService_ = routeService;
-    this.startRowValueBridge_ = DomBridge.of<number>();
+    this.startRowValueHook_ = DomHook.of<number>();
   }
 
   /**
@@ -133,9 +133,9 @@ export class DataView extends BaseThemedElement {
   @handle('#startRowInput').attributeChange('gs-value', FloatParser)
   @handle('#dataSourceInput').attributeChange('gs-bundle-id', StringParser)
   protected async updateDataSource_(): Promise<void> {
-    const bundleId = this.dataSourceBundleIdBridge_.get();
-    const startRow = this.startRowValueBridge_.get();
-    const endRow = this.endRowValueBridge_.get();
+    const bundleId = this.dataSourceBundleIdHook_.get();
+    const startRow = this.startRowValueHook_.get();
+    const endRow = this.endRowValueHook_.get();
     if (bundleId === null
         || endRow === null
         || Number.isNaN(endRow)
@@ -165,7 +165,7 @@ export class DataView extends BaseThemedElement {
    * @return Promise that will be resolved when the update process is done.
    */
   private async updatePreview_(): Promise<void> {
-    this.previewChildrenBridge_.delete();
+    this.previewChildrenHook_.delete();
     let asset = await this.getAsset_();
     if (asset === null) {
       return;
@@ -181,6 +181,6 @@ export class DataView extends BaseThemedElement {
       return;
     }
 
-    this.previewChildrenBridge_.set(data);
+    this.previewChildrenHook_.set(data);
   }
 }

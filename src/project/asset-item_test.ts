@@ -29,8 +29,8 @@ describe('project.AssetItem', () => {
     it('should navigate to asset main view', () => {
       let assetId = 'assetId';
       let projectId = 'projectId';
-      spyOn(item['gsAssetIdBridge_'], 'get').and.returnValue(assetId);
-      spyOn(item['gsProjectIdBridge_'], 'get').and.returnValue(projectId);
+      spyOn(item['gsAssetIdHook_'], 'get').and.returnValue(assetId);
+      spyOn(item['gsProjectIdHook_'], 'get').and.returnValue(projectId);
 
       let assetMainFactory = Mocks.object('assetMainFactory');
       mockRouteFactoryService.assetMain.and.returnValue(assetMainFactory);
@@ -43,8 +43,8 @@ describe('project.AssetItem', () => {
 
     it('should not navigate if there are no asset IDs', () => {
       let projectId = 'projectId';
-      spyOn(item['gsAssetIdBridge_'], 'get').and.returnValue(null);
-      spyOn(item['gsProjectIdBridge_'], 'get').and.returnValue(projectId);
+      spyOn(item['gsAssetIdHook_'], 'get').and.returnValue(null);
+      spyOn(item['gsProjectIdHook_'], 'get').and.returnValue(projectId);
 
       let assetMainFactory = Mocks.object('assetMainFactory');
       mockRouteFactoryService.assetMain.and.returnValue(assetMainFactory);
@@ -56,8 +56,8 @@ describe('project.AssetItem', () => {
 
     it('should not navigate if there are no project IDs', () => {
       let assetId = 'assetId';
-      spyOn(item['gsAssetIdBridge_'], 'get').and.returnValue(assetId);
-      spyOn(item['gsProjectIdBridge_'], 'get').and.returnValue(null);
+      spyOn(item['gsAssetIdHook_'], 'get').and.returnValue(assetId);
+      spyOn(item['gsProjectIdHook_'], 'get').and.returnValue(null);
 
       let assetMainFactory = Mocks.object('assetMainFactory');
       mockRouteFactoryService.assetMain.and.returnValue(assetMainFactory);
@@ -71,68 +71,68 @@ describe('project.AssetItem', () => {
   describe('onGsAssetIdChanged_', () => {
     it('should set the asset name correctly', async (done: any) => {
       let assetId = 'assetId';
-      spyOn(item['gsAssetIdBridge_'], 'get').and.returnValue(assetId);
+      spyOn(item['gsAssetIdHook_'], 'get').and.returnValue(assetId);
 
       let projectId = 'projectId';
-      spyOn(item['gsProjectIdBridge_'], 'get').and.returnValue(projectId);
+      spyOn(item['gsProjectIdHook_'], 'get').and.returnValue(projectId);
 
       let name = 'name';
       let mockAsset = jasmine.createSpyObj('Asset', ['getName']);
       mockAssetCollection.get.and.returnValue(Promise.resolve(mockAsset));
       mockAsset.getName.and.returnValue(name);
 
-      spyOn(item['assetNameBridge_'], 'set');
+      spyOn(item['assetNameHook_'], 'set');
 
       await item['onGsAssetIdChanged_']();
-      assert(item['assetNameBridge_'].set).to.haveBeenCalledWith(name);
+      assert(item['assetNameHook_'].set).to.haveBeenCalledWith(name);
       assert(mockAssetCollection.get).to.haveBeenCalledWith(projectId, assetId);
     });
 
     it('should not set the name if the asset is not found', async (done: any) => {
       let assetId = 'assetId';
-      spyOn(item['gsAssetIdBridge_'], 'get').and.returnValue(assetId);
+      spyOn(item['gsAssetIdHook_'], 'get').and.returnValue(assetId);
 
       let projectId = 'projectId';
-      spyOn(item['gsProjectIdBridge_'], 'get').and.returnValue(projectId);
+      spyOn(item['gsProjectIdHook_'], 'get').and.returnValue(projectId);
 
       mockAssetCollection.get.and.returnValue(Promise.resolve(null));
 
-      spyOn(item['assetNameBridge_'], 'set');
+      spyOn(item['assetNameHook_'], 'set');
 
       await item['onGsAssetIdChanged_']();
-      assert(item['assetNameBridge_'].set).toNot.haveBeenCalled();
+      assert(item['assetNameHook_'].set).toNot.haveBeenCalled();
     });
 
     it('should delete the name if the asset ID is null', async (done: any) => {
-      spyOn(item['gsAssetIdBridge_'], 'get').and.returnValue(null);
+      spyOn(item['gsAssetIdHook_'], 'get').and.returnValue(null);
 
       let projectId = 'projectId';
-      spyOn(item['gsProjectIdBridge_'], 'get').and.returnValue(projectId);
+      spyOn(item['gsProjectIdHook_'], 'get').and.returnValue(projectId);
 
       mockAssetCollection.get.and.returnValue(Promise.resolve(null));
 
-      spyOn(item['assetNameBridge_'], 'set');
-      spyOn(item['assetNameBridge_'], 'delete');
+      spyOn(item['assetNameHook_'], 'set');
+      spyOn(item['assetNameHook_'], 'delete');
 
       await item['onGsAssetIdChanged_']();
-      assert(item['assetNameBridge_'].set).toNot.haveBeenCalled();
-      assert(item['assetNameBridge_'].delete).to.haveBeenCalledWith();
+      assert(item['assetNameHook_'].set).toNot.haveBeenCalled();
+      assert(item['assetNameHook_'].delete).to.haveBeenCalledWith();
     });
 
     it('should delete the name if the project ID is null', async (done: any) => {
       let assetId = 'assetId';
-      spyOn(item['gsAssetIdBridge_'], 'get').and.returnValue(assetId);
+      spyOn(item['gsAssetIdHook_'], 'get').and.returnValue(assetId);
 
-      spyOn(item['gsProjectIdBridge_'], 'get').and.returnValue(null);
+      spyOn(item['gsProjectIdHook_'], 'get').and.returnValue(null);
 
       mockAssetCollection.get.and.returnValue(Promise.resolve(null));
 
-      spyOn(item['assetNameBridge_'], 'set');
-      spyOn(item['assetNameBridge_'], 'delete');
+      spyOn(item['assetNameHook_'], 'set');
+      spyOn(item['assetNameHook_'], 'delete');
 
       await item['onGsAssetIdChanged_']();
-      assert(item['assetNameBridge_'].set).toNot.haveBeenCalled();
-      assert(item['assetNameBridge_'].delete).to.haveBeenCalledWith();
+      assert(item['assetNameHook_'].set).toNot.haveBeenCalled();
+      assert(item['assetNameHook_'].delete).to.haveBeenCalledWith();
     });
   });
 });

@@ -1,7 +1,7 @@
 import {DisposableFunction} from 'external/gs_tools/src/dispose';
 import {DomEvent} from 'external/gs_tools/src/event';
 import {inject} from 'external/gs_tools/src/inject';
-import {bind, customElement, DomBridge, handle, StringParser} from 'external/gs_tools/src/webc';
+import {bind, customElement, DomHook, handle, StringParser} from 'external/gs_tools/src/webc';
 
 import {BaseThemedElement} from 'external/gs_ui/src/common';
 import {RouteService} from 'external/gs_ui/src/routing';
@@ -24,22 +24,22 @@ import {Views} from '../routing/views';
 })
 export class HelperItem extends BaseThemedElement {
   @bind(null).attribute('asset-id', StringParser)
-  private readonly assetIdBridge_: DomBridge<string>;
+  private readonly assetIdHook_: DomHook<string>;
 
   @bind(null).attribute('helper-id', StringParser)
-  private readonly helperIdBridge_: DomBridge<string>;
+  private readonly helperIdHook_: DomHook<string>;
 
   @bind('#name').innerText()
-  private readonly nameBridge_: DomBridge<string>;
+  private readonly nameHook_: DomHook<string>;
 
   @bind('#nameInput').attribute('gs-value', StringParser)
-  private readonly nameInputBridge_: DomBridge<string>;
+  private readonly nameInputHook_: DomHook<string>;
 
   @bind(null).attribute('project-id', StringParser)
-  private readonly projectIdBridge_: DomBridge<string>;
+  private readonly projectIdHook_: DomHook<string>;
 
   @bind('#root').attribute('gs-value', StringParser)
-  private readonly rootValueBridge_: DomBridge<string>;
+  private readonly rootValueHook_: DomHook<string>;
 
   private readonly assetCollection_: AssetCollection;
   private readonly routeFactoryService_: RouteFactoryService;
@@ -54,13 +54,13 @@ export class HelperItem extends BaseThemedElement {
       @inject('theming.ThemeService') themeService: ThemeService) {
     super(themeService);
     this.assetCollection_ = assetCollection;
-    this.assetIdBridge_ = DomBridge.of<string>();
+    this.assetIdHook_ = DomHook.of<string>();
     this.helperUpdateDeregister_ = null;
-    this.helperIdBridge_ = DomBridge.of<string>();
-    this.nameBridge_ = DomBridge.of<string>();
-    this.nameInputBridge_ = DomBridge.of<string>();
-    this.projectIdBridge_ = DomBridge.of<string>();
-    this.rootValueBridge_ =  DomBridge.of<string>();
+    this.helperIdHook_ = DomHook.of<string>();
+    this.nameHook_ = DomHook.of<string>();
+    this.nameInputHook_ = DomHook.of<string>();
+    this.projectIdHook_ = DomHook.of<string>();
+    this.rootValueHook_ =  DomHook.of<string>();
     this.routeFactoryService_ = routeFactoryService;
     this.routeService_ = routeService;
   }
@@ -69,8 +69,8 @@ export class HelperItem extends BaseThemedElement {
    * @return Promise that will be resolved with the asset, or null if the asset cannot be found.
    */
   private getAsset_(): Promise<Asset | null> {
-    const assetId = this.assetIdBridge_.get();
-    const projectId = this.projectIdBridge_.get();
+    const assetId = this.assetIdHook_.get();
+    const projectId = this.projectIdHook_.get();
 
     if (assetId === null || projectId === null) {
       return Promise.resolve(null);
@@ -83,7 +83,7 @@ export class HelperItem extends BaseThemedElement {
    * @return Promise that will be resolved with the helper, or null if the helper cannot be found.
    */
   private async getHelper_(): Promise<Helper | null> {
-    const helperId = this.helperIdBridge_.get();
+    const helperId = this.helperIdHook_.get();
     if (helperId === null) {
       return null;
     }
@@ -101,12 +101,12 @@ export class HelperItem extends BaseThemedElement {
    * @param helper The updated helper.
    */
   private onHelperUpdated_(helper: Helper): void {
-    this.nameBridge_.set(helper.getName());
+    this.nameHook_.set(helper.getName());
   }
 
   @handle('#cancel').event(DomEvent.CLICK)
   protected onCancelClick_(): void {
-    this.rootValueBridge_.set('read');
+    this.rootValueHook_.set('read');
   }
 
   @handle('#delete').event(DomEvent.CLICK)
@@ -125,11 +125,11 @@ export class HelperItem extends BaseThemedElement {
   protected async onEditClick_(): Promise<void> {
     let helper = await this.getHelper_();
     if (helper !== null) {
-      this.nameInputBridge_.set(helper.getName());
+      this.nameInputHook_.set(helper.getName());
     } else {
-      this.nameInputBridge_.delete();
+      this.nameInputHook_.delete();
     }
-    this.rootValueBridge_.set('edit');
+    this.rootValueHook_.set('edit');
   }
 
   @handle('#name').event(DomEvent.CLICK)
@@ -148,7 +148,7 @@ export class HelperItem extends BaseThemedElement {
 
   @handle('#ok').event(DomEvent.CLICK)
   protected async onOkClick_(): Promise<void> {
-    const helperId = this.helperIdBridge_.get();
+    const helperId = this.helperIdHook_.get();
     if (helperId === null) {
       return Promise.resolve();
     }
@@ -163,9 +163,9 @@ export class HelperItem extends BaseThemedElement {
       return;
     }
 
-    helper.setName(this.nameInputBridge_.get() || '');
+    helper.setName(this.nameInputHook_.get() || '');
 
-    this.rootValueBridge_.set('read');
+    this.rootValueHook_.set('read');
 
     await this.assetCollection_.update(asset);
   }

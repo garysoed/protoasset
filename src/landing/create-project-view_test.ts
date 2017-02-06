@@ -29,9 +29,9 @@ describe('landing.CreateProjectView', () => {
 
   describe('reset_', () => {
     it('should clear the name value', () => {
-      spyOn(view['nameValueBridge_'], 'set');
+      spyOn(view['nameValueHook_'], 'set');
       view['reset_']();
-      assert(view['nameValueBridge_'].set).to.haveBeenCalledWith('');
+      assert(view['nameValueHook_'].set).to.haveBeenCalledWith('');
     });
   });
 
@@ -51,21 +51,21 @@ describe('landing.CreateProjectView', () => {
 
   describe('onNameChange_', () => {
     it('should disable the create button if there are no names', () => {
-      spyOn(view['nameValueBridge_'], 'get').and.returnValue('');
-      spyOn(view['createButtonDisabledBridge_'], 'set');
+      spyOn(view['nameValueHook_'], 'get').and.returnValue('');
+      spyOn(view['createButtonDisabledHook_'], 'set');
 
       view['onNameChange_']();
 
-      assert(view['createButtonDisabledBridge_'].set).to.haveBeenCalledWith(true);
+      assert(view['createButtonDisabledHook_'].set).to.haveBeenCalledWith(true);
     });
 
     it('should enable the create button if there are names', () => {
-      spyOn(view['nameValueBridge_'], 'get').and.returnValue('name');
-      spyOn(view['createButtonDisabledBridge_'], 'set');
+      spyOn(view['nameValueHook_'], 'get').and.returnValue('name');
+      spyOn(view['createButtonDisabledHook_'], 'set');
 
       view['onNameChange_']();
 
-      assert(view['createButtonDisabledBridge_'].set).to.haveBeenCalledWith(false);
+      assert(view['createButtonDisabledHook_'].set).to.haveBeenCalledWith(false);
     });
   });
 
@@ -81,7 +81,7 @@ describe('landing.CreateProjectView', () => {
       mockRouteFactoryService.assetList.and.returnValue(routeFactory);
 
       spyOn(Project.prototype, 'setName');
-      spyOn(view['nameValueBridge_'], 'get').and.returnValue(projectName);
+      spyOn(view['nameValueHook_'], 'get').and.returnValue(projectName);
       spyOn(view, 'reset_');
 
       await view['onSubmitAction_']();
@@ -97,7 +97,7 @@ describe('landing.CreateProjectView', () => {
     });
 
     it('should reject if name is not set', async (done: any) => {
-      spyOn(view['nameValueBridge_'], 'get').and.returnValue(null);
+      spyOn(view['nameValueHook_'], 'get').and.returnValue(null);
 
       try {
         await view['onSubmitAction_']();

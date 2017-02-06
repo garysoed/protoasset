@@ -1,6 +1,6 @@
 import {DomEvent} from 'external/gs_tools/src/event';
 import {inject} from 'external/gs_tools/src/inject';
-import {bind, customElement, DomBridge, handle, StringParser} from 'external/gs_tools/src/webc';
+import {bind, customElement, DomHook, handle, StringParser} from 'external/gs_tools/src/webc';
 
 import {BaseThemedElement} from 'external/gs_ui/src/common';
 import {RouteService} from 'external/gs_ui/src/routing';
@@ -21,10 +21,10 @@ export class ProjectItem extends BaseThemedElement {
   private readonly routeService_: RouteService<Views>;
 
   @bind(null).attribute('project-id', StringParser)
-  private readonly projectIdBridge_: DomBridge<string>;
+  private readonly projectIdHook_: DomHook<string>;
 
   @bind('#projectName').innerText()
-  private readonly projectNameBridge_: DomBridge<string>;
+  private readonly projectNameHook_: DomHook<string>;
 
 
   constructor(
@@ -35,15 +35,15 @@ export class ProjectItem extends BaseThemedElement {
     super(themeService);
 
     this.projectCollection_ = projectCollection;
-    this.projectIdBridge_ = DomBridge.of<string>();
-    this.projectNameBridge_ = DomBridge.of<string>();
+    this.projectIdHook_ = DomHook.of<string>();
+    this.projectNameHook_ = DomHook.of<string>();
     this.routeFactoryService_ = routeFactoryService;
     this.routeService_ = routeService;
   }
 
   @handle(null).event(DomEvent.CLICK)
   protected onElementClicked_(): void {
-    let projectId = this.projectIdBridge_.get();
+    let projectId = this.projectIdHook_.get();
     if (projectId !== null) {
       this.routeService_.goTo(this.routeFactoryService_.assetList(), {projectId: projectId});
     }
@@ -53,9 +53,9 @@ export class ProjectItem extends BaseThemedElement {
   protected async onProjectIdChanged_(newId: string): Promise<void> {
     let project = await this.projectCollection_.get(newId);
     if (project !== null) {
-      this.projectNameBridge_.set(project.getName());
+      this.projectNameHook_.set(project.getName());
     } else {
-      this.projectNameBridge_.delete();
+      this.projectNameHook_.delete();
     }
   }
 }

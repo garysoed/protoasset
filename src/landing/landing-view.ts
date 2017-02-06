@@ -1,5 +1,5 @@
 import {inject} from 'external/gs_tools/src/inject';
-import {bind, customElement, DomBridge, handle, StringParser} from 'external/gs_tools/src/webc';
+import {bind, customElement, DomHook, handle, StringParser} from 'external/gs_tools/src/webc';
 
 import {BaseThemedElement} from 'external/gs_ui/src/common';
 import {Event} from 'external/gs_ui/src/const';
@@ -43,7 +43,7 @@ export function projectItemElDataSetter(project: Project, element: Element): voi
 })
 export class LandingView extends BaseThemedElement {
   @bind('#projects').childrenElements(projectItemElGenerator, projectItemElDataSetter)
-  private readonly projectCollectionBridge_: DomBridge<Project[]>;
+  private readonly projectCollectionHook_: DomHook<Project[]>;
 
   private readonly routeFactoryService_: RouteFactoryService;
   private readonly routeService_: RouteService<Views>;
@@ -58,7 +58,7 @@ export class LandingView extends BaseThemedElement {
     this.routeFactoryService_ = routeFactoryService;
     this.routeService_ = routeService;
     this.projectCollection_ = projectCollection;
-    this.projectCollectionBridge_ = DomBridge.of<Project[]>();
+    this.projectCollectionHook_ = DomHook.of<Project[]>();
   }
 
   /**
@@ -94,7 +94,7 @@ export class LandingView extends BaseThemedElement {
         : this.projectCollection_.search(newValue);
 
     let projects = await projectsPromise;
-    this.projectCollectionBridge_.set(projects);
+    this.projectCollectionHook_.set(projects);
   }
 
   /**
@@ -102,9 +102,9 @@ export class LandingView extends BaseThemedElement {
    * @param project The added project.
    */
   private onProjectAdded_(project: Project): void {
-    let projects = this.projectCollectionBridge_.get() || [];
+    let projects = this.projectCollectionHook_.get() || [];
     projects.push(project);
-    this.projectCollectionBridge_.set(projects);
+    this.projectCollectionHook_.set(projects);
   }
 
   /**
@@ -129,6 +129,6 @@ export class LandingView extends BaseThemedElement {
   async onInserted(element: HTMLElement): Promise<void> {
     super.onInserted(element);
     let projects = await this.projectCollection_.list();
-    this.projectCollectionBridge_.set(projects);
+    this.projectCollectionHook_.set(projects);
   }
 }

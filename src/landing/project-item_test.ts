@@ -28,7 +28,7 @@ describe('landing.ProjectItem', () => {
   describe('onElementClicked_', () => {
     it('should go to the correct project view', () => {
       let projectId = 'projectId';
-      spyOn(item['projectIdBridge_'], 'get').and.returnValue(projectId);
+      spyOn(item['projectIdHook_'], 'get').and.returnValue(projectId);
 
       let routeFactory = Mocks.object('routeFactory');
       mockRouteFactoryService.assetList.and.returnValue(routeFactory);
@@ -39,7 +39,7 @@ describe('landing.ProjectItem', () => {
     });
 
     it('should do nothing if the project ID is null', () => {
-      spyOn(item['projectIdBridge_'], 'get').and.returnValue(null);
+      spyOn(item['projectIdHook_'], 'get').and.returnValue(null);
 
       item['onElementClicked_']();
 
@@ -56,11 +56,11 @@ describe('landing.ProjectItem', () => {
 
       mockProjectCollection.get.and.returnValue(Promise.resolve(mockProject));
 
-      spyOn(item['projectNameBridge_'], 'set');
+      spyOn(item['projectNameHook_'], 'set');
 
       await item['onProjectIdChanged_'](projectId);
       assert(mockProjectCollection.get).to.haveBeenCalledWith(projectId);
-      assert(item['projectNameBridge_'].set).to.haveBeenCalledWith(name);
+      assert(item['projectNameHook_'].set).to.haveBeenCalledWith(name);
     });
 
     it('should delete the project name if not found', async (done: any) => {
@@ -68,11 +68,11 @@ describe('landing.ProjectItem', () => {
 
       mockProjectCollection.get.and.returnValue(Promise.resolve(null));
 
-      spyOn(item['projectNameBridge_'], 'delete');
+      spyOn(item['projectNameHook_'], 'delete');
 
       await item['onProjectIdChanged_'](projectId);
       assert(mockProjectCollection.get).to.haveBeenCalledWith(projectId);
-      assert(item['projectNameBridge_'].delete).to.haveBeenCalledWith();
+      assert(item['projectNameHook_'].delete).to.haveBeenCalledWith();
     });
   });
 });

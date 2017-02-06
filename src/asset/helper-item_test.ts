@@ -31,8 +31,8 @@ describe('asset.HelperItem', () => {
     it('should resolve with the correct asset', async (done: any) => {
       let projectId = 'projectId';
       let assetId = 'assetId';
-      spyOn(item['assetIdBridge_'], 'get').and.returnValue(assetId);
-      spyOn(item['projectIdBridge_'], 'get').and.returnValue(projectId);
+      spyOn(item['assetIdHook_'], 'get').and.returnValue(assetId);
+      spyOn(item['projectIdHook_'], 'get').and.returnValue(projectId);
 
       let asset = Mocks.object('asset');
       mockAssetCollection.get.and.returnValue(Promise.resolve(asset));
@@ -44,8 +44,8 @@ describe('asset.HelperItem', () => {
 
     it('should resolve with null if there are no asset IDs', async (done: any) => {
       let projectId = 'projectId';
-      spyOn(item['assetIdBridge_'], 'get').and.returnValue(null);
-      spyOn(item['projectIdBridge_'], 'get').and.returnValue(projectId);
+      spyOn(item['assetIdHook_'], 'get').and.returnValue(null);
+      spyOn(item['projectIdHook_'], 'get').and.returnValue(projectId);
 
       let actualAsset = await item['getAsset_']();
       assert(actualAsset).to.beNull();
@@ -53,8 +53,8 @@ describe('asset.HelperItem', () => {
 
     it('should resolve with null if there are no project IDs', async (done: any) => {
       let assetId = 'assetId';
-      spyOn(item['assetIdBridge_'], 'get').and.returnValue(assetId);
-      spyOn(item['projectIdBridge_'], 'get').and.returnValue(null);
+      spyOn(item['assetIdHook_'], 'get').and.returnValue(assetId);
+      spyOn(item['projectIdHook_'], 'get').and.returnValue(null);
 
       let actualAsset = await item['getAsset_']();
       assert(actualAsset).to.beNull();
@@ -64,7 +64,7 @@ describe('asset.HelperItem', () => {
   describe('getHelper_', () => {
     it('should resolve with the correct helper', async (done: any) => {
       let helperId = 'helperId';
-      spyOn(item['helperIdBridge_'], 'get').and.returnValue(helperId);
+      spyOn(item['helperIdHook_'], 'get').and.returnValue(helperId);
 
       let helper = Mocks.object('helper');
       let mockAsset = jasmine.createSpyObj('Asset', ['getHelper']);
@@ -78,7 +78,7 @@ describe('asset.HelperItem', () => {
 
     it('should resolve with null if asset cannot be found', async (done: any) => {
       let helperId = 'helperId';
-      spyOn(item['helperIdBridge_'], 'get').and.returnValue(helperId);
+      spyOn(item['helperIdHook_'], 'get').and.returnValue(helperId);
 
       spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(null));
 
@@ -87,7 +87,7 @@ describe('asset.HelperItem', () => {
     });
 
     it('should resolve with null if there are no helper IDs', async (done: any) => {
-      spyOn(item['helperIdBridge_'], 'get').and.returnValue(null);
+      spyOn(item['helperIdHook_'], 'get').and.returnValue(null);
 
       let actualHelper = await item['getHelper_']();
       assert(actualHelper).to.beNull();
@@ -99,19 +99,19 @@ describe('asset.HelperItem', () => {
       let name = 'name';
       let mockHelper = jasmine.createSpyObj('Helper', ['getName']);
       mockHelper.getName.and.returnValue(name);
-      spyOn(item['nameBridge_'], 'set');
+      spyOn(item['nameHook_'], 'set');
 
       item['onHelperUpdated_'](mockHelper);
 
-      assert(item['nameBridge_'].set).to.haveBeenCalledWith(name);
+      assert(item['nameHook_'].set).to.haveBeenCalledWith(name);
     });
   });
 
   describe('onCancelClick_', () => {
     it('should set the root value to read', () => {
-      spyOn(item['rootValueBridge_'], 'set');
+      spyOn(item['rootValueHook_'], 'set');
       item['onCancelClick_']();
-      assert(item['rootValueBridge_'].set).to.haveBeenCalledWith('read');
+      assert(item['rootValueHook_'].set).to.haveBeenCalledWith('read');
     });
   });
 
@@ -171,22 +171,22 @@ describe('asset.HelperItem', () => {
       let mockHelper = jasmine.createSpyObj('Helper', ['getName']);
       mockHelper.getName.and.returnValue(name);
       spyOn(item, 'getHelper_').and.returnValue(Promise.resolve(mockHelper));
-      spyOn(item['rootValueBridge_'], 'set');
-      spyOn(item['nameInputBridge_'], 'set');
+      spyOn(item['rootValueHook_'], 'set');
+      spyOn(item['nameInputHook_'], 'set');
 
       await item['onEditClick_']();
-      assert(item['rootValueBridge_'].set).to.haveBeenCalledWith('edit');
-      assert(item['nameInputBridge_'].set).to.haveBeenCalledWith(name);
+      assert(item['rootValueHook_'].set).to.haveBeenCalledWith('edit');
+      assert(item['nameInputHook_'].set).to.haveBeenCalledWith(name);
     });
 
     it('should delete the input name if the helper does not exist', async (done: any) => {
       spyOn(item, 'getHelper_').and.returnValue(Promise.resolve(null));
-      spyOn(item['rootValueBridge_'], 'set');
-      spyOn(item['nameInputBridge_'], 'delete');
+      spyOn(item['rootValueHook_'], 'set');
+      spyOn(item['nameInputHook_'], 'delete');
 
       await item['onEditClick_']();
-      assert(item['rootValueBridge_'].set).to.haveBeenCalledWith('edit');
-      assert(item['nameInputBridge_'].delete).to.haveBeenCalledWith();
+      assert(item['rootValueHook_'].set).to.haveBeenCalledWith('edit');
+      assert(item['nameInputHook_'].delete).to.haveBeenCalledWith();
     });
   });
 
@@ -241,7 +241,7 @@ describe('asset.HelperItem', () => {
     it('should update the helper, save the asset, and set the root value to read',
         async (done: any) => {
           let helperId = 'helperId';
-          spyOn(item['helperIdBridge_'], 'get').and.returnValue(helperId);
+          spyOn(item['helperIdHook_'], 'get').and.returnValue(helperId);
 
           let mockHelper = jasmine.createSpyObj('Helper', ['setName']);
           let mockAsset = jasmine.createSpyObj('Asset', ['getHelper']);
@@ -249,27 +249,27 @@ describe('asset.HelperItem', () => {
           spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
 
           let name = 'name';
-          spyOn(item['nameInputBridge_'], 'get').and.returnValue(name);
-          spyOn(item['rootValueBridge_'], 'set');
+          spyOn(item['nameInputHook_'], 'get').and.returnValue(name);
+          spyOn(item['rootValueHook_'], 'set');
 
           await item['onOkClick_']();
           assert(mockAssetCollection.update).to.haveBeenCalledWith(mockAsset);
-          assert(item['rootValueBridge_'].set).to.haveBeenCalledWith('read');
+          assert(item['rootValueHook_'].set).to.haveBeenCalledWith('read');
           assert(mockHelper.setName).to.haveBeenCalledWith(name);
           assert(mockAsset.getHelper).to.haveBeenCalledWith(helperId);
         });
 
     it('should set the name to "" if null', async (done: any) => {
       let helperId = 'helperId';
-      spyOn(item['helperIdBridge_'], 'get').and.returnValue(helperId);
+      spyOn(item['helperIdHook_'], 'get').and.returnValue(helperId);
 
       let mockHelper = jasmine.createSpyObj('Helper', ['setName']);
       let mockAsset = jasmine.createSpyObj('Asset', ['getHelper']);
       mockAsset.getHelper.and.returnValue(mockHelper);
       spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
 
-      spyOn(item['nameInputBridge_'], 'get').and.returnValue(null);
-      spyOn(item['rootValueBridge_'], 'set');
+      spyOn(item['nameInputHook_'], 'get').and.returnValue(null);
+      spyOn(item['rootValueHook_'], 'set');
 
       await item['onOkClick_']();
       assert(mockHelper.setName).to.haveBeenCalledWith('');
@@ -277,45 +277,45 @@ describe('asset.HelperItem', () => {
 
     it('should do nothing if the helper does not exist', async (done: any) => {
       let helperId = 'helperId';
-      spyOn(item['helperIdBridge_'], 'get').and.returnValue(helperId);
+      spyOn(item['helperIdHook_'], 'get').and.returnValue(helperId);
 
       let mockAsset = jasmine.createSpyObj('Asset', ['getHelper']);
       mockAsset.getHelper.and.returnValue(null);
       spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
 
       let name = 'name';
-      spyOn(item['nameInputBridge_'], 'get').and.returnValue(name);
-      spyOn(item['rootValueBridge_'], 'set');
+      spyOn(item['nameInputHook_'], 'get').and.returnValue(name);
+      spyOn(item['rootValueHook_'], 'set');
 
       await item['onOkClick_']();
       assert(mockAssetCollection.update).toNot.haveBeenCalled();
-      assert(item['rootValueBridge_'].set).toNot.haveBeenCalled();
+      assert(item['rootValueHook_'].set).toNot.haveBeenCalled();
       assert(mockAsset.getHelper).to.haveBeenCalledWith(helperId);
     });
 
     it('should do nothing if the asset does not exist', async (done: any) => {
       let helperId = 'helperId';
-      spyOn(item['helperIdBridge_'], 'get').and.returnValue(helperId);
+      spyOn(item['helperIdHook_'], 'get').and.returnValue(helperId);
 
       spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(null));
 
       let name = 'name';
-      spyOn(item['nameInputBridge_'], 'get').and.returnValue(name);
-      spyOn(item['rootValueBridge_'], 'set');
+      spyOn(item['nameInputHook_'], 'get').and.returnValue(name);
+      spyOn(item['rootValueHook_'], 'set');
 
       await item['onOkClick_']();
       assert(mockAssetCollection.update).toNot.haveBeenCalled();
-      assert(item['rootValueBridge_'].set).toNot.haveBeenCalled();
+      assert(item['rootValueHook_'].set).toNot.haveBeenCalled();
     });
 
     it('should do nothing if the helper ID does not exist', async (done: any) => {
-      spyOn(item['helperIdBridge_'], 'get').and.returnValue(null);
+      spyOn(item['helperIdHook_'], 'get').and.returnValue(null);
 
-      spyOn(item['rootValueBridge_'], 'set');
+      spyOn(item['rootValueHook_'], 'set');
 
       await item['onOkClick_']();
       assert(mockAssetCollection.update).toNot.haveBeenCalled();
-      assert(item['rootValueBridge_'].set).toNot.haveBeenCalled();
+      assert(item['rootValueHook_'].set).toNot.haveBeenCalled();
     });
   });
 

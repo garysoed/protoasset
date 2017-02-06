@@ -4,7 +4,7 @@ import {
   bind,
   BooleanParser,
   customElement,
-  DomBridge,
+  DomHook,
   handle,
   StringParser} from 'external/gs_tools/src/webc';
 
@@ -19,36 +19,36 @@ import {ThemeService} from 'external/gs_ui/src/theming';
 })
 export class FilterButton extends BaseThemedElement {
   @bind('#drawer').attribute('gs-is-expanded', BooleanParser)
-  private readonly drawerExpandedBridge_: DomBridge<boolean>;
+  private readonly drawerExpandedHook_: DomHook<boolean>;
 
   @bind(null).attribute('filter-text', StringParser)
-  private readonly filterTextAttrBridge_: DomBridge<string>;
+  private readonly filterTextAttrHook_: DomHook<string>;
 
   @bind('#searchText').attribute('gs-value', StringParser)
-  private readonly searchTextValueBridge_: DomBridge<string>;
+  private readonly searchTextValueHook_: DomHook<string>;
 
   constructor(
       @inject('theming.ThemeService') themeService: ThemeService) {
     super(themeService);
-    this.drawerExpandedBridge_ = DomBridge.of<boolean>(true);
-    this.filterTextAttrBridge_ = DomBridge.of<string>();
-    this.searchTextValueBridge_ = DomBridge.of<string>();
+    this.drawerExpandedHook_ = DomHook.of<boolean>(true);
+    this.filterTextAttrHook_ = DomHook.of<string>();
+    this.searchTextValueHook_ = DomHook.of<string>();
   }
 
   @handle('#clearButton').event(Event.ACTION)
   protected onClearButtonAction_(): void {
-    this.searchTextValueBridge_.set('');
-    this.filterTextAttrBridge_.set('');
-    this.drawerExpandedBridge_.set(false);
+    this.searchTextValueHook_.set('');
+    this.filterTextAttrHook_.set('');
+    this.drawerExpandedHook_.set(false);
   }
 
   @handle('#searchButton').event(Event.ACTION)
   protected onSearchButtonAction_(): void {
-    this.drawerExpandedBridge_.set(!this.drawerExpandedBridge_.get());
+    this.drawerExpandedHook_.set(!this.drawerExpandedHook_.get());
   }
 
   @handle('#searchText').event(DomEvent.CHANGE)
   protected onSearchTextChange_(): void {
-    this.filterTextAttrBridge_.set(this.searchTextValueBridge_.get() || '');
+    this.filterTextAttrHook_.set(this.searchTextValueHook_.get() || '');
   }
 }

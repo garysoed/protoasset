@@ -158,13 +158,13 @@ describe('asset.DataView', () => {
   describe('updateDataSource_', () => {
     it('should update the asset and preview correctly', async (done: any) => {
       let bundleId = 'bundleId';
-      spyOn(view['dataSourceBundleIdBridge_'], 'get').and.returnValue(bundleId);
+      spyOn(view['dataSourceBundleIdHook_'], 'get').and.returnValue(bundleId);
 
       let startRow = 123;
-      spyOn(view['startRowValueBridge_'], 'get').and.returnValue(startRow);
+      spyOn(view['startRowValueHook_'], 'get').and.returnValue(startRow);
 
       let endRow = 456;
-      spyOn(view['endRowValueBridge_'], 'get').and.returnValue(endRow);
+      spyOn(view['endRowValueHook_'], 'get').and.returnValue(endRow);
 
       let content = 'content';
       mockFileService.processBundle.and
@@ -191,13 +191,13 @@ describe('asset.DataView', () => {
         + 'bundle',
         async (done: any) => {
           let bundleId = 'bundleId';
-          spyOn(view['dataSourceBundleIdBridge_'], 'get').and.returnValue(bundleId);
+          spyOn(view['dataSourceBundleIdHook_'], 'get').and.returnValue(bundleId);
 
           let startRow = 123;
-          spyOn(view['startRowValueBridge_'], 'get').and.returnValue(startRow);
+          spyOn(view['startRowValueHook_'], 'get').and.returnValue(startRow);
 
           let endRow = 456;
-          spyOn(view['endRowValueBridge_'], 'get').and.returnValue(endRow);
+          spyOn(view['endRowValueHook_'], 'get').and.returnValue(endRow);
 
           mockFileService.processBundle.and.returnValue(Promise.resolve(new Map()));
 
@@ -219,9 +219,9 @@ describe('asset.DataView', () => {
         + 'processed',
         async (done: any) => {
           let bundleId = 'bundleId';
-          spyOn(view['dataSourceBundleIdBridge_'], 'get').and.returnValue(bundleId);
-          spyOn(view['startRowValueBridge_'], 'get').and.returnValue(123);
-          spyOn(view['endRowValueBridge_'], 'get').and.returnValue(456);
+          spyOn(view['dataSourceBundleIdHook_'], 'get').and.returnValue(bundleId);
+          spyOn(view['startRowValueHook_'], 'get').and.returnValue(123);
+          spyOn(view['endRowValueHook_'], 'get').and.returnValue(456);
 
           mockFileService.processBundle.and.returnValue(Promise.resolve(null));
 
@@ -239,9 +239,9 @@ describe('asset.DataView', () => {
         });
 
     it('should do nothing if the start row is NaN', async (done: any) => {
-      spyOn(view['dataSourceBundleIdBridge_'], 'get').and.returnValue('bundleId');
-      spyOn(view['startRowValueBridge_'], 'get').and.returnValue(NaN);
-      spyOn(view['endRowValueBridge_'], 'get').and.returnValue(456);
+      spyOn(view['dataSourceBundleIdHook_'], 'get').and.returnValue('bundleId');
+      spyOn(view['startRowValueHook_'], 'get').and.returnValue(NaN);
+      spyOn(view['endRowValueHook_'], 'get').and.returnValue(456);
       spyOn(view, 'updateAsset_');
       spyOn(view, 'updatePreview_');
 
@@ -251,9 +251,9 @@ describe('asset.DataView', () => {
     });
 
     it('should do nothing if the start row is null', async (done: any) => {
-      spyOn(view['dataSourceBundleIdBridge_'], 'get').and.returnValue('bundleId');
-      spyOn(view['startRowValueBridge_'], 'get').and.returnValue(null);
-      spyOn(view['endRowValueBridge_'], 'get').and.returnValue(456);
+      spyOn(view['dataSourceBundleIdHook_'], 'get').and.returnValue('bundleId');
+      spyOn(view['startRowValueHook_'], 'get').and.returnValue(null);
+      spyOn(view['endRowValueHook_'], 'get').and.returnValue(456);
       spyOn(view, 'updateAsset_');
       spyOn(view, 'updatePreview_');
 
@@ -263,9 +263,9 @@ describe('asset.DataView', () => {
     });
 
     it('should do nothing if the end row is NaN', async (done: any) => {
-      spyOn(view['dataSourceBundleIdBridge_'], 'get').and.returnValue('bundleId');
-      spyOn(view['startRowValueBridge_'], 'get').and.returnValue(123);
-      spyOn(view['endRowValueBridge_'], 'get').and.returnValue(NaN);
+      spyOn(view['dataSourceBundleIdHook_'], 'get').and.returnValue('bundleId');
+      spyOn(view['startRowValueHook_'], 'get').and.returnValue(123);
+      spyOn(view['endRowValueHook_'], 'get').and.returnValue(NaN);
       spyOn(view, 'updateAsset_');
       spyOn(view, 'updatePreview_');
 
@@ -275,9 +275,9 @@ describe('asset.DataView', () => {
     });
 
     it('should do nothing if the end row is null', async (done: any) => {
-      spyOn(view['dataSourceBundleIdBridge_'], 'get').and.returnValue('bundleId');
-      spyOn(view['startRowValueBridge_'], 'get').and.returnValue(123);
-      spyOn(view['endRowValueBridge_'], 'get').and.returnValue(null);
+      spyOn(view['dataSourceBundleIdHook_'], 'get').and.returnValue('bundleId');
+      spyOn(view['startRowValueHook_'], 'get').and.returnValue(123);
+      spyOn(view['endRowValueHook_'], 'get').and.returnValue(null);
       spyOn(view, 'updateAsset_');
       spyOn(view, 'updatePreview_');
 
@@ -287,9 +287,9 @@ describe('asset.DataView', () => {
     });
 
     it('should do nothing if the bundle ID cannot be found', async (done: any) => {
-      spyOn(view['dataSourceBundleIdBridge_'], 'get').and.returnValue(null);
-      spyOn(view['startRowValueBridge_'], 'get').and.returnValue(123);
-      spyOn(view['endRowValueBridge_'], 'get').and.returnValue(456);
+      spyOn(view['dataSourceBundleIdHook_'], 'get').and.returnValue(null);
+      spyOn(view['startRowValueHook_'], 'get').and.returnValue(123);
+      spyOn(view['endRowValueHook_'], 'get').and.returnValue(456);
       spyOn(view, 'updateAsset_');
       spyOn(view, 'updatePreview_');
 
@@ -309,12 +309,12 @@ describe('asset.DataView', () => {
       mockAsset.getData.and.returnValue(mockDataSource);
 
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
-      spyOn(view['previewChildrenBridge_'], 'delete');
-      spyOn(view['previewChildrenBridge_'], 'set');
+      spyOn(view['previewChildrenHook_'], 'delete');
+      spyOn(view['previewChildrenHook_'], 'set');
 
       await view['updatePreview_']();
-      assert(view['previewChildrenBridge_'].delete).to.haveBeenCalledWith();
-      assert(view['previewChildrenBridge_'].set).to.haveBeenCalledWith(data);
+      assert(view['previewChildrenHook_'].delete).to.haveBeenCalledWith();
+      assert(view['previewChildrenHook_'].set).to.haveBeenCalledWith(data);
     });
 
     it('should clear the preview if the data cannot be loaded', async (done: any) => {
@@ -325,12 +325,12 @@ describe('asset.DataView', () => {
       mockAsset.getData.and.returnValue(mockDataSource);
 
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
-      spyOn(view['previewChildrenBridge_'], 'delete');
-      spyOn(view['previewChildrenBridge_'], 'set');
+      spyOn(view['previewChildrenHook_'], 'delete');
+      spyOn(view['previewChildrenHook_'], 'set');
 
       await view['updatePreview_']();
-      assert(view['previewChildrenBridge_'].delete).to.haveBeenCalledWith();
-      assert(view['previewChildrenBridge_'].set).toNot.haveBeenCalled();
+      assert(view['previewChildrenHook_'].delete).to.haveBeenCalledWith();
+      assert(view['previewChildrenHook_'].set).toNot.haveBeenCalled();
     });
 
     it('should clear the preview if the asset has no data source', async (done: any) => {
@@ -338,22 +338,22 @@ describe('asset.DataView', () => {
       mockAsset.getData.and.returnValue(null);
 
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
-      spyOn(view['previewChildrenBridge_'], 'delete');
-      spyOn(view['previewChildrenBridge_'], 'set');
+      spyOn(view['previewChildrenHook_'], 'delete');
+      spyOn(view['previewChildrenHook_'], 'set');
 
       await view['updatePreview_']();
-      assert(view['previewChildrenBridge_'].delete).to.haveBeenCalledWith();
-      assert(view['previewChildrenBridge_'].set).toNot.haveBeenCalled();
+      assert(view['previewChildrenHook_'].delete).to.haveBeenCalledWith();
+      assert(view['previewChildrenHook_'].set).toNot.haveBeenCalled();
     });
 
     it('should clear the preview if asset cannot be found', async (done: any) => {
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(null));
-      spyOn(view['previewChildrenBridge_'], 'delete');
-      spyOn(view['previewChildrenBridge_'], 'set');
+      spyOn(view['previewChildrenHook_'], 'delete');
+      spyOn(view['previewChildrenHook_'], 'set');
 
       await view['updatePreview_']();
-      assert(view['previewChildrenBridge_'].delete).to.haveBeenCalledWith();
-      assert(view['previewChildrenBridge_'].set).toNot.haveBeenCalled();
+      assert(view['previewChildrenHook_'].delete).to.haveBeenCalledWith();
+      assert(view['previewChildrenHook_'].set).toNot.haveBeenCalled();
     });
   });
 }); ;

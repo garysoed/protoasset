@@ -139,9 +139,9 @@ describe('project.CreateAssetView', () => {
   describe('reset_', () => {
     it('should reset all values', () => {
       spyOn(view, 'setAssetType_');
-      spyOn(view['nameValueBridge_'], 'set');
+      spyOn(view['nameValueHook_'], 'set');
       view['reset_']();
-      assert(view['nameValueBridge_'].set).to.haveBeenCalledWith('');
+      assert(view['nameValueHook_'].set).to.haveBeenCalledWith('');
       assert(view['setAssetType_']).to.haveBeenCalledWith(null);
     });
   });
@@ -155,12 +155,12 @@ describe('project.CreateAssetView', () => {
 
       spyOn(view, 'updateTemplateSection_');
       spyOn(view, 'verifyInput_');
-      spyOn(view['assetTypeBridge_'], 'set');
+      spyOn(view['assetTypeHook_'], 'set');
 
       view['setAssetType_'](assetType);
 
       assert(view['verifyInput_']).to.haveBeenCalledWith();
-      assert(view['assetTypeBridge_'].set).to.haveBeenCalledWith(renderedType);
+      assert(view['assetTypeHook_'].set).to.haveBeenCalledWith(renderedType);
       assert(view['updateTemplateSection_']).to.haveBeenCalledWith();
       assert(Asset.renderType).to.haveBeenCalledWith(assetType);
     });
@@ -168,13 +168,13 @@ describe('project.CreateAssetView', () => {
     it('should set the bridge correctly if the type is null', () => {
       spyOn(view, 'updateTemplateSection_');
       spyOn(view, 'verifyInput_');
-      spyOn(view['assetTypeBridge_'], 'set');
+      spyOn(view['assetTypeHook_'], 'set');
 
       view['setAssetType_'](null);
 
       assert(view['verifyInput_']).to.haveBeenCalledWith();
       assert(view['updateTemplateSection_']).to.haveBeenCalledWith();
-      assert(view['assetTypeBridge_'].set).to
+      assert(view['assetTypeHook_'].set).to
           .haveBeenCalledWith(Matchers.stringMatching(/Select a type/));
     });
   });
@@ -190,18 +190,18 @@ describe('project.CreateAssetView', () => {
       let presetObj = {heightPx: height, widthPx: width};
       spyOn(ASSET_PRESETS, 'get').and.returnValue(presetObj);
 
-      spyOn(view['presetTypeBridge_'], 'set');
-      spyOn(view['templateHeightBridge_'], 'set');
-      spyOn(view['templateWidthBridge_'], 'set');
+      spyOn(view['presetTypeHook_'], 'set');
+      spyOn(view['templateHeightHook_'], 'set');
+      spyOn(view['templateWidthHook_'], 'set');
       spyOn(view, 'verifyInput_');
 
       view['setPresetType_'](presetType);
 
       assert(view['verifyInput_']).to.haveBeenCalledWith();
-      assert(view['templateHeightBridge_'].set).to.haveBeenCalledWith(height);
-      assert(view['templateWidthBridge_'].set).to.haveBeenCalledWith(width);
+      assert(view['templateHeightHook_'].set).to.haveBeenCalledWith(height);
+      assert(view['templateWidthHook_'].set).to.haveBeenCalledWith(width);
       assert(ASSET_PRESETS.get).to.haveBeenCalledWith(presetType);
-      assert(view['presetTypeBridge_'].set).to.haveBeenCalledWith(renderedPreset);
+      assert(view['presetTypeHook_'].set).to.haveBeenCalledWith(renderedPreset);
       assert(view['presetType_']).to.equal(presetType);
     });
 
@@ -211,33 +211,33 @@ describe('project.CreateAssetView', () => {
 
       spyOn(ASSET_PRESETS, 'get').and.returnValue(undefined);
 
-      spyOn(view['presetTypeBridge_'], 'set');
-      spyOn(view['templateHeightBridge_'], 'set');
-      spyOn(view['templateWidthBridge_'], 'set');
+      spyOn(view['presetTypeHook_'], 'set');
+      spyOn(view['templateHeightHook_'], 'set');
+      spyOn(view['templateWidthHook_'], 'set');
       spyOn(view, 'verifyInput_');
 
       view['setPresetType_'](presetType);
 
       assert(view['verifyInput_']).to.haveBeenCalledWith();
-      assert(view['templateHeightBridge_'].set).toNot.haveBeenCalled();
-      assert(view['templateWidthBridge_'].set).toNot.haveBeenCalled();
+      assert(view['templateHeightHook_'].set).toNot.haveBeenCalled();
+      assert(view['templateWidthHook_'].set).toNot.haveBeenCalled();
       assert(view['presetType_']).to.equal(presetType);
     });
 
     it('should handle the case where the preset type is null', () => {
       spyOn(ASSET_PRESETS, 'get').and.returnValue(undefined);
 
-      spyOn(view['presetTypeBridge_'], 'set');
-      spyOn(view['templateHeightBridge_'], 'set');
-      spyOn(view['templateWidthBridge_'], 'set');
+      spyOn(view['presetTypeHook_'], 'set');
+      spyOn(view['templateHeightHook_'], 'set');
+      spyOn(view['templateWidthHook_'], 'set');
       spyOn(view, 'verifyInput_');
 
       view['setPresetType_'](null);
 
       assert(view['verifyInput_']).to.haveBeenCalledWith();
-      assert(view['templateHeightBridge_'].set).toNot.haveBeenCalled();
-      assert(view['templateWidthBridge_'].set).toNot.haveBeenCalled();
-      assert(view['presetTypeBridge_'].set).to
+      assert(view['templateHeightHook_'].set).toNot.haveBeenCalled();
+      assert(view['templateWidthHook_'].set).toNot.haveBeenCalled();
+      assert(view['presetTypeHook_'].set).to
           .haveBeenCalledWith(Matchers.stringMatching(/Select/));
       assert(view['presetType_']).to.beNull();
     });
@@ -245,11 +245,11 @@ describe('project.CreateAssetView', () => {
 
   describe('updateTemplateSection_', () => {
     it('should set the class and presets correctly, and verify inputs', () => {
-      spyOn(view['templateSectionHiddenBridge_'], 'set');
+      spyOn(view['templateSectionHiddenHook_'], 'set');
 
       spyOn(view, 'verifyInput_');
-      spyOn(view['presetTypeMenuBridge_'], 'set');
-      spyOn(view['presetTypeBridge_'], 'set');
+      spyOn(view['presetTypeMenuHook_'], 'set');
+      spyOn(view['presetTypeHook_'], 'set');
 
       let presetSet = Mocks.object('presetSet');
       spyOn(ASSET_MAP_, 'get').and.returnValue(presetSet);
@@ -260,111 +260,111 @@ describe('project.CreateAssetView', () => {
       view['updateTemplateSection_']();
 
       assert(view['verifyInput_']).to.haveBeenCalledWith();
-      assert(view['templateSectionHiddenBridge_'].set).to.haveBeenCalledWith(false);
-      assert(view['presetTypeMenuBridge_'].set).to.haveBeenCalledWith(presetSet);
-      assert(view['presetTypeBridge_'].set).to.haveBeenCalledWith('');
+      assert(view['templateSectionHiddenHook_'].set).to.haveBeenCalledWith(false);
+      assert(view['presetTypeMenuHook_'].set).to.haveBeenCalledWith(presetSet);
+      assert(view['presetTypeHook_'].set).to.haveBeenCalledWith('');
       assert(ASSET_MAP_.get).to.haveBeenCalledWith(assetType);
     });
 
     it('should set the class and presets correctly if there are no asset types', () => {
-      spyOn(view['templateSectionHiddenBridge_'], 'set');
+      spyOn(view['templateSectionHiddenHook_'], 'set');
 
       spyOn(view, 'verifyInput_');
-      spyOn(view['presetTypeMenuBridge_'], 'set');
-      spyOn(view['presetTypeBridge_'], 'set');
+      spyOn(view['presetTypeMenuHook_'], 'set');
+      spyOn(view['presetTypeHook_'], 'set');
 
       view['assetType_'] = null;
 
       view['updateTemplateSection_']();
 
       assert(view['verifyInput_']).to.haveBeenCalledWith();
-      assert(view['templateSectionHiddenBridge_'].set).to.haveBeenCalledWith(true);
-      assert(view['presetTypeMenuBridge_'].set).to.haveBeenCalledWith([]);
-      assert(view['presetTypeBridge_'].set).to.haveBeenCalledWith('');
+      assert(view['templateSectionHiddenHook_'].set).to.haveBeenCalledWith(true);
+      assert(view['presetTypeMenuHook_'].set).to.haveBeenCalledWith([]);
+      assert(view['presetTypeHook_'].set).to.haveBeenCalledWith('');
     });
   });
 
   describe('verifyInput_', () => {
     it('should enable the create button if the required fields are set', () => {
-      spyOn(view['createButtonDisabledBridge_'], 'set');
-      spyOn(view['nameValueBridge_'], 'get').and.returnValue('name');
-      spyOn(view['templateHeightBridge_'], 'get').and.returnValue(123);
-      spyOn(view['templateWidthBridge_'], 'get').and.returnValue(456);
+      spyOn(view['createButtonDisabledHook_'], 'set');
+      spyOn(view['nameValueHook_'], 'get').and.returnValue('name');
+      spyOn(view['templateHeightHook_'], 'get').and.returnValue(123);
+      spyOn(view['templateWidthHook_'], 'get').and.returnValue(456);
 
       view['assetType_'] = Mocks.object('assetType');
       view['verifyInput_']();
 
-      assert(view['createButtonDisabledBridge_'].set).to.haveBeenCalledWith(false);
+      assert(view['createButtonDisabledHook_'].set).to.haveBeenCalledWith(false);
     });
 
     it('should disable the create button if the name is not set', () => {
-      spyOn(view['createButtonDisabledBridge_'], 'set');
-      spyOn(view['nameValueBridge_'], 'get').and.returnValue(null);
-      spyOn(view['templateHeightBridge_'], 'get').and.returnValue(123);
-      spyOn(view['templateWidthBridge_'], 'get').and.returnValue(456);
+      spyOn(view['createButtonDisabledHook_'], 'set');
+      spyOn(view['nameValueHook_'], 'get').and.returnValue(null);
+      spyOn(view['templateHeightHook_'], 'get').and.returnValue(123);
+      spyOn(view['templateWidthHook_'], 'get').and.returnValue(456);
       view['assetType_'] = Mocks.object('assetType');
       view['verifyInput_']();
 
-      assert(view['createButtonDisabledBridge_'].set).to.haveBeenCalledWith(true);
+      assert(view['createButtonDisabledHook_'].set).to.haveBeenCalledWith(true);
     });
 
     it('should disable the create button if the asset type is not set', () => {
-      spyOn(view['createButtonDisabledBridge_'], 'set');
-      spyOn(view['nameValueBridge_'], 'get').and.returnValue('name');
-      spyOn(view['templateHeightBridge_'], 'get').and.returnValue(123);
-      spyOn(view['templateWidthBridge_'], 'get').and.returnValue(456);
+      spyOn(view['createButtonDisabledHook_'], 'set');
+      spyOn(view['nameValueHook_'], 'get').and.returnValue('name');
+      spyOn(view['templateHeightHook_'], 'get').and.returnValue(123);
+      spyOn(view['templateWidthHook_'], 'get').and.returnValue(456);
       view['assetType_'] = null;
       view['verifyInput_']();
 
-      assert(view['createButtonDisabledBridge_'].set).to.haveBeenCalledWith(true);
+      assert(view['createButtonDisabledHook_'].set).to.haveBeenCalledWith(true);
     });
 
     it('should disable the create button if the width is zero', () => {
-      spyOn(view['createButtonDisabledBridge_'], 'set');
-      spyOn(view['nameValueBridge_'], 'get').and.returnValue('name');
-      spyOn(view['templateHeightBridge_'], 'get').and.returnValue(123);
-      spyOn(view['templateWidthBridge_'], 'get').and.returnValue(0);
+      spyOn(view['createButtonDisabledHook_'], 'set');
+      spyOn(view['nameValueHook_'], 'get').and.returnValue('name');
+      spyOn(view['templateHeightHook_'], 'get').and.returnValue(123);
+      spyOn(view['templateWidthHook_'], 'get').and.returnValue(0);
 
       view['assetType_'] = Mocks.object('assetType');
       view['verifyInput_']();
 
-      assert(view['createButtonDisabledBridge_'].set).to.haveBeenCalledWith(true);
+      assert(view['createButtonDisabledHook_'].set).to.haveBeenCalledWith(true);
     });
 
     it('should disable the create button if the width is NaN', () => {
-      spyOn(view['createButtonDisabledBridge_'], 'set');
-      spyOn(view['nameValueBridge_'], 'get').and.returnValue('name');
-      spyOn(view['templateHeightBridge_'], 'get').and.returnValue(123);
-      spyOn(view['templateWidthBridge_'], 'get').and.returnValue(NaN);
+      spyOn(view['createButtonDisabledHook_'], 'set');
+      spyOn(view['nameValueHook_'], 'get').and.returnValue('name');
+      spyOn(view['templateHeightHook_'], 'get').and.returnValue(123);
+      spyOn(view['templateWidthHook_'], 'get').and.returnValue(NaN);
 
       view['assetType_'] = Mocks.object('assetType');
       view['verifyInput_']();
 
-      assert(view['createButtonDisabledBridge_'].set).to.haveBeenCalledWith(true);
+      assert(view['createButtonDisabledHook_'].set).to.haveBeenCalledWith(true);
     });
 
     it('should disable the create button if the height is zero', () => {
-      spyOn(view['createButtonDisabledBridge_'], 'set');
-      spyOn(view['nameValueBridge_'], 'get').and.returnValue('name');
-      spyOn(view['templateHeightBridge_'], 'get').and.returnValue(0);
-      spyOn(view['templateWidthBridge_'], 'get').and.returnValue(456);
+      spyOn(view['createButtonDisabledHook_'], 'set');
+      spyOn(view['nameValueHook_'], 'get').and.returnValue('name');
+      spyOn(view['templateHeightHook_'], 'get').and.returnValue(0);
+      spyOn(view['templateWidthHook_'], 'get').and.returnValue(456);
 
       view['assetType_'] = Mocks.object('assetType');
       view['verifyInput_']();
 
-      assert(view['createButtonDisabledBridge_'].set).to.haveBeenCalledWith(true);
+      assert(view['createButtonDisabledHook_'].set).to.haveBeenCalledWith(true);
     });
 
     it('should disable the create button if the height is NaN', () => {
-      spyOn(view['createButtonDisabledBridge_'], 'set');
-      spyOn(view['nameValueBridge_'], 'get').and.returnValue('name');
-      spyOn(view['templateHeightBridge_'], 'get').and.returnValue(NaN);
-      spyOn(view['templateWidthBridge_'], 'get').and.returnValue(456);
+      spyOn(view['createButtonDisabledHook_'], 'set');
+      spyOn(view['nameValueHook_'], 'get').and.returnValue('name');
+      spyOn(view['templateHeightHook_'], 'get').and.returnValue(NaN);
+      spyOn(view['templateWidthHook_'], 'get').and.returnValue(456);
 
       view['assetType_'] = Mocks.object('assetType');
       view['verifyInput_']();
 
-      assert(view['createButtonDisabledBridge_'].set).to.haveBeenCalledWith(true);
+      assert(view['createButtonDisabledHook_'].set).to.haveBeenCalledWith(true);
     });
   });
 
@@ -406,13 +406,13 @@ describe('project.CreateAssetView', () => {
       spyOn(view, 'reset_');
 
       let assetName = 'assetName';
-      spyOn(view['nameValueBridge_'], 'get').and.returnValue(assetName);
+      spyOn(view['nameValueHook_'], 'get').and.returnValue(assetName);
 
       let height = 123;
-      spyOn(view['templateHeightBridge_'], 'get').and.returnValue(height);
+      spyOn(view['templateHeightHook_'], 'get').and.returnValue(height);
 
       let width = 456;
-      spyOn(view['templateWidthBridge_'], 'get').and.returnValue(width);
+      spyOn(view['templateWidthHook_'], 'get').and.returnValue(width);
 
       let assetType = Mocks.object('assetType');
       view['assetType_'] = assetType;
@@ -443,9 +443,9 @@ describe('project.CreateAssetView', () => {
 
       spyOn(view, 'reset_');
 
-      spyOn(view['nameValueBridge_'], 'get').and.returnValue('assetName');
-      spyOn(view['templateHeightBridge_'], 'get').and.returnValue(123);
-      spyOn(view['templateWidthBridge_'], 'get').and.returnValue(456);
+      spyOn(view['nameValueHook_'], 'get').and.returnValue('assetName');
+      spyOn(view['templateHeightHook_'], 'get').and.returnValue(123);
+      spyOn(view['templateWidthHook_'], 'get').and.returnValue(456);
 
       let assetType = Mocks.object('assetType');
       view['assetType_'] = assetType;
@@ -458,7 +458,7 @@ describe('project.CreateAssetView', () => {
     });
 
     it('should reject if project name is not set', async (done: any) => {
-      spyOn(view['nameValueBridge_'], 'get').and.returnValue(null);
+      spyOn(view['nameValueHook_'], 'get').and.returnValue(null);
 
       try {
         await view['onSubmitAction_']();
@@ -471,7 +471,7 @@ describe('project.CreateAssetView', () => {
 
     it('should reject if the asset type is not set', async (done: any) => {
       let assetName = 'assetName';
-      spyOn(view['nameValueBridge_'], 'get').and.returnValue(assetName);
+      spyOn(view['nameValueHook_'], 'get').and.returnValue(assetName);
 
       view['assetType_'] = null;
 
@@ -489,9 +489,9 @@ describe('project.CreateAssetView', () => {
 
       spyOn(view, 'reset_');
 
-      spyOn(view['nameValueBridge_'], 'get').and.returnValue('assetName');
-      spyOn(view['templateHeightBridge_'], 'get').and.returnValue(null);
-      spyOn(view['templateWidthBridge_'], 'get').and.returnValue(456);
+      spyOn(view['nameValueHook_'], 'get').and.returnValue('assetName');
+      spyOn(view['templateHeightHook_'], 'get').and.returnValue(null);
+      spyOn(view['templateWidthHook_'], 'get').and.returnValue(456);
 
       view['assetType_'] = Mocks.object('assetType');
 
@@ -509,9 +509,9 @@ describe('project.CreateAssetView', () => {
 
       spyOn(view, 'reset_');
 
-      spyOn(view['nameValueBridge_'], 'get').and.returnValue('assetName');
-      spyOn(view['templateHeightBridge_'], 'get').and.returnValue(NaN);
-      spyOn(view['templateWidthBridge_'], 'get').and.returnValue(456);
+      spyOn(view['nameValueHook_'], 'get').and.returnValue('assetName');
+      spyOn(view['templateHeightHook_'], 'get').and.returnValue(NaN);
+      spyOn(view['templateWidthHook_'], 'get').and.returnValue(456);
 
       view['assetType_'] = Mocks.object('assetType');
 
@@ -529,9 +529,9 @@ describe('project.CreateAssetView', () => {
 
       spyOn(view, 'reset_');
 
-      spyOn(view['nameValueBridge_'], 'get').and.returnValue('assetName');
-      spyOn(view['templateHeightBridge_'], 'get').and.returnValue(123);
-      spyOn(view['templateWidthBridge_'], 'get').and.returnValue(null);
+      spyOn(view['nameValueHook_'], 'get').and.returnValue('assetName');
+      spyOn(view['templateHeightHook_'], 'get').and.returnValue(123);
+      spyOn(view['templateWidthHook_'], 'get').and.returnValue(null);
 
       view['assetType_'] = Mocks.object('assetType');
 
@@ -549,9 +549,9 @@ describe('project.CreateAssetView', () => {
 
       spyOn(view, 'reset_');
 
-      spyOn(view['nameValueBridge_'], 'get').and.returnValue('assetName');
-      spyOn(view['templateHeightBridge_'], 'get').and.returnValue(123);
-      spyOn(view['templateWidthBridge_'], 'get').and.returnValue(NaN);
+      spyOn(view['nameValueHook_'], 'get').and.returnValue('assetName');
+      spyOn(view['templateHeightHook_'], 'get').and.returnValue(123);
+      spyOn(view['templateWidthHook_'], 'get').and.returnValue(NaN);
 
       view['assetType_'] = Mocks.object('assetType');
 

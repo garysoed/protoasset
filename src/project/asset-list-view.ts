@@ -1,5 +1,5 @@
 import {inject} from 'external/gs_tools/src/inject';
-import {bind, customElement, DomBridge, handle} from 'external/gs_tools/src/webc';
+import {bind, customElement, DomHook, handle} from 'external/gs_tools/src/webc';
 
 import {BaseThemedElement} from 'external/gs_ui/src/common';
 import {Event} from 'external/gs_ui/src/const';
@@ -35,10 +35,10 @@ export function assetsDataSetter(asset: Asset, element: Element): void {
 })
 export class AssetListView extends BaseThemedElement {
   @bind('#assets').childrenElements<Asset>(assetsGenerator, assetsDataSetter)
-  private readonly assetsBridge_: DomBridge<Asset[]>;
+  private readonly assetsHook_: DomHook<Asset[]>;
 
   @bind('#projectName').innerText()
-  private readonly projectNameTextBridge_: DomBridge<string>;
+  private readonly projectNameTextHook_: DomHook<string>;
 
   private readonly assetCollection_: AssetCollection;
   private readonly projectCollection_: ProjectCollection;
@@ -53,9 +53,9 @@ export class AssetListView extends BaseThemedElement {
       @inject('theming.ThemeService') themeService: ThemeService) {
     super(themeService);
     this.assetCollection_ = assetCollection;
-    this.assetsBridge_ = DomBridge.of<Asset[]>();
+    this.assetsHook_ = DomHook.of<Asset[]>();
     this.projectCollection_ = projectCollection;
-    this.projectNameTextBridge_ = DomBridge.of<string>();
+    this.projectNameTextHook_ = DomHook.of<string>();
     this.routeFactoryService_ = routeFactoryService;
     this.routeService_ = routeService;
   }
@@ -82,9 +82,9 @@ export class AssetListView extends BaseThemedElement {
       this.projectCollection_.get(projectId),
     ]);
 
-    this.assetsBridge_.set(assets);
+    this.assetsHook_.set(assets);
     if (project !== null) {
-      this.projectNameTextBridge_.set(project.getName());
+      this.projectNameTextHook_.set(project.getName());
     }
   }
 
