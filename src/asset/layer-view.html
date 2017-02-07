@@ -14,12 +14,17 @@
     position: relative;
   }
 
+  #root {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
   #selectedLayerName {
     text-align: left;
     text-transform: none;
   }
 </style>
-<div fill-parent layout="row">
+<div fill-parent id="root" layout="row">
   <div flex layout="column">
     <gs-basic-button>
       <div gs-content layout="row">

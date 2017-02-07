@@ -2,11 +2,11 @@ import {Jsons} from 'external/gs_tools/src/collection';
 
 
 export class TemplateCompiler {
-  private readonly assetData_: string[][];
+  private readonly rowData_: string[];
   private readonly handlebars_: typeof Handlebars;
 
-  constructor(assetData: string[][], handlebars: typeof Handlebars) {
-    this.assetData_ = assetData;
+  constructor(rowData: string[], handlebars: typeof Handlebars) {
+    this.rowData_ = rowData;
     this.handlebars_ = handlebars;
   }
 
@@ -17,7 +17,7 @@ export class TemplateCompiler {
    */
   compile(template: string): (data?: {[key: string]: any}) => string {
     return (additionalData: {[key: string]: any} = {}) => {
-      let data = Jsons.mixin({$$: this.assetData_}, additionalData);
+      const data = Jsons.mixin({$$: this.rowData_}, additionalData);
       return this.handlebars_.compile(template)(data);
     };
   }
@@ -29,7 +29,7 @@ export class TemplateCompiler {
    * @param handlebars The handlebars instance.
    * @return New instance of the compiler.
    */
-  static of(assetData: string[][], handlebars: typeof Handlebars): TemplateCompiler {
-    return new TemplateCompiler(assetData, handlebars);
+  static of(rowData: string[], handlebars: typeof Handlebars): TemplateCompiler {
+    return new TemplateCompiler(rowData, handlebars);
   }
 }

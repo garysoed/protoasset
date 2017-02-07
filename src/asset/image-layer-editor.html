@@ -1,12 +1,23 @@
 <style>
+  gs-float-input,
+  gs-text-input {
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
+
   #imagePreview {
     background-position: center;
     background-repeat: no-repeat;
     background-size: contain;
   }
+
+  .inputRow {
+    margin-bottom: .5rem;
+    margin-top: .5rem;
+  }
 </style>
 <div fill-parent layout="column">
-  <div layout="row">
+  <div class="inputRow" layout="row">
     <div flex layout="row">
       <label>Top</label>
       <gs-float-input flex id="top"></gs-float-input>
@@ -16,7 +27,7 @@
       <gs-float-input flex id="bottom"></gs-float-input>
     </div>
   </div>
-  <div layout="row">
+  <div class="inputRow" layout="row">
     <div flex layout="row">
       <label>Left</label>
       <gs-float-input flex id="left"></gs-float-input>
@@ -26,9 +37,14 @@
       <gs-float-input flex id="right"></gs-float-input>
     </div>
   </div>
-  <div layout="row">
+  <div class="inputRow"layout="row">
     <label>Image URL</label>
     <gs-text-input flex id="imageUrl"></gs-text-input>
   </div>
-  <div flex id="imagePreview"></div>
+  <div class="inputRow" flex id="imagePreview"></div>
+  <div flex-justify="flex-end" layout="row">
+    <gs-basic-button class="gs-primary" id="save">
+      <div gs-content>Save</div>
+    </gs-basic-button>
+  </div>
 </div>

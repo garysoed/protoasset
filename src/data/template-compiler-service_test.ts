@@ -35,7 +35,7 @@ describe('data.TemplateCompilerService', () => {
 
       let dataValue = Mocks.object('dataValue');
       let mockData = jasmine.createSpyObj('Data', ['getData']);
-      mockData.getData.and.returnValue(Promise.resolve(dataValue));
+      mockData.getData.and.returnValue(Promise.resolve([dataValue]));
 
       let mockAsset = jasmine.createSpyObj('Asset', ['getData', 'getAllHelpers']);
       mockAsset.getData.and.returnValue(mockData);

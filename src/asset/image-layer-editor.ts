@@ -1,5 +1,6 @@
 import {Arrays} from 'external/gs_tools/src/collection';
 import {DisposableFunction} from 'external/gs_tools/src/dispose';
+import {DomEvent} from 'external/gs_tools/src/event';
 import {inject} from 'external/gs_tools/src/inject';
 import {
   bind,
@@ -18,6 +19,7 @@ import {AssetCollection} from '../data/asset-collection';
 import {BaseLayer} from '../data/base-layer';
 import {DataEvents} from '../data/data-events';
 import {ImageLayer} from '../data/image-layer';
+import {TemplateCompilerService} from '../data/template-compiler-service';
 
 
 
@@ -25,6 +27,7 @@ import {ImageLayer} from '../data/image-layer';
  * Image Layer
  */
 @customElement({
+  dependencies: [TemplateCompilerService],
   tag: 'pa-asset-image-layer-editor',
   templateKey: 'src/asset/image-layer-editor',
 })
@@ -60,11 +63,13 @@ export class ImageLayerEditor extends BaseThemedElement {
   private topHook_: DomHook<number | null>;
 
   private readonly assetCollection_: AssetCollection;
+  private readonly templateCompilerService_: TemplateCompilerService;
 
   private layerDeregister_: DisposableFunction | null;
 
   constructor(
       @inject('pa.data.AssetCollection') assetCollection: AssetCollection,
+      @inject('pa.data.TemplateCompilerService') templateCompilerService: TemplateCompilerService,
       @inject('theming.ThemeService') themeService: ThemeService) {
     super(themeService);
     this.assetCollection_ = assetCollection;
@@ -78,6 +83,7 @@ export class ImageLayerEditor extends BaseThemedElement {
     this.leftHook_ = DomHook.of<number>();
     this.projectIdHook_ = DomHook.of<string>();
     this.rightHook_ = DomHook.of<number>();
+    this.templateCompilerService_ = templateCompilerService;
     this.topHook_ = DomHook.of<number>();
   }
 
@@ -159,34 +165,40 @@ export class ImageLayerEditor extends BaseThemedElement {
   }
 
 
-  @handle('#top').attributeChange('gs-value', FloatParser)
-  @handle('#bottom').attributeChange('gs-value', FloatParser)
-  @handle('#left').attributeChange('gs-value', FloatParser)
-  @handle('#right').attributeChange('gs-value', FloatParser)
   @handle('#imageUrl').attributeChange('gs-value', StringParser)
-  protected async onFieldChange_(): Promise<void> {
-    let layer = await this.getLayer_();
-    if (layer === null) {
-      return;
-    }
-
-    let asset = await this.getAsset_();
+  async onFieldChange_(): Promise<void> {
+    const asset = await this.getAsset_();
     if (asset === null) {
       return;
     }
 
-    let imageUrl = this.imageUrlHook_.get() || '';
+    const style = this.imagePreviewStyleHook_.get();
+    const imageUrl = this.imageUrlHook_.get() || '';
+    if (style !== null) {
+      try {
+        const templateCompiler = await this.templateCompilerService_.create(asset);
+        if (templateCompiler !== null) {
+          style.backgroundImage = `url(${templateCompiler.compile(imageUrl)()})`;
+        }
+      } catch (e) {
+        // TODO: Display error.
+      }
+    }
+  }
+
+  @handle('#save').event(DomEvent.CLICK)
+  async onSaveClick_(): Promise<void> {
+    const [asset, layer] = await Promise.all([this.getAsset_(), this.getLayer_()]);
+    if (asset === null || layer === null) {
+      return;
+    }
+
+    const imageUrl = this.imageUrlHook_.get() || '';
     layer.setBottom(this.bottomHook_.get());
     layer.setImageUrl(imageUrl);
     layer.setLeft(this.leftHook_.get());
     layer.setRight(this.rightHook_.get());
     layer.setTop(this.topHook_.get());
-
-    let style = this.imagePreviewStyleHook_.get();
-    if (style !== null) {
-      style.backgroundImage = `url(${imageUrl})`;
-    }
-
     await this.assetCollection_.update(asset);
   }
 
