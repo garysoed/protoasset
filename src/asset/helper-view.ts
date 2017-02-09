@@ -15,6 +15,7 @@ import {BaseThemedElement} from 'external/gs_ui/src/common';
 import {RouteService, RouteServiceEvents} from 'external/gs_ui/src/routing';
 import {ThemeService} from 'external/gs_ui/src/theming';
 
+import {SampleDataService} from '../common/sample-data-service';
 import {Asset} from '../data/asset';
 import {AssetCollection} from '../data/asset-collection';
 import {DataEvents} from '../data/data-events';
@@ -114,7 +115,7 @@ export function helperItemGenerator(document: Document): Element {
  * Helper view
  */
 @customElement({
-  dependencies: [HelperItem, TemplateCompilerService],
+  dependencies: [HelperItem, SampleDataService, TemplateCompilerService],
   tag: 'pa-asset-helper-view',
   templateKey: 'src/asset/helper-view',
 })
@@ -144,6 +145,7 @@ export class HelperView extends BaseThemedElement {
   private readonly helperIdGenerator_: IdGenerator;
   private readonly routeFactoryService_: RouteFactoryService;
   private readonly routeService_: RouteService<Views>;
+  private readonly sampleDataService_: SampleDataService;
   private readonly templateCompilerService_: TemplateCompilerService;
 
   private assetUpdateDeregister_: DisposableFunction | null;
@@ -153,6 +155,7 @@ export class HelperView extends BaseThemedElement {
       @inject('pa.data.AssetCollection') assetCollection: AssetCollection,
       @inject('pa.routing.RouteFactoryService') routeFactoryService: RouteFactoryService,
       @inject('gs.routing.RouteService') routeService: RouteService<Views>,
+      @inject('pa.common.SampleDataService') sampleDataService: SampleDataService,
       @inject('pa.data.TemplateCompilerService') templateCompilerService: TemplateCompilerService,
       @inject('theming.ThemeService') themeService: ThemeService) {
     super(themeService);
@@ -169,6 +172,7 @@ export class HelperView extends BaseThemedElement {
     this.nameHook_ = DomHook.of<string>();
     this.routeFactoryService_ = routeFactoryService;
     this.routeService_ = routeService;
+    this.sampleDataService_ = sampleDataService;
     this.templateCompilerService_ = templateCompilerService;
   }
 
@@ -346,12 +350,15 @@ export class HelperView extends BaseThemedElement {
       return;
     }
 
-    let asset = await this.getAsset_();
-    if (asset === null) {
+    let [asset, rowData] = await Promise.all([
+      this.getAsset_(),
+      this.sampleDataService_.getRowData(),
+    ]);
+    if (asset === null || rowData === null) {
       return;
     }
 
-    let compiler = await this.templateCompilerService_.create(asset);
+    let compiler = await this.templateCompilerService_.create(asset, rowData);
     if (compiler === null) {
       return;
     }

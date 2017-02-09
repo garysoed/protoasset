@@ -14,6 +14,7 @@ import {
 import {BaseThemedElement} from 'external/gs_ui/src/common';
 import {ThemeService} from 'external/gs_ui/src/theming';
 
+import {SampleDataService} from '../common/sample-data-service';
 import {Asset} from '../data/asset';
 import {AssetCollection} from '../data/asset-collection';
 import {BaseLayer} from '../data/base-layer';
@@ -63,12 +64,14 @@ export class ImageLayerEditor extends BaseThemedElement {
   private topHook_: DomHook<number | null>;
 
   private readonly assetCollection_: AssetCollection;
+  private readonly sampleDataService_: SampleDataService;
   private readonly templateCompilerService_: TemplateCompilerService;
 
   private layerDeregister_: DisposableFunction | null;
 
   constructor(
       @inject('pa.data.AssetCollection') assetCollection: AssetCollection,
+      @inject('pa.common.SampleDataService') sampleDataService: SampleDataService,
       @inject('pa.data.TemplateCompilerService') templateCompilerService: TemplateCompilerService,
       @inject('theming.ThemeService') themeService: ThemeService) {
     super(themeService);
@@ -83,6 +86,7 @@ export class ImageLayerEditor extends BaseThemedElement {
     this.leftHook_ = DomHook.of<number>();
     this.projectIdHook_ = DomHook.of<string>();
     this.rightHook_ = DomHook.of<number>();
+    this.sampleDataService_ = sampleDataService;
     this.templateCompilerService_ = templateCompilerService;
     this.topHook_ = DomHook.of<number>();
   }
@@ -167,8 +171,11 @@ export class ImageLayerEditor extends BaseThemedElement {
 
   @handle('#imageUrl').attributeChange('gs-value', StringParser)
   async onFieldChange_(): Promise<void> {
-    const asset = await this.getAsset_();
-    if (asset === null) {
+    const [asset, rowData] = await Promise.all([
+      this.getAsset_(),
+      this.sampleDataService_.getRowData(),
+    ]);
+    if (asset === null || rowData === null) {
       return;
     }
 
@@ -176,7 +183,7 @@ export class ImageLayerEditor extends BaseThemedElement {
     const imageUrl = this.imageUrlHook_.get() || '';
     if (style !== null) {
       try {
-        const templateCompiler = await this.templateCompilerService_.create(asset);
+        const templateCompiler = await this.templateCompilerService_.create(asset, rowData);
         if (templateCompiler !== null) {
           style.backgroundImage = `url(${templateCompiler.compile(imageUrl)()})`;
         }

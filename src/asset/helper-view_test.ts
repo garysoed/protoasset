@@ -23,16 +23,16 @@ import {
 
 describe('argElementGenerator', () => {
   it('should generate the correct element and listen to the click event', () => {
-    let element = Mocks.object('element');
-    let mockDocument = jasmine.createSpyObj('Document', ['createElement']);
+    const element = Mocks.object('element');
+    const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
     mockDocument.createElement.and.returnValue(element);
 
-    let mockListenable = jasmine.createSpyObj('Listenable', ['on']);
+    const mockListenable = jasmine.createSpyObj('Listenable', ['on']);
     spyOn(ListenableDom, 'of').and.returnValue(mockListenable);
 
-    let mockInstance = jasmine.createSpyObj('Instance', ['addDisposable', 'onArgClick']);
+    const mockInstance = jasmine.createSpyObj('Instance', ['addDisposable', 'onArgClick']);
 
-    let actualElement = argElementGenerator(mockDocument, mockInstance);
+    const actualElement = argElementGenerator(mockDocument, mockInstance);
     assert(actualElement).to.equal(element);
     assert(mockListenable.on).to
         .haveBeenCalledWith(DomEvent.CLICK, mockInstance.onArgClick, mockInstance);
@@ -44,8 +44,8 @@ describe('argElementGenerator', () => {
 
 describe('argElementDataSetter', () => {
   it('should set the arg label correctly', () => {
-    let element = Mocks.object('element');
-    let label = 'label';
+    const element = Mocks.object('element');
+    const label = 'label';
     argElementDataSetter(label, element);
     assert(element.textContent).to.equal(label);
   });
@@ -53,17 +53,17 @@ describe('argElementDataSetter', () => {
 
 describe('consoleEntryGenerator', () => {
   it('should generate the console entry element correctly', () => {
-    let mockRootClassList = jasmine.createSpyObj('RootClassList', ['add']);
-    let mockRootEl = jasmine.createSpyObj('RootEl', ['appendChild']);
+    const mockRootClassList = jasmine.createSpyObj('RootClassList', ['add']);
+    const mockRootEl = jasmine.createSpyObj('RootEl', ['appendChild']);
     mockRootEl.classList = mockRootClassList;
 
-    let mockCommandClassList = jasmine.createSpyObj('CommandClassList', ['add']);
-    let commandEl = Mocks.object('commandEl');
+    const mockCommandClassList = jasmine.createSpyObj('CommandClassList', ['add']);
+    const commandEl = Mocks.object('commandEl');
     commandEl.classList = mockCommandClassList;
 
-    let resultEl = Mocks.object('resultEl');
+    const resultEl = Mocks.object('resultEl');
 
-    let mockDocument = jasmine.createSpyObj('Document', ['createElement']);
+    const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
     mockDocument.createElement.and.returnValues(mockRootEl, commandEl, resultEl);
 
     assert(consoleEntryGenerator(mockDocument)).to.equal(mockRootEl);
@@ -77,14 +77,14 @@ describe('consoleEntryGenerator', () => {
 
 describe('consoleEntryDataSetter', () => {
   it('should set the data correctly', () => {
-    let command = 'command';
-    let line1 = 'line1';
-    let line2 = 'line2';
-    let result = `${line1}\n  ${line2}`;
+    const command = 'command';
+    const line1 = 'line1';
+    const line2 = 'line2';
+    const result = `${line1}\n  ${line2}`;
 
-    let commandEl = document.createElement('div');
-    let resultEl = document.createElement('div');
-    let rootEl = document.createElement('div');
+    const commandEl = document.createElement('div');
+    const resultEl = document.createElement('div');
+    const rootEl = document.createElement('div');
     rootEl.appendChild(commandEl);
     rootEl.appendChild(resultEl);
 
@@ -96,14 +96,14 @@ describe('consoleEntryDataSetter', () => {
   });
 
   it('should set the data correctly for errors', () => {
-    let command = 'command';
-    let line1 = 'line1';
-    let line2 = 'line2';
-    let result = `${line1}\n  ${line2}`;
+    const command = 'command';
+    const line1 = 'line1';
+    const line2 = 'line2';
+    const result = `${line1}\n  ${line2}`;
 
-    let commandEl = document.createElement('div');
-    let resultEl = document.createElement('div');
-    let rootEl = document.createElement('div');
+    const commandEl = document.createElement('div');
+    const resultEl = document.createElement('div');
+    const rootEl = document.createElement('div');
     rootEl.appendChild(commandEl);
     rootEl.appendChild(resultEl);
 
@@ -117,10 +117,10 @@ describe('consoleEntryDataSetter', () => {
 
 describe('helperItemDataSetter', () => {
   it('should set the attribute correctly', () => {
-    let helperId = 'helperId';
-    let assetId = 'assetId';
-    let projectId = 'projectId';
-    let mockElement = jasmine.createSpyObj('Element', ['setAttribute']);
+    const helperId = 'helperId';
+    const assetId = 'assetId';
+    const projectId = 'projectId';
+    const mockElement = jasmine.createSpyObj('Element', ['setAttribute']);
     helperItemDataSetter({assetId, helperId, projectId}, mockElement);
 
     assert(mockElement.setAttribute).to.haveBeenCalledWith('asset-id', assetId);
@@ -131,8 +131,8 @@ describe('helperItemDataSetter', () => {
 
 describe('helperItemGenerator', () => {
   it('should set the attribute correctly', () => {
-    let element = Mocks.object('element');
-    let mockDocument = jasmine.createSpyObj('Document', ['createElement']);
+    const element = Mocks.object('element');
+    const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
     mockDocument.createElement.and.returnValue(element);
     assert(helperItemGenerator(mockDocument)).to.equal(element);
     assert(mockDocument.createElement).to.haveBeenCalledWith('pa-asset-helper-item');
@@ -143,6 +143,7 @@ describe('asset.HelperView', () => {
   let mockAssetCollection;
   let mockRouteFactoryService;
   let mockRouteService;
+  let mockSampleDataService;
   let mockTemplateCompilerService;
   let view: HelperView;
 
@@ -150,11 +151,13 @@ describe('asset.HelperView', () => {
     mockAssetCollection = jasmine.createSpyObj('AssetCollection', ['get', 'update']);
     mockRouteFactoryService = jasmine.createSpyObj('RouteFactoryService', ['helper', 'landing']);
     mockRouteService = jasmine.createSpyObj('RouteService', ['getParams', 'goTo', 'on']);
+    mockSampleDataService = jasmine.createSpyObj('SampleDataService', ['getRowData']);
     mockTemplateCompilerService = jasmine.createSpyObj('TemplateCompilerService', ['create']);
     view = new HelperView(
         mockAssetCollection,
         mockRouteFactoryService,
         mockRouteService,
+        mockSampleDataService,
         mockTemplateCompilerService,
         jasmine.createSpyObj('ThemeService', ['applyTheme']));
     TestDispose.add(view);
@@ -162,22 +165,22 @@ describe('asset.HelperView', () => {
 
   describe('createHelper_', () => {
     it('should create a new helper, update the asset, and navigate to it', async (done: any) => {
-      let helperFactory = Mocks.object('helperFactory');
+      const helperFactory = Mocks.object('helperFactory');
       mockRouteFactoryService.helper.and.returnValue(helperFactory);
 
-      let assetId = 'assetId';
-      let projectId = 'projectId';
-      let existingHelperId = 'existingHelperId';
+      const assetId = 'assetId';
+      const projectId = 'projectId';
+      const existingHelperId = 'existingHelperId';
       spyOn(view['helperIdGenerator_'], 'generate').and.returnValue(existingHelperId);
 
-      let newHelperId = 'newHelperId';
+      const newHelperId = 'newHelperId';
       spyOn(view['helperIdGenerator_'], 'resolveConflict').and.returnValue(newHelperId);
 
-      let mockHelper = Mocks.object('newHelper');
+      const mockHelper = Mocks.object('newHelper');
       spyOn(Helper, 'of').and.returnValue(mockHelper);
 
-      let existingHelper = Mocks.object('otherHelper');
-      let mockAsset = jasmine.createSpyObj(
+      const existingHelper = Mocks.object('otherHelper');
+      const mockAsset = jasmine.createSpyObj(
           'Asset',
           ['getHelper', 'getId', 'getProjectId', 'setHelper']);
       mockAsset.getHelper.and.returnValues(existingHelper, null);
@@ -205,66 +208,66 @@ describe('asset.HelperView', () => {
 
   describe('getAsset_', () => {
     it('should resolve with the asset correctly', async (done: any) => {
-      let asset = Mocks.object('asset');
+      const asset = Mocks.object('asset');
       mockAssetCollection.get.and.returnValue(Promise.resolve(asset));
 
-      let helper = Mocks.object('helper');
+      const helper = Mocks.object('helper');
       mockRouteFactoryService.helper.and.returnValue(helper);
 
-      let assetId = 'assetId';
-      let projectId = 'projectId';
+      const assetId = 'assetId';
+      const projectId = 'projectId';
       mockRouteService.getParams.and.returnValue({assetId, projectId});
 
-      let actualAsset = await view['getAsset_']();
+      const actualAsset = await view['getAsset_']();
       assert(actualAsset).to.equal(asset);
       assert(mockAssetCollection.get).to.haveBeenCalledWith(projectId, assetId);
       assert(mockRouteService.getParams).to.haveBeenCalledWith(helper);
     });
 
     it('should resolve with null if there are no params', async (done: any) => {
-      let asset = Mocks.object('asset');
+      const asset = Mocks.object('asset');
       mockAssetCollection.get.and.returnValue(Promise.resolve(asset));
 
-      let helperRouteFactory = Mocks.object('helperRouteFactory');
+      const helperRouteFactory = Mocks.object('helperRouteFactory');
       mockRouteFactoryService.helper.and.returnValue(helperRouteFactory);
 
       mockRouteService.getParams.and.returnValue(null);
 
-      let actualAsset = await view['getAsset_']();
+      const actualAsset = await view['getAsset_']();
       assert(actualAsset).to.beNull();
     });
   });
 
   describe('getHelper_', () => {
     it('should resolve with the helper correctly', async (done: any) => {
-      let helperRouteFactory = Mocks.object('helperRouteFactory');
+      const helperRouteFactory = Mocks.object('helperRouteFactory');
       mockRouteFactoryService.helper.and.returnValue(helperRouteFactory);
 
-      let helperId = 'helperId';
+      const helperId = 'helperId';
       mockRouteService.getParams.and.returnValue({helperId});
 
-      let helper = Mocks.object('helper');
-      let mockAsset = jasmine.createSpyObj('Asset', ['getHelper']);
+      const helper = Mocks.object('helper');
+      const mockAsset = jasmine.createSpyObj('Asset', ['getHelper']);
       mockAsset.getHelper.and.returnValue(helper);
 
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
 
-      let actualHelper = await view['getHelper_']();
+      const actualHelper = await view['getHelper_']();
       assert(actualHelper).to.equal(helper);
       assert(mockRouteService.getParams).to.haveBeenCalledWith(helperRouteFactory);
       assert(mockAsset.getHelper).to.haveBeenCalledWith(helperId);
     });
 
     it('should resolve with null if the asset cannot be found', async (done: any) => {
-      let helperRouteFactory = Mocks.object('helperRouteFactory');
+      const helperRouteFactory = Mocks.object('helperRouteFactory');
       mockRouteFactoryService.helper.and.returnValue(helperRouteFactory);
 
-      let helperId = 'helperId';
+      const helperId = 'helperId';
       mockRouteService.getParams.and.returnValue({helperId});
 
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(null));
 
-      let actualHelper = await view['getHelper_']();
+      const actualHelper = await view['getHelper_']();
       assert(actualHelper).to.beNull();
     });
 
@@ -275,14 +278,14 @@ describe('asset.HelperView', () => {
 
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(null));
 
-      let actualHelper = await view['getHelper_']();
+      const actualHelper = await view['getHelper_']();
       assert(actualHelper).to.beNull();
     });
   });
 
   describe('onActiveChange_', () => {
     it('should call updateAsset_', async (done: any) => {
-      let asset = Mocks.object('asset');
+      const asset = Mocks.object('asset');
       spyOn(view, 'updateAsset_');
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(asset));
       await view['onActiveChange_'](true);
@@ -290,7 +293,7 @@ describe('asset.HelperView', () => {
     });
 
     it('should redirect to landing page if asset cannot be found', async (done: any) => {
-      let landingRouteFactory = Mocks.object('landingRouteFactory');
+      const landingRouteFactory = Mocks.object('landingRouteFactory');
       mockRouteFactoryService.landing.and.returnValue(landingRouteFactory);
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(null));
       await view['onActiveChange_'](true);
@@ -305,8 +308,8 @@ describe('asset.HelperView', () => {
     });
 
     it('should not throw error if there are no previous deregisters', async (done: any) => {
-      let mockNewDeregister = jasmine.createSpyObj('NewDeregister', ['dispose']);
-      let mockAsset = jasmine.createSpyObj('Asset', ['on']);
+      const mockNewDeregister = jasmine.createSpyObj('NewDeregister', ['dispose']);
+      const mockAsset = jasmine.createSpyObj('Asset', ['on']);
       mockAsset.on.and.returnValue(mockNewDeregister);
 
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
@@ -318,11 +321,11 @@ describe('asset.HelperView', () => {
 
   describe('onArgInputValueChange_', () => {
     it('should update the arg elements with the new args and clear the input element', () => {
-      let arg1 = 'arg1';
-      let arg2 = 'arg2';
-      let newArg1 = 'newArg1';
-      let newArg2 = 'newArg2';
-      let newValue = `${newArg1}, ${newArg2}, ,`;
+      const arg1 = 'arg1';
+      const arg2 = 'arg2';
+      const newArg1 = 'newArg1';
+      const newArg2 = 'newArg2';
+      const newValue = `${newArg1}, ${newArg2}, ,`;
 
       spyOn(view['argElementsHook_'], 'get').and.returnValue([arg1, arg2]);
       spyOn(view['argElementsHook_'], 'set');
@@ -335,9 +338,9 @@ describe('asset.HelperView', () => {
     });
 
     it('should work if there are no existing args', () => {
-      let newArg1 = 'newArg1';
-      let newArg2 = 'newArg2';
-      let newValue = `${newArg1}, ${newArg2}, ,`;
+      const newArg1 = 'newArg1';
+      const newArg2 = 'newArg2';
+      const newValue = `${newArg1}, ${newArg2}, ,`;
 
       spyOn(view['argElementsHook_'], 'get').and.returnValue(null);
       spyOn(view['argElementsHook_'], 'set');
@@ -350,7 +353,7 @@ describe('asset.HelperView', () => {
     });
 
     it('should do nothing if there are no commas in the input element', () => {
-      let newValue = 'newValue';
+      const newValue = 'newValue';
 
       spyOn(view['argElementsHook_'], 'set');
       spyOn(view['argInputHook_'], 'delete');
@@ -374,23 +377,23 @@ describe('asset.HelperView', () => {
 
   describe('onAssetChanged_', () => {
     it('should update the UI elements for asset and helper', async (done: any) => {
-      let currentHelperId = 'currentHelperId';
+      const currentHelperId = 'currentHelperId';
 
-      let mockHelper = jasmine.createSpyObj('Helper', ['getArgs', 'getBody', 'getId', 'getName']);
+      const mockHelper = jasmine.createSpyObj('Helper', ['getArgs', 'getBody', 'getId', 'getName']);
       mockHelper.getId.and.returnValue(currentHelperId);
       spyOn(view, 'getHelper_').and.returnValue(Promise.resolve(mockHelper));
 
-      let helperId1 = 'helperId1';
-      let mockHelper1 = jasmine.createSpyObj('Helper1', ['getId']);
+      const helperId1 = 'helperId1';
+      const mockHelper1 = jasmine.createSpyObj('Helper1', ['getId']);
       mockHelper1.getId.and.returnValue(helperId1);
 
-      let helperId2 = 'helperId2';
-      let mockHelper2 = jasmine.createSpyObj('Helper2', ['getId']);
+      const helperId2 = 'helperId2';
+      const mockHelper2 = jasmine.createSpyObj('Helper2', ['getId']);
       mockHelper2.getId.and.returnValue(helperId2);
 
-      let assetId = 'assetId';
-      let projectId = 'projectId';
-      let mockAsset = jasmine.createSpyObj('Asset', ['getAllHelpers', 'getId', 'getProjectId']);
+      const assetId = 'assetId';
+      const projectId = 'projectId';
+      const mockAsset = jasmine.createSpyObj('Asset', ['getAllHelpers', 'getId', 'getProjectId']);
       mockAsset.getAllHelpers.and.returnValue([mockHelper1, mockHelper2, mockHelper]);
       mockAsset.getId.and.returnValue(assetId);
       mockAsset.getProjectId.and.returnValue(projectId);
@@ -411,17 +414,17 @@ describe('asset.HelperView', () => {
     it('should pick the first helper if there are no helpers selected', async (done: any) => {
       spyOn(view, 'getHelper_').and.returnValue(Promise.resolve(null));
 
-      let helperId1 = 'helperId1';
-      let mockHelper1 = jasmine.createSpyObj('Helper1', ['getId']);
+      const helperId1 = 'helperId1';
+      const mockHelper1 = jasmine.createSpyObj('Helper1', ['getId']);
       mockHelper1.getId.and.returnValue(helperId1);
 
-      let helperId2 = 'helperId2';
-      let mockHelper2 = jasmine.createSpyObj('Helper2', ['getId']);
+      const helperId2 = 'helperId2';
+      const mockHelper2 = jasmine.createSpyObj('Helper2', ['getId']);
       mockHelper2.getId.and.returnValue(helperId2);
 
-      let assetId = 'assetId';
-      let projectId = 'projectId';
-      let mockAsset = jasmine.createSpyObj('Asset', ['getAllHelpers', 'getId', 'getProjectId']);
+      const assetId = 'assetId';
+      const projectId = 'projectId';
+      const mockAsset = jasmine.createSpyObj('Asset', ['getAllHelpers', 'getId', 'getProjectId']);
       mockAsset.getAllHelpers.and.returnValue([mockHelper1, mockHelper2]);
       mockAsset.getId.and.returnValue(assetId);
       mockAsset.getProjectId.and.returnValue(projectId);
@@ -429,7 +432,7 @@ describe('asset.HelperView', () => {
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
       spyOn(view, 'updateHelper_');
 
-      let helperFactoryService = Mocks.object('helperFactoryService');
+      const helperFactoryService = Mocks.object('helperFactoryService');
       mockRouteFactoryService.helper.and.returnValue(helperFactoryService);
 
       await view['onAssetChanged_'](mockAsset);
@@ -442,14 +445,14 @@ describe('asset.HelperView', () => {
     it('should create a new helper if there are no helpers in the asset', async (done: any) => {
       spyOn(view, 'getHelper_').and.returnValue(Promise.resolve(null));
 
-      let mockAsset = jasmine.createSpyObj('Asset', ['getAllHelpers']);
+      const mockAsset = jasmine.createSpyObj('Asset', ['getAllHelpers']);
       mockAsset.getAllHelpers.and.returnValue([]);
 
       spyOn(view, 'createHelper_').and.returnValue(Promise.resolve());
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
       spyOn(view, 'updateHelper_');
 
-      let helperFactoryService = Mocks.object('helperFactoryService');
+      const helperFactoryService = Mocks.object('helperFactoryService');
       mockRouteFactoryService.helper.and.returnValue(helperFactoryService);
 
       await view['onAssetChanged_'](mockAsset);
@@ -460,18 +463,18 @@ describe('asset.HelperView', () => {
 
   describe('onChanges_', () => {
     it('should update the helper and the asset correctly', async (done: any) => {
-      let args = Mocks.object('args');
+      const args = Mocks.object('args');
       spyOn(view['argElementsHook_'], 'get').and.returnValue(args);
 
-      let body = 'body';
+      const body = 'body';
       spyOn(view['bodyInputHook_'], 'get').and.returnValue(body);
 
-      let helperId = 'helperId';
-      let mockHelper = jasmine.createSpyObj('Helper', ['getId', 'setArgs', 'setBody', 'setName']);
+      const helperId = 'helperId';
+      const mockHelper = jasmine.createSpyObj('Helper', ['getId', 'setArgs', 'setBody', 'setName']);
       mockHelper.getId.and.returnValue(helperId);
       spyOn(view, 'getHelper_').and.returnValue(Promise.resolve(mockHelper));
 
-      let mockAsset = jasmine.createSpyObj('Asset', ['setHelper']);
+      const mockAsset = jasmine.createSpyObj('Asset', ['setHelper']);
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
 
       await view['onChanges_']();
@@ -482,10 +485,10 @@ describe('asset.HelperView', () => {
     });
 
     it('should do nothing if the helper cannot be found', async (done: any) => {
-      let args = Mocks.object('args');
+      const args = Mocks.object('args');
       spyOn(view['argElementsHook_'], 'get').and.returnValue(args);
 
-      let body = 'body';
+      const body = 'body';
       spyOn(view['bodyInputHook_'], 'get').and.returnValue(body);
 
       spyOn(view, 'getHelper_').and.returnValue(Promise.resolve(null));
@@ -496,10 +499,10 @@ describe('asset.HelperView', () => {
     });
 
     it('should do nothing if the asset cannot be found', async (done: any) => {
-      let args = Mocks.object('args');
+      const args = Mocks.object('args');
       spyOn(view['argElementsHook_'], 'get').and.returnValue(args);
 
-      let body = 'body';
+      const body = 'body';
       spyOn(view['bodyInputHook_'], 'get').and.returnValue(body);
 
       spyOn(view, 'getHelper_').and.returnValue(Promise.resolve(Mocks.object('helper')));
@@ -512,7 +515,7 @@ describe('asset.HelperView', () => {
     it('should do nothing if args is null', async (done: any) => {
       spyOn(view['argElementsHook_'], 'get').and.returnValue(null);
 
-      let body = 'body';
+      const body = 'body';
       spyOn(view['bodyInputHook_'], 'get').and.returnValue(body);
 
       spyOn(view, 'getHelper_').and.returnValue(Promise.resolve(Mocks.object('helper')));
@@ -523,7 +526,7 @@ describe('asset.HelperView', () => {
     });
 
     it('should do nothing if body is null', async (done: any) => {
-      let args = Mocks.object('args');
+      const args = Mocks.object('args');
       spyOn(view['argElementsHook_'], 'get').and.returnValue(args);
       spyOn(view['bodyInputHook_'], 'get').and.returnValue(null);
 
@@ -537,7 +540,7 @@ describe('asset.HelperView', () => {
 
   describe('onCreateButtonClick_', () => {
     it('should call creaateHelper_ correctly', async (done: any) => {
-      let asset = Mocks.object('asset');
+      const asset = Mocks.object('asset');
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(asset));
       spyOn(view, 'createHelper_');
       await view['onCreateButtonClick_']();
@@ -555,37 +558,40 @@ describe('asset.HelperView', () => {
   describe('onExecuteButtonClick_', () => {
     it('should execute the code, update the console, and scroll to the bottom of the console',
         async (done: any) => {
-          let asset = Mocks.object('asset');
+          const asset = Mocks.object('asset');
           spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(asset));
 
-          let command = 'command';
+          const command = 'command';
           spyOn(view['consoleInputHook_'], 'get').and.returnValue(command);
 
-          let entry1 = Mocks.object('entry1');
-          let entry2 = Mocks.object('entry2');
+          const entry1 = Mocks.object('entry1');
+          const entry2 = Mocks.object('entry2');
           spyOn(view['consoleEntryHook_'], 'get').and.returnValue([entry1, entry2]);
           spyOn(view['consoleEntryHook_'], 'set');
 
-          let result = 'result';
-          let mockCompiledDelegate = jasmine.createSpy('CompiledDelegate');
+          const result = 'result';
+          const mockCompiledDelegate = jasmine.createSpy('CompiledDelegate');
           mockCompiledDelegate.and.returnValue(result);
 
-          let mockCompiler = jasmine.createSpyObj('Compiler', ['compile']);
+          const mockCompiler = jasmine.createSpyObj('Compiler', ['compile']);
           mockCompiler.compile.and.returnValue(mockCompiledDelegate);
           mockTemplateCompilerService.create.and.returnValue(mockCompiler);
 
-          let scrollHeight = 123;
-          let containerEl = Mocks.object('containerEl');
+          const scrollHeight = 123;
+          const containerEl = Mocks.object('containerEl');
           containerEl.scrollHeight = scrollHeight;
 
-          let mockShadowRoot = jasmine.createSpyObj('ShadowRoot', ['querySelector']);
+          const mockShadowRoot = jasmine.createSpyObj('ShadowRoot', ['querySelector']);
           mockShadowRoot.querySelector.and.returnValue(containerEl);
 
-          let element = Mocks.object('element');
+          const element = Mocks.object('element');
           element.shadowRoot = mockShadowRoot;
-          let mockListenable = jasmine.createSpyObj('Listenable', ['getEventTarget']);
+          const mockListenable = jasmine.createSpyObj('Listenable', ['getEventTarget']);
           mockListenable.getEventTarget.and.returnValue(element);
           spyOn(view, 'getElement').and.returnValue(mockListenable);
+
+          const rowData = Mocks.object('rowData');
+          mockSampleDataService.getRowData.and.returnValue(Promise.resolve(rowData));
 
           await view['onExecuteButtonClick_']();
           assert(containerEl.scrollTop).to.equal(scrollHeight);
@@ -596,41 +602,44 @@ describe('asset.HelperView', () => {
             {command, isError: false, result},
           ]);
           assert(mockCompiler.compile).to.haveBeenCalledWith(command);
-          assert(mockTemplateCompilerService.create).to.haveBeenCalledWith(asset);
+          assert(mockTemplateCompilerService.create).to.haveBeenCalledWith(asset, rowData);
         });
 
     it('should handle error thrown during compile step correctly', async (done: any) => {
-      let asset = Mocks.object('asset');
+      const asset = Mocks.object('asset');
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(asset));
 
-      let command = 'command';
+      const command = 'command';
       spyOn(view['consoleInputHook_'], 'get').and.returnValue(command);
 
-      let entry1 = Mocks.object('entry1');
-      let entry2 = Mocks.object('entry2');
+      const entry1 = Mocks.object('entry1');
+      const entry2 = Mocks.object('entry2');
       spyOn(view['consoleEntryHook_'], 'get').and.returnValue([entry1, entry2]);
       spyOn(view['consoleEntryHook_'], 'set');
 
-      let message = 'message';
-      let stack = 'stack';
-      let error = {message, stack};
+      const message = 'message';
+      const stack = 'stack';
+      const error = {message, stack};
       Object.setPrototypeOf(error, Error.prototype);
-      let mockCompiler = jasmine.createSpyObj('Compiler', ['compile']);
+      const mockCompiler = jasmine.createSpyObj('Compiler', ['compile']);
       mockCompiler.compile.and.throwError(error);
       mockTemplateCompilerService.create.and.returnValue(mockCompiler);
 
-      let scrollHeight = 123;
-      let containerEl = Mocks.object('containerEl');
+      const scrollHeight = 123;
+      const containerEl = Mocks.object('containerEl');
       containerEl.scrollHeight = scrollHeight;
 
-      let mockShadowRoot = jasmine.createSpyObj('ShadowRoot', ['querySelector']);
+      const mockShadowRoot = jasmine.createSpyObj('ShadowRoot', ['querySelector']);
       mockShadowRoot.querySelector.and.returnValue(containerEl);
 
-      let element = Mocks.object('element');
+      const element = Mocks.object('element');
       element.shadowRoot = mockShadowRoot;
-      let mockListenable = jasmine.createSpyObj('Listenable', ['getEventTarget']);
+      const mockListenable = jasmine.createSpyObj('Listenable', ['getEventTarget']);
       mockListenable.getEventTarget.and.returnValue(element);
       spyOn(view, 'getElement').and.returnValue(mockListenable);
+
+      const rowData = Mocks.object('rowData');
+      mockSampleDataService.getRowData.and.returnValue(Promise.resolve(rowData));
 
       await view['onExecuteButtonClick_']();
       assert(containerEl.scrollTop).to.equal(scrollHeight);
@@ -641,30 +650,33 @@ describe('asset.HelperView', () => {
         {command, isError: true, result: `${message}\n\n${stack}`},
       ]);
       assert(mockCompiler.compile).to.haveBeenCalledWith(command);
-      assert(mockTemplateCompilerService.create).to.haveBeenCalledWith(asset);
+      assert(mockTemplateCompilerService.create).to.haveBeenCalledWith(asset, rowData);
     });
 
     it('should not scroll to the bottom if the element cannot be found', async (done: any) => {
-      let asset = Mocks.object('asset');
+      const asset = Mocks.object('asset');
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(asset));
 
-      let command = 'command';
+      const command = 'command';
       spyOn(view['consoleInputHook_'], 'get').and.returnValue(command);
 
-      let entry1 = Mocks.object('entry1');
-      let entry2 = Mocks.object('entry2');
+      const entry1 = Mocks.object('entry1');
+      const entry2 = Mocks.object('entry2');
       spyOn(view['consoleEntryHook_'], 'get').and.returnValue([entry1, entry2]);
       spyOn(view['consoleEntryHook_'], 'set');
 
-      let message = 'message';
-      let stack = 'stack';
-      let error = {message, stack};
+      const message = 'message';
+      const stack = 'stack';
+      const error = {message, stack};
       Object.setPrototypeOf(error, Error.prototype);
-      let mockCompiler = jasmine.createSpyObj('Compiler', ['compile']);
+      const mockCompiler = jasmine.createSpyObj('Compiler', ['compile']);
       mockCompiler.compile.and.throwError(error);
       mockTemplateCompilerService.create.and.returnValue(mockCompiler);
 
       spyOn(view, 'getElement').and.returnValue(null);
+
+      const rowData = Mocks.object('rowData');
+      mockSampleDataService.getRowData.and.returnValue(Promise.resolve(rowData));
 
       await view['onExecuteButtonClick_']();
       assert(view['consoleEntryHook_'].set).to.haveBeenCalledWith([
@@ -673,32 +685,53 @@ describe('asset.HelperView', () => {
         {command, isError: true, result: `${message}\n\n${stack}`},
       ]);
       assert(mockCompiler.compile).to.haveBeenCalledWith(command);
-      assert(mockTemplateCompilerService.create).to.haveBeenCalledWith(asset);
+      assert(mockTemplateCompilerService.create).to.haveBeenCalledWith(asset, rowData);
     });
 
     it('should do nothing if the compiler cannot be created', async (done: any) => {
-      let asset = Mocks.object('asset');
+      const asset = Mocks.object('asset');
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(asset));
 
-      let command = 'command';
+      const command = 'command';
       spyOn(view['consoleInputHook_'], 'get').and.returnValue(command);
       spyOn(view['consoleEntryHook_'], 'set');
+
+      const rowData = Mocks.object('rowData');
+      mockSampleDataService.getRowData.and.returnValue(Promise.resolve(rowData));
 
       mockTemplateCompilerService.create.and.returnValue(null);
 
       await view['onExecuteButtonClick_']();
       assert(view['consoleEntryHook_'].set).toNot.haveBeenCalled();
-      assert(mockTemplateCompilerService.create).to.haveBeenCalledWith(asset);
+      assert(mockTemplateCompilerService.create).to.haveBeenCalledWith(asset, rowData);
     });
 
     it('should do nothing if asset cannot be found', async (done: any) => {
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(null));
 
-      let command = 'command';
+      const command = 'command';
       spyOn(view['consoleInputHook_'], 'get').and.returnValue(command);
       spyOn(view['consoleEntryHook_'], 'set');
-
       mockTemplateCompilerService.create.and.returnValue(null);
+
+      const rowData = Mocks.object('rowData');
+      mockSampleDataService.getRowData.and.returnValue(Promise.resolve(rowData));
+
+      await view['onExecuteButtonClick_']();
+      assert(view['consoleEntryHook_'].set).toNot.haveBeenCalled();
+      assert(mockTemplateCompilerService.create).toNot.haveBeenCalled();
+    });
+
+    it('should do nothing if the row data cannot be found', async (done: any) => {
+      const asset = Mocks.object('asset');
+      spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(asset));
+
+      const command = 'command';
+      spyOn(view['consoleInputHook_'], 'get').and.returnValue(command);
+      spyOn(view['consoleEntryHook_'], 'set');
+      mockTemplateCompilerService.create.and.returnValue(null);
+
+      mockSampleDataService.getRowData.and.returnValue(Promise.resolve(null));
 
       await view['onExecuteButtonClick_']();
       assert(view['consoleEntryHook_'].set).toNot.haveBeenCalled();
@@ -719,10 +752,10 @@ describe('asset.HelperView', () => {
 
   describe('onHelperChanged_', () => {
     it('should update the name, argElements, and body input', () => {
-      let name = 'name';
-      let args = Mocks.object('args');
-      let body = 'body';
-      let mockHelper = jasmine.createSpyObj('Helper', ['getArgs', 'getBody', 'getName']);
+      const name = 'name';
+      const args = Mocks.object('args');
+      const body = 'body';
+      const mockHelper = jasmine.createSpyObj('Helper', ['getArgs', 'getBody', 'getName']);
       mockHelper.getArgs.and.returnValue(args);
       mockHelper.getBody.and.returnValue(body);
       mockHelper.getName.and.returnValue(name);
@@ -744,7 +777,7 @@ describe('asset.HelperView', () => {
       spyOn(view, 'onActiveChange_');
       mockRouteService.getParams.and.returnValue({});
 
-      let helperFactory = Mocks.object('helperFactory');
+      const helperFactory = Mocks.object('helperFactory');
       mockRouteFactoryService.helper.and.returnValue(helperFactory);
 
       view['onRouteChanged_']();
@@ -757,7 +790,7 @@ describe('asset.HelperView', () => {
       spyOn(view, 'onActiveChange_');
       mockRouteService.getParams.and.returnValue(null);
 
-      let helperFactory = Mocks.object('helperFactory');
+      const helperFactory = Mocks.object('helperFactory');
       mockRouteFactoryService.helper.and.returnValue(helperFactory);
 
       view['onRouteChanged_']();
@@ -769,14 +802,14 @@ describe('asset.HelperView', () => {
 
   describe('updateAsset_', () => {
     it('should dispose the previous deregister and listen to changed event', () => {
-      let mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
+      const mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
       view['assetUpdateDeregister_'] = mockDeregister;
 
-      let mockNewDeregister = jasmine.createSpyObj('NewDeregister', ['dispose']);
-      let mockAsset = jasmine.createSpyObj('Asset', ['on']);
+      const mockNewDeregister = jasmine.createSpyObj('NewDeregister', ['dispose']);
+      const mockAsset = jasmine.createSpyObj('Asset', ['on']);
       mockAsset.on.and.returnValue(mockNewDeregister);
 
-      let assetChangedSpy = spyOn(view, 'onAssetChanged_');
+      const assetChangedSpy = spyOn(view, 'onAssetChanged_');
 
       view['updateAsset_'](mockAsset);
       assert(mockAsset.on).to
@@ -793,8 +826,8 @@ describe('asset.HelperView', () => {
     it('should not throw error if there are no previous deregister functions', () => {
       view['assetUpdateDeregister_'] = null;
 
-      let mockNewDeregister = jasmine.createSpyObj('NewDeregister', ['dispose']);
-      let mockAsset = jasmine.createSpyObj('Asset', ['on']);
+      const mockNewDeregister = jasmine.createSpyObj('NewDeregister', ['dispose']);
+      const mockAsset = jasmine.createSpyObj('Asset', ['on']);
       mockAsset.on.and.returnValue(mockNewDeregister);
 
       spyOn(view, 'onAssetChanged_');
@@ -811,14 +844,14 @@ describe('asset.HelperView', () => {
 
   describe('updateHelper_', () => {
     it('should dispose the previous deregister and listen to changed events to helper', () => {
-      let mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
+      const mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
       view['helperUpdateDeregister_'] = mockDeregister;
 
-      let mockNewDeregister = jasmine.createSpyObj('NewDeregister', ['dispose']);
-      let mockHelper = jasmine.createSpyObj('Helper', ['on']);
+      const mockNewDeregister = jasmine.createSpyObj('NewDeregister', ['dispose']);
+      const mockHelper = jasmine.createSpyObj('Helper', ['on']);
       mockHelper.on.and.returnValue(mockNewDeregister);
 
-      let helperChangedSpy = spyOn(view, 'onHelperChanged_');
+      const helperChangedSpy = spyOn(view, 'onHelperChanged_');
 
       view['updateHelper_'](mockHelper);
       assert(mockHelper.on).to
@@ -835,8 +868,8 @@ describe('asset.HelperView', () => {
     it('should not throw errors if there are no previous deregisters', () => {
       view['helperUpdateDeregister_'] = null;
 
-      let mockNewDeregister = jasmine.createSpyObj('NewDeregister', ['dispose']);
-      let mockHelper = jasmine.createSpyObj('Helper', ['on']);
+      const mockNewDeregister = jasmine.createSpyObj('NewDeregister', ['dispose']);
+      const mockHelper = jasmine.createSpyObj('Helper', ['on']);
       mockHelper.on.and.returnValue(mockNewDeregister);
 
       spyOn(view, 'onHelperChanged_');
@@ -853,10 +886,11 @@ describe('asset.HelperView', () => {
 
   describe('disposeInternal', () => {
     it('should dispose the asset update deregister and helper update deregister', () => {
-      let mockAssetUpdateDeregister = jasmine.createSpyObj('AssetUpdateDeregister', ['dispose']);
+      const mockAssetUpdateDeregister = jasmine.createSpyObj('AssetUpdateDeregister', ['dispose']);
       view['assetUpdateDeregister_'] = mockAssetUpdateDeregister;
 
-      let mockHelperUpdateDeregister = jasmine.createSpyObj('HelperUpdateDeregister', ['dispose']);
+      const mockHelperUpdateDeregister =
+          jasmine.createSpyObj('HelperUpdateDeregister', ['dispose']);
       view['helperUpdateDeregister_'] = mockHelperUpdateDeregister;
 
       view.disposeInternal();
@@ -873,16 +907,16 @@ describe('asset.HelperView', () => {
 
   describe('onArgClick', () => {
     it('should remove the argument and update the arg elements', () => {
-      let arg1 = 'arg1';
-      let arg2 = 'arg2';
-      let arg3 = 'arg3';
+      const arg1 = 'arg1';
+      const arg2 = 'arg2';
+      const arg3 = 'arg3';
       spyOn(view['argElementsHook_'], 'get').and.returnValue([arg1, arg2, arg3]);
       spyOn(view['argElementsHook_'], 'set');
 
-      let child1 = document.createElement('child1');
-      let child2 = document.createElement('child2');
-      let child3 = document.createElement('child3');
-      let rootEl = document.createElement('root');
+      const child1 = document.createElement('child1');
+      const child2 = document.createElement('child2');
+      const child3 = document.createElement('child3');
+      const rootEl = document.createElement('root');
       rootEl.appendChild(child1);
       rootEl.appendChild(child2);
       rootEl.appendChild(child3);
@@ -912,13 +946,13 @@ describe('asset.HelperView', () => {
 
   describe('onCreated', () => {
     it('should listen to route service changed event', () => {
-      let mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
+      const mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
       mockRouteService.on.and.returnValue(mockDeregister);
 
       spyOn(view, 'addDisposable').and.callThrough();
       spyOn(view, 'onRouteChanged_');
 
-      let element = Mocks.object('element');
+      const element = Mocks.object('element');
       view.onCreated(element);
       assert(view.addDisposable).to.haveBeenCalledWith(mockDeregister);
       assert(mockRouteService.on).to

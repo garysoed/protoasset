@@ -34,32 +34,18 @@ describe('data.TemplateCompilerService', () => {
       mockHelper2.getName.and.returnValue(name2);
 
       let dataValue = Mocks.object('dataValue');
-      let mockData = jasmine.createSpyObj('Data', ['getData']);
-      mockData.getData.and.returnValue(Promise.resolve([dataValue]));
 
-      let mockAsset = jasmine.createSpyObj('Asset', ['getData', 'getAllHelpers']);
-      mockAsset.getData.and.returnValue(mockData);
+      let mockAsset = jasmine.createSpyObj('Asset', ['getAllHelpers']);
       mockAsset.getAllHelpers.and.returnValue([mockHelper1, mockHelper2]);
 
       let compiler = Mocks.object('compiler');
       spyOn(TemplateCompiler, 'of').and.returnValue(compiler);
 
-      let actualCompiler = await service.create(mockAsset);
+      let actualCompiler = await service.create(mockAsset, dataValue);
       assert(actualCompiler).to.equal(compiler);
       assert(TemplateCompiler.of).to.haveBeenCalledWith(dataValue, mockHandlebarsInstance);
       assert(mockHandlebarsInstance.registerHelper).to.haveBeenCalledWith(name1, function1);
       assert(mockHandlebarsInstance.registerHelper).to.haveBeenCalledWith(name2, function2);
-    });
-
-    it('should resolve with null if data cannot be found', async (done: any) => {
-      let mockHandlebarsInstance = jasmine.createSpyObj('HandlebarsInstance', ['registerHelper']);
-      mockHandlebars.create.and.returnValue(mockHandlebarsInstance);
-
-      let mockAsset = jasmine.createSpyObj('Asset', ['getData', 'getHelpers']);
-      mockAsset.getData.and.returnValue(null);
-
-      let actualCompiler = await service.create(mockAsset);
-      assert(actualCompiler).to.equal(null);
     });
   });
 });

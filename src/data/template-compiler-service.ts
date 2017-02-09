@@ -10,7 +10,7 @@ import {TemplateCompiler} from './template-compiler';
 /**
  * Creates TemplateCompilers from asset.
  */
-@bind('pa.data.TemplateCompilerService')
+@bind('pa.common.TemplateCompilerService')
 export class TemplateCompilerService {
   private readonly handlebars_: typeof Handlebars;
   private dataRow_: number;
@@ -27,12 +27,7 @@ export class TemplateCompilerService {
    * @return Promise that will be resolved with the newly created TemplateCompiler, or null if it
    *    cannot be created.
    */
-  async create(asset: Asset): Promise<TemplateCompiler | null> {
-    let data = asset.getData();
-    if (data === null) {
-      return Promise.resolve(null);
-    }
-
+  create(asset: Asset, data: string[]): TemplateCompiler {
     let handlebars = this.handlebars_.create();
     Arrays
         .of(asset.getAllHelpers())
@@ -42,7 +37,6 @@ export class TemplateCompilerService {
     handlebars.registerHelper('toLowerCase', function(options: any): string {
       return Cases.of(options.fn(this)).toLowerCase();
     });
-    let dataValue = await data.getData();
-    return TemplateCompiler.of(dataValue[this.dataRow_], handlebars);
+    return TemplateCompiler.of(data, handlebars);
   }
 }

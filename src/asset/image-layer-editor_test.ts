@@ -12,14 +12,17 @@ import {ImageLayerEditor} from './image-layer-editor';
 
 describe('namespace.ImageLayerEditor', () => {
   let mockAssetCollection;
+  let mockSampleDataService;
   let mockTemplateCompilerService;
   let editor: ImageLayerEditor;
 
   beforeEach(() => {
     mockAssetCollection = jasmine.createSpyObj('AssetCollection', ['get', 'update']);
+    mockSampleDataService = jasmine.createSpyObj('SampleDataService', ['getRowData']);
     mockTemplateCompilerService = jasmine.createSpyObj('TemplateCompilerService', ['create']);
     editor = new ImageLayerEditor(
         mockAssetCollection,
+        mockSampleDataService,
         mockTemplateCompilerService,
         Mocks.object('ThemeService'));
     TestDispose.add(editor);
@@ -223,10 +226,13 @@ describe('namespace.ImageLayerEditor', () => {
       const asset = Mocks.object('asset');
       spyOn(editor, 'getAsset_').and.returnValue(Promise.resolve(asset));
 
+      const rowData = Mocks.object('rowData');
+      mockSampleDataService.getRowData.and.returnValue(Promise.resolve(rowData));
+
       await editor['onFieldChange_']();
       assert(style.backgroundImage).to.equal(`url(${renderedImageUrl})`);
       assert(mockCompiler.compile).to.haveBeenCalledWith(imageUrl);
-      assert(mockTemplateCompilerService.create).to.haveBeenCalledWith(asset);
+      assert(mockTemplateCompilerService.create).to.haveBeenCalledWith(asset, rowData);
     });
 
     it('should skip updating the image preview if the style element cannot be found',
@@ -239,11 +245,25 @@ describe('namespace.ImageLayerEditor', () => {
           const asset = Mocks.object('asset');
           spyOn(editor, 'getAsset_').and.returnValue(Promise.resolve(asset));
 
+          const rowData = Mocks.object('rowData');
+          mockSampleDataService.getRowData.and.returnValue(Promise.resolve(rowData));
+
           await editor['onFieldChange_']();
         });
 
     it('should not reject if the asset cannot be found', async (done: any) => {
       spyOn(editor, 'getAsset_').and.returnValue(Promise.resolve(null));
+
+      const rowData = Mocks.object('rowData');
+      mockSampleDataService.getRowData.and.returnValue(Promise.resolve(rowData));
+
+      await editor['onFieldChange_']();
+    });
+
+    it('should not reject if the row data cannot be found', async (done: any) => {
+      const asset = Mocks.object('asset');
+      spyOn(editor, 'getAsset_').and.returnValue(Promise.resolve(asset));
+      mockSampleDataService.getRowData.and.returnValue(Promise.resolve(null));
 
       await editor['onFieldChange_']();
     });
