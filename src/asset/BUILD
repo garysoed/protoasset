@@ -6,6 +6,7 @@ proto_asset(
     deps = [
         "@gs_tools//src",
         "@gs_ui//src",
+        "//src/common",
         "//src/data",
         "//src/routing",
     ])

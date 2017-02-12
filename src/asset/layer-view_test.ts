@@ -10,18 +10,13 @@ import {DataEvents} from '../data/data-events';
 import {HtmlLayer} from '../data/html-layer';
 import {LayerType} from '../data/layer-type';
 
-import {layerItemDataSetter, layerItemGenerator, LayerView} from './layer-view';
+import {
+  layerItemDataSetter,
+  layerItemGenerator,
+  layerPreviewDataSetter,
+  layerPreviewGenerator,
+  LayerView} from './layer-view';
 
-
-describe('layerItemGenerator', () => {
-  it('should generate the correct element', () => {
-    const element = Mocks.object('element');
-    const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
-    mockDocument.createElement.and.returnValue(element);
-    assert(layerItemGenerator(mockDocument)).to.equal(element);
-    assert(mockDocument.createElement).to.haveBeenCalledWith('pa-asset-layer-item');
-  });
-});
 
 describe('layerItemDataSetter', () => {
   it('should set the correct attributes', () => {
@@ -33,6 +28,36 @@ describe('layerItemDataSetter', () => {
     assert(mockElement.setAttribute).to.haveBeenCalledWith('asset-id', assetId);
     assert(mockElement.setAttribute).to.haveBeenCalledWith('layer-id', layerId);
     assert(mockElement.setAttribute).to.haveBeenCalledWith('project-id', projectId);
+  });
+});
+
+describe('layerItemGenerator', () => {
+  it('should generate the correct element', () => {
+    const element = Mocks.object('element');
+    const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
+    mockDocument.createElement.and.returnValue(element);
+    assert(layerItemGenerator(mockDocument)).to.equal(element);
+    assert(mockDocument.createElement).to.haveBeenCalledWith('pa-asset-layer-item');
+  });
+});
+
+describe('layerPreviewDataSetter', () => {
+  it('should set the attributes correctly', () => {
+    const layerId = 'layerId';
+    const mockElement = jasmine.createSpyObj('Element', ['setAttribute']);
+    layerPreviewDataSetter({isSelected: true, layerId}, mockElement);
+    assert(mockElement.setAttribute).to.haveBeenCalledWith('is-selected', 'true');
+    assert(mockElement.setAttribute).to.haveBeenCalledWith('layer-id', layerId);
+  });
+});
+
+describe('layerPreviewGenerator', () => {
+  it('should create the element correctly', () => {
+    const element = Mocks.object('element');
+    const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
+    mockDocument.createElement.and.returnValue(element);
+    assert(layerPreviewGenerator(mockDocument)).to.equal(element);
+    assert(mockDocument.createElement).to.haveBeenCalledWith('pa-asset-layer-preview');
   });
 });
 
@@ -59,56 +84,47 @@ describe('asset.LayerView', () => {
 
   describe('createLayer_', () => {
     it('should create the correct layer and update it to the asset', async (done: any) => {
-      let layerRouteFactory = Mocks.object('layerRouteFactory');
+      const layerRouteFactory = Mocks.object('layerRouteFactory');
       mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
 
-      let projectId = 'projectId';
-      let assetId = 'assetId';
-      mockRouteService.getParams.and.returnValue({assetId, projectId});
-
-      let oldId = 'oldId';
-      let mockOldLayer = jasmine.createSpyObj('OldLayer', ['getId']);
+      const oldId = 'oldId';
+      const mockOldLayer = jasmine.createSpyObj('OldLayer', ['getId']);
       mockOldLayer.getId.and.returnValue(oldId);
 
-      let mockAsset = jasmine.createSpyObj('Asset', ['getLayers', 'setLayers']);
+      const mockAsset = jasmine.createSpyObj('Asset', ['getLayers', 'setLayers']);
       mockAsset.getLayers.and.returnValue([mockOldLayer]);
       mockAssetCollection.get.and.returnValue(Promise.resolve(mockAsset));
+      spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
 
-      let id = 'id';
+      const id = 'id';
       spyOn(view['layerIdGenerator_'], 'generate').and.returnValue(oldId);
       spyOn(view['layerIdGenerator_'], 'resolveConflict').and.returnValue(id);
 
-      let selectLayerSpy = spyOn(view, 'selectLayer_');
-      let layerType = LayerType.HTML;
+      const selectLayerSpy = spyOn(view, 'selectLayer_');
+      const layerType = LayerType.HTML;
 
       await view['createLayer_'](layerType);
       assert(mockAssetCollection.update).to.haveBeenCalledWith(mockAsset);
       assert(mockOverlayService.hideOverlay).to.haveBeenCalledWith();
 
       assert(view['selectLayer_']).to.haveBeenCalledWith(Matchers.any(HtmlLayer));
-      let layer: HtmlLayer = selectLayerSpy.calls.argsFor(0)[0];
+      const layer: HtmlLayer = selectLayerSpy.calls.argsFor(0)[0];
       TestDispose.add(layer);
 
       assert(mockAsset.setLayers).to.haveBeenCalledWith([layer, mockOldLayer]);
       assert(layer.getName()).to.equal(Matchers.stringMatching(/New html layer/));
       assert(layer.getId()).to.equal(id);
       assert(view['layerIdGenerator_'].resolveConflict).to.haveBeenCalledWith(oldId);
-
-      assert(mockAssetCollection.get).to.haveBeenCalledWith(projectId, assetId);
-      assert(mockRouteService.getParams).to.haveBeenCalledWith(layerRouteFactory);
     });
 
     it('should reject the promise if the layer type is not supported', async (done: any) => {
-      let layerRouteFactory = Mocks.object('layerRouteFactory');
+      const layerRouteFactory = Mocks.object('layerRouteFactory');
       mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
 
-      let projectId = 'projectId';
-      let assetId = 'assetId';
-      mockRouteService.getParams.and.returnValue({assetId, projectId});
-
-      let mockAsset = jasmine.createSpyObj('Asset', ['getLayers', 'setLayers']);
+      const mockAsset = jasmine.createSpyObj('Asset', ['getLayers', 'setLayers']);
       mockAsset.getLayers.and.returnValue([]);
       mockAssetCollection.get.and.returnValue(Promise.resolve(mockAsset));
+      spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
 
       spyOn(view['layerIdGenerator_'], 'generate').and.returnValue('id');
 
@@ -120,27 +136,60 @@ describe('asset.LayerView', () => {
     });
 
     it('should do nothing if the asset cannot be found', async (done: any) => {
-      let layerRouteFactory = Mocks.object('layerRouteFactory');
+      const layerRouteFactory = Mocks.object('layerRouteFactory');
       mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
-
-      let projectId = 'projectId';
-      let assetId = 'assetId';
-      mockRouteService.getParams.and.returnValue({assetId, projectId});
-
-      mockAssetCollection.get.and.returnValue(Promise.resolve(null));
+      spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(null));
 
       await view['createLayer_'](LayerType.HTML);
       assert(mockAssetCollection.update).toNot.haveBeenCalled();
     });
+  });
 
-    it('should do nothing if the params cannot be determined', async (done: any) => {
-      let layerRouteFactory = Mocks.object('layerRouteFactory');
+  describe('disposeInternal', () => {
+    it('should dispose the deregisters', () => {
+      const mockAssetChangeDeregister = jasmine.createSpyObj('AssetChangeDeregister', ['dispose']);
+      const mockLayerChangeDeregister = jasmine.createSpyObj('LayerChangeDeregister', ['dispose']);
+      view['assetChangedDeregister_'] = mockAssetChangeDeregister;
+      view['layerChangedDeregister_'] = mockLayerChangeDeregister;
+
+      view.disposeInternal();
+
+      assert(mockAssetChangeDeregister.dispose).to.haveBeenCalledWith();
+      assert(mockLayerChangeDeregister.dispose).to.haveBeenCalledWith();
+    });
+
+    it('should not throw error if there are no deregisters', () => {
+      assert(() => {
+        view.disposeInternal();
+      }).toNot.throw();
+    });
+  });
+
+  describe('getAsset_', () => {
+    it('should resolve with the correct asset', async (done: any) => {
+      const layerRouteFactory = Mocks.object('layerRouteFactory');
+      mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
+
+      const projectId = 'projectId';
+      const assetId = 'assetId';
+      mockRouteService.getParams.and.returnValue({assetId, projectId});
+
+      const asset = Mocks.object('asset');
+      mockAssetCollection.get.and.returnValue(Promise.resolve(asset));
+
+      assert(await view['getAsset_']()).to.equal(asset);
+      assert(mockAssetCollection.get).to.haveBeenCalledWith(projectId, assetId);
+      assert(mockRouteService.getParams).to.haveBeenCalledWith(layerRouteFactory);
+    });
+
+    it('should resolve with null if the params cannot be found', async (done: any) => {
+      const layerRouteFactory = Mocks.object('layerRouteFactory');
       mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
 
       mockRouteService.getParams.and.returnValue(null);
 
-      await view['createLayer_'](LayerType.HTML);
-      assert(mockAssetCollection.update).toNot.haveBeenCalled();
+      assert(await view['getAsset_']()).to.beNull();
+      assert(mockRouteService.getParams).to.haveBeenCalledWith(layerRouteFactory);
     });
   });
 
@@ -178,6 +227,7 @@ describe('asset.LayerView', () => {
       spyOn(view.textEditorAssetIdHook_, 'set');
       spyOn(view.textEditorProjectIdHook_, 'set');
       spyOn(view.layersChildElementHook_, 'set');
+      spyOn(view, 'updateLayerPreviews_');
 
       await view['onAssetChanged_'](mockAsset);
       assert(view.imageEditorDataRowHook_.set).to.haveBeenCalledWith(0);
@@ -192,12 +242,13 @@ describe('asset.LayerView', () => {
         {assetId: id, layerId: layerId2, projectId},
         {assetId: id, layerId: layerId3, projectId},
       ]);
+      assert(view['updateLayerPreviews_']).to.haveBeenCalledWith();
     });
 
     it('should not set the data row if the data length is 0', async (done: any) => {
-      let mockDataSource = jasmine.createSpyObj('DataSource', ['getData']);
+      const mockDataSource = jasmine.createSpyObj('DataSource', ['getData']);
       mockDataSource.getData.and.returnValue(Promise.resolve([]));
-      let mockAsset = jasmine.createSpyObj('Asset', ['getData', 'getId', 'getProjectId']);
+      const mockAsset = jasmine.createSpyObj('Asset', ['getData', 'getId', 'getProjectId']);
       mockAsset.getData.and.returnValue(mockDataSource);
       mockAsset.getId.and.returnValue('id');
       mockAsset.getProjectId.and.returnValue('projectId');
@@ -215,7 +266,7 @@ describe('asset.LayerView', () => {
     });
 
     it('should not set the data row if there are no data source', async (done: any) => {
-      let mockAsset = jasmine.createSpyObj('Asset', ['getData', 'getId', 'getProjectId']);
+      const mockAsset = jasmine.createSpyObj('Asset', ['getData', 'getId', 'getProjectId']);
       mockAsset.getData.and.returnValue(null);
       mockAsset.getId.and.returnValue('id');
       mockAsset.getProjectId.and.returnValue('projectId');
@@ -233,12 +284,24 @@ describe('asset.LayerView', () => {
     });
   });
 
+  describe('onCreated', () => {
+    it('should listen to route changed event', () => {
+      const element = Mocks.object('element');
+      mockRouteService.on.and.returnValue({dispose(): void {}});
+      spyOn(view, 'onRouteChanged_');
+      view.onCreated(element);
+      assert(view['onRouteChanged_']).to.haveBeenCalledWith();
+      assert(mockRouteService.on).to
+          .haveBeenCalledWith(RouteServiceEvents.CHANGED, view['onRouteChanged_'], view);
+    });
+  });
+
   describe('onLayerChanged_', () => {
     it('should update the UI correctly', () => {
-      let name = 'name';
-      let type = Mocks.object('type');
-      let id = 'id';
-      let mockLayer = jasmine.createSpyObj('Layer', ['getId', 'getName', 'getType']);
+      const name = 'name';
+      const type = Mocks.object('type');
+      const id = 'id';
+      const mockLayer = jasmine.createSpyObj('Layer', ['getId', 'getName', 'getType']);
       mockLayer.getId.and.returnValue(id);
       mockLayer.getName.and.returnValue(name);
       mockLayer.getType.and.returnValue(type);
@@ -262,24 +325,24 @@ describe('asset.LayerView', () => {
     it('should select the correct layer, listen to the new asset, and update the UI base on the'
         + ' asset',
         async (done: any) => {
-          let mockOldDeregister = jasmine.createSpyObj('OldDeregister', ['dispose']);
+          const mockOldDeregister = jasmine.createSpyObj('OldDeregister', ['dispose']);
           view['assetChangedDeregister_'] = mockOldDeregister;
 
-          let layerRouteFactory = Mocks.object('layerRouteFactory');
+          const layerRouteFactory = Mocks.object('layerRouteFactory');
           mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
 
-          let projectId = 'projectId';
-          let assetId = 'assetId';
+          const projectId = 'projectId';
+          const assetId = 'assetId';
           mockRouteService.getParams.and.returnValue({assetId, projectId});
 
-          let layer = Mocks.object('layer');
-          let mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
-          let mockAsset = jasmine.createSpyObj('Asset', ['getLayers', 'on']);
+          const layer = Mocks.object('layer');
+          const mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
+          const mockAsset = jasmine.createSpyObj('Asset', ['getLayers', 'on']);
           mockAsset.getLayers.and.returnValue([layer]);
           mockAsset.on.and.returnValue(mockDeregister);
           mockAssetCollection.get.and.returnValue(Promise.resolve(mockAsset));
 
-          let assetChangedSpy = spyOn(view, 'onAssetChanged_');
+          const assetChangedSpy = spyOn(view, 'onAssetChanged_');
           spyOn(view, 'selectLayer_');
 
           await view['onRouteChanged_']();
@@ -303,23 +366,23 @@ describe('asset.LayerView', () => {
         });
 
     it('should create a new layer if there are no layers to select', async (done: any) => {
-      let mockOldDeregister = jasmine.createSpyObj('OldDeregister', ['dispose']);
+      const mockOldDeregister = jasmine.createSpyObj('OldDeregister', ['dispose']);
       view['assetChangedDeregister_'] = mockOldDeregister;
 
-      let layerRouteFactory = Mocks.object('layerRouteFactory');
+      const layerRouteFactory = Mocks.object('layerRouteFactory');
       mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
 
-      let projectId = 'projectId';
-      let assetId = 'assetId';
+      const projectId = 'projectId';
+      const assetId = 'assetId';
       mockRouteService.getParams.and.returnValue({assetId, projectId});
 
-      let mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
-      let mockAsset = jasmine.createSpyObj('Asset', ['getLayers', 'on']);
+      const mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
+      const mockAsset = jasmine.createSpyObj('Asset', ['getLayers', 'on']);
       mockAsset.getLayers.and.returnValue([]);
       mockAsset.on.and.returnValue(mockDeregister);
       mockAssetCollection.get.and.returnValue(Promise.resolve(mockAsset));
 
-      let assetChangedSpy = spyOn(view, 'onAssetChanged_');
+      const assetChangedSpy = spyOn(view, 'onAssetChanged_');
       spyOn(view, 'selectLayer_');
       spyOn(view, 'createLayer_').and.returnValue(Promise.resolve());
 
@@ -345,14 +408,14 @@ describe('asset.LayerView', () => {
     });
 
     it('should do nothing if the asset cannot be found', async (done: any) => {
-      let mockOldDeregister = jasmine.createSpyObj('OldDeregister', ['dispose']);
+      const mockOldDeregister = jasmine.createSpyObj('OldDeregister', ['dispose']);
       view['assetChangedDeregister_'] = mockOldDeregister;
 
-      let layerRouteFactory = Mocks.object('layerRouteFactory');
+      const layerRouteFactory = Mocks.object('layerRouteFactory');
       mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
 
-      let projectId = 'projectId';
-      let assetId = 'assetId';
+      const projectId = 'projectId';
+      const assetId = 'assetId';
       mockRouteService.getParams.and.returnValue({assetId, projectId});
 
       mockAssetCollection.get.and.returnValue(Promise.resolve(null));
@@ -367,10 +430,10 @@ describe('asset.LayerView', () => {
     });
 
     it('should do nothing if params cannot be determined', async (done: any) => {
-      let mockOldDeregister = jasmine.createSpyObj('OldDeregister', ['dispose']);
+      const mockOldDeregister = jasmine.createSpyObj('OldDeregister', ['dispose']);
       view['assetChangedDeregister_'] = mockOldDeregister;
 
-      let layerRouteFactory = Mocks.object('layerRouteFactory');
+      const layerRouteFactory = Mocks.object('layerRouteFactory');
       mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
 
       mockRouteService.getParams.and.returnValue(null);
@@ -387,7 +450,7 @@ describe('asset.LayerView', () => {
         async (done: any) => {
           view['assetChangedDeregister_'] = null;
 
-          let layerRouteFactory = Mocks.object('layerRouteFactory');
+          const layerRouteFactory = Mocks.object('layerRouteFactory');
           mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
 
           mockRouteService.getParams.and.returnValue(null);
@@ -400,14 +463,14 @@ describe('asset.LayerView', () => {
 
   describe('selectLayer_', () => {
     it('should listen to layer changed event and deregister the previous one', () => {
-      let mockOldDeregister = jasmine.createSpyObj('OldDeregister', ['dispose']);
+      const mockOldDeregister = jasmine.createSpyObj('OldDeregister', ['dispose']);
       view['layerChangedDeregister_'] = mockOldDeregister;
 
-      let mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
-      let mockLayer = jasmine.createSpyObj('Layer', ['on']);
+      const mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
+      const mockLayer = jasmine.createSpyObj('Layer', ['on']);
       mockLayer.on.and.returnValue(mockDeregister);
 
-      let spyOnLayerChanged = spyOn(view, 'onLayerChanged_');
+      const spyOnLayerChanged = spyOn(view, 'onLayerChanged_');
 
       view['selectLayer_'](mockLayer);
 
@@ -423,8 +486,8 @@ describe('asset.LayerView', () => {
     it('should not throw error if there are no previous layer changed deregisters', () => {
       view['layerChangedDeregister_'] = null;
 
-      let mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
-      let mockLayer = jasmine.createSpyObj('Layer', ['on']);
+      const mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
+      const mockLayer = jasmine.createSpyObj('Layer', ['on']);
       mockLayer.on.and.returnValue(mockDeregister);
 
       spyOn(view, 'onLayerChanged_');
@@ -435,35 +498,35 @@ describe('asset.LayerView', () => {
     });
   });
 
-  describe('disposeInternal', () => {
-    it('should dispose the deregisters', () => {
-      let mockAssetChangeDeregister = jasmine.createSpyObj('AssetChangeDeregister', ['dispose']);
-      let mockLayerChangeDeregister = jasmine.createSpyObj('LayerChangeDeregister', ['dispose']);
-      view['assetChangedDeregister_'] = mockAssetChangeDeregister;
-      view['layerChangedDeregister_'] = mockLayerChangeDeregister;
+  describe('updateLayerPreviews_', () => {
+    it('should set the layer preview data correctly', async (done: any) => {
+      const layerId1 = 'layerId1';
+      const mockLayer1 = jasmine.createSpyObj('Layer1', ['getId']);
+      mockLayer1.getId.and.returnValue(layerId1);
 
-      view.disposeInternal();
+      const layerId2 = 'layerId2';
+      const mockLayer2 = jasmine.createSpyObj('Layer2', ['getId']);
+      mockLayer2.getId.and.returnValue(layerId2);
 
-      assert(mockAssetChangeDeregister.dispose).to.haveBeenCalledWith();
-      assert(mockLayerChangeDeregister.dispose).to.haveBeenCalledWith();
+      const mockAsset = jasmine.createSpyObj('Asset', ['getLayers']);
+      mockAsset.getLayers.and.returnValue([mockLayer1, mockLayer2]);
+      spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
+      spyOn(view['layerPreviewsChildElementHook_'], 'set');
+
+      view['selectedLayerId_'] = layerId1;
+      await view['updateLayerPreviews_']();
+      assert(view['layerPreviewsChildElementHook_'].set).to.haveBeenCalledWith([
+        {isSelected: true, layerId: layerId1},
+        {isSelected: false, layerId: layerId2},
+      ]);
     });
 
-    it('should not throw error if there are no deregisters', () => {
-      assert(() => {
-        view.disposeInternal();
-      }).toNot.throw();
-    });
-  });
+    it('should do nothing if asset cannot be found', async (done: any) => {
+      spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(null));
+      spyOn(view['layerPreviewsChildElementHook_'], 'set');
 
-  describe('onCreated', () => {
-    it('should listen to route changed event', () => {
-      let element = Mocks.object('element');
-      mockRouteService.on.and.returnValue({dispose(): void {}});
-      spyOn(view, 'onRouteChanged_');
-      view.onCreated(element);
-      assert(view['onRouteChanged_']).to.haveBeenCalledWith();
-      assert(mockRouteService.on).to
-          .haveBeenCalledWith(RouteServiceEvents.CHANGED, view['onRouteChanged_'], view);
+      await view['updateLayerPreviews_']();
+      assert(view['layerPreviewsChildElementHook_'].set).toNot.haveBeenCalled();
     });
   });
 });

@@ -185,7 +185,7 @@ export class ImageLayerEditor extends BaseThemedElement {
       try {
         const templateCompiler = await this.templateCompilerService_.create(asset, rowData);
         if (templateCompiler !== null) {
-          style.backgroundImage = `url(${templateCompiler.compile(imageUrl)()})`;
+          style.backgroundImage = `url(${templateCompiler.compile(imageUrl)})`;
         }
       } catch (e) {
         // TODO: Display error.
@@ -201,11 +201,11 @@ export class ImageLayerEditor extends BaseThemedElement {
     }
 
     const imageUrl = this.imageUrlHook_.get() || '';
-    layer.setBottom(this.bottomHook_.get());
+    layer.setBottom(this.bottomHook_.get() || 0);
     layer.setImageUrl(imageUrl);
-    layer.setLeft(this.leftHook_.get());
-    layer.setRight(this.rightHook_.get());
-    layer.setTop(this.topHook_.get());
+    layer.setLeft(this.leftHook_.get() || 0);
+    layer.setRight(this.rightHook_.get() || 0);
+    layer.setTop(this.topHook_.get() || 0);
     await this.assetCollection_.update(asset);
   }
 

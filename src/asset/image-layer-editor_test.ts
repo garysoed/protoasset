@@ -214,10 +214,8 @@ describe('namespace.ImageLayerEditor', () => {
       spyOn(editor['imageUrlHook_'], 'get').and.returnValue(imageUrl);
 
       const renderedImageUrl = 'renderedImageUrl';
-      const mockHandleBarExecutor = jasmine.createSpy('HandleBarExecutor');
-      mockHandleBarExecutor.and.returnValue(renderedImageUrl);
       const mockCompiler = jasmine.createSpyObj('Compiler', ['compile']);
-      mockCompiler.compile.and.returnValue(mockHandleBarExecutor);
+      mockCompiler.compile.and.returnValue(renderedImageUrl);
       mockTemplateCompilerService.create.and.returnValue(Promise.resolve(mockCompiler));
 
       const style = Mocks.object('style');

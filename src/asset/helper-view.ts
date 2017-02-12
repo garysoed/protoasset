@@ -366,7 +366,7 @@ export class HelperView extends BaseThemedElement {
     let result;
     let isError;
     try {
-      result = compiler.compile(consoleValue)();
+      result = compiler.compile(consoleValue);
       isError = false;
     } catch (e) {
       if (!(e instanceof Error)) {

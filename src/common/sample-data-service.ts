@@ -8,7 +8,7 @@ import {RouteFactoryService} from '../routing/route-factory-service';
 import {Views} from '../routing/views';
 
 
-@bind('pa.data.SampleDataService')
+@bind('pa.common.SampleDataService')
 export class SampleDataService {
   private readonly assetCollection_: AssetCollection;
   private readonly routeFactoryService_: RouteFactoryService;

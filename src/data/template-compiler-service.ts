@@ -10,7 +10,7 @@ import {TemplateCompiler} from './template-compiler';
 /**
  * Creates TemplateCompilers from asset.
  */
-@bind('pa.common.TemplateCompilerService')
+@bind('pa.data.TemplateCompilerService')
 export class TemplateCompilerService {
   private readonly handlebars_: typeof Handlebars;
   private dataRow_: number;

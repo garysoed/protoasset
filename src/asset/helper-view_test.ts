@@ -570,11 +570,9 @@ describe('asset.HelperView', () => {
           spyOn(view['consoleEntryHook_'], 'set');
 
           const result = 'result';
-          const mockCompiledDelegate = jasmine.createSpy('CompiledDelegate');
-          mockCompiledDelegate.and.returnValue(result);
 
           const mockCompiler = jasmine.createSpyObj('Compiler', ['compile']);
-          mockCompiler.compile.and.returnValue(mockCompiledDelegate);
+          mockCompiler.compile.and.returnValue(result);
           mockTemplateCompilerService.create.and.returnValue(mockCompiler);
 
           const scrollHeight = 123;

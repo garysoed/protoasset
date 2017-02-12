@@ -17,41 +17,29 @@ describe('data.ImageLayer', () => {
 
   describe('asHtml', () => {
     it('should return the correct CSS and HTML components', () => {
-      let top = 12;
-      let right = 34;
-      let bottom = 56;
-      let left = 78;
-      let imageUrl = 'imageUrl';
+      const top = 12;
+      const right = 34;
+      const bottom = 56;
+      const left = 78;
+      const imageUrl = 'imageUrl';
       layer.setTop(top);
       layer.setRight(right);
       layer.setBottom(bottom);
       layer.setLeft(left);
       layer.setImageUrl(imageUrl);
 
-      let {css, html} = layer.asHtml();
+      const {css, html} = layer.asHtml();
       assert(css).to.equal('');
 
-      let expectedStyles = [
+      const expectedStyles = [
         `bottom: ${bottom}px;`,
         `left: ${left}px;`,
         `right: ${right}px;`,
         `top: ${top}px;`,
-        `background: url('${imageUrl});`,
+        `background: url('${imageUrl}');`,
+        `background-repeat: no-repeat;`,
         `background-size: contain;`,
-      ];
-      assert(html).to.equal(`<div style="${expectedStyles.join('')}"></div>`);
-    });
-
-    it('should not include the bounding box if not specified', () => {
-      let imageUrl = 'imageUrl';
-      layer.setImageUrl(imageUrl);
-
-      let {css, html} = layer.asHtml();
-      assert(css).to.equal('');
-
-      let expectedStyles = [
-        `background: url('${imageUrl});`,
-        `background-size: contain;`,
+        `position: absolute;`,
       ];
       assert(html).to.equal(`<div style="${expectedStyles.join('')}"></div>`);
     });
@@ -63,7 +51,7 @@ describe('data.ImageLayer', () => {
         callback();
       });
 
-      let bottom = 123;
+      const bottom = 123;
 
       layer.setBottom(bottom);
 
@@ -77,7 +65,7 @@ describe('data.ImageLayer', () => {
         callback();
       });
 
-      let bottom = 123;
+      const bottom = 123;
       layer['bottom_'] = bottom;
 
       layer.setBottom(bottom);
@@ -93,7 +81,7 @@ describe('data.ImageLayer', () => {
         callback();
       });
 
-      let imageUrl = 'imageUrl';
+      const imageUrl = 'imageUrl';
       layer.setImageUrl(imageUrl);
 
       assert(layer.dispatch).to
@@ -106,7 +94,7 @@ describe('data.ImageLayer', () => {
         callback();
       });
 
-      let imageUrl = 'imageUrl';
+      const imageUrl = 'imageUrl';
       layer['imageUrl_'] = imageUrl;
 
       layer.setImageUrl(imageUrl);
@@ -122,7 +110,7 @@ describe('data.ImageLayer', () => {
         callback();
       });
 
-      let left = 123;
+      const left = 123;
 
       layer.setLeft(left);
 
@@ -136,7 +124,7 @@ describe('data.ImageLayer', () => {
         callback();
       });
 
-      let left = 123;
+      const left = 123;
       layer['left_'] = left;
 
       layer.setLeft(left);
@@ -152,7 +140,7 @@ describe('data.ImageLayer', () => {
         callback();
       });
 
-      let right = 123;
+      const right = 123;
 
       layer.setRight(right);
 
@@ -166,7 +154,7 @@ describe('data.ImageLayer', () => {
         callback();
       });
 
-      let right = 123;
+      const right = 123;
       layer['right_'] = right;
 
       layer.setRight(right);
@@ -182,7 +170,7 @@ describe('data.ImageLayer', () => {
         callback();
       });
 
-      let top = 123;
+      const top = 123;
 
       layer.setTop(top);
 
@@ -196,7 +184,7 @@ describe('data.ImageLayer', () => {
         callback();
       });
 
-      let top = 123;
+      const top = 123;
       layer['top_'] = top;
 
       layer.setTop(top);

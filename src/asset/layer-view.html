@@ -14,6 +14,14 @@
     position: relative;
   }
 
+  #previews {
+    position: relative;
+  }
+
+  #previewsContainer {
+    overflow: scroll;
+  }
+
   #root {
     padding-left: 1rem;
     padding-right: 1rem;
@@ -41,7 +49,11 @@
       <pa-asset-text-layer-editor gs-when="text" id="textEditor"></pa-asset-text-layer-editor>
     </gs-switch>
   </div>
-  <div flex>Preview</div>
+  <div flex layout="column">
+    <div flex id="previewsContainer">
+      <div id="previews" style="height: 200px;width:200px;"></div>
+    </div>
+  </div>
 </div>
 <gs-basic-button class="gs-theme-normal gs-primary" id="createButton">
   <div gs-content id="createButtonContent">

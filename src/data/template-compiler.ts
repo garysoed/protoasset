@@ -15,11 +15,9 @@ export class TemplateCompiler {
    * @param template The Handlebars template string to compile.
    * @return Function that takes in additional data and returns the template with the data applied.
    */
-  compile(template: string): (data?: {[key: string]: any}) => string {
-    return (additionalData: {[key: string]: any} = {}) => {
-      const data = Jsons.mixin({$$: this.rowData_}, additionalData);
-      return this.handlebars_.compile(template)(data);
-    };
+  compile(template: string, additionalData: {[key: string]: any} = {}): string {
+    const data = Jsons.mixin({$$: this.rowData_}, additionalData);
+    return this.handlebars_.compile(template)(data);
   }
 
   /**

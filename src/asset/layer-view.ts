@@ -7,6 +7,7 @@ import {Enums} from 'external/gs_tools/src/typescript';
 import {Validate} from 'external/gs_tools/src/valid';
 import {
   bind,
+  BooleanParser,
   customElement,
   DomHook,
   EnumParser,
@@ -32,14 +33,12 @@ import {Views} from '../routing/views';
 
 import {ImageLayerEditor} from './image-layer-editor';
 import {LayerItem} from './layer-item';
+import {LayerPreview} from './layer-preview';
 
 
 type LayerItemData = {assetId: string, layerId: string, projectId: string};
+type LayerPreviewData = {isSelected: boolean, layerId: string};
 
-
-export function layerItemGenerator(document: Document): Element {
-  return document.createElement('pa-asset-layer-item');
-}
 
 export function layerItemDataSetter(data: LayerItemData, element: Element): void {
   element.setAttribute('asset-id', data.assetId);
@@ -47,12 +46,25 @@ export function layerItemDataSetter(data: LayerItemData, element: Element): void
   element.setAttribute('project-id', data.projectId);
 }
 
+export function layerItemGenerator(document: Document): Element {
+  return document.createElement('pa-asset-layer-item');
+}
+
+export function layerPreviewDataSetter(data: LayerPreviewData, element: Element): void {
+  element.setAttribute('is-selected', BooleanParser.stringify(data.isSelected));
+  element.setAttribute('layer-id', data.layerId);
+}
+
+export function layerPreviewGenerator(document: Document): Element {
+  return document.createElement('pa-asset-layer-preview');
+}
+
 
 /**
  * Displays layer editor
  */
 @customElement({
-  dependencies: [ImageLayerEditor, LayerItem],
+  dependencies: [ImageLayerEditor, LayerItem, LayerPreview],
   tag: 'pa-asset-layer-view',
   templateKey: 'src/asset/layer-view',
 })
@@ -81,6 +93,9 @@ export class LayerView extends BaseThemedElement {
   @bind('#selectedLayerName').innerText()
   readonly layerNameHook_: DomHook<string>;
 
+  @bind('#previews').childrenElements(layerPreviewGenerator, layerPreviewDataSetter)
+  readonly layerPreviewsChildElementHook_: DomHook<LayerPreviewData[]>;
+
   @bind('#layerTypeSwitch').attribute('gs-value', EnumParser(LayerType))
   readonly layerTypeSwitchHook_: DomHook<LayerType>;
 
@@ -104,6 +119,7 @@ export class LayerView extends BaseThemedElement {
 
   private assetChangedDeregister_: DisposableFunction | null;
   private layerChangedDeregister_: DisposableFunction | null;
+  private selectedLayerId_: string | null;
 
   constructor(
       @inject('pa.data.AssetCollection') assetCollection: AssetCollection,
@@ -124,11 +140,13 @@ export class LayerView extends BaseThemedElement {
     this.layerChangedDeregister_ = null;
     this.layerIdGenerator_ = new SimpleIdGenerator();
     this.layerNameHook_ = DomHook.of<string>();
+    this.layerPreviewsChildElementHook_ = DomHook.of<LayerPreviewData[]>();
     this.layerTypeSwitchHook_ = DomHook.of<LayerType>();
     this.layersChildElementHook_ = DomHook.of<LayerItemData[]>();
     this.overlayService_ = overlayService;
     this.routeFactoryService_ = routeFactoryService;
     this.routeService_ = routeService;
+    this.selectedLayerId_ = null;
     this.textEditorAssetIdHook_ = DomHook.of<string>();
     this.textEditorLayerIdHook_ = DomHook.of<string>();
     this.textEditorProjectIdHook_ = DomHook.of<string>();
@@ -138,19 +156,12 @@ export class LayerView extends BaseThemedElement {
   @handle('#createImageLayer').event(DomEvent.CLICK, [LayerType.IMAGE])
   @handle('#createTextLayer').event(DomEvent.CLICK, [LayerType.TEXT])
   async createLayer_(layerType: LayerType): Promise<void> {
-    let params = this.routeService_.getParams<{assetId: string, projectId: string}>(
-        this.routeFactoryService_.layer());
-    if (params === null) {
-      return;
-    }
-
-    let asset = await this.assetCollection_.get(params.projectId, params.assetId);
+    const asset = await this.getAsset_();
     if (asset === null) {
       return;
     }
-
-    let layers = asset.getLayers();
-    let existingIds = new Set(
+    const layers = asset.getLayers();
+    const existingIds = new Set(
         Arrays
             .of(layers)
             .map((layer: BaseLayer) => {
@@ -162,7 +173,7 @@ export class LayerView extends BaseThemedElement {
       id = this.layerIdGenerator_.resolveConflict(id);
     }
 
-    let name = `New ${Enums.toLowerCaseString(layerType, LayerType)} layer`;
+    const name = `New ${Enums.toLowerCaseString(layerType, LayerType)} layer`;
     let layer: BaseLayer;
 
     switch (layerType) {
@@ -188,6 +199,33 @@ export class LayerView extends BaseThemedElement {
   }
 
   /**
+   * @override
+   */
+  disposeInternal(): void {
+    if (this.assetChangedDeregister_ !== null) {
+      this.assetChangedDeregister_.dispose();
+    }
+
+    if (this.layerChangedDeregister_ !== null) {
+      this.layerChangedDeregister_.dispose();
+    }
+    super.disposeInternal();
+  }
+
+  /**
+   * @return Promise that will be resolved with the selected asset, or null if it does not exist.
+   */
+  private async getAsset_(): Promise<Asset | null> {
+    const params = this.routeService_.getParams<{assetId: string, projectId: string}>(
+        this.routeFactoryService_.layer());
+    if (params === null) {
+      return null;
+    }
+
+    return await this.assetCollection_.get(params.projectId, params.assetId);
+  }
+
+  /**
    * Handles when the asset was changed.
    * @param asset The changed asset.
    */
@@ -199,12 +237,12 @@ export class LayerView extends BaseThemedElement {
     this.textEditorAssetIdHook_.set(asset.getId());
     this.textEditorProjectIdHook_.set(asset.getProjectId());
 
-    let dataSource = asset.getData();
+    const dataSource = asset.getData();
     if (dataSource === null) {
       return;
     }
 
-    let data = await dataSource.getData();
+    const data = await dataSource.getData();
     if (data.length <= 0) {
       return;
       // TODO: Display error if there are no data.
@@ -213,7 +251,7 @@ export class LayerView extends BaseThemedElement {
     // TODO: Let user pick the data row.
     this.imageEditorDataRowHook_.set(0);
 
-    let layerItemData = Arrays
+    const layerItemData = Arrays
         .of(asset.getLayers())
         .map((layer: BaseLayer) => {
           return {
@@ -224,6 +262,20 @@ export class LayerView extends BaseThemedElement {
         })
         .asArray();
     this.layersChildElementHook_.set(layerItemData);
+    this.updateLayerPreviews_();
+  }
+
+  /**
+   * @override
+   */
+  onCreated(element: HTMLElement): void {
+    super.onCreated(element);
+
+    this.addDisposable(this.routeService_.on(
+        RouteServiceEvents.CHANGED,
+        this.onRouteChanged_,
+        this));
+    this.onRouteChanged_();
   }
 
   /**
@@ -289,30 +341,22 @@ export class LayerView extends BaseThemedElement {
     this.onLayerChanged_(layer);
   }
 
-  /**
-   * @override
-   */
-  disposeInternal(): void {
-    if (this.assetChangedDeregister_ !== null) {
-      this.assetChangedDeregister_.dispose();
+  private async updateLayerPreviews_(): Promise<void> {
+    const asset = await this.getAsset_();
+    if (asset === null) {
+      return;
     }
 
-    if (this.layerChangedDeregister_ !== null) {
-      this.layerChangedDeregister_.dispose();
-    }
-    super.disposeInternal();
-  }
-
-  /**
-   * @override
-   */
-  onCreated(element: HTMLElement): void {
-    super.onCreated(element);
-
-    this.addDisposable(this.routeService_.on(
-        RouteServiceEvents.CHANGED,
-        this.onRouteChanged_,
-        this));
-    this.onRouteChanged_();
+    const layerPreviewData = Arrays
+        .of(asset.getLayers())
+        .map((layer: BaseLayer) => {
+          const layerId = layer.getId();
+          return {
+            isSelected: layerId === this.selectedLayerId_,
+            layerId: layerId,
+          };
+        })
+        .asArray();
+    this.layerPreviewsChildElementHook_.set(layerPreviewData);
   }
 }

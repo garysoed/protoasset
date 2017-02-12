@@ -10,44 +10,35 @@ import {LayerType} from './layer-type';
  */
 @Serializable('imageLayer')
 export class ImageLayer extends BaseLayer {
-  @Field('bottom') private bottom_: number | null;
+  @Field('bottom') private bottom_: number;
   @Field('imageUrl') private imageUrl_: string;
-  @Field('left') private left_: number | null;
-  @Field('right') private right_: number | null;
-  @Field('top') private top_: number | null;
+  @Field('left') private left_: number;
+  @Field('right') private right_: number;
+  @Field('top') private top_: number;
 
   constructor(id: string, name: string) {
     super(id, name, LayerType.IMAGE);
-    this.bottom_ = null;
+    this.bottom_ = 0;
     this.imageUrl_ = '';
-    this.left_ = null;
-    this.right_ = null;
-    this.top_ = null;
+    this.left_ = 0;
+    this.right_ = 0;
+    this.top_ = 0;
   }
 
   /**
    * @override
    */
   asHtml(): {css: string, html: string} {
-    let styles: string[] = [];
-    if (this.bottom_ !== null) {
-      styles.push(`bottom: ${this.bottom_}px;`);
-    }
-
-    if (this.left_ !== null) {
-      styles.push(`left: ${this.left_}px;`);
-    }
-
-    if (this.right_ !== null) {
-      styles.push(`right: ${this.right_}px;`);
-    }
-
-    if (this.top_ !== null) {
-      styles.push(`top: ${this.top_}px;`);
-    }
-
-    styles.push(`background: url('${this.imageUrl_});`);
-    styles.push(`background-size: contain;`);
+    let styles: string[] = [
+      `bottom: ${this.bottom_}px;`,
+      `left: ${this.left_}px;`,
+      `right: ${this.right_}px;`,
+      `top: ${this.top_}px;`,
+      `background: url('${this.imageUrl_}');`,
+      `background-repeat: no-repeat;`,
+      `background-size: contain;`,
+      `position: absolute;`,
+    ];
 
     let html = `<div style="${styles.join('')}"></div>`;
     return {css: '', html};
@@ -56,7 +47,7 @@ export class ImageLayer extends BaseLayer {
   /**
    * @return The bottom bounding box of the image layer, in px.
    */
-  getBottom(): number | null {
+  getBottom(): number {
     return this.bottom_;
   }
 
@@ -70,28 +61,28 @@ export class ImageLayer extends BaseLayer {
   /**
    * @return The left bounding box of the image layer, in px.
    */
-  getLeft(): number | null {
+  getLeft(): number {
     return this.left_;
   }
 
   /**
    * @return The right bounding box of the image layer, in px.
    */
-  getRight(): number | null {
+  getRight(): number {
     return this.right_;
   }
 
   /**
    * @return The top bounding box of the image layer, in px.
    */
-  getTop(): number | null {
+  getTop(): number {
     return this.top_;
   }
 
   /**
    * @param bottom The bottom of the bounding box to set, in px.
    */
-  setBottom(bottom: number | null): void {
+  setBottom(bottom: number): void {
     if (this.bottom_ === bottom) {
       return;
     }
@@ -117,7 +108,7 @@ export class ImageLayer extends BaseLayer {
   /**
    * @param left The left of the bounding box to set, in px.
    */
-  setLeft(left: number | null): void {
+  setLeft(left: number): void {
     if (this.left_ === left) {
       return;
     }
@@ -130,7 +121,7 @@ export class ImageLayer extends BaseLayer {
   /**
    * @param right The right of the bounding box to set, in px.
    */
-  setRight(right: number | null): void {
+  setRight(right: number): void {
     if (this.right_ === right) {
       return;
     }
@@ -143,7 +134,7 @@ export class ImageLayer extends BaseLayer {
   /**
    * @param top The top of the bounding box to set, in px.
    */
-  setTop(top: number | null): void {
+  setTop(top: number): void {
     if (this.top_ === top) {
       return;
     }

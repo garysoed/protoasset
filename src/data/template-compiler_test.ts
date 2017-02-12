@@ -34,8 +34,7 @@ describe('data.TemplateCompiler', () => {
 
       let template = 'template';
 
-      let fn = compiler.compile(template);
-      assert(fn(additionalData)).to.equal(result);
+      assert(compiler.compile(template, additionalData)).to.equal(result);
       assert(mockHandlebars.compile).to.haveBeenCalledWith(template);
       assert(mockDelegate).to.haveBeenCalledWith({
         $$: assetData,
