@@ -1,3 +1,4 @@
+import {sequenced} from 'external/gs_tools/src/async';
 import {Arrays} from 'external/gs_tools/src/collection';
 import {DisposableFunction} from 'external/gs_tools/src/dispose';
 import {inject} from 'external/gs_tools/src/inject';
@@ -13,8 +14,10 @@ import {RouteService, RouteServiceEvents} from 'external/gs_ui/src/routing';
 import {ThemeService} from 'external/gs_ui/src/theming';
 
 import {SampleDataService} from '../common/sample-data-service';
+import {Asset} from '../data/asset';
 import {AssetCollection} from '../data/asset-collection';
 import {BaseLayer} from '../data/base-layer';
+import {DataEvents} from '../data/data-events';
 import {TemplateCompilerService} from '../data/template-compiler-service';
 import {RouteFactoryService} from '../routing/route-factory-service';
 import {Views} from '../routing/views';
@@ -73,9 +76,20 @@ export class LayerPreview extends BaseThemedElement {
     this.onLayerIdChanged_();
   }
 
+  private onLayerChange_(asset: Asset, rowData: string[], layer: BaseLayer): void {
+    const {css, html} = layer.asHtml();
+    const compiler = this.templateCompilerService_.create(asset, rowData);
+    this.cssInnerHtmlHook_.set(compiler.compile(css));
+    this.rootInnerHtmlHook_.set(compiler.compile(html));
+  }
+
   @handle(null).attributeChange('layer-id')
+  @sequenced()
   async onLayerIdChanged_(): Promise<void> {
-    // TODO: Listen to layer changes.
+    if (this.layerDeregister_ !== null) {
+      this.layerDeregister_.dispose();
+      this.layerDeregister_ = null;
+    }
     const params = this.routeService_.getParams(this.routeFactoryService_.layer());
     if (params === null) {
       return;
@@ -103,9 +117,8 @@ export class LayerPreview extends BaseThemedElement {
       return;
     }
 
-    const {css, html} = layer.asHtml();
-    const compiler = this.templateCompilerService_.create(asset, rowData);
-    this.cssInnerHtmlHook_.set(compiler.compile(css));
-    this.rootInnerHtmlHook_.set(compiler.compile(html));
+    this.layerDeregister_ = layer
+        .on(DataEvents.CHANGED, this.onLayerChange_.bind(this, asset, rowData, layer), this);
+    this.onLayerChange_(asset, rowData, layer);
   }
 }

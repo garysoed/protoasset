@@ -184,9 +184,9 @@ describe('asset.LayerItem', () => {
     it('should set the root mode correctly and stop propagation', () => {
       const mockEvent = jasmine.createSpyObj('Event', ['stopPropagation']);
       const mode = Mode.EDIT;
-      spyOn(item.rootModeHook_, 'set');
+      spyOn(item.switchModeHook_, 'set');
       item.onChangeModeClick_(mode, mockEvent);
-      assert(item.rootModeHook_.set).to.haveBeenCalledWith(mode);
+      assert(item.switchModeHook_.set).to.haveBeenCalledWith(mode);
       assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
     });
   });
@@ -319,13 +319,13 @@ describe('asset.LayerItem', () => {
 
       const asset = Mocks.object('asset');
       spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(asset));
-      spyOn(item.rootModeHook_, 'set');
+      spyOn(item.switchModeHook_, 'set');
 
       const mockEvent = jasmine.createSpyObj('Event', ['stopPropagation']);
 
       await item['onOkClick_'](mockEvent);
 
-      assert(item.rootModeHook_.set).to.haveBeenCalledWith(Mode.READ);
+      assert(item.switchModeHook_.set).to.haveBeenCalledWith(Mode.READ);
       assert(mockAssetCollection.update).to.haveBeenCalledWith(asset);
       assert(mockLayer.setName).to.haveBeenCalledWith(name);
       assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
@@ -336,13 +336,13 @@ describe('asset.LayerItem', () => {
       spyOn(item, 'getLayer_').and.returnValue(Promise.resolve(mockLayer));
 
       spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(null));
-      spyOn(item.rootModeHook_, 'set');
+      spyOn(item.switchModeHook_, 'set');
 
       const mockEvent = jasmine.createSpyObj('Event', ['stopPropagation']);
 
       await item['onOkClick_'](mockEvent);
 
-      assert(item.rootModeHook_.set).toNot.haveBeenCalled();
+      assert(item.switchModeHook_.set).toNot.haveBeenCalled();
       assert(mockAssetCollection.update).toNot.haveBeenCalled();
       assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
     });
@@ -351,13 +351,13 @@ describe('asset.LayerItem', () => {
       spyOn(item, 'getLayer_').and.returnValue(Promise.resolve(null));
 
       spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(Mocks.object('asset')));
-      spyOn(item.rootModeHook_, 'set');
+      spyOn(item.switchModeHook_, 'set');
 
       const mockEvent = jasmine.createSpyObj('Event', ['stopPropagation']);
 
       await item['onOkClick_'](mockEvent);
 
-      assert(item.rootModeHook_.set).toNot.haveBeenCalled();
+      assert(item.switchModeHook_.set).toNot.haveBeenCalled();
       assert(mockAssetCollection.update).toNot.haveBeenCalled();
       assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
     });
@@ -430,6 +430,22 @@ describe('asset.LayerItem', () => {
       await item.onMoveButtonClick_(moveIndex, mockEvent);
       assert(mockAssetCollection.update).toNot.haveBeenCalled();
       assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
+    });
+  });
+
+  describe('onRootClick_', () => {
+    it('should stop propagation if the switch mode is not READ', () => {
+      const mockEvent = jasmine.createSpyObj('Event', ['stopPropagation']);
+      spyOn(item.switchModeHook_, 'get').and.returnValue(Mode.EDIT);
+      item.onRootClick_(mockEvent);
+      assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
+    });
+
+    it('should not stop propagation if the switch mode is READ', () => {
+      const mockEvent = jasmine.createSpyObj('Event', ['stopPropagation']);
+      spyOn(item.switchModeHook_, 'get').and.returnValue(Mode.READ);
+      item.onRootClick_(mockEvent);
+      assert(mockEvent.stopPropagation).toNot.haveBeenCalled();
     });
   });
 

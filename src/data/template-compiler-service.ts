@@ -34,7 +34,7 @@ export class TemplateCompilerService {
         .forEach((helper: Helper) => {
           handlebars.registerHelper(helper.getName(), helper.asFunction());
         });
-    handlebars.registerHelper('toLowerCase', function(options: any): string {
+    handlebars.registerHelper('case', function(caseString: string, options: any): string {
       return Cases.of(options.fn(this)).toLowerCase();
     });
     return TemplateCompiler.of(data, handlebars);

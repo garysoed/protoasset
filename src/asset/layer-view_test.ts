@@ -724,8 +724,8 @@ describe('asset.LayerView', () => {
       view['selectedLayerId_'] = layerId1;
       await view['updateLayerPreviews_']();
       assert(view['layerPreviewsChildElementHook_'].set).to.haveBeenCalledWith([
-        {isSelected: true, layerId: layerId1},
         {isSelected: false, layerId: layerId2},
+        {isSelected: true, layerId: layerId1},
       ]);
     });
 

@@ -18,13 +18,13 @@
     padding: 1rem;
   }
 
-  #root {
+  #switch {
     background-color: var(--gsColorPassiveBG);
   }
 </style>
 
-<gs-basic-button>
-  <gs-switch fill-parent gs-content gs-value="read" id="root">
+<gs-basic-button id="root">
+  <gs-switch fill-parent gs-content gs-value="read" id="switch">
     <div gs-when="read" layout="row">
       <div flex id="name"></div>
       <gs-basic-button id="edit">

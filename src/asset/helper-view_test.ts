@@ -286,10 +286,13 @@ describe('asset.HelperView', () => {
   describe('onActiveChange_', () => {
     it('should call updateAsset_', async (done: any) => {
       const asset = Mocks.object('asset');
+      const mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
+      view['assetUpdateDeregister_'] = mockDeregister;
       spyOn(view, 'updateAsset_');
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(asset));
       await view['onActiveChange_'](true);
       assert(view['updateAsset_']).to.haveBeenCalledWith(asset);
+      assert(mockDeregister.dispose).to.haveBeenCalledWith();
     });
 
     it('should redirect to landing page if asset cannot be found', async (done: any) => {
@@ -308,11 +311,9 @@ describe('asset.HelperView', () => {
     });
 
     it('should not throw error if there are no previous deregisters', async (done: any) => {
-      const mockNewDeregister = jasmine.createSpyObj('NewDeregister', ['dispose']);
-      const mockAsset = jasmine.createSpyObj('Asset', ['on']);
-      mockAsset.on.and.returnValue(mockNewDeregister);
+      const asset = Mocks.object('asset');
 
-      spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
+      spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(asset));
       spyOn(view, 'updateAsset_');
 
       await view['onActiveChange_'](true);

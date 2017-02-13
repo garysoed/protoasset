@@ -1,3 +1,4 @@
+import {sequenced} from 'external/gs_tools/src/async';
 import {Arrays} from 'external/gs_tools/src/collection';
 import {DisposableFunction} from 'external/gs_tools/src/dispose';
 import {DomEvent, ListenableDom} from 'external/gs_tools/src/event';
@@ -350,6 +351,7 @@ export class LayerView extends BaseThemedElement {
    * Handles when the route was changed.
    * @return Promise that will be resolved when all operations are done.
    */
+  @sequenced()
   private async onRouteChanged_(): Promise<void> {
     if (this.assetChangedDeregister_ !== null) {
       this.assetChangedDeregister_.dispose();
@@ -421,6 +423,7 @@ export class LayerView extends BaseThemedElement {
             layerId: layerId,
           };
         })
+        .reverse()
         .asArray();
     this.layerPreviewsChildElementHook_.set(layerPreviewData);
   }

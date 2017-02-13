@@ -1,3 +1,4 @@
+import {sequenced} from 'external/gs_tools/src/async';
 import {Arrays} from 'external/gs_tools/src/collection';
 import {DisposableFunction} from 'external/gs_tools/src/dispose';
 import {DomEvent, ListenableDom} from 'external/gs_tools/src/event';
@@ -232,7 +233,12 @@ export class HelperView extends BaseThemedElement {
   }
 
   @handle(null).attributeChange('gs-view-active', BooleanParser)
+  @sequenced()
   protected async onActiveChange_(isActive: boolean | null): Promise<void> {
+    if (this.assetUpdateDeregister_ !== null) {
+      this.assetUpdateDeregister_.dispose();
+      this.assetUpdateDeregister_ = null;
+    }
     if (!isActive) {
       return;
     }

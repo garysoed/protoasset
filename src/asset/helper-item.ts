@@ -1,3 +1,4 @@
+import {sequenced} from 'external/gs_tools/src/async';
 import {DisposableFunction} from 'external/gs_tools/src/dispose';
 import {DomEvent} from 'external/gs_tools/src/event';
 import {inject} from 'external/gs_tools/src/inject';
@@ -184,6 +185,7 @@ export class HelperItem extends BaseThemedElement {
   @handle(null).attributeChange('asset-id', StringParser)
   @handle(null).attributeChange('helper-id', StringParser)
   @handle(null).attributeChange('project-id', StringParser)
+  @sequenced()
   async updateHelper_(): Promise<void> {
     let helper = await this.getHelper_();
     if (this.helperUpdateDeregister_ !== null) {

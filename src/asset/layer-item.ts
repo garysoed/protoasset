@@ -1,3 +1,4 @@
+import {sequenced} from 'external/gs_tools/src/async';
 import {Arrays} from 'external/gs_tools/src/collection';
 import {DisposableFunction} from 'external/gs_tools/src/dispose';
 import {DomEvent} from 'external/gs_tools/src/event';
@@ -52,8 +53,8 @@ export class LayerItem extends BaseThemedElement {
   @bind(null).attribute('project-id', StringParser)
   readonly projectIdHook_: DomHook<string>;
 
-  @bind('#root').attribute('gs-value', EnumParser(Mode))
-  readonly rootModeHook_: DomHook<Mode>;
+  @bind('#switch').attribute('gs-value', EnumParser(Mode))
+  readonly switchModeHook_: DomHook<Mode>;
 
   @bind('#up').attribute('disabled', BooleanParser)
   readonly upDisabledHook_: DomHook<boolean>;
@@ -76,7 +77,7 @@ export class LayerItem extends BaseThemedElement {
     this.nameHook_ = DomHook.of<string>();
     this.nameInputHook_ = DomHook.of<string>();
     this.projectIdHook_ = DomHook.of<string>();
-    this.rootModeHook_ = DomHook.of<Mode>();
+    this.switchModeHook_ = DomHook.of<Mode>();
     this.upDisabledHook_ = DomHook.of<boolean>(true);
   }
 
@@ -131,6 +132,7 @@ export class LayerItem extends BaseThemedElement {
 
   @handle(null).attributeChange('asset-id', StringParser)
   @handle(null).attributeChange('project-id', StringParser)
+  @sequenced()
   async onAssetIdChanged_(): Promise<void> {
     if (this.assetDeregister_ !== null) {
       this.assetDeregister_.dispose();
@@ -150,7 +152,7 @@ export class LayerItem extends BaseThemedElement {
   @handle('#cancel').event(DomEvent.CLICK, [Mode.READ])
   @handle('#edit').event(DomEvent.CLICK, [Mode.EDIT])
   onChangeModeClick_(mode: Mode, event: Event): void {
-    this.rootModeHook_.set(mode);
+    this.switchModeHook_.set(mode);
     event.stopPropagation();
   }
 
@@ -176,6 +178,7 @@ export class LayerItem extends BaseThemedElement {
   }
 
   @handle(null).attributeChange('layer-id', StringParser)
+  @sequenced()
   async onLayerIdChanged_(): Promise<void> {
     if (this.layerDeregister_ !== null) {
       this.layerDeregister_.dispose();
@@ -193,20 +196,6 @@ export class LayerItem extends BaseThemedElement {
     this.updateLayerPosition_();
   }
 
-  @handle('#ok').event(DomEvent.CLICK)
-  async onOkClick_(event: Event): Promise<void> {
-    event.stopPropagation();
-
-    const [asset, layer] = await Promise.all([this.getAsset_(), this.getLayer_()]);
-    if (asset === null || layer === null) {
-      return;
-    }
-
-    layer.setName(this.nameInputHook_.get() || '');
-    this.assetCollection_.update(asset);
-    this.rootModeHook_.set(Mode.READ);
-  }
-
   @handle('#up').event(DomEvent.CLICK, [-1])
   @handle('#down').event(DomEvent.CLICK, [1])
   async onMoveButtonClick_(moveIndex: number, event: Event): Promise<void> {
@@ -222,6 +211,27 @@ export class LayerItem extends BaseThemedElement {
     }
     asset.insertLayer(layer, index + moveIndex);
     this.assetCollection_.update(asset);
+  }
+
+  @handle('#ok').event(DomEvent.CLICK)
+  async onOkClick_(event: Event): Promise<void> {
+    event.stopPropagation();
+
+    const [asset, layer] = await Promise.all([this.getAsset_(), this.getLayer_()]);
+    if (asset === null || layer === null) {
+      return;
+    }
+
+    layer.setName(this.nameInputHook_.get() || '');
+    this.assetCollection_.update(asset);
+    this.switchModeHook_.set(Mode.READ);
+  }
+
+  @handle('#root').event(DomEvent.CLICK)
+  onRootClick_(event: Event): void {
+    if (this.switchModeHook_.get() !== Mode.READ) {
+      event.stopPropagation();
+    }
   }
 
   /**

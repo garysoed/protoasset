@@ -160,7 +160,7 @@ export class Asset extends BaseListenable<DataEvents> {
    * @param layer The layer to insert.
    * @param index The index to insert / move the layer to.
    */
-  insertLayer(layer: BaseLayer, index: number = this.layers_.length): void {
+  insertLayer(layer: BaseLayer, index: number = 0): void {
     const removeIndex = this.layers_.indexOf(layer);
     if (removeIndex === index) {
       return;

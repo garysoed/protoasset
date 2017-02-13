@@ -1,3 +1,4 @@
+import {sequenced} from 'external/gs_tools/src/async';
 import {Arrays} from 'external/gs_tools/src/collection';
 import {DisposableFunction} from 'external/gs_tools/src/dispose';
 import {DomEvent} from 'external/gs_tools/src/event';
@@ -152,6 +153,7 @@ export class ImageLayerEditor extends BaseThemedElement {
   @handle(null).attributeChange('asset-id', StringParser)
   @handle(null).attributeChange('project-id', StringParser)
   @handle(null).attributeChange('layer-id', StringParser)
+  @sequenced()
   protected async onLayerIdChange_(): Promise<void> {
     if (this.layerDeregister_ !== null) {
       this.layerDeregister_.dispose();
