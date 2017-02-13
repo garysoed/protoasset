@@ -6,6 +6,7 @@ import {bind, customElement, DomHook, handle, StringParser} from 'external/gs_to
 import {BaseThemedElement} from 'external/gs_ui/src/common';
 import {RouteService} from 'external/gs_ui/src/routing';
 import {ThemeService} from 'external/gs_ui/src/theming';
+import {OverlayService} from 'external/gs_ui/src/tool';
 
 import {Asset} from '../data/asset';
 import {AssetCollection} from '../data/asset-collection';
@@ -24,24 +25,25 @@ import {Views} from '../routing/views';
 })
 export class HelperItem extends BaseThemedElement {
   @bind(null).attribute('asset-id', StringParser)
-  private readonly assetIdHook_: DomHook<string>;
+  readonly assetIdHook_: DomHook<string>;
 
   @bind(null).attribute('helper-id', StringParser)
-  private readonly helperIdHook_: DomHook<string>;
+  readonly helperIdHook_: DomHook<string>;
 
   @bind('#name').innerText()
-  private readonly nameHook_: DomHook<string>;
+  readonly nameHook_: DomHook<string>;
 
   @bind('#nameInput').attribute('gs-value', StringParser)
-  private readonly nameInputHook_: DomHook<string>;
+  readonly nameInputHook_: DomHook<string>;
 
   @bind(null).attribute('project-id', StringParser)
-  private readonly projectIdHook_: DomHook<string>;
+  readonly projectIdHook_: DomHook<string>;
 
   @bind('#root').attribute('gs-value', StringParser)
-  private readonly rootValueHook_: DomHook<string>;
+  readonly rootValueHook_: DomHook<string>;
 
   private readonly assetCollection_: AssetCollection;
+  private readonly overlayService_: OverlayService;
   private readonly routeFactoryService_: RouteFactoryService;
   private readonly routeService_: RouteService<Views>;
 
@@ -49,6 +51,7 @@ export class HelperItem extends BaseThemedElement {
 
   constructor(
       @inject('pa.data.AssetCollection') assetCollection: AssetCollection,
+      @inject('gs.tool.OverlayService') overlayService: OverlayService,
       @inject('pa.routing.RouteFactoryService') routeFactoryService: RouteFactoryService,
       @inject('gs.routing.RouteService') routeService: RouteService<Views>,
       @inject('theming.ThemeService') themeService: ThemeService) {
@@ -59,6 +62,7 @@ export class HelperItem extends BaseThemedElement {
     this.helperIdHook_ = DomHook.of<string>();
     this.nameHook_ = DomHook.of<string>();
     this.nameInputHook_ = DomHook.of<string>();
+    this.overlayService_ = overlayService;
     this.projectIdHook_ = DomHook.of<string>();
     this.rootValueHook_ =  DomHook.of<string>();
     this.routeFactoryService_ = routeFactoryService;
@@ -105,12 +109,14 @@ export class HelperItem extends BaseThemedElement {
   }
 
   @handle('#cancel').event(DomEvent.CLICK)
-  protected onCancelClick_(): void {
+  onCancelClick_(event: Event): void {
+    event.stopPropagation();
     this.rootValueHook_.set('read');
   }
 
   @handle('#delete').event(DomEvent.CLICK)
-  protected async onDeleteClick_(): Promise<void> {
+  async onDeleteClick_(event: Event): Promise<void> {
+    event.stopPropagation();
     let [asset, helper] = await Promise.all([this.getAsset_(), this.getHelper_()]);
     if (asset === null || helper === null) {
       return;
@@ -118,11 +124,13 @@ export class HelperItem extends BaseThemedElement {
 
     asset.deleteHelper(helper.getId());
 
-    await Promise.all([this.updateHelper_(), this.assetCollection_.update(asset)]);
+    this.updateHelper_();
+    this.assetCollection_.update(asset);
   }
 
   @handle('#edit').event(DomEvent.CLICK)
-  protected async onEditClick_(): Promise<void> {
+  async onEditClick_(event: Event): Promise<void> {
+    event.stopPropagation();
     let helper = await this.getHelper_();
     if (helper !== null) {
       this.nameInputHook_.set(helper.getName());
@@ -132,22 +140,10 @@ export class HelperItem extends BaseThemedElement {
     this.rootValueHook_.set('edit');
   }
 
-  @handle('#name').event(DomEvent.CLICK)
-  protected async onNameClick_(): Promise<void> {
-    let [asset, helper] = await Promise.all([this.getAsset_(), this.getHelper_()]);
-    if (asset === null || helper === null) {
-      return;
-    }
-
-    this.routeService_.goTo(this.routeFactoryService_.helper(), {
-      assetId: asset.getId(),
-      helperId: helper.getId(),
-      projectId: asset.getProjectId(),
-    });
-  }
-
   @handle('#ok').event(DomEvent.CLICK)
-  protected async onOkClick_(): Promise<void> {
+  async onOkClick_(event: Event): Promise<void> {
+    event.stopPropagation();
+
     const helperId = this.helperIdHook_.get();
     if (helperId === null) {
       return Promise.resolve();
@@ -167,13 +163,28 @@ export class HelperItem extends BaseThemedElement {
 
     this.rootValueHook_.set('read');
 
-    await this.assetCollection_.update(asset);
+    this.assetCollection_.update(asset);
+  }
+
+  @handle('#readRoot').event(DomEvent.CLICK)
+  async onReadRootClick_(): Promise<void> {
+    let [asset, helper] = await Promise.all([this.getAsset_(), this.getHelper_()]);
+    if (asset === null || helper === null) {
+      return;
+    }
+
+    this.routeService_.goTo(this.routeFactoryService_.helper(), {
+      assetId: asset.getId(),
+      helperId: helper.getId(),
+      projectId: asset.getProjectId(),
+    });
+    this.overlayService_.hideOverlay();
   }
 
   @handle(null).attributeChange('asset-id', StringParser)
   @handle(null).attributeChange('helper-id', StringParser)
   @handle(null).attributeChange('project-id', StringParser)
-  protected async updateHelper_(): Promise<void> {
+  async updateHelper_(): Promise<void> {
     let helper = await this.getHelper_();
     if (this.helperUpdateDeregister_ !== null) {
       this.helperUpdateDeregister_.dispose();

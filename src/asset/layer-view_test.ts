@@ -1,6 +1,7 @@
 import {assert, Matchers, TestBase} from '../test-base';
 TestBase.setup();
 
+import {DomEvent, ListenableDom} from 'external/gs_tools/src/event';
 import {Mocks} from 'external/gs_tools/src/mock';
 import {TestDispose} from 'external/gs_tools/src/testing';
 
@@ -33,11 +34,31 @@ describe('layerItemDataSetter', () => {
 
 describe('layerItemGenerator', () => {
   it('should generate the correct element', () => {
-    const element = Mocks.object('element');
+    const layerId = 'layerId';
+    const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
+    mockElement.getAttribute.and.returnValue(layerId);
+
+    const disposableFunction = Mocks.object('disposableFunction');
+    const mockListenableDom = jasmine.createSpyObj('ListenableDom', ['on']);
+    mockListenableDom.on.and.returnValue(disposableFunction);
+    spyOn(ListenableDom, 'of').and.returnValue(mockListenableDom);
+
     const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
-    mockDocument.createElement.and.returnValue(element);
-    assert(layerItemGenerator(mockDocument)).to.equal(element);
+    mockDocument.createElement.and.returnValue(mockElement);
+    const mockInstance =
+        jasmine.createSpyObj('Instance', ['addDisposable', 'onLayerItemClick_']);
+    assert(layerItemGenerator(mockDocument, mockInstance)).to.equal(mockElement);
     assert(mockDocument.createElement).to.haveBeenCalledWith('pa-asset-layer-item');
+    assert(mockInstance.addDisposable).to.haveBeenCalledWith(mockListenableDom);
+    assert(mockInstance.addDisposable).to.haveBeenCalledWith(disposableFunction);
+
+    assert(mockListenableDom.on).to
+        .haveBeenCalledWith(DomEvent.CLICK, Matchers.any(Function), mockInstance);
+    mockListenableDom.on.calls.argsFor(0)[1]();
+    assert(mockInstance.onLayerItemClick_).to.haveBeenCalledWith(layerId);
+    assert(mockElement.getAttribute).to.haveBeenCalledWith('layer-id');
+
+    assert(ListenableDom.of).to.haveBeenCalledWith(mockElement);
   });
 });
 
@@ -91,7 +112,7 @@ describe('asset.LayerView', () => {
       const mockOldLayer = jasmine.createSpyObj('OldLayer', ['getId']);
       mockOldLayer.getId.and.returnValue(oldId);
 
-      const mockAsset = jasmine.createSpyObj('Asset', ['getLayers', 'setLayers']);
+      const mockAsset = jasmine.createSpyObj('Asset', ['getLayers', 'insertLayer']);
       mockAsset.getLayers.and.returnValue([mockOldLayer]);
       mockAssetCollection.get.and.returnValue(Promise.resolve(mockAsset));
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
@@ -111,7 +132,7 @@ describe('asset.LayerView', () => {
       const layer: HtmlLayer = selectLayerSpy.calls.argsFor(0)[0];
       TestDispose.add(layer);
 
-      assert(mockAsset.setLayers).to.haveBeenCalledWith([layer, mockOldLayer]);
+      assert(mockAsset.insertLayer).to.haveBeenCalledWith(layer);
       assert(layer.getName()).to.equal(Matchers.stringMatching(/New html layer/));
       assert(layer.getId()).to.equal(id);
       assert(view['layerIdGenerator_'].resolveConflict).to.haveBeenCalledWith(oldId);
@@ -121,7 +142,7 @@ describe('asset.LayerView', () => {
       const layerRouteFactory = Mocks.object('layerRouteFactory');
       mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
 
-      const mockAsset = jasmine.createSpyObj('Asset', ['getLayers', 'setLayers']);
+      const mockAsset = jasmine.createSpyObj('Asset', ['getLayers', 'insertLayer']);
       mockAsset.getLayers.and.returnValue([]);
       mockAssetCollection.get.and.returnValue(Promise.resolve(mockAsset));
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
@@ -212,12 +233,22 @@ describe('asset.LayerView', () => {
       const mockLayer3 = jasmine.createSpyObj('Layer3', ['getId']);
       mockLayer3.getId.and.returnValue(layerId3);
 
-      const mockAsset =
-          jasmine.createSpyObj('Asset', ['getData', 'getId', 'getLayers', 'getProjectId']);
+      const height = 123;
+      const width = 456;
+      const mockAsset = jasmine.createSpyObj('Asset', [
+        'getData',
+        'getHeight',
+        'getId',
+        'getLayers',
+        'getProjectId',
+        'getWidth',
+      ]);
       mockAsset.getData.and.returnValue(mockDataSource);
+      mockAsset.getHeight.and.returnValue(height);
       mockAsset.getId.and.returnValue(id);
       mockAsset.getProjectId.and.returnValue(projectId);
       mockAsset.getLayers.and.returnValue([mockLayer1, mockLayer2, mockLayer3]);
+      mockAsset.getWidth.and.returnValue(width);
 
       spyOn(view.htmlEditorAssetIdHook_, 'set');
       spyOn(view.htmlEditorProjectIdHook_, 'set');
@@ -227,10 +258,22 @@ describe('asset.LayerView', () => {
       spyOn(view.textEditorAssetIdHook_, 'set');
       spyOn(view.textEditorProjectIdHook_, 'set');
       spyOn(view.layersChildElementHook_, 'set');
+
+      const style = Mocks.object('style');
+      spyOn(view.layerPreviewsStyleHook_, 'get').and.returnValue(style);
+
       spyOn(view, 'updateLayerPreviews_');
+      spyOn(view, 'selectDefaultLayer_');
+
+      view['selectedLayerId_'] = layerId2;
 
       await view['onAssetChanged_'](mockAsset);
+      assert(view['selectDefaultLayer_']).toNot.haveBeenCalled();
       assert(view.imageEditorDataRowHook_.set).to.haveBeenCalledWith(0);
+      assert(style).to.equal({
+        height: `${height}px`,
+        width: `${width}px`,
+      });
       assert(view.htmlEditorAssetIdHook_.set).to.haveBeenCalledWith(id);
       assert(view.htmlEditorProjectIdHook_.set).to.haveBeenCalledWith(projectId);
       assert(view.imageEditorAssetIdHook_.set).to.haveBeenCalledWith(id);
@@ -244,6 +287,82 @@ describe('asset.LayerView', () => {
       ]);
       assert(view['updateLayerPreviews_']).to.haveBeenCalledWith();
     });
+
+    it('should not throw error if the style object cannot be found', async (done: any) => {
+      const id = 'id';
+      const projectId = 'projectId';
+      const mockDataSource = jasmine.createSpyObj('DataSource', ['getData']);
+      mockDataSource.getData.and.returnValue(Promise.resolve(['data']));
+
+      const mockAsset = jasmine.createSpyObj('Asset', [
+        'getData',
+        'getId',
+        'getLayers',
+        'getProjectId',
+      ]);
+      mockAsset.getData.and.returnValue(mockDataSource);
+      mockAsset.getId.and.returnValue(id);
+      mockAsset.getProjectId.and.returnValue(projectId);
+      mockAsset.getLayers.and.returnValue([]);
+
+      spyOn(view.htmlEditorAssetIdHook_, 'set');
+      spyOn(view.htmlEditorProjectIdHook_, 'set');
+      spyOn(view.imageEditorAssetIdHook_, 'set');
+      spyOn(view.imageEditorDataRowHook_, 'set');
+      spyOn(view.imageEditorProjectIdHook_, 'set');
+      spyOn(view.textEditorAssetIdHook_, 'set');
+      spyOn(view.textEditorProjectIdHook_, 'set');
+      spyOn(view.layersChildElementHook_, 'set');
+
+      spyOn(view.layerPreviewsStyleHook_, 'get').and.returnValue(null);
+
+      spyOn(view, 'updateLayerPreviews_');
+      spyOn(view, 'selectDefaultLayer_');
+
+      await view['onAssetChanged_'](mockAsset);
+    });
+
+    it('should select the default layer if the selected layer cannot be found',
+        async (done: any) => {
+          const id = 'id';
+          const projectId = 'projectId';
+          const mockDataSource = jasmine.createSpyObj('DataSource', ['getData']);
+          mockDataSource.getData.and.returnValue(Promise.resolve(['data']));
+
+          const layerId = 'layerId';
+          const mockLayer = jasmine.createSpyObj('Layer1', ['getId']);
+          mockLayer.getId.and.returnValue(layerId);
+
+          const mockAsset = jasmine.createSpyObj('Asset', [
+            'getData',
+            'getId',
+            'getLayers',
+            'getProjectId',
+          ]);
+          mockAsset.getData.and.returnValue(mockDataSource);
+          mockAsset.getId.and.returnValue(id);
+          mockAsset.getProjectId.and.returnValue(projectId);
+          mockAsset.getLayers.and.returnValue([mockLayer]);
+
+          spyOn(view.htmlEditorAssetIdHook_, 'set');
+          spyOn(view.htmlEditorProjectIdHook_, 'set');
+          spyOn(view.imageEditorAssetIdHook_, 'set');
+          spyOn(view.imageEditorDataRowHook_, 'set');
+          spyOn(view.imageEditorProjectIdHook_, 'set');
+          spyOn(view.textEditorAssetIdHook_, 'set');
+          spyOn(view.textEditorProjectIdHook_, 'set');
+          spyOn(view.layersChildElementHook_, 'set');
+
+          spyOn(view.layerPreviewsStyleHook_, 'get').and.returnValue(null);
+
+          spyOn(view, 'updateLayerPreviews_');
+          spyOn(view, 'selectDefaultLayer_');
+
+          view['selectedLayerId_'] = 'otherLayerId';
+
+          await view['onAssetChanged_'](mockAsset);
+          assert(view['selectDefaultLayer_']).to.haveBeenCalledWith(mockAsset);
+        });
 
     it('should not set the data row if the data length is 0', async (done: any) => {
       const mockDataSource = jasmine.createSpyObj('DataSource', ['getData']);
@@ -318,6 +437,61 @@ describe('asset.LayerView', () => {
       assert(view['htmlEditorLayerIdHook_'].set).to.haveBeenCalledWith(id);
       assert(view['imageEditorLayerIdHook_'].set).to.haveBeenCalledWith(id);
       assert(view['textEditorLayerIdHook_'].set).to.haveBeenCalledWith(id);
+    });
+  });
+
+  describe('onLayerItemClick_', () => {
+    it('should select the layer correctly and hide the overlay', async (done: any) => {
+      const layerId = 'layerId';
+      const mockLayer = jasmine.createSpyObj('Layer', ['getId']);
+      mockLayer.getId.and.returnValue(layerId);
+
+      const mockAsset = jasmine.createSpyObj('Asset', ['getLayers']);
+      mockAsset.getLayers.and.returnValue([
+        jasmine.createSpyObj('layer1', ['getId']),
+        mockLayer,
+        jasmine.createSpyObj('layer2', ['getId']),
+      ]);
+      spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
+
+      spyOn(view, 'selectLayer_');
+
+      await view['onLayerItemClick_'](layerId);
+      assert(view['selectLayer_']).to.haveBeenCalledWith(mockLayer);
+      assert(mockOverlayService.hideOverlay).to.haveBeenCalledWith();
+    });
+
+    it('should not select any layers if the layer cannot be found', async (done: any) => {
+      const mockAsset = jasmine.createSpyObj('Asset', ['getLayers']);
+      mockAsset.getLayers.and.returnValue([
+        jasmine.createSpyObj('layer1', ['getId']),
+        jasmine.createSpyObj('layer2', ['getId']),
+      ]);
+      spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
+
+      spyOn(view, 'selectLayer_');
+
+      await view['onLayerItemClick_']('layerId');
+      assert(view['selectLayer_']).toNot.haveBeenCalled();
+      assert(mockOverlayService.hideOverlay).to.haveBeenCalledWith();
+    });
+
+    it('should not select any layers if the asset cannot be found', async (done: any) => {
+      spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(null));
+
+      spyOn(view, 'selectLayer_');
+
+      await view['onLayerItemClick_']('layerId');
+      assert(view['selectLayer_']).toNot.haveBeenCalled();
+      assert(mockOverlayService.hideOverlay).to.haveBeenCalledWith();
+    });
+
+    it('should not select any layers if the layerId is null', async (done: any) => {
+      spyOn(view, 'selectLayer_');
+
+      await view['onLayerItemClick_'](null);
+      assert(view['selectLayer_']).toNot.haveBeenCalled();
+      assert(mockOverlayService.hideOverlay).to.haveBeenCalledWith();
     });
   });
 
@@ -461,13 +635,45 @@ describe('asset.LayerView', () => {
         });
   });
 
+  describe('selectDefaultLayer_', () => {
+    it('should select the first layer', () => {
+      const layer = Mocks.object('layer');
+      const mockAsset = jasmine.createSpyObj('Asset', ['getLayers']);
+      mockAsset.getLayers.and.returnValue([
+        layer,
+        Mocks.object('layer2'),
+      ]);
+
+      spyOn(view, 'createLayer_');
+      spyOn(view, 'selectLayer_');
+
+      view['selectDefaultLayer_'](mockAsset);
+      assert(view['createLayer_']).toNot.haveBeenCalled();
+      assert(view['selectLayer_']).to.haveBeenCalledWith(layer);
+    });
+
+    it('should create a new layer if there are no layers in the asset', () => {
+      const mockAsset = jasmine.createSpyObj('Asset', ['getLayers']);
+      mockAsset.getLayers.and.returnValue([]);
+
+      spyOn(view, 'createLayer_');
+      spyOn(view, 'selectLayer_');
+
+      view['selectDefaultLayer_'](mockAsset);
+      assert(view['createLayer_']).to.haveBeenCalledWith(LayerType.IMAGE);
+      assert(view['selectLayer_']).toNot.haveBeenCalled();
+    });
+  });
+
   describe('selectLayer_', () => {
     it('should listen to layer changed event and deregister the previous one', () => {
       const mockOldDeregister = jasmine.createSpyObj('OldDeregister', ['dispose']);
       view['layerChangedDeregister_'] = mockOldDeregister;
 
       const mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
-      const mockLayer = jasmine.createSpyObj('Layer', ['on']);
+      const layerId = 'layerId';
+      const mockLayer = jasmine.createSpyObj('Layer', ['getId', 'on']);
+      mockLayer.getId.and.returnValue(layerId);
       mockLayer.on.and.returnValue(mockDeregister);
 
       const spyOnLayerChanged = spyOn(view, 'onLayerChanged_');
@@ -475,6 +681,7 @@ describe('asset.LayerView', () => {
       view['selectLayer_'](mockLayer);
 
       assert(view['onLayerChanged_']).to.haveBeenCalledWith(mockLayer);
+      assert(view['selectedLayerId_']).to.equal(layerId);
       assert(mockLayer.on).to.haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function), view);
       spyOnLayerChanged.calls.reset();
 
@@ -487,7 +694,8 @@ describe('asset.LayerView', () => {
       view['layerChangedDeregister_'] = null;
 
       const mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
-      const mockLayer = jasmine.createSpyObj('Layer', ['on']);
+      const mockLayer = jasmine.createSpyObj('Layer', ['getId', 'on']);
+      mockLayer.getId.and.returnValue('layerId');
       mockLayer.on.and.returnValue(mockDeregister);
 
       spyOn(view, 'onLayerChanged_');

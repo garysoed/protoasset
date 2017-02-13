@@ -147,6 +147,25 @@ export class LayerItem extends BaseThemedElement {
     this.onLayerIdChanged_();
   }
 
+  @handle('#cancel').event(DomEvent.CLICK, [Mode.READ])
+  @handle('#edit').event(DomEvent.CLICK, [Mode.EDIT])
+  onChangeModeClick_(mode: Mode, event: Event): void {
+    this.rootModeHook_.set(mode);
+    event.stopPropagation();
+  }
+
+  @handle('#delete').event(DomEvent.CLICK)
+  async onDeleteClick_(event: Event): Promise<void> {
+    event.stopPropagation();
+    const [asset, layer] = await Promise.all([this.getAsset_(), this.getLayer_()]);
+    if (asset === null || layer === null) {
+      return;
+    }
+
+    asset.removeLayer(layer);
+    this.assetCollection_.update(asset);
+  }
+
   /**
    * Handles when the layer was changed.
    * @param layer The layer that was changed.
@@ -175,7 +194,9 @@ export class LayerItem extends BaseThemedElement {
   }
 
   @handle('#ok').event(DomEvent.CLICK)
-  async onOkClick_(): Promise<void> {
+  async onOkClick_(event: Event): Promise<void> {
+    event.stopPropagation();
+
     const [asset, layer] = await Promise.all([this.getAsset_(), this.getLayer_()]);
     if (asset === null || layer === null) {
       return;
@@ -183,13 +204,24 @@ export class LayerItem extends BaseThemedElement {
 
     layer.setName(this.nameInputHook_.get() || '');
     this.assetCollection_.update(asset);
-    this.setMode_(Mode.READ);
+    this.rootModeHook_.set(Mode.READ);
   }
 
-  @handle('#cancel').event(DomEvent.CLICK, [Mode.READ])
-  @handle('#edit').event(DomEvent.CLICK, [Mode.EDIT])
-  setMode_(mode: Mode): void {
-    this.rootModeHook_.set(mode);
+  @handle('#up').event(DomEvent.CLICK, [-1])
+  @handle('#down').event(DomEvent.CLICK, [1])
+  async onMoveButtonClick_(moveIndex: number, event: Event): Promise<void> {
+    event.stopPropagation();
+    const [asset, layer] = await Promise.all([this.getAsset_(), this.getLayer_()]);
+    if (asset === null || layer === null) {
+      return;
+    }
+
+    const index = asset.getLayers().indexOf(layer);
+    if (index < 0) {
+      return;
+    }
+    asset.insertLayer(layer, index + moveIndex);
+    this.assetCollection_.update(asset);
   }
 
   /**

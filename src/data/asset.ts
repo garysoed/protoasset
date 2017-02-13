@@ -155,6 +155,42 @@ export class Asset extends BaseListenable<DataEvents> {
   }
 
   /**
+   * Inserts a layer at the specified index. If the layer already exists, move to the specified
+   * index.
+   * @param layer The layer to insert.
+   * @param index The index to insert / move the layer to.
+   */
+  insertLayer(layer: BaseLayer, index: number = this.layers_.length): void {
+    const removeIndex = this.layers_.indexOf(layer);
+    if (removeIndex === index) {
+      return;
+    }
+
+    this.dispatch(DataEvents.CHANGED, () => {
+      if (removeIndex >= 0) {
+        this.layers_.splice(removeIndex, 1);
+      }
+      this.layers_.splice(index, 0, layer);
+    });
+  }
+
+  /**
+   * Removes the layer.
+   * @param layer The layer to remove.
+   */
+  removeLayer(layer: BaseLayer): void {
+    const index = this.layers_.indexOf(layer);
+    if (index < 0) {
+      return;
+    }
+
+    this.dispatch(DataEvents.CHANGED, () => {
+      const [deletedLayer] = this.layers_.splice(index, 1);
+      deletedLayer.dispose();
+    });
+  }
+
+  /**
    * @param data The data to set.
    */
   setData(data: IDataSource<string[][]>): void {

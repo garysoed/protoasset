@@ -180,6 +180,60 @@ describe('asset.LayerItem', () => {
     });
   });
 
+  describe('onChangeModeClick_', () => {
+    it('should set the root mode correctly and stop propagation', () => {
+      const mockEvent = jasmine.createSpyObj('Event', ['stopPropagation']);
+      const mode = Mode.EDIT;
+      spyOn(item.rootModeHook_, 'set');
+      item.onChangeModeClick_(mode, mockEvent);
+      assert(item.rootModeHook_.set).to.haveBeenCalledWith(mode);
+      assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
+    });
+  });
+
+  describe('onDeleteClick_', () => {
+    it('should remove the layer, update the asset and stop the event propagation',
+        async (done: any) => {
+          const layer = Mocks.object('layer');
+          spyOn(item, 'getLayer_').and.returnValue(Promise.resolve(layer));
+
+          const mockAsset = jasmine.createSpyObj('Asset', ['removeLayer']);
+          spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
+
+          const mockEvent = jasmine.createSpyObj('Event', ['stopPropagation']);
+
+          await item.onDeleteClick_(mockEvent);
+          assert(mockAssetCollection.update).to.haveBeenCalledWith(mockAsset);
+          assert(mockAsset.removeLayer).to.haveBeenCalledWith(layer);
+          assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
+        });
+
+    it('should not update the asset if there are no assets', async (done: any) => {
+      const layer = Mocks.object('layer');
+      spyOn(item, 'getLayer_').and.returnValue(Promise.resolve(layer));
+      spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(null));
+
+      const mockEvent = jasmine.createSpyObj('Event', ['stopPropagation']);
+
+      await item.onDeleteClick_(mockEvent);
+      assert(mockAssetCollection.update).toNot.haveBeenCalled();
+      assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
+    });
+
+    it('should not update the asset if there are no layers', async (done: any) => {
+      spyOn(item, 'getLayer_').and.returnValue(Promise.resolve(null));
+
+      const mockAsset = jasmine.createSpyObj('Asset', ['removeLayer']);
+      spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
+
+      const mockEvent = jasmine.createSpyObj('Event', ['stopPropagation']);
+
+      await item.onDeleteClick_(mockEvent);
+      assert(mockAssetCollection.update).toNot.haveBeenCalled();
+      assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
+    });
+  });
+
   describe('onLayerChanged_', () => {
     it('should update the UI correctly', () => {
       const name = 'name';
@@ -265,13 +319,16 @@ describe('asset.LayerItem', () => {
 
       const asset = Mocks.object('asset');
       spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(asset));
-      spyOn(item, 'setMode_');
+      spyOn(item.rootModeHook_, 'set');
 
-      await item['onOkClick_']();
+      const mockEvent = jasmine.createSpyObj('Event', ['stopPropagation']);
 
-      assert(item['setMode_']).to.haveBeenCalledWith(Mode.READ);
+      await item['onOkClick_'](mockEvent);
+
+      assert(item.rootModeHook_.set).to.haveBeenCalledWith(Mode.READ);
       assert(mockAssetCollection.update).to.haveBeenCalledWith(asset);
       assert(mockLayer.setName).to.haveBeenCalledWith(name);
+      assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
     });
 
     it('should do nothing if asset cannot be found', async (done: any) => {
@@ -279,33 +336,100 @@ describe('asset.LayerItem', () => {
       spyOn(item, 'getLayer_').and.returnValue(Promise.resolve(mockLayer));
 
       spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(null));
-      spyOn(item, 'setMode_');
+      spyOn(item.rootModeHook_, 'set');
 
-      await item['onOkClick_']();
+      const mockEvent = jasmine.createSpyObj('Event', ['stopPropagation']);
 
-      assert(item['setMode_']).toNot.haveBeenCalled();
+      await item['onOkClick_'](mockEvent);
+
+      assert(item.rootModeHook_.set).toNot.haveBeenCalled();
       assert(mockAssetCollection.update).toNot.haveBeenCalled();
+      assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
     });
 
     it('should do nothing if layer cannot be found', async (done: any) => {
       spyOn(item, 'getLayer_').and.returnValue(Promise.resolve(null));
 
       spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(Mocks.object('asset')));
-      spyOn(item, 'setMode_');
+      spyOn(item.rootModeHook_, 'set');
 
-      await item['onOkClick_']();
+      const mockEvent = jasmine.createSpyObj('Event', ['stopPropagation']);
 
-      assert(item['setMode_']).toNot.haveBeenCalled();
+      await item['onOkClick_'](mockEvent);
+
+      assert(item.rootModeHook_.set).toNot.haveBeenCalled();
       assert(mockAssetCollection.update).toNot.haveBeenCalled();
+      assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
     });
   });
 
-  describe('setMode_', () => {
-    it('should update the root hook correctly', () => {
-      const mode = Mode.EDIT;
-      spyOn(item.rootModeHook_, 'set');
-      item['setMode_'](mode);
-      assert(item.rootModeHook_.set).to.haveBeenCalledWith(mode);
+  describe('onMoveButtonClick_', () => {
+    it('should move the layer correctly, update the asset, and stop the event propagation',
+        async (done: any) => {
+          const moveIndex = 123;
+          const layer = Mocks.object('layer');
+          spyOn(item, 'getLayer_').and.returnValue(Promise.resolve(layer));
+
+          const mockAsset = jasmine.createSpyObj('Asset', ['getLayers', 'insertLayer']);
+          mockAsset.getLayers.and.returnValue([
+            Mocks.object('otherLayer1'),
+            layer,
+            Mocks.object('otherLayer2'),
+          ]);
+          spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
+
+          const mockEvent = jasmine.createSpyObj('Event', ['stopPropagation']);
+
+          await item.onMoveButtonClick_(moveIndex, mockEvent);
+          assert(mockAssetCollection.update).to.haveBeenCalledWith(mockAsset);
+          assert(mockAsset.insertLayer).to.haveBeenCalledWith(layer, 1 + moveIndex);
+          assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
+        });
+
+    it('should not update the asset if the layer is not in the asset', async (done: any) => {
+      const moveIndex = 123;
+      spyOn(item, 'getLayer_').and.returnValue(Promise.resolve(null));
+
+      const mockAsset = jasmine.createSpyObj('Asset', ['getLayers', 'insertLayer']);
+      mockAsset.getLayers.and.returnValue([
+        Mocks.object('otherLayer1'),
+        Mocks.object('otherLayer2'),
+      ]);
+      spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
+
+      const mockEvent = jasmine.createSpyObj('Event', ['stopPropagation']);
+
+      await item.onMoveButtonClick_(moveIndex, mockEvent);
+      assert(mockAssetCollection.update).toNot.haveBeenCalled();
+      assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
+    });
+
+    it('should not update the asset if there are no assets', async (done: any) => {
+      const moveIndex = 123;
+      const layer = Mocks.object('layer');
+      spyOn(item, 'getLayer_').and.returnValue(Promise.resolve(layer));
+      spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(null));
+
+      const mockEvent = jasmine.createSpyObj('Event', ['stopPropagation']);
+
+      await item.onMoveButtonClick_(moveIndex, mockEvent);
+      assert(mockAssetCollection.update).toNot.haveBeenCalled();
+      assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
+    });
+
+    it('should not update the asset if there are no layers', async (done: any) => {
+      const moveIndex = 123;
+      spyOn(item, 'getLayer_').and.returnValue(Promise.resolve(null));
+
+      const mockAsset = jasmine.createSpyObj('Asset', ['getLayers', 'insertLayer']);
+      mockAsset.getLayers.and.returnValue([]);
+      spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
+
+      const mockEvent = jasmine.createSpyObj('Event', ['stopPropagation']);
+
+      await item.onMoveButtonClick_(moveIndex, mockEvent);
+      assert(mockAssetCollection.update).toNot.haveBeenCalled();
+      assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
     });
   });
 

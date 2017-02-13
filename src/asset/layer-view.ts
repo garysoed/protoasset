@@ -1,6 +1,6 @@
 import {Arrays} from 'external/gs_tools/src/collection';
 import {DisposableFunction} from 'external/gs_tools/src/dispose';
-import {DomEvent} from 'external/gs_tools/src/event';
+import {DomEvent, ListenableDom} from 'external/gs_tools/src/event';
 import {inject} from 'external/gs_tools/src/inject';
 import {IdGenerator, SimpleIdGenerator} from 'external/gs_tools/src/random';
 import {Enums} from 'external/gs_tools/src/typescript';
@@ -46,8 +46,18 @@ export function layerItemDataSetter(data: LayerItemData, element: Element): void
   element.setAttribute('project-id', data.projectId);
 }
 
-export function layerItemGenerator(document: Document): Element {
-  return document.createElement('pa-asset-layer-item');
+export function layerItemGenerator(document: Document, instance: LayerView): Element {
+  const element = document.createElement('pa-asset-layer-item');
+  const listenableDom = ListenableDom.of(element);
+  instance.addDisposable(
+      listenableDom.on(
+          DomEvent.CLICK,
+          () => {
+            instance.onLayerItemClick_(element.getAttribute('layer-id'));
+          },
+          instance));
+  instance.addDisposable(listenableDom);
+  return element;
 }
 
 export function layerPreviewDataSetter(data: LayerPreviewData, element: Element): void {
@@ -96,6 +106,9 @@ export class LayerView extends BaseThemedElement {
   @bind('#previews').childrenElements(layerPreviewGenerator, layerPreviewDataSetter)
   readonly layerPreviewsChildElementHook_: DomHook<LayerPreviewData[]>;
 
+  @bind('#previews').property('style')
+  readonly layerPreviewsStyleHook_: DomHook<CSSStyleDeclaration>;
+
   @bind('#layerTypeSwitch').attribute('gs-value', EnumParser(LayerType))
   readonly layerTypeSwitchHook_: DomHook<LayerType>;
 
@@ -141,6 +154,7 @@ export class LayerView extends BaseThemedElement {
     this.layerIdGenerator_ = new SimpleIdGenerator();
     this.layerNameHook_ = DomHook.of<string>();
     this.layerPreviewsChildElementHook_ = DomHook.of<LayerPreviewData[]>();
+    this.layerPreviewsStyleHook_ = DomHook.of<CSSStyleDeclaration>();
     this.layerTypeSwitchHook_ = DomHook.of<LayerType>();
     this.layersChildElementHook_ = DomHook.of<LayerItemData[]>();
     this.overlayService_ = overlayService;
@@ -190,8 +204,7 @@ export class LayerView extends BaseThemedElement {
         throw Validate.fail(`Unsupported layer type: ${layerType}`);
     }
 
-    layers.splice(0, 0, layer);
-    asset.setLayers(layers);
+    asset.insertLayer(layer);
 
     this.selectLayer_(layer);
     this.overlayService_.hideOverlay();
@@ -209,6 +222,7 @@ export class LayerView extends BaseThemedElement {
     if (this.layerChangedDeregister_ !== null) {
       this.layerChangedDeregister_.dispose();
     }
+
     super.disposeInternal();
   }
 
@@ -248,6 +262,11 @@ export class LayerView extends BaseThemedElement {
       // TODO: Display error if there are no data.
     }
 
+    const style = this.layerPreviewsStyleHook_.get();
+    if (style !== null) {
+      style.height = `${asset.getHeight()}px`;
+      style.width = `${asset.getWidth()}px`;
+    }
     // TODO: Let user pick the data row.
     this.imageEditorDataRowHook_.set(0);
 
@@ -263,6 +282,17 @@ export class LayerView extends BaseThemedElement {
         .asArray();
     this.layersChildElementHook_.set(layerItemData);
     this.updateLayerPreviews_();
+
+    // Check if the currently selected layer exists.
+    const layers = asset.getLayers();
+    const layer = Arrays
+        .of(layers)
+        .find((layer: BaseLayer) => {
+          return layer.getId() === this.selectedLayerId_;
+        });
+    if (layer === null) {
+      this.selectDefaultLayer_(asset);
+    }
   }
 
   /**
@@ -291,6 +321,32 @@ export class LayerView extends BaseThemedElement {
   }
 
   /**
+   * Handles event when layer item is clicked.
+   */
+  async onLayerItemClick_(layerId: string | null): Promise<void> {
+    this.overlayService_.hideOverlay();
+    if (layerId === null) {
+      return;
+    }
+
+    const asset = await this.getAsset_();
+    if (asset === null) {
+      return;
+    }
+
+    const layer = Arrays
+        .of(asset.getLayers())
+        .find((layer: BaseLayer) => {
+          return layer.getId() === layerId;
+        });
+    if (layer === null) {
+      return;
+    }
+
+    this.selectLayer_(layer);
+  }
+
+  /**
    * Handles when the route was changed.
    * @return Promise that will be resolved when all operations are done.
    */
@@ -315,14 +371,21 @@ export class LayerView extends BaseThemedElement {
         this.onAssetChanged_.bind(this, asset),
         this);
     this.onAssetChanged_(asset);
+    this.selectDefaultLayer_(asset);
+  }
 
+  /**
+   * Selects a default layer, or create a new layer and select it if there are no layers in the
+   * given asset.
+   * @param asset The asset to select the default layer in.
+   */
+  private selectDefaultLayer_(asset: Asset): void {
     let layers = asset.getLayers();
     if (layers.length <= 0) {
-      await this.createLayer_(LayerType.IMAGE);
-      return;
+      this.createLayer_(LayerType.IMAGE);
+    } else {
+      this.selectLayer_(layers[0]);
     }
-
-    this.selectLayer_(layers[0]);
   }
 
   /**
@@ -338,6 +401,8 @@ export class LayerView extends BaseThemedElement {
         DataEvents.CHANGED,
         this.onLayerChanged_.bind(this, layer),
         this);
+
+    this.selectedLayerId_ = layer.getId();
     this.onLayerChanged_(layer);
   }
 

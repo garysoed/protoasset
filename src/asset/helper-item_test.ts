@@ -11,16 +11,19 @@ import {HelperItem} from './helper-item';
 
 describe('asset.HelperItem', () => {
   let mockAssetCollection;
+  let mockOverlayService;
   let mockRouteFactoryService;
   let mockRouteService;
   let item: HelperItem;
 
   beforeEach(() => {
     mockAssetCollection = jasmine.createSpyObj('AssetCollection', ['get', 'update']);
+    mockOverlayService = jasmine.createSpyObj('OverlayService', ['hideOverlay']);
     mockRouteFactoryService = jasmine.createSpyObj('RouteFactoryService', ['helper']);
     mockRouteService = jasmine.createSpyObj('RouteService', ['goTo']);
     item = new HelperItem(
         mockAssetCollection,
+        mockOverlayService,
         mockRouteFactoryService,
         mockRouteService,
         jasmine.createSpyObj('ThemeService', ['applyTheme']));
@@ -29,75 +32,75 @@ describe('asset.HelperItem', () => {
 
   describe('getAsset_', () => {
     it('should resolve with the correct asset', async (done: any) => {
-      let projectId = 'projectId';
-      let assetId = 'assetId';
+      const projectId = 'projectId';
+      const assetId = 'assetId';
       spyOn(item['assetIdHook_'], 'get').and.returnValue(assetId);
       spyOn(item['projectIdHook_'], 'get').and.returnValue(projectId);
 
-      let asset = Mocks.object('asset');
+      const asset = Mocks.object('asset');
       mockAssetCollection.get.and.returnValue(Promise.resolve(asset));
 
-      let actualAsset = await item['getAsset_']();
+      const actualAsset = await item['getAsset_']();
       assert(actualAsset).to.equal(asset);
       assert(mockAssetCollection.get).to.haveBeenCalledWith(projectId, assetId);
     });
 
     it('should resolve with null if there are no asset IDs', async (done: any) => {
-      let projectId = 'projectId';
+      const projectId = 'projectId';
       spyOn(item['assetIdHook_'], 'get').and.returnValue(null);
       spyOn(item['projectIdHook_'], 'get').and.returnValue(projectId);
 
-      let actualAsset = await item['getAsset_']();
+      const actualAsset = await item['getAsset_']();
       assert(actualAsset).to.beNull();
     });
 
     it('should resolve with null if there are no project IDs', async (done: any) => {
-      let assetId = 'assetId';
+      const assetId = 'assetId';
       spyOn(item['assetIdHook_'], 'get').and.returnValue(assetId);
       spyOn(item['projectIdHook_'], 'get').and.returnValue(null);
 
-      let actualAsset = await item['getAsset_']();
+      const actualAsset = await item['getAsset_']();
       assert(actualAsset).to.beNull();
     });
   });
 
   describe('getHelper_', () => {
     it('should resolve with the correct helper', async (done: any) => {
-      let helperId = 'helperId';
+      const helperId = 'helperId';
       spyOn(item['helperIdHook_'], 'get').and.returnValue(helperId);
 
-      let helper = Mocks.object('helper');
-      let mockAsset = jasmine.createSpyObj('Asset', ['getHelper']);
+      const helper = Mocks.object('helper');
+      const mockAsset = jasmine.createSpyObj('Asset', ['getHelper']);
       mockAsset.getHelper.and.returnValue(helper);
       spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
 
-      let actualHelper = await item['getHelper_']();
+      const actualHelper = await item['getHelper_']();
       assert(actualHelper).to.equal(helper);
       assert(mockAsset.getHelper).to.haveBeenCalledWith(helperId);
     });
 
     it('should resolve with null if asset cannot be found', async (done: any) => {
-      let helperId = 'helperId';
+      const helperId = 'helperId';
       spyOn(item['helperIdHook_'], 'get').and.returnValue(helperId);
 
       spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(null));
 
-      let actualHelper = await item['getHelper_']();
+      const actualHelper = await item['getHelper_']();
       assert(actualHelper).to.beNull();
     });
 
     it('should resolve with null if there are no helper IDs', async (done: any) => {
       spyOn(item['helperIdHook_'], 'get').and.returnValue(null);
 
-      let actualHelper = await item['getHelper_']();
+      const actualHelper = await item['getHelper_']();
       assert(actualHelper).to.beNull();
     });
   });
 
   describe('onHelperUpdated_', () => {
     it('should set the name bridge correctly', () => {
-      let name = 'name';
-      let mockHelper = jasmine.createSpyObj('Helper', ['getName']);
+      const name = 'name';
+      const mockHelper = jasmine.createSpyObj('Helper', ['getName']);
       mockHelper.getName.and.returnValue(name);
       spyOn(item['nameHook_'], 'set');
 
@@ -109,19 +112,21 @@ describe('asset.HelperItem', () => {
 
   describe('onCancelClick_', () => {
     it('should set the root value to read', () => {
+      const mockEvent = jasmine.createSpyObj('Event', ['stopPropagation']);
       spyOn(item['rootValueHook_'], 'set');
-      item['onCancelClick_']();
+      item['onCancelClick_'](mockEvent);
       assert(item['rootValueHook_'].set).to.haveBeenCalledWith('read');
+      assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
     });
   });
 
   describe('onDeleteClick_', () => {
     it('should delete the helper and update the asset and helper', async (done: any) => {
-      let mockAsset = jasmine.createSpyObj('Asset', ['deleteHelper']);
+      const mockAsset = jasmine.createSpyObj('Asset', ['deleteHelper']);
       spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
 
-      let helperId = 'helperId';
-      let mockHelper = jasmine.createSpyObj('Helper', ['getId']);
+      const helperId = 'helperId';
+      const mockHelper = jasmine.createSpyObj('Helper', ['getId']);
       mockHelper.getId.and.returnValue(helperId);
       spyOn(item, 'getHelper_').and.returnValue(Promise.resolve(mockHelper));
 
@@ -129,17 +134,20 @@ describe('asset.HelperItem', () => {
 
       mockAssetCollection.update.and.returnValue(Promise.resolve());
 
-      await item['onDeleteClick_']();
+      const mockEvent = jasmine.createSpyObj('Event', ['stopPropagation']);
+
+      await item['onDeleteClick_'](mockEvent);
       assert(item['updateHelper_']).to.haveBeenCalledWith();
       assert(mockAssetCollection.update).to.haveBeenCalledWith(mockAsset);
       assert(mockAsset.deleteHelper).to.haveBeenCalledWith(helperId);
+      assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
     });
 
     it('should do nothing if the asset cannot be found', async (done: any) => {
       spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(null));
 
-      let helperId = 'helperId';
-      let mockHelper = jasmine.createSpyObj('Helper', ['getId']);
+      const helperId = 'helperId';
+      const mockHelper = jasmine.createSpyObj('Helper', ['getId']);
       mockHelper.getId.and.returnValue(helperId);
       spyOn(item, 'getHelper_').and.returnValue(Promise.resolve(mockHelper));
 
@@ -147,12 +155,15 @@ describe('asset.HelperItem', () => {
 
       mockAssetCollection.update.and.returnValue(Promise.resolve());
 
-      await item['onDeleteClick_']();
+      const mockEvent = jasmine.createSpyObj('Event', ['stopPropagation']);
+
+      await item['onDeleteClick_'](mockEvent);
       assert(item['updateHelper_']).toNot.haveBeenCalled();
+      assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
     });
 
     it('should do nothing if the helper cannot be found', async (done: any) => {
-      let mockAsset = jasmine.createSpyObj('Asset', ['deleteHelper']);
+      const mockAsset = jasmine.createSpyObj('Asset', ['deleteHelper']);
       spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
       spyOn(item, 'getHelper_').and.returnValue(Promise.resolve(null));
 
@@ -160,23 +171,29 @@ describe('asset.HelperItem', () => {
 
       mockAssetCollection.update.and.returnValue(Promise.resolve());
 
-      await item['onDeleteClick_']();
+      const mockEvent = jasmine.createSpyObj('Event', ['stopPropagation']);
+
+      await item['onDeleteClick_'](mockEvent);
       assert(item['updateHelper_']).toNot.haveBeenCalled();
+      assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
     });
   });
 
   describe('onEditClick_', () => {
     it('should update the input name and set the root value to edit', async (done: any) => {
-      let name = 'name';
-      let mockHelper = jasmine.createSpyObj('Helper', ['getName']);
+      const name = 'name';
+      const mockHelper = jasmine.createSpyObj('Helper', ['getName']);
       mockHelper.getName.and.returnValue(name);
       spyOn(item, 'getHelper_').and.returnValue(Promise.resolve(mockHelper));
       spyOn(item['rootValueHook_'], 'set');
       spyOn(item['nameInputHook_'], 'set');
 
-      await item['onEditClick_']();
+      const mockEvent = jasmine.createSpyObj('Event', ['stopPropagation']);
+
+      await item['onEditClick_'](mockEvent);
       assert(item['rootValueHook_'].set).to.haveBeenCalledWith('edit');
       assert(item['nameInputHook_'].set).to.haveBeenCalledWith(name);
+      assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
     });
 
     it('should delete the input name if the helper does not exist', async (done: any) => {
@@ -184,30 +201,130 @@ describe('asset.HelperItem', () => {
       spyOn(item['rootValueHook_'], 'set');
       spyOn(item['nameInputHook_'], 'delete');
 
-      await item['onEditClick_']();
+      const mockEvent = jasmine.createSpyObj('Event', ['stopPropagation']);
+
+      await item['onEditClick_'](mockEvent);
       assert(item['rootValueHook_'].set).to.haveBeenCalledWith('edit');
       assert(item['nameInputHook_'].delete).to.haveBeenCalledWith();
+      assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
     });
   });
 
-  describe('onNameClick_', () => {
+  describe('onOkClick_', () => {
+    it('should update the helper, save the asset, and set the root value to read',
+        async (done: any) => {
+          const helperId = 'helperId';
+          spyOn(item['helperIdHook_'], 'get').and.returnValue(helperId);
+
+          const mockHelper = jasmine.createSpyObj('Helper', ['setName']);
+          const mockAsset = jasmine.createSpyObj('Asset', ['getHelper']);
+          mockAsset.getHelper.and.returnValue(mockHelper);
+          spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
+
+          const name = 'name';
+          spyOn(item['nameInputHook_'], 'get').and.returnValue(name);
+          spyOn(item['rootValueHook_'], 'set');
+
+          const mockEvent = jasmine.createSpyObj('Event', ['stopPropagation']);
+
+          await item['onOkClick_'](mockEvent);
+          assert(mockAssetCollection.update).to.haveBeenCalledWith(mockAsset);
+          assert(item['rootValueHook_'].set).to.haveBeenCalledWith('read');
+          assert(mockHelper.setName).to.haveBeenCalledWith(name);
+          assert(mockAsset.getHelper).to.haveBeenCalledWith(helperId);
+          assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
+        });
+
+    it('should set the name to "" if null', async (done: any) => {
+      const helperId = 'helperId';
+      spyOn(item['helperIdHook_'], 'get').and.returnValue(helperId);
+
+      const mockHelper = jasmine.createSpyObj('Helper', ['setName']);
+      const mockAsset = jasmine.createSpyObj('Asset', ['getHelper']);
+      mockAsset.getHelper.and.returnValue(mockHelper);
+      spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
+
+      spyOn(item['nameInputHook_'], 'get').and.returnValue(null);
+      spyOn(item['rootValueHook_'], 'set');
+
+      const mockEvent = jasmine.createSpyObj('Event', ['stopPropagation']);
+
+      await item['onOkClick_'](mockEvent);
+      assert(mockHelper.setName).to.haveBeenCalledWith('');
+      assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
+    });
+
+    it('should do nothing if the helper does not exist', async (done: any) => {
+      const helperId = 'helperId';
+      spyOn(item['helperIdHook_'], 'get').and.returnValue(helperId);
+
+      const mockAsset = jasmine.createSpyObj('Asset', ['getHelper']);
+      mockAsset.getHelper.and.returnValue(null);
+      spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
+
+      const name = 'name';
+      spyOn(item['nameInputHook_'], 'get').and.returnValue(name);
+      spyOn(item['rootValueHook_'], 'set');
+
+      const mockEvent = jasmine.createSpyObj('Event', ['stopPropagation']);
+
+      await item['onOkClick_'](mockEvent);
+      assert(mockAssetCollection.update).toNot.haveBeenCalled();
+      assert(item['rootValueHook_'].set).toNot.haveBeenCalled();
+      assert(mockAsset.getHelper).to.haveBeenCalledWith(helperId);
+      assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
+    });
+
+    it('should do nothing if the asset does not exist', async (done: any) => {
+      const helperId = 'helperId';
+      spyOn(item['helperIdHook_'], 'get').and.returnValue(helperId);
+
+      spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(null));
+
+      const name = 'name';
+      spyOn(item['nameInputHook_'], 'get').and.returnValue(name);
+      spyOn(item['rootValueHook_'], 'set');
+
+      const mockEvent = jasmine.createSpyObj('Event', ['stopPropagation']);
+
+      await item['onOkClick_'](mockEvent);
+      assert(mockAssetCollection.update).toNot.haveBeenCalled();
+      assert(item['rootValueHook_'].set).toNot.haveBeenCalled();
+      assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
+    });
+
+    it('should do nothing if the helper ID does not exist', async (done: any) => {
+      spyOn(item['helperIdHook_'], 'get').and.returnValue(null);
+
+      spyOn(item['rootValueHook_'], 'set');
+
+      const mockEvent = jasmine.createSpyObj('Event', ['stopPropagation']);
+
+      await item['onOkClick_'](mockEvent);
+      assert(mockAssetCollection.update).toNot.haveBeenCalled();
+      assert(item['rootValueHook_'].set).toNot.haveBeenCalled();
+      assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
+    });
+  });
+
+  describe('onReadRootClick_', () => {
     it('should navigate to the correct helper', async (done: any) => {
-      let assetId = 'assetId';
-      let projectId = 'projectId';
-      let mockAsset = jasmine.createSpyObj('Asset', ['getId', 'getProjectId']);
+      const assetId = 'assetId';
+      const projectId = 'projectId';
+      const mockAsset = jasmine.createSpyObj('Asset', ['getId', 'getProjectId']);
       mockAsset.getId.and.returnValue(assetId);
       mockAsset.getProjectId.and.returnValue(projectId);
       spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
 
-      let helperId = 'helperId';
-      let mockHelper = jasmine.createSpyObj('Helper', ['getId']);
+      const helperId = 'helperId';
+      const mockHelper = jasmine.createSpyObj('Helper', ['getId']);
       mockHelper.getId.and.returnValue(helperId);
       spyOn(item, 'getHelper_').and.returnValue(Promise.resolve(mockHelper));
 
-      let helperRouteFactory = Mocks.object('helperRouteFactory');
+      const helperRouteFactory = Mocks.object('helperRouteFactory');
       mockRouteFactoryService.helper.and.returnValue(helperRouteFactory);
 
-      await item['onNameClick_']();
+      await item['onReadRootClick_']();
       assert(mockRouteService.goTo).to.haveBeenCalledWith(
           helperRouteFactory,
           {assetId, helperId, projectId});
@@ -216,106 +333,24 @@ describe('asset.HelperItem', () => {
     it('should do nothing if the asset does not exist', async (done: any) => {
       spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(null));
 
-      let mockHelper = jasmine.createSpyObj('Helper', ['getId']);
+      const mockHelper = jasmine.createSpyObj('Helper', ['getId']);
       mockHelper.getId.and.returnValue('helperId');
       spyOn(item, 'getHelper_').and.returnValue(Promise.resolve(mockHelper));
 
-      await item['onNameClick_']();
+      await item['onReadRootClick_']();
       assert(mockRouteService.goTo).toNot.haveBeenCalled();
     });
 
     it('should do nothing if the helper cannot be found', async (done: any) => {
-      let mockAsset = jasmine.createSpyObj('Asset', ['getId', 'getProjectId']);
+      const mockAsset = jasmine.createSpyObj('Asset', ['getId', 'getProjectId']);
       mockAsset.getId.and.returnValue('assetId');
       mockAsset.getProjectId.and.returnValue('projectId');
       spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
 
       spyOn(item, 'getHelper_').and.returnValue(Promise.resolve(null));
 
-      await item['onNameClick_']();
+      await item['onReadRootClick_']();
       assert(mockRouteService.goTo).toNot.haveBeenCalled();
-    });
-  });
-
-  describe('onOkClick_', () => {
-    it('should update the helper, save the asset, and set the root value to read',
-        async (done: any) => {
-          let helperId = 'helperId';
-          spyOn(item['helperIdHook_'], 'get').and.returnValue(helperId);
-
-          let mockHelper = jasmine.createSpyObj('Helper', ['setName']);
-          let mockAsset = jasmine.createSpyObj('Asset', ['getHelper']);
-          mockAsset.getHelper.and.returnValue(mockHelper);
-          spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
-
-          let name = 'name';
-          spyOn(item['nameInputHook_'], 'get').and.returnValue(name);
-          spyOn(item['rootValueHook_'], 'set');
-
-          await item['onOkClick_']();
-          assert(mockAssetCollection.update).to.haveBeenCalledWith(mockAsset);
-          assert(item['rootValueHook_'].set).to.haveBeenCalledWith('read');
-          assert(mockHelper.setName).to.haveBeenCalledWith(name);
-          assert(mockAsset.getHelper).to.haveBeenCalledWith(helperId);
-        });
-
-    it('should set the name to "" if null', async (done: any) => {
-      let helperId = 'helperId';
-      spyOn(item['helperIdHook_'], 'get').and.returnValue(helperId);
-
-      let mockHelper = jasmine.createSpyObj('Helper', ['setName']);
-      let mockAsset = jasmine.createSpyObj('Asset', ['getHelper']);
-      mockAsset.getHelper.and.returnValue(mockHelper);
-      spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
-
-      spyOn(item['nameInputHook_'], 'get').and.returnValue(null);
-      spyOn(item['rootValueHook_'], 'set');
-
-      await item['onOkClick_']();
-      assert(mockHelper.setName).to.haveBeenCalledWith('');
-    });
-
-    it('should do nothing if the helper does not exist', async (done: any) => {
-      let helperId = 'helperId';
-      spyOn(item['helperIdHook_'], 'get').and.returnValue(helperId);
-
-      let mockAsset = jasmine.createSpyObj('Asset', ['getHelper']);
-      mockAsset.getHelper.and.returnValue(null);
-      spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
-
-      let name = 'name';
-      spyOn(item['nameInputHook_'], 'get').and.returnValue(name);
-      spyOn(item['rootValueHook_'], 'set');
-
-      await item['onOkClick_']();
-      assert(mockAssetCollection.update).toNot.haveBeenCalled();
-      assert(item['rootValueHook_'].set).toNot.haveBeenCalled();
-      assert(mockAsset.getHelper).to.haveBeenCalledWith(helperId);
-    });
-
-    it('should do nothing if the asset does not exist', async (done: any) => {
-      let helperId = 'helperId';
-      spyOn(item['helperIdHook_'], 'get').and.returnValue(helperId);
-
-      spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(null));
-
-      let name = 'name';
-      spyOn(item['nameInputHook_'], 'get').and.returnValue(name);
-      spyOn(item['rootValueHook_'], 'set');
-
-      await item['onOkClick_']();
-      assert(mockAssetCollection.update).toNot.haveBeenCalled();
-      assert(item['rootValueHook_'].set).toNot.haveBeenCalled();
-    });
-
-    it('should do nothing if the helper ID does not exist', async (done: any) => {
-      spyOn(item['helperIdHook_'], 'get').and.returnValue(null);
-
-      spyOn(item['rootValueHook_'], 'set');
-
-      await item['onOkClick_']();
-      assert(mockAssetCollection.update).toNot.haveBeenCalled();
-      assert(item['rootValueHook_'].set).toNot.haveBeenCalled();
     });
   });
 
@@ -323,15 +358,15 @@ describe('asset.HelperItem', () => {
     it('should dispose the previous helper deregister, listen to the CHANGED event, and call ' +
         'helperUpdated_',
         async (done: any) => {
-          let mockPreviousDeregister = jasmine.createSpyObj('PreviousDeregister', ['dispose']);
+          const mockPreviousDeregister = jasmine.createSpyObj('PreviousDeregister', ['dispose']);
           item['helperUpdateDeregister_'] = mockPreviousDeregister;
 
-          let mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
-          let mockHelper = jasmine.createSpyObj('Helper', ['on']);
+          const mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
+          const mockHelper = jasmine.createSpyObj('Helper', ['on']);
           mockHelper.on.and.returnValue(mockDeregister);
           spyOn(item, 'getHelper_').and.returnValue(Promise.resolve(mockHelper));
 
-          let onHelperUpdatedSpy = spyOn(item, 'onHelperUpdated_');
+          const onHelperUpdatedSpy = spyOn(item, 'onHelperUpdated_');
 
           await item['updateHelper_']();
           assert(item['onHelperUpdated_']).to.haveBeenCalledWith(mockHelper);
@@ -348,7 +383,7 @@ describe('asset.HelperItem', () => {
 
     it('should still dispose the previous helper deregister when the new helper is null',
         async (done: any) => {
-          let mockPreviousDeregister = jasmine.createSpyObj('PreviousDeregister', ['dispose']);
+          const mockPreviousDeregister = jasmine.createSpyObj('PreviousDeregister', ['dispose']);
           item['helperUpdateDeregister_'] = mockPreviousDeregister;
 
           spyOn(item, 'getHelper_').and.returnValue(Promise.resolve(null));
@@ -360,7 +395,7 @@ describe('asset.HelperItem', () => {
         });
 
     it('should not throw error if there are no previous helper deregisters', async (done: any) => {
-      let mockHelper = jasmine.createSpyObj('Helper', ['on']);
+      const mockHelper = jasmine.createSpyObj('Helper', ['on']);
       mockHelper.on.and.returnValue(jasmine.createSpyObj('Deregister', ['dispose']));
       spyOn(item, 'getHelper_').and.returnValue(Promise.resolve(mockHelper));
 
@@ -373,7 +408,7 @@ describe('asset.HelperItem', () => {
 
   describe('disposeInternal', () => {
     it('should dispose the deregister function', () => {
-      let mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
+      const mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
       item['helperUpdateDeregister_'] = mockDeregister;
       item.disposeInternal();
       assert(mockDeregister.dispose).to.haveBeenCalledWith();
@@ -388,7 +423,7 @@ describe('asset.HelperItem', () => {
 
   describe('onCreated', () => {
     it('should update the helper', () => {
-      let element = Mocks.object('element');
+      const element = Mocks.object('element');
       spyOn(item, 'updateHelper_');
       item.onCreated(element);
       assert(item['updateHelper_']).to.haveBeenCalledWith();

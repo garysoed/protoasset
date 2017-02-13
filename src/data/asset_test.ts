@@ -18,8 +18,8 @@ describe('data.Asset', () => {
 
   describe('deleteHelper', () => {
     it('should delete the helper and dispatch the changed event', () => {
-      let helperId = 'helperId';
-      let helper = Mocks.object('helper');
+      const helperId = 'helperId';
+      const helper = Mocks.object('helper');
       asset['helpers_'] = {[helperId]: helper};
       spyOn(asset, 'dispatch').and.callFake((event: any, callback: Function) => {
         callback();
@@ -46,12 +46,12 @@ describe('data.Asset', () => {
 
   describe('getAllHelpers', () => {
     it('should return the correct helpers', () => {
-      let helperId1 = 'helperId1';
-      let helperId2 = 'helperId2';
-      let helperId3 = 'helperId3';
-      let helper1 = jasmine.createSpyObj('helper1', ['dispose']);
-      let helper2 = jasmine.createSpyObj('helper2', ['dispose']);
-      let helper3 = jasmine.createSpyObj('helper3', ['dispose']);
+      const helperId1 = 'helperId1';
+      const helperId2 = 'helperId2';
+      const helperId3 = 'helperId3';
+      const helper1 = jasmine.createSpyObj('helper1', ['dispose']);
+      const helper2 = jasmine.createSpyObj('helper2', ['dispose']);
+      const helper3 = jasmine.createSpyObj('helper3', ['dispose']);
       asset['helpers_'] = {
         [helperId1]: helper1,
         [helperId2]: helper2,
@@ -63,8 +63,8 @@ describe('data.Asset', () => {
 
   describe('getHelper', () => {
     it('should return the correct helper', () => {
-      let helperId = 'helperId';
-      let helper = jasmine.createSpyObj('helper', ['dispose']);
+      const helperId = 'helperId';
+      const helper = jasmine.createSpyObj('helper', ['dispose']);
       asset['helpers_'] = {
         [helperId]: helper,
       };
@@ -72,12 +72,124 @@ describe('data.Asset', () => {
     });
 
     it('should return null if the helper does not exist', () => {
-      let helperId = 'helperId';
-      let helper = jasmine.createSpyObj('helper', ['dispose']);
+      const helperId = 'helperId';
+      const helper = jasmine.createSpyObj('helper', ['dispose']);
       asset['helpers_'] = {
         [helperId]: helper,
       };
       assert(asset.getHelper('otherHelperId')).to.beNull();
+    });
+  });
+
+  describe('insertLayer', () => {
+    it('should move the layer to the correct, higher position', () => {
+      spyOn(asset, 'dispatch').and.callFake((event: any, callback: Function) => {
+        callback();
+      });
+
+      const layer1 = jasmine.createSpyObj('layer1', ['dispose']);
+      const layer2 = jasmine.createSpyObj('layer2', ['dispose']);
+      const layer = jasmine.createSpyObj('layer', ['dispose']);
+
+      asset['layers_'] = [layer1, layer, layer2];
+
+      asset.insertLayer(layer, 2);
+
+      assert(asset.dispatch).to
+          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+      assert(asset.getLayers()).to.equal([layer1, layer2, layer]);
+    });
+
+    it('should move the layer to the correct, lower position', () => {
+      spyOn(asset, 'dispatch').and.callFake((event: any, callback: Function) => {
+        callback();
+      });
+
+      const layer1 = jasmine.createSpyObj('layer1', ['dispose']);
+      const layer2 = jasmine.createSpyObj('layer2', ['dispose']);
+      const layer = jasmine.createSpyObj('layer', ['dispose']);
+
+      asset['layers_'] = [layer1, layer, layer2];
+
+      asset.insertLayer(layer, 0);
+
+      assert(asset.dispatch).to
+          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+      assert(asset.getLayers()).to.equal([layer, layer1, layer2]);
+    });
+
+    it('should insert the layer correctly if it does not exist', () => {
+      spyOn(asset, 'dispatch').and.callFake((event: any, callback: Function) => {
+        callback();
+      });
+
+      const layer1 = jasmine.createSpyObj('layer1', ['dispose']);
+      const layer2 = jasmine.createSpyObj('layer2', ['dispose']);
+      const layer = jasmine.createSpyObj('layer', ['dispose']);
+
+      asset['layers_'] = [layer1, layer2];
+
+      asset.insertLayer(layer, 1);
+
+      assert(asset.dispatch).to
+          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+      assert(asset.getLayers()).to.equal([layer1, layer, layer2]);
+    });
+
+    it('should do nothing if the layer is already at the correct position', () => {
+      spyOn(asset, 'dispatch').and.callFake((event: any, callback: Function) => {
+        callback();
+      });
+
+      const layer1 = jasmine.createSpyObj('layer1', ['dispose']);
+      const layer2 = jasmine.createSpyObj('layer2', ['dispose']);
+      const layer = jasmine.createSpyObj('layer', ['dispose']);
+
+      asset['layers_'] = [layer1, layer, layer2];
+
+      asset.insertLayer(layer, 1);
+
+      assert(asset.dispatch).toNot.haveBeenCalled();
+      assert(asset.getLayers()).to.equal([layer1, layer, layer2]);
+    });
+  });
+
+  describe('removeLayer', () => {
+    it('should remove the layer correctly', () => {
+      spyOn(asset, 'dispatch').and.callFake((event: any, callback: Function) => {
+        callback();
+      });
+
+      const layer1 = jasmine.createSpyObj('layer1', ['dispose']);
+      const layer2 = jasmine.createSpyObj('layer2', ['dispose']);
+      const layer = jasmine.createSpyObj('layer', ['dispose']);
+
+      asset['layers_'] = [layer1, layer, layer2];
+
+      asset.removeLayer(layer);
+
+      assert(asset.dispatch).to
+          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+      assert(asset.getLayers()).to.equal([layer1, layer2]);
+      assert(layer.dispose).to.haveBeenCalledWith();
+    });
+
+    it('should do nothing if the layer does not exist', () => {
+      spyOn(asset, 'dispatch').and.callFake((event: any, callback: Function) => {
+        callback();
+      });
+
+      const layer1 = jasmine.createSpyObj('layer1', ['dispose']);
+      const layer2 = jasmine.createSpyObj('layer2', ['dispose']);
+      const layer = jasmine.createSpyObj('layer', ['dispose']);
+
+      asset['layers_'] = [layer1, layer2];
+
+      asset.removeLayer(layer);
+
+      assert(asset.dispatch).toNot.haveBeenCalled();
+      assert(asset.getLayers()).to.equal([layer1, layer2]);
+      assert(layer.dispose).toNot.haveBeenCalled();
     });
   });
 
@@ -87,7 +199,7 @@ describe('data.Asset', () => {
         callback();
       });
 
-      let data = Mocks.object('data');
+      const data = Mocks.object('data');
 
       asset.setData(data);
 
@@ -103,7 +215,7 @@ describe('data.Asset', () => {
         callback();
       });
 
-      let height = 123;
+      const height = 123;
 
       asset.setHeight(height);
 
@@ -117,7 +229,7 @@ describe('data.Asset', () => {
         callback();
       });
 
-      let height = 123;
+      const height = 123;
       asset['height_'] = height;
 
       asset.setHeight(height);
@@ -133,8 +245,8 @@ describe('data.Asset', () => {
         callback();
       });
 
-      let helperId = 'helperId';
-      let helper = jasmine.createSpyObj('helper', ['dispose']);
+      const helperId = 'helperId';
+      const helper = jasmine.createSpyObj('helper', ['dispose']);
 
       asset.setHelper(helperId, helper);
 
@@ -148,8 +260,8 @@ describe('data.Asset', () => {
         callback();
       });
 
-      let helperId = 'helperId';
-      let helper = jasmine.createSpyObj('helper', ['dispose']);
+      const helperId = 'helperId';
+      const helper = jasmine.createSpyObj('helper', ['dispose']);
       asset['helpers_'] = {[helperId]: helper};
 
       asset.setHelper(helperId, helper);
@@ -165,7 +277,7 @@ describe('data.Asset', () => {
         callback();
       });
 
-      let layers = [jasmine.createSpyObj('layer', ['dispose'])];
+      const layers = [jasmine.createSpyObj('layer', ['dispose'])];
       asset.setLayers(layers);
 
       assert(asset.dispatch).to
@@ -178,7 +290,7 @@ describe('data.Asset', () => {
         callback();
       });
 
-      let layers = [jasmine.createSpyObj('layer', ['dispose'])];
+      const layers = [jasmine.createSpyObj('layer', ['dispose'])];
       asset['layers_'] = layers;
 
       asset.setLayers(layers);
@@ -194,7 +306,7 @@ describe('data.Asset', () => {
         callback();
       });
 
-      let name = 'name';
+      const name = 'name';
 
       asset.setName(name);
 
@@ -208,7 +320,7 @@ describe('data.Asset', () => {
         callback();
       });
 
-      let name = 'name';
+      const name = 'name';
       asset['name_'] = name;
       asset.setName(name);
 
@@ -223,7 +335,7 @@ describe('data.Asset', () => {
         callback();
       });
 
-      let type = AssetType.CARD;
+      const type = AssetType.CARD;
 
       asset.setType(type);
 
@@ -237,7 +349,7 @@ describe('data.Asset', () => {
         callback();
       });
 
-      let type = AssetType.CARD;
+      const type = AssetType.CARD;
       asset['type_'] = type;
       asset.setType(type);
 
@@ -252,7 +364,7 @@ describe('data.Asset', () => {
         callback();
       });
 
-      let width = 123;
+      const width = 123;
 
       asset.setWidth(width);
 
@@ -266,7 +378,7 @@ describe('data.Asset', () => {
         callback();
       });
 
-      let width = 123;
+      const width = 123;
       asset['width_'] = width;
       asset.setWidth(width);
 

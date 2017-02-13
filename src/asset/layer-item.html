@@ -8,7 +8,9 @@
   #name {
     cursor: pointer;
     overflow: hidden;
+    text-align: left;
     text-overflow: ellipsis;
+    text-transform: none;
     white-space: nowrap;
   }
 
@@ -21,30 +23,32 @@
   }
 </style>
 
-<gs-switch fill-parent gs-value="read" id="root">
-  <div gs-when="read" layout="row">
-    <div flex id="name"></div>
-    <gs-basic-button id="edit">
-      <gs-icon gs-content>edit</gs-icon>
-    </gs-basic-button>
-    <gs-basic-button id="up">
-      <gs-icon gs-content>arrow_upward</gs-icon>
-    </gs-basic-button>
-    <gs-basic-button id="down">
-      <gs-icon gs-content>arrow_downward</gs-icon>
-    </gs-basic-button>
-    <gs-basic-button id="delete">
-      <gs-icon gs-content>delete</gs-icon>
-    </gs-basic-button>
-  </div>
+<gs-basic-button>
+  <gs-switch fill-parent gs-content gs-value="read" id="root">
+    <div gs-when="read" layout="row">
+      <div flex id="name"></div>
+      <gs-basic-button id="edit">
+        <gs-icon gs-content>edit</gs-icon>
+      </gs-basic-button>
+      <gs-basic-button id="up">
+        <gs-icon gs-content>arrow_upward</gs-icon>
+      </gs-basic-button>
+      <gs-basic-button id="down">
+        <gs-icon gs-content>arrow_downward</gs-icon>
+      </gs-basic-button>
+      <gs-basic-button id="delete">
+        <gs-icon gs-content>delete</gs-icon>
+      </gs-basic-button>
+    </div>
 
-  <div gs-when="edit" layout="row">
-    <gs-text-input flex id="nameInput"></gs-text-input>
-    <gs-basic-button id="ok">
-      <gs-icon gs-content>check</gs-icon>
-    </gs-basic-button>
-    <gs-basic-button id="cancel">
-      <gs-icon gs-content>close</gs-icon>
-    </gs-basic-button>
-  </div>
-</gs-switch>
+    <div gs-when="edit" layout="row">
+      <gs-text-input flex id="nameInput"></gs-text-input>
+      <gs-basic-button id="ok">
+        <gs-icon gs-content>check</gs-icon>
+      </gs-basic-button>
+      <gs-basic-button id="cancel">
+        <gs-icon gs-content>close</gs-icon>
+      </gs-basic-button>
+    </div>
+  </gs-switch>
+</gs-basic-button>
