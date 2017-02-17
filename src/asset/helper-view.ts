@@ -16,6 +16,7 @@ import {BaseThemedElement} from 'external/gs_ui/src/common';
 import {RouteService, RouteServiceEvents} from 'external/gs_ui/src/routing';
 import {ThemeService} from 'external/gs_ui/src/theming';
 
+import {SampleDataPicker} from '../common/sample-data-picker';
 import {SampleDataService} from '../common/sample-data-service';
 import {Asset} from '../data/asset';
 import {AssetCollection} from '../data/asset-collection';
@@ -38,8 +39,8 @@ type ConsoleEntry = {command: string, isError: boolean, result: string};
  * @return The newly created element.
  */
 export function argElementGenerator(document: Document, instance: HelperView): Element {
-  let element = document.createElement('div');
-  let listenable = ListenableDom.of(element);
+  const element = document.createElement('div');
+  const listenable = ListenableDom.of(element);
   instance.addDisposable(listenable);
   listenable.on(DomEvent.CLICK, instance.onArgClick, instance);
   return element;
@@ -60,11 +61,11 @@ export function argElementDataSetter(label: string, element: Element): void {
  * @return The newly created element.
  */
 export function consoleEntryGenerator(document: Document): Element {
-  let root = document.createElement('div');
+  const root = document.createElement('div');
   root.classList.add('consoleEntry');
-  let command = document.createElement('div');
+  const command = document.createElement('div');
   command.classList.add('gs-theme-invert');
-  let result = document.createElement('div');
+  const result = document.createElement('div');
   root.appendChild(command);
   root.appendChild(result);
   return root;
@@ -78,7 +79,7 @@ export function consoleEntryGenerator(document: Document): Element {
 export function consoleEntryDataSetter(data: ConsoleEntry, element: Element): void {
   element.children.item(0).textContent = data.command;
 
-  let resultEl = element.children.item(1);
+  const resultEl = element.children.item(1);
   resultEl.innerHTML = Arrays
       .of(data.result.split('\n'))
       .map((line: string) => {
@@ -116,31 +117,42 @@ export function helperItemGenerator(document: Document): Element {
  * Helper view
  */
 @customElement({
-  dependencies: [HelperItem, SampleDataService, TemplateCompilerService],
+  dependencies: [
+    HelperItem,
+    SampleDataPicker,
+    SampleDataService,
+    TemplateCompilerService,
+  ],
   tag: 'pa-asset-helper-view',
   templateKey: 'src/asset/helper-view',
 })
 export class HelperView extends BaseThemedElement {
   @bind('#args').childrenElements<string>(argElementGenerator, argElementDataSetter, 0)
-  private readonly argElementsHook_: DomHook<string[]>;
+  readonly argElementsHook_: DomHook<string[]>;
 
   @bind('#argInput').attribute('gs-value', StringParser)
-  private readonly argInputHook_: DomHook<string>;
+  readonly argInputHook_: DomHook<string>;
 
   @bind('#bodyInput').attribute('gs-value', StringParser)
-  private readonly bodyInputHook_: DomHook<string>;
-
-  @bind('#consoleInput').attribute('gs-value', StringParser)
-  private readonly consoleInputHook_: DomHook<string>;
-
-  @bind('#helpers').childrenElements<HelperIdParams>(helperItemGenerator, helperItemDataSetter)
-  private readonly helperItemsHook_: DomHook<HelperIdParams[]>;
-
-  @bind('#name').innerText()
-  private readonly nameHook_: DomHook<string>;
+  readonly bodyInputHook_: DomHook<string>;
 
   @bind('#console').childrenElements<ConsoleEntry>(consoleEntryGenerator, consoleEntryDataSetter)
-  private readonly consoleEntryHook_: DomHook<ConsoleEntry[]>;
+  readonly consoleEntryHook_: DomHook<ConsoleEntry[]>;
+
+  @bind('#consoleInput').attribute('gs-value', StringParser)
+  readonly consoleInputHook_: DomHook<string>;
+
+  @bind('#helpers').childrenElements<HelperIdParams>(helperItemGenerator, helperItemDataSetter)
+  readonly helperItemsHook_: DomHook<HelperIdParams[]>;
+
+  @bind('#name').innerText()
+  readonly nameHook_: DomHook<string>;
+
+  @bind('#sampleDataPicker').attribute('asset-id', StringParser)
+  readonly sampleDataPickerAssetIdHook_: DomHook<string>;
+
+  @bind('#sampleDataPicker').attribute('project-id', StringParser)
+  readonly sampleDataPickerProjectIdHook_: DomHook<string>;
 
   private readonly assetCollection_: AssetCollection;
   private readonly helperIdGenerator_: IdGenerator;
@@ -173,6 +185,8 @@ export class HelperView extends BaseThemedElement {
     this.nameHook_ = DomHook.of<string>();
     this.routeFactoryService_ = routeFactoryService;
     this.routeService_ = routeService;
+    this.sampleDataPickerAssetIdHook_ = DomHook.of<string>();
+    this.sampleDataPickerProjectIdHook_ = DomHook.of<string>();
     this.sampleDataService_ = sampleDataService;
     this.templateCompilerService_ = templateCompilerService;
   }
@@ -186,10 +200,10 @@ export class HelperView extends BaseThemedElement {
       newHelperId = this.helperIdGenerator_.resolveConflict(newHelperId);
     }
 
-    let helper = Helper.of(newHelperId, `helper_${newHelperId}`);
+    const helper = Helper.of(newHelperId, `helper_${newHelperId}`);
     asset.setHelper(newHelperId, helper);
 
-    let [helperId] = await Promise.all([newHelperId, this.assetCollection_.update(asset)]);
+    const [helperId] = await Promise.all([newHelperId, this.assetCollection_.update(asset)]);
     this.routeService_.goTo<{assetId: string, helperId: string, projectId: string}>(
         this.routeFactoryService_.helper(),
         {
@@ -224,7 +238,7 @@ export class HelperView extends BaseThemedElement {
       return Promise.resolve(null);
     }
 
-    let asset = await this.getAsset_();
+    const asset = await this.getAsset_();
     if (asset === null) {
       return null;
     }
@@ -242,11 +256,14 @@ export class HelperView extends BaseThemedElement {
     if (!isActive) {
       return;
     }
-    let asset = await this.getAsset_();
+
+    const asset = await this.getAsset_();
     if (asset === null) {
       this.routeService_.goTo(this.routeFactoryService_.landing(), {});
       return;
     }
+    this.sampleDataPickerAssetIdHook_.set(asset.getId());
+    this.sampleDataPickerProjectIdHook_.set(asset.getProjectId());
     this.updateAsset_(asset);
   }
 
@@ -256,10 +273,10 @@ export class HelperView extends BaseThemedElement {
       return;
     }
 
-    let commaIndex = newValue.indexOf(',');
+    const commaIndex = newValue.indexOf(',');
     if (commaIndex >= 0) {
-      let existingArgs = this.argElementsHook_.get() || [];
-      let newArgs = Arrays
+      const existingArgs = this.argElementsHook_.get() || [];
+      const newArgs = Arrays
           .of(newValue.split(','))
           .map((arg: string) => {
             return arg.trim();
@@ -282,7 +299,7 @@ export class HelperView extends BaseThemedElement {
     const helper = await this.getHelper_();
     if (helper === null) {
       // Check for an existing helper.
-      let helpers = asset.getAllHelpers();
+      const helpers = asset.getAllHelpers();
       if (helpers.length <= 0) {
         await this.createHelper_(asset);
       } else {
@@ -297,13 +314,13 @@ export class HelperView extends BaseThemedElement {
 
     this.updateHelper_(helper);
 
-    let otherHelpers = Arrays
+    const otherHelpers = Arrays
         .of(asset.getAllHelpers())
         .filter((value: Helper) => {
           return value.getId() !== helper.getId();
         })
         .asArray();
-    let helperIdParams = Arrays
+    const helperIdParams = Arrays
         .of([helper])
         .addAllArray(otherHelpers)
         .map((helper: Helper) => {
@@ -327,7 +344,7 @@ export class HelperView extends BaseThemedElement {
       return;
     }
 
-    let [helper, asset] = await Promise.all([this.getHelper_(), this.getAsset_()]);
+    const [helper, asset] = await Promise.all([this.getHelper_(), this.getAsset_()]);
     if (helper === null || asset === null) {
       return;
     }
@@ -341,7 +358,7 @@ export class HelperView extends BaseThemedElement {
 
   @handle('#createButton').event(DomEvent.CLICK)
   protected async onCreateButtonClick_(): Promise<void> {
-    let asset = await this.getAsset_();
+    const asset = await this.getAsset_();
     if (asset === null) {
       return;
     }
@@ -356,7 +373,7 @@ export class HelperView extends BaseThemedElement {
       return;
     }
 
-    let [asset, rowData] = await Promise.all([
+    const [asset, rowData] = await Promise.all([
       this.getAsset_(),
       this.sampleDataService_.getRowData(),
     ]);
@@ -364,7 +381,7 @@ export class HelperView extends BaseThemedElement {
       return;
     }
 
-    let compiler = await this.templateCompilerService_.create(asset, rowData);
+    const compiler = await this.templateCompilerService_.create(asset, rowData);
     if (compiler === null) {
       return;
     }
@@ -381,15 +398,15 @@ export class HelperView extends BaseThemedElement {
       result = `${e.message}\n\n${e.stack}`;
       isError = true;
     }
-    let consoleEntries = this.consoleEntryHook_.get() || [];
+    const consoleEntries = this.consoleEntryHook_.get() || [];
     consoleEntries.push({command: consoleValue, isError: isError, result: result});
     this.consoleEntryHook_.set(consoleEntries);
 
-    let element = this.getElement();
+    const element = this.getElement();
     if (element === null) {
       return;
     }
-    let containerEl = element.getEventTarget().shadowRoot.querySelector('#consoleContainer');
+    const containerEl = element.getEventTarget().shadowRoot.querySelector('#consoleContainer');
     containerEl.scrollTop = containerEl.scrollHeight;
   };
 
@@ -470,12 +487,12 @@ export class HelperView extends BaseThemedElement {
       return;
     }
 
-    let args = this.argElementsHook_.get();
+    const args = this.argElementsHook_.get();
     if (args === null) {
       return;
     }
 
-    let removedIndex = Arrays
+    const removedIndex = Arrays
         .fromItemList(target.parentElement.children)
         .findIndex((value: Element) => {
           return value === target;

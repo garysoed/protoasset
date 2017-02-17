@@ -1,4 +1,9 @@
 <style>
+  :host {
+    height: 4rem;
+    width: 3.5rem;
+  }
+
   #drawerContent {
     background-color: white;
   }
@@ -10,10 +15,10 @@
   }
 </style>
 
-<gs-drawer gs-anchor-point="left" gs-min-width="3.5rem" gs-max-width="20rem" id="drawer">
+<gs-drawer gs-anchor-point="right" gs-min-width="3.5rem" gs-max-width="20rem" id="drawer">
   <div flex-align="center" gs-content id="drawerContent" layout="row">
     <gs-basic-button id="searchButton">
-      <gs-icon gs-content>search</gs-icon>
+      <gs-icon gs-content>filter_list</gs-icon>
     </gs-basic-button>
     <gs-text-input flex id="searchText"></gs-text-input>
     <gs-basic-button id="clearButton">

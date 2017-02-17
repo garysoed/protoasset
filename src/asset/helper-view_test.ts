@@ -285,14 +285,22 @@ describe('asset.HelperView', () => {
 
   describe('onActiveChange_', () => {
     it('should call updateAsset_', async (done: any) => {
-      const asset = Mocks.object('asset');
+      const assetId = 'assetId';
+      const projectId = 'projectId';
+      const mockAsset = jasmine.createSpyObj('Asset', ['getId', 'getProjectId']);
+      mockAsset.getId.and.returnValue(assetId);
+      mockAsset.getProjectId.and.returnValue(projectId);
       const mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
       view['assetUpdateDeregister_'] = mockDeregister;
       spyOn(view, 'updateAsset_');
-      spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(asset));
+      spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
+      spyOn(view.sampleDataPickerAssetIdHook_, 'set');
+      spyOn(view.sampleDataPickerProjectIdHook_, 'set');
       await view['onActiveChange_'](true);
-      assert(view['updateAsset_']).to.haveBeenCalledWith(asset);
+      assert(view['updateAsset_']).to.haveBeenCalledWith(mockAsset);
       assert(mockDeregister.dispose).to.haveBeenCalledWith();
+      assert(view.sampleDataPickerAssetIdHook_.set).to.haveBeenCalledWith(assetId);
+      assert(view.sampleDataPickerProjectIdHook_.set).to.haveBeenCalledWith(projectId);
     });
 
     it('should redirect to landing page if asset cannot be found', async (done: any) => {
@@ -311,10 +319,12 @@ describe('asset.HelperView', () => {
     });
 
     it('should not throw error if there are no previous deregisters', async (done: any) => {
-      const asset = Mocks.object('asset');
+      const mockAsset = jasmine.createSpyObj('Asset', ['getId', 'getProjectId']);
 
-      spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(asset));
+      spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
       spyOn(view, 'updateAsset_');
+      spyOn(view.sampleDataPickerAssetIdHook_, 'set');
+      spyOn(view.sampleDataPickerProjectIdHook_, 'set');
 
       await view['onActiveChange_'](true);
     });

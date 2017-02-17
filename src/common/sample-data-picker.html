@@ -1,0 +1,54 @@
+<style>
+  :host {
+    height: 21.5rem;
+    width: 3.5rem;
+  }
+
+  #drawer {
+    --gsColorPassiveBG: transparent;
+  }
+
+  #drawerContent {
+    background-color: white;
+  }
+
+  #drawer[gs-is-expanded="true"] #drawerContent {
+    box-shadow: var(--gsBoxShadowAbove);
+    margin-bottom: .1rem;
+    margin-left: .1rem;
+  }
+
+  #drawer[gs-is-expanded="false"] #results {
+    display: none;
+  }
+
+  #inputRow {
+    height: 3.5rem;
+    width: 100%;
+  }
+
+  #searchText {
+    margin-right: 1rem;
+  }
+
+  .result {
+    cursor: pointer;
+    line-height: 1.5rem;
+    overflow: hidden;
+    padding: 1rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+</style>
+
+<gs-drawer gs-anchor-point="right" gs-min-width="3.5rem" gs-max-width="20rem" id="drawer">
+  <div gs-content id="drawerContent" layout="column">
+    <div id="inputRow" flex-align="center" layout="row">
+      <gs-basic-button id="searchButton">
+        <gs-icon gs-content>search</gs-icon>
+      </gs-basic-button>
+      <gs-text-input flex id="searchText"></gs-text-input>
+    </div>
+    <div id="results"></div>
+  </div>
+</gs-drawer>

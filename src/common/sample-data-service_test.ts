@@ -1,9 +1,11 @@
-import {assert, TestBase} from '../test-base';
+import {assert, Matchers, TestBase} from '../test-base';
 TestBase.setup();
 
 import {Mocks} from 'external/gs_tools/src/mock';
+import {TestDispose} from 'external/gs_tools/src/testing';
 
 import {SampleDataService} from './sample-data-service';
+import {SampleDataServiceEvent} from './sample-data-service-event';
 
 
 describe('common.SampleDataService', () => {
@@ -20,9 +22,10 @@ describe('common.SampleDataService', () => {
         mockAssetCollection,
         mockRouteFactoryService,
         mockRouteService);
+    TestDispose.add(service);
   });
 
-  describe('getRowData', () => {
+  describe('getData_', () => {
     it('should resolve with the correct data', async (done: any) => {
       const layerRouteFactory = Mocks.object('layerRouteFactory');
       mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
@@ -31,40 +34,22 @@ describe('common.SampleDataService', () => {
       const projectId = 'projectId';
       mockRouteService.getParams.and.returnValue({assetId, projectId});
 
-      const rowData = Mocks.object('rowData');
+      const data = Mocks.object('data');
       const mockDataSource = jasmine.createSpyObj('DataSource', ['getData']);
-      mockDataSource.getData.and.returnValue(Promise.resolve(['otherRowData', rowData, 'other']));
+      mockDataSource.getData.and.returnValue(Promise.resolve(data));
 
       const mockAsset = jasmine.createSpyObj('Asset', ['getData']);
       mockAsset.getData.and.returnValue(mockDataSource);
       mockAssetCollection.get.and.returnValue(Promise.resolve(mockAsset));
 
-      service.setDataRow(1);
-      assert(await service.getRowData()).to.equal(rowData);
+      assert(await service['getData_']()).to.equal(data);
       assert(mockAssetCollection.get).to.haveBeenCalledWith(projectId, assetId);
       assert(mockRouteService.getParams).to.haveBeenCalledWith(layerRouteFactory);
     });
 
-    it('should resolve with null if the row data index is invalid', async (done: any) => {
-      mockRouteFactoryService.layer.and.returnValue(Mocks.object('layerRouteFactory'));
-
-      const assetId = 'assetId';
-      const projectId = 'projectId';
-      mockRouteService.getParams.and.returnValue({assetId, projectId});
-
-      const mockDataSource = jasmine.createSpyObj('DataSource', ['getData']);
-      mockDataSource.getData.and.returnValue(Promise.resolve(['rowData']));
-
-      const mockAsset = jasmine.createSpyObj('Asset', ['getData']);
-      mockAsset.getData.and.returnValue(mockDataSource);
-      mockAssetCollection.get.and.returnValue(Promise.resolve(mockAsset));
-
-      service.setDataRow(5);
-      assert(await service.getRowData()).to.beNull();
-    });
-
-    it('should resolve with null if there is no data source in the array', async (done: any) => {
-      mockRouteFactoryService.layer.and.returnValue(Mocks.object('layerRouteFactory'));
+    it('should resolve with null if there are no data source', async (done: any) => {
+      const layerRouteFactory = Mocks.object('layerRouteFactory');
+      mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
 
       const assetId = 'assetId';
       const projectId = 'projectId';
@@ -74,12 +59,14 @@ describe('common.SampleDataService', () => {
       mockAsset.getData.and.returnValue(null);
       mockAssetCollection.get.and.returnValue(Promise.resolve(mockAsset));
 
-      service.setDataRow(5);
-      assert(await service.getRowData()).to.beNull();
+      assert(await service['getData_']()).to.beNull();
+      assert(mockAssetCollection.get).to.haveBeenCalledWith(projectId, assetId);
+      assert(mockRouteService.getParams).to.haveBeenCalledWith(layerRouteFactory);
     });
 
-    it('should resolve with null if asset cannot be found', async (done: any) => {
-      mockRouteFactoryService.layer.and.returnValue(Mocks.object('layerRouteFactory'));
+    it('should resolve with null if there are no assets', async (done: any) => {
+      const layerRouteFactory = Mocks.object('layerRouteFactory');
+      mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
 
       const assetId = 'assetId';
       const projectId = 'projectId';
@@ -87,24 +74,103 @@ describe('common.SampleDataService', () => {
 
       mockAssetCollection.get.and.returnValue(Promise.resolve(null));
 
-      service.setDataRow(5);
-      assert(await service.getRowData()).to.beNull();
+      assert(await service['getData_']()).to.beNull();
+      assert(mockAssetCollection.get).to.haveBeenCalledWith(projectId, assetId);
+      assert(mockRouteService.getParams).to.haveBeenCalledWith(layerRouteFactory);
     });
 
     it('should resolve with null if no params can be found', async (done: any) => {
-      mockRouteFactoryService.layer.and.returnValue(Mocks.object('layerRouteFactory'));
-
+      const layerRouteFactory = Mocks.object('layerRouteFactory');
+      mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
       mockRouteService.getParams.and.returnValue(null);
 
-      service.setDataRow(5);
+      mockAssetCollection.get.and.returnValue(Promise.resolve(null));
+
+      assert(await service['getData_']()).to.beNull();
+      assert(mockRouteService.getParams).to.haveBeenCalledWith(layerRouteFactory);
+    });
+  });
+
+  describe('getFuse', () => {
+    it('should return with the correct Fuse', async (done: any) => {
+      const entry00 = 'entry00';
+      const entry01 = 'entry01';
+      const entry10 = 'entry10';
+      spyOn(service, 'getData_').and.returnValue(Promise.resolve([
+        [entry00, entry01],
+        [entry10],
+      ]));
+
+      const fuse = Mocks.object('fuse');
+      spyOn(service, 'createFuse_').and.returnValue(fuse);
+
+      assert(await service.getFuse()).to.equal(fuse);
+      assert(service['createFuse_']).to.haveBeenCalledWith([
+        {display: entry00, row: 0},
+        {display: entry01, row: 0},
+        {display: entry10, row: 1},
+      ]);
+    });
+
+    it('should return null if there are no data', async (done: any) => {
+      spyOn(service, 'getData_').and.returnValue(Promise.resolve(null));
+      assert(await service.getFuse()).to.beNull();
+    });
+  });
+
+  describe('getRowData', () => {
+    it('should resolve with the correct data', async (done: any) => {
+      const rowData = Mocks.object('rowData');
+      spyOn(service, 'getData_').and
+          .returnValue(Promise.resolve(['otherRowData', rowData, 'other']));
+
+      service.setDataRow(1);
+      assert(await service.getRowData()).to.equal(rowData);
+    });
+
+    it('should resolve with null if there are no data at the data row', async (done: any) => {
+      const rowData = Mocks.object('rowData');
+      spyOn(service, 'getData_').and
+          .returnValue(Promise.resolve(['otherRowData', rowData, 'other']));
+
+      service.setDataRow(3);
       assert(await service.getRowData()).to.beNull();
     });
 
-    it('should resolve with null if the data row index is null', async (done: any) => {
-      mockRouteService.getParams.and.returnValue(null);
+    it('should resolve with null if there are no data', async (done: any) => {
+      spyOn(service, 'getData_').and.returnValue(Promise.resolve(null));
 
+      service.setDataRow(3);
+      assert(await service.getRowData()).to.beNull();
+    });
+
+    it('should resolve with null if data row is null', async (done: any) => {
       service.setDataRow(null);
       assert(await service.getRowData()).to.beNull();
+    });
+  });
+
+  describe('setDataRow', () => {
+    it('should dispatch the ROW_CHANGED event', () => {
+      const dataRow = 123;
+      const dispatchSpy = spyOn(service, 'dispatch');
+
+      service.setDataRow(dataRow);
+
+      assert(service.dispatch).to.haveBeenCalledWith(
+          SampleDataServiceEvent.ROW_CHANGED, <() => void> Matchers.any(Function));
+      dispatchSpy.calls.argsFor(0)[1]();
+      assert(service.getDataRow()).to.equal(dataRow);
+    });
+
+    it('should do nothing if the data row is equal to the given row', () => {
+      const dataRow = 123;
+      spyOn(service, 'dispatch');
+
+      service['dataRow_'] = dataRow;
+      service.setDataRow(dataRow);
+
+      assert(service.dispatch).toNot.haveBeenCalled();
     });
   });
 });
