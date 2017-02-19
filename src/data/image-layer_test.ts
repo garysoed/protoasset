@@ -15,6 +15,26 @@ describe('data.ImageLayer', () => {
     TestDispose.add(layer);
   });
 
+  describe('asActiveBoundaryPreviewHtml_', () => {
+    it('should return the correct CSS and HTML components', () => {
+      const boxStyle1 = 'boxStyle1';
+      const boxStyle2 = 'boxStyle2';
+      spyOn(layer, 'getBoxStyles_').and.returnValue([boxStyle1, boxStyle2]);
+
+      const html = 'html';
+      spyOn(layer, 'createDiv_').and.returnValue(html);
+      assert(layer['asActiveBoundaryPreviewHtml_']()).to.equal({
+        css: '',
+        html,
+      });
+      assert(layer['createDiv_']).to.haveBeenCalledWith([
+        boxStyle1,
+        boxStyle2,
+        `background-color: var(--gsColorPassiveBG);`,
+      ]);
+    });
+  });
+
   describe('asHtml', () => {
     it('should return the correct CSS and HTML components', () => {
       const top = 12;
@@ -42,6 +62,58 @@ describe('data.ImageLayer', () => {
         `position: absolute;`,
       ];
       assert(html).to.equal(`<div style="${expectedStyles.join('')}"></div>`);
+    });
+  });
+
+  describe('asInactiveNormalPreviewHtml_', () => {
+    it('should return the correct CSS and HTML components', () => {
+      const boxStyle1 = 'boxStyle1';
+      const boxStyle2 = 'boxStyle2';
+      spyOn(layer, 'getBoxStyles_').and.returnValue([boxStyle1, boxStyle2]);
+
+      const imageUrl = 'imageUrl';
+      layer['imageUrl_'] = imageUrl;
+
+      const html = 'html';
+      spyOn(layer, 'createDiv_').and.returnValue(html);
+
+      assert(layer['asInactiveNormalPreviewHtml_']()).to.equal({
+        css: '',
+        html,
+      });
+      assert(layer['createDiv_']).to.haveBeenCalledWith(Matchers.arrayContaining([
+        boxStyle1,
+        boxStyle2,
+        `background: url('${imageUrl}');`,
+      ]));
+    });
+  });
+
+  describe('createDiv_', () => {
+    it('should return the correct div', () => {
+      const style1 = 'style1';
+      const style2 = 'style2';
+      assert(layer['createDiv_']([style1, style2])).to
+          .equal(Matchers.stringMatching(new RegExp(`style="${style1}${style2}"`)));
+    });
+  });
+
+  describe('getBoxStyles_', () => {
+    it('should return the correct array of styles', () => {
+      const bottom = 12;
+      const left = 34;
+      const right = 56;
+      const top = 78;
+      layer['bottom_'] = bottom;
+      layer['left_'] = left;
+      layer['right_'] = right;
+      layer['top_'] = top;
+      assert(layer['getBoxStyles_']()).to.equal([
+        `bottom: ${bottom}px;`,
+        `left: ${left}px;`,
+        `right: ${right}px;`,
+        `top: ${top}px;`,
+      ]);
     });
   });
 

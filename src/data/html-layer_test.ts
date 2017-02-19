@@ -1,6 +1,7 @@
 import {assert, Matchers, TestBase} from '../test-base';
 TestBase.setup();
 
+import {Mocks} from 'external/gs_tools/src/mock';
 import {TestDispose} from 'external/gs_tools/src/testing';
 
 import {DataEvents} from './data-events';
@@ -15,14 +16,30 @@ describe('data.HtmlLayer', () => {
     TestDispose.add(layer);
   });
 
+  describe('asActiveBoundaryPreviewHtml_', () => {
+    it('should return the correct CSS and HTML components', () => {
+      const html = Mocks.object('html');
+      spyOn(layer, 'asHtml').and.returnValue(html);
+      assert(layer['asActiveBoundaryPreviewHtml_']()).to.equal(html);
+    });
+  });
+
   describe('asHtml', () => {
     it('should return the correct CSS and HTML components', () => {
-      let css = 'css';
-      let html = 'html';
+      const css = 'css';
+      const html = 'html';
       layer.setCss(css);
       layer.setHtml(html);
 
       assert(layer.asHtml()).to.equal({css, html});
+    });
+  });
+
+  describe('asInactiveNormalPreviewHtml_', () => {
+    it('should return the correct CSS and HTML components', () => {
+      const html = Mocks.object('html');
+      spyOn(layer, 'asHtml').and.returnValue(html);
+      assert(layer['asInactiveNormalPreviewHtml_']()).to.equal(html);
     });
   });
 
@@ -32,7 +49,7 @@ describe('data.HtmlLayer', () => {
         callback();
       });
 
-      let css = 'css';
+      const css = 'css';
       layer.setCss(css);
 
       assert(layer.dispatch).to
@@ -45,7 +62,7 @@ describe('data.HtmlLayer', () => {
         callback();
       });
 
-      let css = 'css';
+      const css = 'css';
       layer['css_'] = css;
 
       layer.setCss(css);
@@ -61,7 +78,7 @@ describe('data.HtmlLayer', () => {
         callback();
       });
 
-      let html = 'html';
+      const html = 'html';
       layer.setHtml(html);
 
       assert(layer.dispatch).to
@@ -74,7 +91,7 @@ describe('data.HtmlLayer', () => {
         callback();
       });
 
-      let html = 'html';
+      const html = 'html';
       layer['html_'] = html;
 
       layer.setHtml(html);

@@ -9,6 +9,7 @@ import {RouteServiceEvents} from 'external/gs_ui/src/routing';
 
 import {DataEvents} from '../data/data-events';
 import {HtmlLayer} from '../data/html-layer';
+import {LayerPreviewMode} from '../data/layer-preview-mode';
 import {LayerType} from '../data/layer-type';
 
 import {
@@ -66,7 +67,7 @@ describe('layerPreviewDataSetter', () => {
   it('should set the attributes correctly', () => {
     const layerId = 'layerId';
     const mockElement = jasmine.createSpyObj('Element', ['setAttribute']);
-    layerPreviewDataSetter({isSelected: true, layerId}, mockElement);
+    layerPreviewDataSetter({isSelected: true, layerId, mode: LayerPreviewMode.NORMAL}, mockElement);
     assert(mockElement.setAttribute).to.haveBeenCalledWith('is-selected', 'true');
     assert(mockElement.setAttribute).to.haveBeenCalledWith('layer-id', layerId);
   });
@@ -677,9 +678,11 @@ describe('asset.LayerView', () => {
       mockLayer.on.and.returnValue(mockDeregister);
 
       const spyOnLayerChanged = spyOn(view, 'onLayerChanged_');
+      spyOn(view, 'updateLayerPreviews_');
 
       view['selectLayer_'](mockLayer);
 
+      assert(view['updateLayerPreviews_']).to.haveBeenCalledWith();
       assert(view['onLayerChanged_']).to.haveBeenCalledWith(mockLayer);
       assert(view['selectedLayerId_']).to.equal(layerId);
       assert(mockLayer.on).to.haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function), view);
@@ -724,8 +727,8 @@ describe('asset.LayerView', () => {
       view['selectedLayerId_'] = layerId1;
       await view['updateLayerPreviews_']();
       assert(view['layerPreviewsChildElementHook_'].set).to.haveBeenCalledWith([
-        {isSelected: false, layerId: layerId2},
-        {isSelected: true, layerId: layerId1},
+        {isSelected: false, layerId: layerId2, mode: LayerPreviewMode.NORMAL},
+        {isSelected: true, layerId: layerId1, mode: LayerPreviewMode.NORMAL},
       ]);
     });
 

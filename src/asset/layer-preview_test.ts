@@ -6,6 +6,7 @@ import {TestDispose} from 'external/gs_tools/src/testing';
 
 import {RouteServiceEvents} from 'external/gs_ui/src/routing';
 
+import {SampleDataServiceEvent} from '../common/sample-data-service-event';
 import {DataEvents} from '../data/data-events';
 
 import {LayerPreview} from './layer-preview';
@@ -23,7 +24,7 @@ describe('asset.LayerPreview', () => {
     mockAssetCollection = jasmine.createSpyObj('AssetCollection', ['get']);
     mockRouteFactoryService = jasmine.createSpyObj('RouteFactoryService', ['layer']);
     mockRouteService = jasmine.createSpyObj('RouteService', ['getParams', 'on']);
-    mockSampleDataService = jasmine.createSpyObj('SampleDataService', ['getRowData']);
+    mockSampleDataService = jasmine.createSpyObj('SampleDataService', ['getRowData', 'on']);
     mockTemplateCompilerService = jasmine.createSpyObj('TemplateCompilerService', ['create']);
     preview = new LayerPreview(
         mockAssetCollection,
@@ -36,7 +37,11 @@ describe('asset.LayerPreview', () => {
   });
 
   describe('onCreated', () => {
-    it('should listen to route changed events', () => {
+    it('should initialize correctly', () => {
+      const mockDisposable = jasmine.createSpyObj('Disposable', ['dispose']);
+      mockSampleDataService.on.and.returnValue(mockDisposable);
+      mockRouteService.on.and.returnValue(mockDisposable);
+
       spyOn(preview, 'onLayerIdChanged_');
 
       const element = Mocks.object('element');
@@ -46,15 +51,25 @@ describe('asset.LayerPreview', () => {
           RouteServiceEvents.CHANGED,
           preview['onLayerIdChanged_'],
           preview);
+      assert(mockSampleDataService.on).to.haveBeenCalledWith(
+          SampleDataServiceEvent.ROW_CHANGED,
+          preview['onDataChanged_'],
+          preview);
     });
   });
 
   describe('onLayerChange_', () => {
     it('should update the css and root inner HTMLs correctly', () => {
+      const previewMode = Mocks.object('previewMode');
+      spyOn(preview.previewModeHook_, 'get').and.returnValue(previewMode);
+
+      const isActive = true;
+      spyOn(preview.isSelectedHook_, 'get').and.returnValue(isActive);
+
       const css = 'css';
       const html = 'html';
-      const mockLayer = jasmine.createSpyObj('Layer', ['asHtml']);
-      mockLayer.asHtml.and.returnValue({css, html});
+      const mockLayer = jasmine.createSpyObj('Layer', ['asPreviewHtml']);
+      mockLayer.asPreviewHtml.and.returnValue({css, html});
 
       const asset = Mocks.object('asset');
 
@@ -83,6 +98,15 @@ describe('asset.LayerPreview', () => {
       assert(mockCompiler.compile).to.haveBeenCalledWith(html);
       assert(mockCompiler.compile).to.haveBeenCalledWith(css);
       assert(mockTemplateCompilerService.create).to.haveBeenCalledWith(asset, rowData);
+      assert(mockLayer.asPreviewHtml).to.haveBeenCalledWith(previewMode, isActive);
+    });
+  });
+
+  describe('onDataChanged_', () => {
+    it('should call onLayerIdChanged_', () => {
+      spyOn(preview, 'onLayerIdChanged_');
+      preview['onDataChanged_']();
+      assert(preview.onLayerIdChanged_).to.haveBeenCalledWith();
     });
   });
 

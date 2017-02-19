@@ -1,7 +1,6 @@
 import {sequenced} from 'external/gs_tools/src/async';
 import {Arrays} from 'external/gs_tools/src/collection';
 import {DisposableFunction} from 'external/gs_tools/src/dispose';
-import {DomEvent} from 'external/gs_tools/src/event';
 import {inject} from 'external/gs_tools/src/inject';
 import {
   bind,
@@ -16,6 +15,7 @@ import {BaseThemedElement} from 'external/gs_ui/src/common';
 import {ThemeService} from 'external/gs_ui/src/theming';
 
 import {SampleDataService} from '../common/sample-data-service';
+import {SampleDataServiceEvent} from '../common/sample-data-service-event';
 import {Asset} from '../data/asset';
 import {AssetCollection} from '../data/asset-collection';
 import {BaseLayer} from '../data/base-layer';
@@ -139,6 +139,17 @@ export class ImageLayerEditor extends BaseThemedElement {
   }
 
   /**
+   * @override
+   */
+  onCreated(element: HTMLElement): void {
+    super.onCreated(element);
+    this.addDisposable(this.sampleDataService_.on(
+        SampleDataServiceEvent.ROW_CHANGED,
+        this.onSampleDataRowChanged_,
+        this));
+  }
+
+  /**
    * Handles when there is data change on the given layer.
    * @param layer Layer whose data was changed.
    */
@@ -195,7 +206,18 @@ export class ImageLayerEditor extends BaseThemedElement {
     }
   }
 
-  @handle('#save').event(DomEvent.CLICK)
+  /**
+   * Handles when the sample data row is changed.
+   */
+  private onSampleDataRowChanged_(): void {
+    this.onFieldChange_();
+  }
+
+  @handle('#top').attributeChange('gs-value')
+  @handle('#bottom').attributeChange('gs-value')
+  @handle('#left').attributeChange('gs-value')
+  @handle('#right').attributeChange('gs-value')
+  @handle('#imageUrl').attributeChange('gs-value')
   async onSaveClick_(): Promise<void> {
     const [asset, layer] = await Promise.all([this.getAsset_(), this.getLayer_()]);
     if (asset === null || layer === null) {

@@ -19,11 +19,25 @@ export class HtmlLayer extends BaseLayer {
   /**
    * @override
    */
+  asActiveBoundaryPreviewHtml_(): {css: string, html: string} {
+    return this.asHtml();
+  }
+
+  /**
+   * @override
+   */
   asHtml(): {css: string, html: string} {
     return {
       css: this.css_,
       html: this.html_,
     };
+  }
+
+  /**
+   * @override
+   */
+  asInactiveNormalPreviewHtml_(): {css: string, html: string} {
+    return this.asHtml();
   }
 
   /**

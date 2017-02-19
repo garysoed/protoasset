@@ -23,25 +23,55 @@ export class ImageLayer extends BaseLayer {
     this.left_ = 0;
     this.right_ = 0;
     this.top_ = 0;
+    // TODO: Move the box stuff to BaseLayer.
+  }
+
+  /**
+   * @override
+   */
+  protected asActiveBoundaryPreviewHtml_(): {css: string, html: string} {
+    const styles: string[] = this.getBoxStyles_().concat([
+      `background-color: var(--gsColorPassiveBG);`,
+    ]);
+    return {css: '', html: this.createDiv_(styles)};
   }
 
   /**
    * @override
    */
   asHtml(): {css: string, html: string} {
-    let styles: string[] = [
-      `bottom: ${this.bottom_}px;`,
-      `left: ${this.left_}px;`,
-      `right: ${this.right_}px;`,
-      `top: ${this.top_}px;`,
+    const styles: string[] = this.getBoxStyles_().concat([
       `background: url('${this.imageUrl_}');`,
       `background-repeat: no-repeat;`,
       `background-size: contain;`,
       `position: absolute;`,
-    ];
+    ]);
 
-    let html = `<div style="${styles.join('')}"></div>`;
-    return {css: '', html};
+    // TODO: Use the layer ID for CSS selection.
+    return {css: '', html: this.createDiv_(styles)};
+  }
+
+  /**
+   * @override
+   */
+  protected asInactiveNormalPreviewHtml_(): {css: string, html: string} {
+    const styles: string[] = this.getBoxStyles_().concat([
+      `background: url('${this.imageUrl_}');`,
+      `background-repeat: no-repeat;`,
+      `background-size: contain;`,
+      `position: absolute;`,
+      `filter: grayscale(50%);`,
+      `opacity: .5;`,
+    ]);
+    return {css: '', html: this.createDiv_(styles)};
+  }
+
+  /**
+   * @param styles Styles to apply to the created div.
+   * @return Newly created DIV element with the gien styles applied.
+   */
+  private createDiv_(styles: string[]): string {
+    return `<div style="${styles.join('')}"></div>`;
   }
 
   /**
@@ -49,6 +79,18 @@ export class ImageLayer extends BaseLayer {
    */
   getBottom(): number {
     return this.bottom_;
+  }
+
+  /**
+   * @return Array of styles based on the boundary box top, left, bottom, right.
+   */
+  private getBoxStyles_(): string[] {
+    return [
+      `bottom: ${this.bottom_}px;`,
+      `left: ${this.left_}px;`,
+      `right: ${this.right_}px;`,
+      `top: ${this.top_}px;`,
+    ];
   }
 
   /**

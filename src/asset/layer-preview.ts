@@ -4,8 +4,10 @@ import {DisposableFunction} from 'external/gs_tools/src/dispose';
 import {inject} from 'external/gs_tools/src/inject';
 import {
   bind,
+  BooleanParser,
   customElement,
   DomHook,
+  EnumParser,
   handle,
   StringParser} from 'external/gs_tools/src/webc';
 
@@ -14,10 +16,12 @@ import {RouteService, RouteServiceEvents} from 'external/gs_ui/src/routing';
 import {ThemeService} from 'external/gs_ui/src/theming';
 
 import {SampleDataService} from '../common/sample-data-service';
+import {SampleDataServiceEvent} from '../common/sample-data-service-event';
 import {Asset} from '../data/asset';
 import {AssetCollection} from '../data/asset-collection';
 import {BaseLayer} from '../data/base-layer';
 import {DataEvents} from '../data/data-events';
+import {LayerPreviewMode} from '../data/layer-preview-mode';
 import {TemplateCompilerService} from '../data/template-compiler-service';
 import {RouteFactoryService} from '../routing/route-factory-service';
 import {Views} from '../routing/views';
@@ -31,11 +35,17 @@ import {Views} from '../routing/views';
   templateKey: 'src/asset/layer-preview',
 })
 export class LayerPreview extends BaseThemedElement {
+  @bind('#css').property('innerHTML')
+  readonly cssInnerHtmlHook_: DomHook<string>;
+
+  @bind(null).attribute('is-selected', BooleanParser)
+  readonly isSelectedHook_: DomHook<boolean>;
+
   @bind(null).attribute('layer-id', StringParser)
   readonly layerIdHook_: DomHook<string>;
 
-  @bind('#css').property('innerHTML')
-  readonly cssInnerHtmlHook_: DomHook<string>;
+  @bind(null).attribute('preview-mode', EnumParser(LayerPreviewMode))
+  readonly previewModeHook_: DomHook<LayerPreviewMode>;
 
   @bind('#root').property('innerHTML')
   readonly rootInnerHtmlHook_: DomHook<string>;
@@ -58,8 +68,10 @@ export class LayerPreview extends BaseThemedElement {
     super(themeService);
     this.assetCollection_ = assetCollection;
     this.cssInnerHtmlHook_ = DomHook.of<string>();
+    this.isSelectedHook_ = DomHook.of<boolean>();
     this.layerDeregister_ = null;
     this.layerIdHook_ = DomHook.of<string>();
+    this.previewModeHook_ = DomHook.of<LayerPreviewMode>();
     this.rootInnerHtmlHook_ = DomHook.of<string>();
     this.routeFactoryService_ = routeFactoryService;
     this.routeService_ = routeService;
@@ -72,15 +84,29 @@ export class LayerPreview extends BaseThemedElement {
    */
   onCreated(element: HTMLElement): void {
     super.onCreated(element);
-    this.routeService_.on(RouteServiceEvents.CHANGED, this.onLayerIdChanged_, this);
+    this.addDisposable(this.sampleDataService_.on(
+        SampleDataServiceEvent.ROW_CHANGED,
+        this.onDataChanged_,
+        this));
+    this.addDisposable(
+        this.routeService_.on(RouteServiceEvents.CHANGED, this.onLayerIdChanged_, this));
     this.onLayerIdChanged_();
   }
 
   private onLayerChange_(asset: Asset, rowData: string[], layer: BaseLayer): void {
-    const {css, html} = layer.asHtml();
+    const previewMode = this.previewModeHook_.get() || LayerPreviewMode.NORMAL;
+    const isActive = this.isSelectedHook_.get() || false;
+
+    const {css, html} = layer.asPreviewHtml(previewMode, isActive);
     const compiler = this.templateCompilerService_.create(asset, rowData);
     this.cssInnerHtmlHook_.set(compiler.compile(css));
     this.rootInnerHtmlHook_.set(compiler.compile(html));
+  }
+
+  @handle(null).attributeChange('preview-mode')
+  @handle(null).attributeChange('is-selected')
+  private onDataChanged_(): void {
+    this.onLayerIdChanged_();
   }
 
   @handle(null).attributeChange('layer-id')
@@ -95,16 +121,16 @@ export class LayerPreview extends BaseThemedElement {
       return;
     }
 
-    const layerId = this.layerIdHook_.get();
-    if (layerId === null) {
-      return;
-    }
-
     const [asset, rowData] = await Promise.all([
       this.assetCollection_.get(params.projectId, params.assetId),
       this.sampleDataService_.getRowData(),
     ]);
     if (asset === null || rowData === null) {
+      return;
+    }
+
+    const layerId = this.layerIdHook_.get();
+    if (layerId === null) {
       return;
     }
 

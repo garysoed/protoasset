@@ -26,6 +26,10 @@ export class TextLayer extends BaseLayer {
     this.top_ = null;
   }
 
+  asActiveBoundaryPreviewHtml_(): {css: string, html: string} {
+    return this.asHtml();
+  }
+
   /**
    * @override
    */
@@ -51,6 +55,10 @@ export class TextLayer extends BaseLayer {
 
     let html = `<div style="${styles.join('')}">${this.text_}</div>`;
     return {css, html};
+  }
+
+  asInactiveNormalPreviewHtml_(): {css: string, html: string} {
+    return this.asHtml();
   }
 
   /**

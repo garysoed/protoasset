@@ -1,8 +1,13 @@
 import {Field} from 'external/gs_tools/src/data';
 import {BaseListenable} from 'external/gs_tools/src/event';
+import {Validate} from 'external/gs_tools/src/valid';
 
 import {DataEvents} from './data-events';
+import {LayerPreviewMode} from './layer-preview-mode';
 import {LayerType} from './layer-type';
+
+
+type HtmlRender = {css: string, html: string};
 
 
 /**
@@ -25,9 +30,37 @@ export abstract class BaseLayer extends BaseListenable<DataEvents> {
   }
 
   /**
+   * @return The layer as HTML and CSS components when the layer is actively previewe in BOUNDARY
+   *     mode.
+   */
+  protected abstract asActiveBoundaryPreviewHtml_(): HtmlRender;
+
+  /**
    * @return The layer as HTML and CSS components.
    */
-  abstract asHtml(): {css: string, html: string};
+  abstract asHtml(): HtmlRender;
+
+  /**
+   * @return The layer as HTML and CSS components when the layer is not actively previewed in
+   *     NORMAL mode.
+   */
+  protected abstract asInactiveNormalPreviewHtml_(): HtmlRender;
+
+  /**
+   * @param mode Preview mode to return.
+   * @param isActive True iff the layer is currently actively previewed.
+   * @return The layer as HTML and CSS components in preview mode.
+   */
+  asPreviewHtml(mode: LayerPreviewMode, isActive: boolean): HtmlRender {
+    switch (mode) {
+      case LayerPreviewMode.NORMAL:
+        return isActive ? this.asHtml() : this.asInactiveNormalPreviewHtml_();
+      case LayerPreviewMode.BOUNDARY:
+        return isActive ? this.asActiveBoundaryPreviewHtml_() : this.asInactiveNormalPreviewHtml_();
+      default:
+        throw Validate.fail(`Unsuppored layer preview mode: ${mode}`);
+    }
+  }
 
   /**
    * @return ID of the layer.

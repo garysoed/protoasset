@@ -4,6 +4,7 @@ TestBase.setup();
 import {Mocks} from 'external/gs_tools/src/mock';
 import {TestDispose} from 'external/gs_tools/src/testing';
 
+import {SampleDataServiceEvent} from '../common/sample-data-service-event';
 import {DataEvents} from '../data/data-events';
 import {ImageLayer} from '../data/image-layer';
 
@@ -18,13 +19,13 @@ describe('namespace.ImageLayerEditor', () => {
 
   beforeEach(() => {
     mockAssetCollection = jasmine.createSpyObj('AssetCollection', ['get', 'update']);
-    mockSampleDataService = jasmine.createSpyObj('SampleDataService', ['getRowData']);
+    mockSampleDataService = jasmine.createSpyObj('SampleDataService', ['getRowData', 'on']);
     mockTemplateCompilerService = jasmine.createSpyObj('TemplateCompilerService', ['create']);
     editor = new ImageLayerEditor(
         mockAssetCollection,
         mockSampleDataService,
         mockTemplateCompilerService,
-        Mocks.object('ThemeService'));
+        jasmine.createSpyObj('ThemeService', ['applyTheme']));
     TestDispose.add(editor);
   });
 
@@ -126,6 +127,20 @@ describe('namespace.ImageLayerEditor', () => {
       spyOn(editor['layerIdHook_'], 'get').and.returnValue(null);
 
       assert(await editor['getLayer_']()).to.beNull();
+    });
+  });
+
+  describe('onCreated', () => {
+    it('should listen to sample data row changed event', () => {
+      const mockDisposable = jasmine.createSpyObj('Disposable', ['dispose']);
+      mockSampleDataService.on.and.returnValue(mockDisposable);
+      spyOn(editor, 'addDisposable').and.callThrough();
+      editor.onCreated(Mocks.object('element'));
+      assert(editor.addDisposable).to.haveBeenCalledWith(mockDisposable);
+      assert(mockSampleDataService.on).to.haveBeenCalledWith(
+          SampleDataServiceEvent.ROW_CHANGED,
+          editor['onSampleDataRowChanged_'],
+          editor);
     });
   });
 
@@ -264,6 +279,14 @@ describe('namespace.ImageLayerEditor', () => {
       mockSampleDataService.getRowData.and.returnValue(Promise.resolve(null));
 
       await editor['onFieldChange_']();
+    });
+  });
+
+  describe('onSampleDataRowChanged_', () => {
+    it('should call onFieldChange_', () => {
+      spyOn(editor, 'onFieldChange_');
+      editor['onSampleDataRowChanged_']();
+      assert(editor.onFieldChange_).to.haveBeenCalledWith();
     });
   });
 

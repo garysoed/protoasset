@@ -21,12 +21,14 @@ import {RouteService, RouteServiceEvents} from 'external/gs_ui/src/routing';
 import {ThemeService} from 'external/gs_ui/src/theming';
 import {OverlayService} from 'external/gs_ui/src/tool';
 
+import {SampleDataPicker} from '../common/sample-data-picker';
 import {Asset} from '../data/asset';
 import {AssetCollection} from '../data/asset-collection';
 import {BaseLayer} from '../data/base-layer';
 import {DataEvents} from '../data/data-events';
 import {HtmlLayer} from '../data/html-layer';
 import {ImageLayer} from '../data/image-layer';
+import {LayerPreviewMode} from '../data/layer-preview-mode';
 import {LayerType} from '../data/layer-type';
 import {TextLayer} from '../data/text-layer';
 import {RouteFactoryService} from '../routing/route-factory-service';
@@ -38,7 +40,7 @@ import {LayerPreview} from './layer-preview';
 
 
 type LayerItemData = {assetId: string, layerId: string, projectId: string};
-type LayerPreviewData = {isSelected: boolean, layerId: string};
+type LayerPreviewData = {isSelected: boolean, layerId: string, mode: LayerPreviewMode};
 
 
 export function layerItemDataSetter(data: LayerItemData, element: Element): void {
@@ -64,6 +66,7 @@ export function layerItemGenerator(document: Document, instance: LayerView): Ele
 export function layerPreviewDataSetter(data: LayerPreviewData, element: Element): void {
   element.setAttribute('is-selected', BooleanParser.stringify(data.isSelected));
   element.setAttribute('layer-id', data.layerId);
+  element.setAttribute('preview-mode', EnumParser(LayerPreviewMode).stringify(data.mode));
 }
 
 export function layerPreviewGenerator(document: Document): Element {
@@ -75,7 +78,7 @@ export function layerPreviewGenerator(document: Document): Element {
  * Displays layer editor
  */
 @customElement({
-  dependencies: [ImageLayerEditor, LayerItem, LayerPreview],
+  dependencies: [ImageLayerEditor, LayerItem, LayerPreview, SampleDataPicker],
   tag: 'pa-asset-layer-view',
   templateKey: 'src/asset/layer-view',
 })
@@ -406,6 +409,7 @@ export class LayerView extends BaseThemedElement {
 
     this.selectedLayerId_ = layer.getId();
     this.onLayerChanged_(layer);
+    this.updateLayerPreviews_();
   }
 
   private async updateLayerPreviews_(): Promise<void> {
@@ -421,6 +425,7 @@ export class LayerView extends BaseThemedElement {
           return {
             isSelected: layerId === this.selectedLayerId_,
             layerId: layerId,
+            mode: LayerPreviewMode.NORMAL,
           };
         })
         .reverse()
