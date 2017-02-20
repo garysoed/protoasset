@@ -118,36 +118,6 @@ describe('data.ImageLayer', () => {
     });
   });
 
-  describe('setBottom', () => {
-    it('should dispatch the CHANGED event', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
-        callback();
-      });
-
-      const bottom = 123;
-
-      layer.setBottom(bottom);
-
-      assert(layer.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
-      assert(layer.getBottom()).to.equal(bottom);
-    });
-
-    it('should not dispatch the CHANGED event if the bottom does not change', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
-        callback();
-      });
-
-      const bottom = 123;
-      layer['bottom_'] = bottom;
-
-      layer.setBottom(bottom);
-
-      assert(layer.dispatch).toNot.haveBeenCalled();
-      assert(layer.getBottom()).to.equal(bottom);
-    });
-  });
-
   describe('setImageUrl', () => {
     it('should dispatch the CHANGED event', () => {
       spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
@@ -174,96 +144,6 @@ describe('data.ImageLayer', () => {
 
       assert(layer.dispatch).toNot.haveBeenCalled();
       assert(layer.getImageUrl()).to.equal(imageUrl);
-    });
-  });
-
-  describe('setLeft', () => {
-    it('should dispatch the CHANGED event', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
-        callback();
-      });
-
-      const left = 123;
-
-      layer.setLeft(left);
-
-      assert(layer.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
-      assert(layer.getLeft()).to.equal(left);
-    });
-
-    it('should not dispatch the CHANGED event if the left does not change', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
-        callback();
-      });
-
-      const left = 123;
-      layer['left_'] = left;
-
-      layer.setLeft(left);
-
-      assert(layer.dispatch).toNot.haveBeenCalled();
-      assert(layer.getLeft()).to.equal(left);
-    });
-  });
-
-  describe('setRight', () => {
-    it('should dispatch the CHANGED event', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
-        callback();
-      });
-
-      const right = 123;
-
-      layer.setRight(right);
-
-      assert(layer.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
-      assert(layer.getRight()).to.equal(right);
-    });
-
-    it('should not dispatch the CHANGED event if the right does not change', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
-        callback();
-      });
-
-      const right = 123;
-      layer['right_'] = right;
-
-      layer.setRight(right);
-
-      assert(layer.dispatch).toNot.haveBeenCalled();
-      assert(layer.getRight()).to.equal(right);
-    });
-  });
-
-  describe('setTop', () => {
-    it('should dispatch the CHANGED event', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
-        callback();
-      });
-
-      const top = 123;
-
-      layer.setTop(top);
-
-      assert(layer.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
-      assert(layer.getTop()).to.equal(top);
-    });
-
-    it('should not dispatch the CHANGED event if the top does not change', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
-        callback();
-      });
-
-      const top = 123;
-      layer['top_'] = top;
-
-      layer.setTop(top);
-
-      assert(layer.dispatch).toNot.haveBeenCalled();
-      assert(layer.getTop()).to.equal(top);
     });
   });
 });

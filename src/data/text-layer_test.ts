@@ -40,21 +40,7 @@ describe('data.TextLayer', () => {
         `left: ${left}px;`,
         `right: ${right}px;`,
         `top: ${top}px;`,
-        `font-family: ${fontFamily};`,
-      ];
-      assert(html).to.equal(`<div style="${styles.join('')}">${text}</div>`);
-    });
-
-    it('should not include the bounding box or font import if not specified', () => {
-      let fontFamily = 'fontFamily';
-      let text = 'text';
-      layer.setFontFamily(fontFamily);
-      layer.setText(text);
-
-      let {css, html} = layer.asHtml();
-      assert(css).to.equal('');
-
-      let styles = [
+        `position: absolute;`,
         `font-family: ${fontFamily};`,
       ];
       assert(html).to.equal(`<div style="${styles.join('')}">${text}</div>`);

@@ -16,6 +16,10 @@ type HtmlRender = {css: string, html: string};
 export abstract class BaseLayer extends BaseListenable<DataEvents> {
   @Field('id') private id_: string;
   @Field('name') private name_: string;
+  @Field('bottom') private bottom_: number;
+  @Field('left') private left_: number;
+  @Field('right') private right_: number;
+  @Field('top') private top_: number;
 
   private readonly type_: LayerType;
 
@@ -24,8 +28,12 @@ export abstract class BaseLayer extends BaseListenable<DataEvents> {
    */
   constructor(id: string, name: string, type: LayerType) {
     super();
+    this.bottom_ = 0;
     this.id_ = id;
+    this.left_ = 0;
     this.name_ = name;
+    this.right_ = 0;
+    this.top_ = 0;
     this.type_ = type;
   }
 
@@ -65,10 +73,37 @@ export abstract class BaseLayer extends BaseListenable<DataEvents> {
   }
 
   /**
+   * @return The bottom bounding box of the image layer, in px.
+   */
+  getBottom(): number {
+    return this.bottom_;
+  }
+
+  /**
+   * @return Array of styles based on the boundary box top, left, bottom, right.
+   */
+  protected getBoxStyles_(): string[] {
+    return [
+      `bottom: ${this.bottom_}px;`,
+      `left: ${this.left_}px;`,
+      `right: ${this.right_}px;`,
+      `top: ${this.top_}px;`,
+      `position: absolute;`,
+    ];
+  }
+
+  /**
    * @return ID of the layer.
    */
   getId(): string {
     return this.id_;
+  }
+
+  /**
+   * @return The left bounding box of the image layer, in px.
+   */
+  getLeft(): number {
+    return this.left_;
   }
 
   /**
@@ -79,10 +114,50 @@ export abstract class BaseLayer extends BaseListenable<DataEvents> {
   }
 
   /**
+   * @return The right bounding box of the image layer, in px.
+   */
+  getRight(): number {
+    return this.right_;
+  }
+
+  /**
+   * @return The top bounding box of the image layer, in px.
+   */
+  getTop(): number {
+    return this.top_;
+  }
+
+  /**
    * @return Type of the layer.
    */
   getType(): LayerType {
     return this.type_;
+  }
+
+  /**
+   * @param bottom The bottom of the bounding box to set, in px.
+   */
+  setBottom(bottom: number): void {
+    if (this.bottom_ === bottom) {
+      return;
+    }
+
+    this.dispatch(DataEvents.CHANGED, () => {
+      this.bottom_ = bottom;
+    });
+  }
+
+  /**
+   * @param left The left of the bounding box to set, in px.
+   */
+  setLeft(left: number): void {
+    if (this.left_ === left) {
+      return;
+    }
+
+    this.dispatch(DataEvents.CHANGED, () => {
+      this.left_ = left;
+    });
   }
 
   /**
@@ -97,6 +172,32 @@ export abstract class BaseLayer extends BaseListenable<DataEvents> {
 
     this.dispatch(DataEvents.CHANGED, () => {
       this.name_ = name;
+    });
+  }
+
+  /**
+   * @param right The right of the bounding box to set, in px.
+   */
+  setRight(right: number): void {
+    if (this.right_ === right) {
+      return;
+    }
+
+    this.dispatch(DataEvents.CHANGED, () => {
+      this.right_ = right;
+    });
+  }
+
+  /**
+   * @param top The top of the bounding box to set, in px.
+   */
+  setTop(top: number): void {
+    if (this.top_ === top) {
+      return;
+    }
+
+    this.dispatch(DataEvents.CHANGED, () => {
+      this.top_ = top;
     });
   }
 }

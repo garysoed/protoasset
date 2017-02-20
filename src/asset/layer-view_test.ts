@@ -287,6 +287,8 @@ describe('asset.LayerView', () => {
       mockAsset.getLayers.and.returnValue([mockLayer1, mockLayer2, mockLayer3]);
       mockAsset.getWidth.and.returnValue(width);
 
+      spyOn(view.baseEditorAssetIdHook_, 'set');
+      spyOn(view.baseEditorProjectIdHook_, 'set');
       spyOn(view.htmlEditorAssetIdHook_, 'set');
       spyOn(view.htmlEditorProjectIdHook_, 'set');
       spyOn(view.imageEditorAssetIdHook_, 'set');
@@ -311,6 +313,8 @@ describe('asset.LayerView', () => {
         height: `${height}px`,
         width: `${width}px`,
       });
+      assert(view.baseEditorAssetIdHook_.set).to.haveBeenCalledWith(id);
+      assert(view.baseEditorProjectIdHook_.set).to.haveBeenCalledWith(projectId);
       assert(view.htmlEditorAssetIdHook_.set).to.haveBeenCalledWith(id);
       assert(view.htmlEditorProjectIdHook_.set).to.haveBeenCalledWith(projectId);
       assert(view.imageEditorAssetIdHook_.set).to.haveBeenCalledWith(id);
@@ -342,6 +346,8 @@ describe('asset.LayerView', () => {
       mockAsset.getProjectId.and.returnValue(projectId);
       mockAsset.getLayers.and.returnValue([]);
 
+      spyOn(view.baseEditorAssetIdHook_, 'set');
+      spyOn(view.baseEditorProjectIdHook_, 'set');
       spyOn(view.htmlEditorAssetIdHook_, 'set');
       spyOn(view.htmlEditorProjectIdHook_, 'set');
       spyOn(view.imageEditorAssetIdHook_, 'set');
@@ -381,6 +387,8 @@ describe('asset.LayerView', () => {
           mockAsset.getProjectId.and.returnValue(projectId);
           mockAsset.getLayers.and.returnValue([mockLayer]);
 
+          spyOn(view.baseEditorAssetIdHook_, 'set');
+          spyOn(view.baseEditorProjectIdHook_, 'set');
           spyOn(view.htmlEditorAssetIdHook_, 'set');
           spyOn(view.htmlEditorProjectIdHook_, 'set');
           spyOn(view.imageEditorAssetIdHook_, 'set');
@@ -409,16 +417,18 @@ describe('asset.LayerView', () => {
       mockAsset.getId.and.returnValue('id');
       mockAsset.getProjectId.and.returnValue('projectId');
 
-      spyOn(view['htmlEditorAssetIdHook_'], 'set');
-      spyOn(view['htmlEditorProjectIdHook_'], 'set');
-      spyOn(view['imageEditorAssetIdHook_'], 'set');
-      spyOn(view['imageEditorDataRowHook_'], 'set');
-      spyOn(view['imageEditorProjectIdHook_'], 'set');
-      spyOn(view['textEditorAssetIdHook_'], 'set');
-      spyOn(view['textEditorProjectIdHook_'], 'set');
+      spyOn(view.baseEditorAssetIdHook_, 'set');
+      spyOn(view.baseEditorProjectIdHook_, 'set');
+      spyOn(view.htmlEditorAssetIdHook_, 'set');
+      spyOn(view.htmlEditorProjectIdHook_, 'set');
+      spyOn(view.imageEditorAssetIdHook_, 'set');
+      spyOn(view.imageEditorDataRowHook_, 'set');
+      spyOn(view.imageEditorProjectIdHook_, 'set');
+      spyOn(view.textEditorAssetIdHook_, 'set');
+      spyOn(view.textEditorProjectIdHook_, 'set');
 
       await view['onAssetChanged_'](mockAsset);
-      assert(view['imageEditorDataRowHook_'].set).toNot.haveBeenCalled();
+      assert(view.imageEditorDataRowHook_.set).toNot.haveBeenCalled();
     });
 
     it('should not set the data row if there are no data source', async (done: any) => {
@@ -427,16 +437,18 @@ describe('asset.LayerView', () => {
       mockAsset.getId.and.returnValue('id');
       mockAsset.getProjectId.and.returnValue('projectId');
 
-      spyOn(view['htmlEditorAssetIdHook_'], 'set');
-      spyOn(view['htmlEditorProjectIdHook_'], 'set');
-      spyOn(view['imageEditorAssetIdHook_'], 'set');
-      spyOn(view['imageEditorDataRowHook_'], 'set');
-      spyOn(view['imageEditorProjectIdHook_'], 'set');
-      spyOn(view['textEditorAssetIdHook_'], 'set');
-      spyOn(view['textEditorProjectIdHook_'], 'set');
+      spyOn(view.baseEditorAssetIdHook_, 'set');
+      spyOn(view.baseEditorProjectIdHook_, 'set');
+      spyOn(view.htmlEditorAssetIdHook_, 'set');
+      spyOn(view.htmlEditorProjectIdHook_, 'set');
+      spyOn(view.imageEditorAssetIdHook_, 'set');
+      spyOn(view.imageEditorDataRowHook_, 'set');
+      spyOn(view.imageEditorProjectIdHook_, 'set');
+      spyOn(view.textEditorAssetIdHook_, 'set');
+      spyOn(view.textEditorProjectIdHook_, 'set');
 
       await view['onAssetChanged_'](mockAsset);
-      assert(view['imageEditorDataRowHook_'].set).toNot.haveBeenCalled();
+      assert(view.imageEditorDataRowHook_.set).toNot.haveBeenCalled();
     });
   });
 
@@ -464,18 +476,20 @@ describe('asset.LayerView', () => {
       mockLayer.getName.and.returnValue(name);
       mockLayer.getType.and.returnValue(type);
 
-      spyOn(view['layerNameHook_'], 'set');
-      spyOn(view['layerTypeSwitchHook_'], 'set');
-      spyOn(view['htmlEditorLayerIdHook_'], 'set');
-      spyOn(view['imageEditorLayerIdHook_'], 'set');
-      spyOn(view['textEditorLayerIdHook_'], 'set');
+      spyOn(view.layerNameHook_, 'set');
+      spyOn(view.layerTypeSwitchHook_, 'set');
+      spyOn(view.baseEditorLayerIdHook_, 'set');
+      spyOn(view.htmlEditorLayerIdHook_, 'set');
+      spyOn(view.imageEditorLayerIdHook_, 'set');
+      spyOn(view.textEditorLayerIdHook_, 'set');
 
       view['onLayerChanged_'](mockLayer);
-      assert(view['layerNameHook_'].set).to.haveBeenCalledWith(name);
-      assert(view['layerTypeSwitchHook_'].set).to.haveBeenCalledWith(type);
-      assert(view['htmlEditorLayerIdHook_'].set).to.haveBeenCalledWith(id);
-      assert(view['imageEditorLayerIdHook_'].set).to.haveBeenCalledWith(id);
-      assert(view['textEditorLayerIdHook_'].set).to.haveBeenCalledWith(id);
+      assert(view.layerNameHook_.set).to.haveBeenCalledWith(name);
+      assert(view.layerTypeSwitchHook_.set).to.haveBeenCalledWith(type);
+      assert(view.baseEditorLayerIdHook_.set).to.haveBeenCalledWith(id);
+      assert(view.htmlEditorLayerIdHook_.set).to.haveBeenCalledWith(id);
+      assert(view.imageEditorLayerIdHook_.set).to.haveBeenCalledWith(id);
+      assert(view.textEditorLayerIdHook_.set).to.haveBeenCalledWith(id);
     });
   });
 
@@ -815,11 +829,11 @@ describe('asset.LayerView', () => {
       const mockAsset = jasmine.createSpyObj('Asset', ['getLayers']);
       mockAsset.getLayers.and.returnValue([mockLayer1, mockLayer2]);
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
-      spyOn(view['layerPreviewsChildElementHook_'], 'set');
+      spyOn(view.layerPreviewsChildElementHook_, 'set');
 
       view['selectedLayerId_'] = layerId1;
       await view['updateLayerPreviews_']();
-      assert(view['layerPreviewsChildElementHook_'].set).to.haveBeenCalledWith([
+      assert(view.layerPreviewsChildElementHook_.set).to.haveBeenCalledWith([
         {isSelected: false, layerId: layerId2, mode: LayerPreviewMode.NORMAL},
         {isSelected: true, layerId: layerId1, mode: LayerPreviewMode.NORMAL},
       ]);
@@ -827,10 +841,10 @@ describe('asset.LayerView', () => {
 
     it('should do nothing if asset cannot be found', async (done: any) => {
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(null));
-      spyOn(view['layerPreviewsChildElementHook_'], 'set');
+      spyOn(view.layerPreviewsChildElementHook_, 'set');
 
       await view['updateLayerPreviews_']();
-      assert(view['layerPreviewsChildElementHook_'].set).toNot.haveBeenCalled();
+      assert(view.layerPreviewsChildElementHook_.set).toNot.haveBeenCalled();
     });
   });
 });

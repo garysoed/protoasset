@@ -10,19 +10,11 @@ import {LayerType} from './layer-type';
  */
 @Serializable('imageLayer')
 export class ImageLayer extends BaseLayer {
-  @Field('bottom') private bottom_: number;
   @Field('imageUrl') private imageUrl_: string;
-  @Field('left') private left_: number;
-  @Field('right') private right_: number;
-  @Field('top') private top_: number;
 
   constructor(id: string, name: string) {
     super(id, name, LayerType.IMAGE);
-    this.bottom_ = 0;
     this.imageUrl_ = '';
-    this.left_ = 0;
-    this.right_ = 0;
-    this.top_ = 0;
     // TODO: Move the box stuff to BaseLayer.
   }
 
@@ -73,64 +65,10 @@ export class ImageLayer extends BaseLayer {
   }
 
   /**
-   * @return The bottom bounding box of the image layer, in px.
-   */
-  getBottom(): number {
-    return this.bottom_;
-  }
-
-  /**
-   * @return Array of styles based on the boundary box top, left, bottom, right.
-   */
-  private getBoxStyles_(): string[] {
-    return [
-      `bottom: ${this.bottom_}px;`,
-      `left: ${this.left_}px;`,
-      `right: ${this.right_}px;`,
-      `top: ${this.top_}px;`,
-      `position: absolute;`,
-    ];
-  }
-
-  /**
    * @return The URL of the image in the layer.
    */
   getImageUrl(): string {
     return this.imageUrl_;
-  }
-
-  /**
-   * @return The left bounding box of the image layer, in px.
-   */
-  getLeft(): number {
-    return this.left_;
-  }
-
-  /**
-   * @return The right bounding box of the image layer, in px.
-   */
-  getRight(): number {
-    return this.right_;
-  }
-
-  /**
-   * @return The top bounding box of the image layer, in px.
-   */
-  getTop(): number {
-    return this.top_;
-  }
-
-  /**
-   * @param bottom The bottom of the bounding box to set, in px.
-   */
-  setBottom(bottom: number): void {
-    if (this.bottom_ === bottom) {
-      return;
-    }
-
-    this.dispatch(DataEvents.CHANGED, () => {
-      this.bottom_ = bottom;
-    });
   }
 
   /**
@@ -143,45 +81,6 @@ export class ImageLayer extends BaseLayer {
 
     this.dispatch(DataEvents.CHANGED, () => {
       this.imageUrl_ = imageUrl;
-    });
-  }
-
-  /**
-   * @param left The left of the bounding box to set, in px.
-   */
-  setLeft(left: number): void {
-    if (this.left_ === left) {
-      return;
-    }
-
-    this.dispatch(DataEvents.CHANGED, () => {
-      this.left_ = left;
-    });
-  }
-
-  /**
-   * @param right The right of the bounding box to set, in px.
-   */
-  setRight(right: number): void {
-    if (this.right_ === right) {
-      return;
-    }
-
-    this.dispatch(DataEvents.CHANGED, () => {
-      this.right_ = right;
-    });
-  }
-
-  /**
-   * @param top The top of the bounding box to set, in px.
-   */
-  setTop(top: number): void {
-    if (this.top_ === top) {
-      return;
-    }
-
-    this.dispatch(DataEvents.CHANGED, () => {
-      this.top_ = top;
     });
   }
 }

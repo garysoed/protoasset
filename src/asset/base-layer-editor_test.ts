@@ -4,28 +4,20 @@ TestBase.setup();
 import {Mocks} from 'external/gs_tools/src/mock';
 import {TestDispose} from 'external/gs_tools/src/testing';
 
-import {SampleDataServiceEvent} from '../common/sample-data-service-event';
 import {DataEvents} from '../data/data-events';
-import {ImageLayer} from '../data/image-layer';
 
-import {ImageLayerEditor} from './image-layer-editor';
+import {BaseLayerEditor} from './base-layer-editor';
 
 
-describe('namespace.ImageLayerEditor', () => {
+describe('asset.BaseLayerEditor', () => {
   let mockAssetCollection;
-  let mockSampleDataService;
-  let mockTemplateCompilerService;
-  let editor: ImageLayerEditor;
+  let editor: BaseLayerEditor;
 
   beforeEach(() => {
     mockAssetCollection = jasmine.createSpyObj('AssetCollection', ['get', 'update']);
-    mockSampleDataService = jasmine.createSpyObj('SampleDataService', ['getRowData', 'on']);
-    mockTemplateCompilerService = jasmine.createSpyObj('TemplateCompilerService', ['create']);
-    editor = new ImageLayerEditor(
+    editor = new BaseLayerEditor(
         mockAssetCollection,
-        mockSampleDataService,
-        mockTemplateCompilerService,
-        jasmine.createSpyObj('ThemeService', ['applyTheme']));
+        Mocks.object('ThemeService'));
     TestDispose.add(editor);
   });
 
@@ -76,7 +68,6 @@ describe('namespace.ImageLayerEditor', () => {
 
       const mockLayer = jasmine.createSpyObj('Layer', ['getId']);
       mockLayer.getId.and.returnValue(layerId);
-      Object.setPrototypeOf(mockLayer, ImageLayer.prototype);
 
       const mockAsset = jasmine.createSpyObj('Asset', ['getLayers']);
       mockAsset.getLayers.and.returnValue([mockLayer]);
@@ -85,27 +76,12 @@ describe('namespace.ImageLayerEditor', () => {
       assert(await editor['getLayer_']()).to.equal(mockLayer);
     });
 
-    it('should resolve with null if the layer is not an ImageLayer', async (done: any) => {
-      const layerId = 'layerId';
-      spyOn(editor.layerIdHook_, 'get').and.returnValue(layerId);
-
-      const mockLayer = jasmine.createSpyObj('Layer', ['getId']);
-      mockLayer.getId.and.returnValue(layerId);
-
-      const mockAsset = jasmine.createSpyObj('Asset', ['getLayers']);
-      mockAsset.getLayers.and.returnValue([mockLayer]);
-      spyOn(editor, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
-
-      assert(await editor['getLayer_']()).to.beNull();
-    });
-
     it('should resolve with null if the layer cannot be found', async (done: any) => {
       const layerId = 'layerId';
       spyOn(editor.layerIdHook_, 'get').and.returnValue(layerId);
 
       const mockLayer = jasmine.createSpyObj('Layer', ['getId']);
       mockLayer.getId.and.returnValue('otherLayerId');
-      Object.setPrototypeOf(mockLayer, ImageLayer.prototype);
 
       const mockAsset = jasmine.createSpyObj('Asset', ['getLayers']);
       mockAsset.getLayers.and.returnValue([mockLayer]);
@@ -130,27 +106,21 @@ describe('namespace.ImageLayerEditor', () => {
     });
   });
 
-  describe('onCreated', () => {
-    it('should listen to sample data row changed event', () => {
-      const mockDisposable = jasmine.createSpyObj('Disposable', ['dispose']);
-      mockSampleDataService.on.and.returnValue(mockDisposable);
-      spyOn(editor, 'addDisposable').and.callThrough();
-      editor.onCreated(Mocks.object('element'));
-      assert(editor.addDisposable).to.haveBeenCalledWith(mockDisposable);
-      assert(mockSampleDataService.on).to.haveBeenCalledWith(
-          SampleDataServiceEvent.ROW_CHANGED,
-          editor['onSampleDataRowChanged_'],
-          editor);
-    });
-  });
-
   describe('onDataChanged_', () => {
     it('should update the layer and save it', async (done: any) => {
-      const imageUrl = 'imageUrl';
+      const bottom = 12;
+      const left = 34;
+      const right = 56;
+      const top = 78;
 
-      spyOn(editor.imageUrlHook_, 'get').and.returnValue(imageUrl);
+      spyOn(editor.bottomHook_, 'get').and.returnValue(bottom);
+      spyOn(editor.leftHook_, 'get').and.returnValue(left);
+      spyOn(editor.rightHook_, 'get').and.returnValue(right);
+      spyOn(editor.topHook_, 'get').and.returnValue(top);
 
-      const mockLayer = jasmine.createSpyObj('Layer', ['setImageUrl']);
+      const mockLayer = jasmine.createSpyObj(
+          'Layer',
+          ['setBottom', 'setLeft', 'setRight', 'setTop']);
       spyOn(editor, 'getLayer_').and.returnValue(Promise.resolve(mockLayer));
 
       const asset = Mocks.object('asset');
@@ -158,7 +128,10 @@ describe('namespace.ImageLayerEditor', () => {
 
       await editor['onDataChanged_']();
       assert(mockAssetCollection.update).to.haveBeenCalledWith(asset);
-      assert(mockLayer.setImageUrl).to.haveBeenCalledWith(imageUrl);
+      assert(mockLayer.setTop).to.haveBeenCalledWith(top);
+      assert(mockLayer.setRight).to.haveBeenCalledWith(right);
+      assert(mockLayer.setLeft).to.haveBeenCalledWith(left);
+      assert(mockLayer.setBottom).to.haveBeenCalledWith(bottom);
     });
 
     it('should do nothing if the layer cannot be found', async (done: any) => {
@@ -182,76 +155,31 @@ describe('namespace.ImageLayerEditor', () => {
     });
   });
 
-  describe('onFieldChange_', () => {
-    it('should update the image preview correctly', async (done: any) => {
-      const imageUrl = 'imageUrl';
-      spyOn(editor.imageUrlHook_, 'get').and.returnValue(imageUrl);
-
-      const renderedImageUrl = 'renderedImageUrl';
-      const mockCompiler = jasmine.createSpyObj('Compiler', ['compile']);
-      mockCompiler.compile.and.returnValue(renderedImageUrl);
-      mockTemplateCompilerService.create.and.returnValue(Promise.resolve(mockCompiler));
-
-      const style = Mocks.object('style');
-      spyOn(editor.imagePreviewStyleHook_, 'get').and.returnValue(style);
-
-      const asset = Mocks.object('asset');
-      spyOn(editor, 'getAsset_').and.returnValue(Promise.resolve(asset));
-
-      const rowData = Mocks.object('rowData');
-      mockSampleDataService.getRowData.and.returnValue(Promise.resolve(rowData));
-
-      await editor['onFieldChange_']();
-      assert(style.backgroundImage).to.equal(`url(${renderedImageUrl})`);
-      assert(mockCompiler.compile).to.haveBeenCalledWith(imageUrl);
-      assert(mockTemplateCompilerService.create).to.haveBeenCalledWith(asset, rowData);
-    });
-
-    it('should skip updating the image preview if the style element cannot be found',
-        async (done: any) => {
-          const imageUrl = 'imageUrl';
-
-          spyOn(editor.imageUrlHook_, 'get').and.returnValue(imageUrl);
-          spyOn(editor.imagePreviewStyleHook_, 'get').and.returnValue(null);
-
-          const asset = Mocks.object('asset');
-          spyOn(editor, 'getAsset_').and.returnValue(Promise.resolve(asset));
-
-          const rowData = Mocks.object('rowData');
-          mockSampleDataService.getRowData.and.returnValue(Promise.resolve(rowData));
-
-          await editor['onFieldChange_']();
-        });
-
-    it('should not reject if the asset cannot be found', async (done: any) => {
-      spyOn(editor, 'getAsset_').and.returnValue(Promise.resolve(null));
-
-      const rowData = Mocks.object('rowData');
-      mockSampleDataService.getRowData.and.returnValue(Promise.resolve(rowData));
-
-      await editor['onFieldChange_']();
-    });
-
-    it('should not reject if the row data cannot be found', async (done: any) => {
-      const asset = Mocks.object('asset');
-      spyOn(editor, 'getAsset_').and.returnValue(Promise.resolve(asset));
-      mockSampleDataService.getRowData.and.returnValue(Promise.resolve(null));
-
-      await editor['onFieldChange_']();
-    });
-  });
-
   describe('onLayerChange_', () => {
     it('should update the UI correctly', () => {
-      const imageUrl = 'imageUrl';
-      const mockLayer = jasmine.createSpyObj('Layer', ['getImageUrl']);
-      mockLayer.getImageUrl.and.returnValue(imageUrl);
+      const top = 12;
+      const bottom = 34;
+      const left = 56;
+      const right = 78;
+      const mockLayer = jasmine.createSpyObj(
+          'Layer',
+          ['getBottom', 'getLeft', 'getRight', 'getTop']);
+      mockLayer.getBottom.and.returnValue(bottom);
+      mockLayer.getLeft.and.returnValue(left);
+      mockLayer.getRight.and.returnValue(right);
+      mockLayer.getTop.and.returnValue(top);
 
-      spyOn(editor.imageUrlHook_, 'set');
+      spyOn(editor.topHook_, 'set');
+      spyOn(editor.bottomHook_, 'set');
+      spyOn(editor.leftHook_, 'set');
+      spyOn(editor.rightHook_, 'set');
 
       editor['onLayerChange_'](mockLayer);
 
-      assert(editor.imageUrlHook_.set).to.haveBeenCalledWith(imageUrl);
+      assert(editor.topHook_.set).to.haveBeenCalledWith(top);
+      assert(editor.bottomHook_.set).to.haveBeenCalledWith(bottom);
+      assert(editor.leftHook_.set).to.haveBeenCalledWith(left);
+      assert(editor.rightHook_.set).to.haveBeenCalledWith(right);
     });
   });
 
@@ -300,28 +228,5 @@ describe('namespace.ImageLayerEditor', () => {
 
           await editor['onLayerIdChange_']();
         });
-  });
-
-  describe('onSampleDataRowChanged_', () => {
-    it('should call onFieldChange_', () => {
-      spyOn(editor, 'onFieldChange_');
-      editor['onSampleDataRowChanged_']();
-      assert(editor.onFieldChange_).to.haveBeenCalledWith();
-    });
-  });
-
-  describe('disposeInternal', () => {
-    it('should dispose the layer deregister', () => {
-      const mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
-      editor['layerDeregister_'] = mockDeregister;
-      editor.disposeInternal();
-      assert(mockDeregister.dispose).to.haveBeenCalledWith();
-    });
-
-    it('should not throw error if there are no layer deregisters', () => {
-      assert(() => {
-        editor.disposeInternal();
-      }).toNot.throw();
-    });
   });
 });

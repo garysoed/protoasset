@@ -6,73 +6,65 @@ import {
   bind,
   customElement,
   DomHook,
+  FloatParser,
   handle,
-  IntegerParser,
   StringParser} from 'external/gs_tools/src/webc';
 
 import {BaseThemedElement} from 'external/gs_ui/src/common';
 import {ThemeService} from 'external/gs_ui/src/theming';
 
-import {SampleDataService} from '../common/sample-data-service';
-import {SampleDataServiceEvent} from '../common/sample-data-service-event';
 import {Asset} from '../data/asset';
 import {AssetCollection} from '../data/asset-collection';
 import {BaseLayer} from '../data/base-layer';
 import {DataEvents} from '../data/data-events';
-import {ImageLayer} from '../data/image-layer';
-import {TemplateCompilerService} from '../data/template-compiler-service';
-
 
 
 /**
- * Image Layer
+ * Base layer editor
  */
 @customElement({
-  dependencies: [TemplateCompilerService],
-  tag: 'pa-asset-image-layer-editor',
-  templateKey: 'src/asset/image-layer-editor',
+  tag: 'pa-asset-base-layer-editor',
+  templateKey: 'src/asset/base-layer-editor',
 })
-export class ImageLayerEditor extends BaseThemedElement {
+export class BaseLayerEditor extends BaseThemedElement {
   @bind(null).attribute('asset-id', StringParser)
   readonly assetIdHook_: DomHook<string>;
 
-  @bind(null).attribute('data-row', IntegerParser)
-  readonly dataRowHook_: DomHook<number>;
-
-  @bind('#imagePreview').property('style')
-  readonly imagePreviewStyleHook_: DomHook<CSSStyleDeclaration>;
-
-  @bind('#imageUrl').attribute('gs-value', StringParser)
-  readonly imageUrlHook_: DomHook<string>;
+  @bind('#bottom').attribute('gs-value', FloatParser)
+  readonly bottomHook_: DomHook<number | null>;
 
   @bind(null).attribute('layer-id', StringParser)
   readonly layerIdHook_: DomHook<string>;
 
+  @bind('#left').attribute('gs-value', FloatParser)
+  readonly leftHook_: DomHook<number | null>;
+
   @bind(null).attribute('project-id', StringParser)
   readonly projectIdHook_: DomHook<string>;
 
+  @bind('#right').attribute('gs-value', FloatParser)
+  readonly rightHook_: DomHook<number | null>;
+
+  @bind('#top').attribute('gs-value', FloatParser)
+  readonly topHook_: DomHook<number | null>;
+
   private readonly assetCollection_: AssetCollection;
-  private readonly sampleDataService_: SampleDataService;
-  private readonly templateCompilerService_: TemplateCompilerService;
 
   private layerDeregister_: DisposableFunction | null;
 
   constructor(
       @inject('pa.data.AssetCollection') assetCollection: AssetCollection,
-      @inject('pa.common.SampleDataService') sampleDataService: SampleDataService,
-      @inject('pa.data.TemplateCompilerService') templateCompilerService: TemplateCompilerService,
       @inject('theming.ThemeService') themeService: ThemeService) {
     super(themeService);
     this.assetCollection_ = assetCollection;
     this.assetIdHook_ = DomHook.of<string>();
-    this.dataRowHook_ = DomHook.of<number>();
-    this.imagePreviewStyleHook_ = DomHook.of<CSSStyleDeclaration>();
-    this.imageUrlHook_ = DomHook.of<string>();
+    this.bottomHook_ = DomHook.of<number>();
     this.layerDeregister_ = null;
     this.layerIdHook_ = DomHook.of<string>();
+    this.leftHook_ = DomHook.of<number>();
     this.projectIdHook_ = DomHook.of<string>();
-    this.sampleDataService_ = sampleDataService;
-    this.templateCompilerService_ = templateCompilerService;
+    this.rightHook_ = DomHook.of<number>();
+    this.topHook_ = DomHook.of<number>();
   }
 
   /**
@@ -93,7 +85,7 @@ export class ImageLayerEditor extends BaseThemedElement {
    * Gets the layer to edit.
    * @return Promise that will be resolved with the layer, or null if it cannot be found.
    */
-  private async getLayer_(): Promise<ImageLayer | null> {
+  private async getLayer_(): Promise<BaseLayer | null> {
     const layerId = this.layerIdHook_.get();
     if (layerId === null) {
       return null;
@@ -114,66 +106,35 @@ export class ImageLayerEditor extends BaseThemedElement {
       return null;
     }
 
-    if (!(layer instanceof ImageLayer)) {
-      return null;
-    }
-
     return layer;
   }
 
-  /**
-   * @override
-   */
-  onCreated(element: HTMLElement): void {
-    super.onCreated(element);
-    this.addDisposable(this.sampleDataService_.on(
-        SampleDataServiceEvent.ROW_CHANGED,
-        this.onSampleDataRowChanged_,
-        this));
-  }
-
-  @handle('#imageUrl').attributeChange('gs-value')
+  @handle('#top').attributeChange('gs-value')
+  @handle('#bottom').attributeChange('gs-value')
+  @handle('#left').attributeChange('gs-value')
+  @handle('#right').attributeChange('gs-value')
   async onDataChanged_(): Promise<void> {
     const [asset, layer] = await Promise.all([this.getAsset_(), this.getLayer_()]);
     if (asset === null || layer === null) {
       return;
     }
 
-    const imageUrl = this.imageUrlHook_.get() || '';
-    layer.setImageUrl(imageUrl);
+    layer.setBottom(this.bottomHook_.get() || 0);
+    layer.setLeft(this.leftHook_.get() || 0);
+    layer.setRight(this.rightHook_.get() || 0);
+    layer.setTop(this.topHook_.get() || 0);
     await this.assetCollection_.update(asset);
-  }
-
-  @handle('#imageUrl').attributeChange('gs-value')
-  async onFieldChange_(): Promise<void> {
-    const [asset, rowData] = await Promise.all([
-      this.getAsset_(),
-      this.sampleDataService_.getRowData(),
-    ]);
-    if (asset === null || rowData === null) {
-      return;
-    }
-
-    const style = this.imagePreviewStyleHook_.get();
-    const imageUrl = this.imageUrlHook_.get() || '';
-    if (style !== null) {
-      try {
-        const templateCompiler = await this.templateCompilerService_.create(asset, rowData);
-        if (templateCompiler !== null) {
-          style.backgroundImage = `url(${templateCompiler.compile(imageUrl)})`;
-        }
-      } catch (e) {
-        // TODO: Display error.
-      }
-    }
   }
 
   /**
    * Handles when there is data change on the given layer.
    * @param layer Layer whose data was changed.
    */
-  private onLayerChange_(layer: ImageLayer): void {
-    this.imageUrlHook_.set(layer.getImageUrl());
+  private onLayerChange_(layer: BaseLayer): void {
+    this.topHook_.set(layer.getTop());
+    this.bottomHook_.set(layer.getBottom());
+    this.leftHook_.set(layer.getLeft());
+    this.rightHook_.set(layer.getRight());
   }
 
   @handle(null).attributeChange('asset-id')
@@ -194,22 +155,5 @@ export class ImageLayerEditor extends BaseThemedElement {
     this.layerDeregister_ = layer
         .on(DataEvents.CHANGED, this.onLayerChange_.bind(this, layer), this);
     this.onLayerChange_(layer);
-  }
-
-  /**
-   * Handles when the sample data row is changed.
-   */
-  private onSampleDataRowChanged_(): void {
-    this.onFieldChange_();
-  }
-
-  /**
-   * @override
-   */
-  disposeInternal(): void {
-    if (this.layerDeregister_ !== null) {
-      this.layerDeregister_.dispose();
-    }
-    super.disposeInternal();
   }
 }

@@ -34,6 +34,7 @@ import {TextLayer} from '../data/text-layer';
 import {RouteFactoryService} from '../routing/route-factory-service';
 import {Views} from '../routing/views';
 
+import {BaseLayerEditor} from './base-layer-editor';
 import {ImageLayerEditor} from './image-layer-editor';
 import {LayerItem} from './layer-item';
 import {LayerPreview} from './layer-preview';
@@ -92,11 +93,26 @@ export function layerPreviewModeGenerator(document: Document, instance: LayerVie
  * Displays layer editor
  */
 @customElement({
-  dependencies: [ImageLayerEditor, LayerItem, LayerPreview, MenuItem, SampleDataPicker],
+  dependencies: [
+    BaseLayerEditor,
+    ImageLayerEditor,
+    LayerItem,
+    LayerPreview,
+    MenuItem,
+    SampleDataPicker],
   tag: 'pa-asset-layer-view',
   templateKey: 'src/asset/layer-view',
 })
 export class LayerView extends BaseThemedElement {
+  @bind('#baseEditor').attribute('asset-id', StringParser)
+  readonly baseEditorAssetIdHook_: DomHook<string>;
+
+  @bind('#baseEditor').attribute('layer-id', StringParser)
+  readonly baseEditorLayerIdHook_: DomHook<string>;
+
+  @bind('#baseEditor').attribute('project-id', StringParser)
+  readonly baseEditorProjectIdHook_: DomHook<string>;
+
   @bind('#htmlEditor').attribute('asset-id', StringParser)
   readonly htmlEditorAssetIdHook_: DomHook<string>;
 
@@ -169,6 +185,9 @@ export class LayerView extends BaseThemedElement {
     super(themeService);
     this.assetChangedDeregister_ = null;
     this.assetCollection_ = assetCollection;
+    this.baseEditorAssetIdHook_ = DomHook.of<string>();
+    this.baseEditorLayerIdHook_ = DomHook.of<string>();
+    this.baseEditorProjectIdHook_ = DomHook.of<string>();
     this.htmlEditorAssetIdHook_ = DomHook.of<string>();
     this.htmlEditorLayerIdHook_ = DomHook.of<string>();
     this.htmlEditorProjectIdHook_ = DomHook.of<string>();
@@ -273,6 +292,8 @@ export class LayerView extends BaseThemedElement {
    * @param asset The changed asset.
    */
   private async onAssetChanged_(asset: Asset): Promise<void> {
+    this.baseEditorAssetIdHook_.set(asset.getId());
+    this.baseEditorProjectIdHook_.set(asset.getProjectId());
     this.htmlEditorAssetIdHook_.set(asset.getId());
     this.htmlEditorProjectIdHook_.set(asset.getProjectId());
     this.imageEditorAssetIdHook_.set(asset.getId());
@@ -346,6 +367,7 @@ export class LayerView extends BaseThemedElement {
   private onLayerChanged_(layer: BaseLayer): void {
     this.layerNameHook_.set(layer.getName());
     this.layerTypeSwitchHook_.set(layer.getType());
+    this.baseEditorLayerIdHook_.set(layer.getId());
     this.htmlEditorLayerIdHook_.set(layer.getId());
     this.imageEditorLayerIdHook_.set(layer.getId());
     this.textEditorLayerIdHook_.set(layer.getId());
