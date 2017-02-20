@@ -31,7 +31,7 @@ export class ImageLayer extends BaseLayer {
    */
   protected asActiveBoundaryPreviewHtml_(): {css: string, html: string} {
     const styles: string[] = this.getBoxStyles_().concat([
-      `background-color: var(--gsColorPassiveBG);`,
+      `background-color: var(--gsThemeNormal);`,
     ]);
     return {css: '', html: this.createDiv_(styles)};
   }
@@ -44,7 +44,6 @@ export class ImageLayer extends BaseLayer {
       `background: url('${this.imageUrl_}');`,
       `background-repeat: no-repeat;`,
       `background-size: contain;`,
-      `position: absolute;`,
     ]);
 
     // TODO: Use the layer ID for CSS selection.
@@ -59,7 +58,6 @@ export class ImageLayer extends BaseLayer {
       `background: url('${this.imageUrl_}');`,
       `background-repeat: no-repeat;`,
       `background-size: contain;`,
-      `position: absolute;`,
       `filter: grayscale(50%);`,
       `opacity: .5;`,
     ]);
@@ -90,6 +88,7 @@ export class ImageLayer extends BaseLayer {
       `left: ${this.left_}px;`,
       `right: ${this.right_}px;`,
       `top: ${this.top_}px;`,
+      `position: absolute;`,
     ];
   }
 

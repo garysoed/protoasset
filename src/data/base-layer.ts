@@ -53,10 +53,12 @@ export abstract class BaseLayer extends BaseListenable<DataEvents> {
    */
   asPreviewHtml(mode: LayerPreviewMode, isActive: boolean): HtmlRender {
     switch (mode) {
-      case LayerPreviewMode.NORMAL:
-        return isActive ? this.asHtml() : this.asInactiveNormalPreviewHtml_();
       case LayerPreviewMode.BOUNDARY:
         return isActive ? this.asActiveBoundaryPreviewHtml_() : this.asInactiveNormalPreviewHtml_();
+      case LayerPreviewMode.FULL:
+        return this.asHtml();
+      case LayerPreviewMode.NORMAL:
+        return isActive ? this.asHtml() : this.asInactiveNormalPreviewHtml_();
       default:
         throw Validate.fail(`Unsuppored layer preview mode: ${mode}`);
     }

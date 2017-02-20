@@ -58,6 +58,12 @@ describe('data.BaseLayer', () => {
           spyOn(layer, 'asInactiveNormalPreviewHtml_').and.returnValue(html);
           assert(layer.asPreviewHtml(LayerPreviewMode.BOUNDARY, false)).to.equal(html);
         });
+
+    it('should return the correct components when the mode is FULL', () => {
+      const html = Mocks.object('html');
+      spyOn(layer, 'asHtml').and.returnValue(html);
+      assert(layer.asPreviewHtml(LayerPreviewMode.FULL, true)).to.equal(html);
+    });
   });
 
   describe('setName', () => {

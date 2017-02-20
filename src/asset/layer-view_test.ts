@@ -17,6 +17,8 @@ import {
   layerItemGenerator,
   layerPreviewDataSetter,
   layerPreviewGenerator,
+  layerPreviewModeDataSetter,
+  layerPreviewModeGenerator,
   LayerView} from './layer-view';
 
 
@@ -80,6 +82,40 @@ describe('layerPreviewGenerator', () => {
     mockDocument.createElement.and.returnValue(element);
     assert(layerPreviewGenerator(mockDocument)).to.equal(element);
     assert(mockDocument.createElement).to.haveBeenCalledWith('pa-asset-layer-preview');
+  });
+});
+
+describe('layerPreviewModeDataSetter', () => {
+  it('should set the data correctly', () => {
+    const mockElement = jasmine.createSpyObj('Element', ['setAttribute']);
+    layerPreviewModeDataSetter(LayerPreviewMode.BOUNDARY, mockElement);
+    assert(mockElement.setAttribute).to.haveBeenCalledWith('gs-content', 'boundary');
+    assert(mockElement.setAttribute).to.haveBeenCalledWith('gs-value', 'boundary');
+  });
+});
+
+describe('layerPreviewModeGenerator', () => {
+  it('should create the correct element', () => {
+    const mockInstance = jasmine.createSpyObj('Instance', ['addDisposable']);
+
+    const disposable = Mocks.object('disposable');
+    const mockListenableDom = jasmine.createSpyObj('ListenableDom', ['on']);
+    mockListenableDom.on.and.returnValue(disposable);
+    spyOn(ListenableDom, 'of').and.returnValue(mockListenableDom);
+
+    const element = Mocks.object('element');
+    const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
+    mockDocument.createElement.and.returnValue(element);
+
+    assert(layerPreviewModeGenerator(mockDocument, mockInstance)).to.equal(element);
+    assert(mockInstance.addDisposable).to.haveBeenCalledWith(mockListenableDom);
+    assert(mockInstance.addDisposable).to.haveBeenCalledWith(disposable);
+    assert(mockListenableDom.on).to.haveBeenCalledWith(
+        DomEvent.CLICK,
+        mockInstance.onLayerPreviewModeSelected_,
+        mockInstance);
+    assert(ListenableDom.of).to.haveBeenCalledWith(element);
+    assert(mockDocument.createElement).to.haveBeenCalledWith('gs-menu-item');
   });
 });
 
@@ -409,10 +445,12 @@ describe('asset.LayerView', () => {
       const element = Mocks.object('element');
       mockRouteService.on.and.returnValue({dispose(): void {}});
       spyOn(view, 'onRouteChanged_');
+      spyOn(view, 'onSelectedLayerPreviewModeChanged_');
       view.onCreated(element);
       assert(view['onRouteChanged_']).to.haveBeenCalledWith();
       assert(mockRouteService.on).to
           .haveBeenCalledWith(RouteServiceEvents.CHANGED, view['onRouteChanged_'], view);
+      assert(view['onSelectedLayerPreviewModeChanged_']).to.haveBeenCalledWith();
     });
   });
 
@@ -493,6 +531,43 @@ describe('asset.LayerView', () => {
       await view['onLayerItemClick_'](null);
       assert(view['selectLayer_']).toNot.haveBeenCalled();
       assert(mockOverlayService.hideOverlay).to.haveBeenCalledWith();
+    });
+  });
+
+  describe('onLayerPreviewModeSelected_', () => {
+    it('should update the selected layer correctly', () => {
+      const previewMode = LayerPreviewMode.FULL;
+      const mockTarget = jasmine.createSpyObj('Target', ['getAttribute']);
+      mockTarget.getAttribute.and.returnValue('full');
+      const event = Mocks.object('event');
+      event.target = mockTarget;
+
+      spyOn(view, 'selectedLayerPreviewMode_');
+      spyOn(view, 'onSelectedLayerPreviewModeChanged_');
+      spyOn(view, 'updateLayerPreviews_');
+
+      view.onLayerPreviewModeSelected_(event);
+      assert(mockOverlayService.hideOverlay).to.haveBeenCalledWith();
+      assert(view['updateLayerPreviews_']).to.haveBeenCalledWith();
+      assert(view['onSelectedLayerPreviewModeChanged_']).to.haveBeenCalledWith();
+      assert(view['selectedLayerPreviewMode_']).to.equal(previewMode);
+      assert(mockTarget.getAttribute).to.haveBeenCalledWith('gs-value');
+    });
+
+    it('should do nothing if the selected value is invalid', () => {
+      const mockTarget = jasmine.createSpyObj('Target', ['getAttribute']);
+      mockTarget.getAttribute.and.returnValue('unknown');
+      const event = Mocks.object('event');
+      event.target = mockTarget;
+
+      spyOn(view, 'selectedLayerPreviewMode_');
+      spyOn(view, 'onSelectedLayerPreviewModeChanged_');
+      spyOn(view, 'updateLayerPreviews_');
+
+      view.onLayerPreviewModeSelected_(event);
+      assert(mockOverlayService.hideOverlay).toNot.haveBeenCalled();
+      assert(view['updateLayerPreviews_']).toNot.haveBeenCalled();
+      assert(view['onSelectedLayerPreviewModeChanged_']).toNot.haveBeenCalled();
     });
   });
 
@@ -634,6 +709,24 @@ describe('asset.LayerView', () => {
 
           assert(mockRouteService.getParams).to.haveBeenCalledWith(layerRouteFactory);
         });
+  });
+
+  describe('onSelectedLayerPreviewModeChanged_', () => {
+    it('should update the selected preview name and preview mode list correctly', () => {
+      view['selectedLayerPreviewMode_'] = LayerPreviewMode.BOUNDARY;
+
+      spyOn(view.selectedPreviewModeHook_, 'set');
+      spyOn(view.previewModeChildElementHook_, 'set');
+
+      view['onSelectedLayerPreviewModeChanged_']();
+
+      assert(view.selectedPreviewModeHook_.set).to.haveBeenCalledWith('boundary');
+      assert(view.previewModeChildElementHook_.set).to.haveBeenCalledWith([
+        LayerPreviewMode.BOUNDARY,
+        LayerPreviewMode.NORMAL,
+        LayerPreviewMode.FULL,
+      ]);
+    });
   });
 
   describe('selectDefaultLayer_', () => {

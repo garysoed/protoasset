@@ -19,7 +19,7 @@ import {
 import {BaseThemedElement} from 'external/gs_ui/src/common';
 import {RouteService, RouteServiceEvents} from 'external/gs_ui/src/routing';
 import {ThemeService} from 'external/gs_ui/src/theming';
-import {OverlayService} from 'external/gs_ui/src/tool';
+import {MenuItem, OverlayService} from 'external/gs_ui/src/tool';
 
 import {SampleDataPicker} from '../common/sample-data-picker';
 import {Asset} from '../data/asset';
@@ -73,12 +73,26 @@ export function layerPreviewGenerator(document: Document): Element {
   return document.createElement('pa-asset-layer-preview');
 }
 
+export function layerPreviewModeDataSetter(data: LayerPreviewMode, element: Element): void {
+  element.setAttribute('gs-content', Enums.toLowerCaseString(data, LayerPreviewMode));
+  element.setAttribute('gs-value', EnumParser(LayerPreviewMode).stringify(data));
+}
+
+export function layerPreviewModeGenerator(document: Document, instance: LayerView): Element {
+  const element = document.createElement('gs-menu-item');
+  const listenableDom = ListenableDom.of(element);
+  instance.addDisposable(
+      listenableDom.on(DomEvent.CLICK, instance.onLayerPreviewModeSelected_, instance));
+  instance.addDisposable(listenableDom);
+  return element;
+}
+
 
 /**
  * Displays layer editor
  */
 @customElement({
-  dependencies: [ImageLayerEditor, LayerItem, LayerPreview, SampleDataPicker],
+  dependencies: [ImageLayerEditor, LayerItem, LayerPreview, MenuItem, SampleDataPicker],
   tag: 'pa-asset-layer-view',
   templateKey: 'src/asset/layer-view',
 })
@@ -119,6 +133,13 @@ export class LayerView extends BaseThemedElement {
   @bind('#layers').childrenElements<LayerItemData>(layerItemGenerator, layerItemDataSetter)
   readonly layersChildElementHook_: DomHook<LayerItemData[]>;
 
+  @bind('#previewModes').childrenElements(layerPreviewModeGenerator, layerPreviewModeDataSetter)
+  readonly previewModeChildElementHook_: DomHook<LayerPreviewMode[]>;
+
+  // TODO: Add parser to innerText.
+  @bind('#selectedPreviewMode').innerText()
+  readonly selectedPreviewModeHook_: DomHook<string>;
+
   @bind('#textEditor').attribute('asset-id', StringParser)
   readonly textEditorAssetIdHook_: DomHook<string>;
 
@@ -137,6 +158,7 @@ export class LayerView extends BaseThemedElement {
   private assetChangedDeregister_: DisposableFunction | null;
   private layerChangedDeregister_: DisposableFunction | null;
   private selectedLayerId_: string | null;
+  private selectedLayerPreviewMode_: LayerPreviewMode;
 
   constructor(
       @inject('pa.data.AssetCollection') assetCollection: AssetCollection,
@@ -162,9 +184,12 @@ export class LayerView extends BaseThemedElement {
     this.layerTypeSwitchHook_ = DomHook.of<LayerType>();
     this.layersChildElementHook_ = DomHook.of<LayerItemData[]>();
     this.overlayService_ = overlayService;
+    this.previewModeChildElementHook_ = DomHook.of<LayerPreviewMode[]>();
     this.routeFactoryService_ = routeFactoryService;
     this.routeService_ = routeService;
     this.selectedLayerId_ = null;
+    this.selectedLayerPreviewMode_ = LayerPreviewMode.NORMAL;
+    this.selectedPreviewModeHook_ = DomHook.of<string>();
     this.textEditorAssetIdHook_ = DomHook.of<string>();
     this.textEditorLayerIdHook_ = DomHook.of<string>();
     this.textEditorProjectIdHook_ = DomHook.of<string>();
@@ -310,6 +335,8 @@ export class LayerView extends BaseThemedElement {
         this.onRouteChanged_,
         this));
     this.onRouteChanged_();
+
+    this.onSelectedLayerPreviewModeChanged_();
   }
 
   /**
@@ -351,6 +378,24 @@ export class LayerView extends BaseThemedElement {
   }
 
   /**
+   * Handles when the layer preview mode is selected.
+   * @param event Event triggered.
+   */
+  onLayerPreviewModeSelected_(event: Event): void {
+    const target = <HTMLElement> event.target;
+    const previewMode = EnumParser<LayerPreviewMode>(LayerPreviewMode)
+        .parse(target.getAttribute('gs-value'));
+    if (previewMode === null) {
+      return;
+    }
+
+    this.selectedLayerPreviewMode_ = previewMode;
+    this.onSelectedLayerPreviewModeChanged_();
+    this.updateLayerPreviews_();
+    this.overlayService_.hideOverlay();
+  }
+
+  /**
    * Handles when the route was changed.
    * @return Promise that will be resolved when all operations are done.
    */
@@ -377,6 +422,19 @@ export class LayerView extends BaseThemedElement {
         this);
     this.onAssetChanged_(asset);
     this.selectDefaultLayer_(asset);
+  }
+
+  private onSelectedLayerPreviewModeChanged_(): void {
+    const previewModes = Arrays
+        .of([this.selectedLayerPreviewMode_])
+        .addAllArray(Arrays
+            .of(Enums.getAllValues<LayerPreviewMode>(LayerPreviewMode))
+            .removeAll(new Set([this.selectedLayerPreviewMode_]))
+            .asArray())
+        .asArray();
+    this.previewModeChildElementHook_.set(previewModes);
+    this.selectedPreviewModeHook_
+        .set(EnumParser(LayerPreviewMode).stringify(this.selectedLayerPreviewMode_));
   }
 
   /**
@@ -425,7 +483,7 @@ export class LayerView extends BaseThemedElement {
           return {
             isSelected: layerId === this.selectedLayerId_,
             layerId: layerId,
-            mode: LayerPreviewMode.NORMAL,
+            mode: this.selectedLayerPreviewMode_,
           };
         })
         .reverse()

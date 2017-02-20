@@ -30,7 +30,7 @@ describe('data.ImageLayer', () => {
       assert(layer['createDiv_']).to.haveBeenCalledWith([
         boxStyle1,
         boxStyle2,
-        `background-color: var(--gsColorPassiveBG);`,
+        `background-color: var(--gsThemeNormal);`,
       ]);
     });
   });
@@ -56,10 +56,10 @@ describe('data.ImageLayer', () => {
         `left: ${left}px;`,
         `right: ${right}px;`,
         `top: ${top}px;`,
+        `position: absolute;`,
         `background: url('${imageUrl}');`,
         `background-repeat: no-repeat;`,
         `background-size: contain;`,
-        `position: absolute;`,
       ];
       assert(html).to.equal(`<div style="${expectedStyles.join('')}"></div>`);
     });
@@ -113,6 +113,7 @@ describe('data.ImageLayer', () => {
         `left: ${left}px;`,
         `right: ${right}px;`,
         `top: ${top}px;`,
+        `position: absolute;`,
       ]);
     });
   });
