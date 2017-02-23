@@ -38,6 +38,7 @@ import {BaseLayerEditor} from './base-layer-editor';
 import {ImageLayerEditor} from './image-layer-editor';
 import {LayerItem} from './layer-item';
 import {LayerPreview} from './layer-preview';
+import {TextLayerEditor} from './text-layer-editor';
 
 
 type LayerItemData = {assetId: string, layerId: string, projectId: string};
@@ -99,7 +100,9 @@ export function layerPreviewModeGenerator(document: Document, instance: LayerVie
     LayerItem,
     LayerPreview,
     MenuItem,
-    SampleDataPicker],
+    SampleDataPicker,
+    TextLayerEditor,
+  ],
   tag: 'pa-asset-layer-view',
   templateKey: 'src/asset/layer-view',
 })

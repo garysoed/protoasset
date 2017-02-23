@@ -1,6 +1,3 @@
-import {sequenced} from 'external/gs_tools/src/async';
-import {Arrays} from 'external/gs_tools/src/collection';
-import {DisposableFunction} from 'external/gs_tools/src/dispose';
 import {inject} from 'external/gs_tools/src/inject';
 import {
   bind,
@@ -10,13 +7,12 @@ import {
   handle,
   StringParser} from 'external/gs_tools/src/webc';
 
-import {BaseThemedElement} from 'external/gs_ui/src/common';
 import {ThemeService} from 'external/gs_ui/src/theming';
 
-import {Asset} from '../data/asset';
 import {AssetCollection} from '../data/asset-collection';
 import {BaseLayer} from '../data/base-layer';
-import {DataEvents} from '../data/data-events';
+
+import {AbstractLayerEditor} from './abstract-layer-editor';
 
 
 /**
@@ -26,7 +22,7 @@ import {DataEvents} from '../data/data-events';
   tag: 'pa-asset-base-layer-editor',
   templateKey: 'src/asset/base-layer-editor',
 })
-export class BaseLayerEditor extends BaseThemedElement {
+export class BaseLayerEditor extends AbstractLayerEditor<BaseLayer> {
   @bind(null).attribute('asset-id', StringParser)
   readonly assetIdHook_: DomHook<string>;
 
@@ -48,18 +44,12 @@ export class BaseLayerEditor extends BaseThemedElement {
   @bind('#top').attribute('gs-value', FloatParser)
   readonly topHook_: DomHook<number | null>;
 
-  private readonly assetCollection_: AssetCollection;
-
-  private layerDeregister_: DisposableFunction | null;
-
   constructor(
       @inject('pa.data.AssetCollection') assetCollection: AssetCollection,
       @inject('theming.ThemeService') themeService: ThemeService) {
-    super(themeService);
-    this.assetCollection_ = assetCollection;
+    super(assetCollection, themeService);
     this.assetIdHook_ = DomHook.of<string>();
     this.bottomHook_ = DomHook.of<number>();
-    this.layerDeregister_ = null;
     this.layerIdHook_ = DomHook.of<string>();
     this.leftHook_ = DomHook.of<number>();
     this.projectIdHook_ = DomHook.of<string>();
@@ -68,44 +58,9 @@ export class BaseLayerEditor extends BaseThemedElement {
   }
 
   /**
-   * Gets the asset to use.
-   * @return Promise that will be resolved with the asset, or null if it cannot be found.
+   * @override
    */
-  private async getAsset_(): Promise<Asset | null> {
-    let assetId = this.assetIdHook_.get();
-    let projectId = this.projectIdHook_.get();
-    if (assetId === null || projectId === null) {
-      return null;
-    }
-
-    return await this.assetCollection_.get(projectId, assetId);
-  }
-
-  /**
-   * Gets the layer to edit.
-   * @return Promise that will be resolved with the layer, or null if it cannot be found.
-   */
-  private async getLayer_(): Promise<BaseLayer | null> {
-    const layerId = this.layerIdHook_.get();
-    if (layerId === null) {
-      return null;
-    }
-
-    let asset = await this.getAsset_();
-    if (asset === null) {
-      return null;
-    }
-
-    let layer = Arrays
-        .of(asset.getLayers())
-        .find((layer: BaseLayer) => {
-          return layer.getId() === layerId;
-        });
-
-    if (layer === null) {
-      return null;
-    }
-
+  protected checkLayer_(layer: BaseLayer): BaseLayer {
     return layer;
   }
 
@@ -130,30 +85,10 @@ export class BaseLayerEditor extends BaseThemedElement {
    * Handles when there is data change on the given layer.
    * @param layer Layer whose data was changed.
    */
-  private onLayerChange_(layer: BaseLayer): void {
+  protected onLayerChange_(layer: BaseLayer): void {
     this.topHook_.set(layer.getTop());
     this.bottomHook_.set(layer.getBottom());
     this.leftHook_.set(layer.getLeft());
     this.rightHook_.set(layer.getRight());
-  }
-
-  @handle(null).attributeChange('asset-id')
-  @handle(null).attributeChange('project-id')
-  @handle(null).attributeChange('layer-id')
-  @sequenced()
-  protected async onLayerIdChange_(): Promise<void> {
-    if (this.layerDeregister_ !== null) {
-      this.layerDeregister_.dispose();
-      this.layerDeregister_ = null;
-    }
-
-    let layer = await this.getLayer_();
-    if (layer === null) {
-      return;
-    }
-
-    this.layerDeregister_ = layer
-        .on(DataEvents.CHANGED, this.onLayerChange_.bind(this, layer), this);
-    this.onLayerChange_(layer);
   }
 }

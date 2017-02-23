@@ -17,31 +17,28 @@ describe('data.TextLayer', () => {
 
   describe('asHtml', () => {
     it('should return the correct HTML and CSS components', () => {
-      let fontUrl = 'fontUrl';
-      let bottom = 12;
-      let left = 34;
-      let right = 56;
-      let top = 78;
-      let fontFamily = 'fontFamily';
-      let text = 'text';
+      const color = 'color';
+      const fontUrl = 'fontUrl';
+      const fontFamily = 'fontFamily';
+      const fontSize = 'fontSize';
+      const text = 'text';
+      layer.setColor(color);
       layer.setFontUrl(fontUrl);
-      layer.setBottom(bottom);
-      layer.setLeft(left);
-      layer.setRight(right);
-      layer.setTop(top);
       layer.setFontFamily(fontFamily);
+      layer.setSize(fontSize);
       layer.setText(text);
 
-      let {css, html} = layer.asHtml();
-      assert(css).to.equal(`@import '${fontUrl}';`);
+      const boxStyle = 'boxStyle';
+      spyOn(layer, 'getBoxStyles_').and.returnValue([boxStyle]);
 
-      let styles = [
-        `bottom: ${bottom}px;`,
-        `left: ${left}px;`,
-        `right: ${right}px;`,
-        `top: ${top}px;`,
-        `position: absolute;`,
+      const {css, html} = layer.asHtml();
+      assert(css).to.equal(`@import url('${fontUrl}');`);
+
+      const styles = [
+        boxStyle,
+        `color: ${color};`,
         `font-family: ${fontFamily};`,
+        `font-size: ${fontSize};`,
       ];
       assert(html).to.equal(`<div style="${styles.join('')}">${text}</div>`);
     });
@@ -53,7 +50,7 @@ describe('data.TextLayer', () => {
         callback();
       });
 
-      let bottom = 123;
+      const bottom = 123;
       layer.setBottom(bottom);
 
       assert(layer.dispatch).to
@@ -66,7 +63,7 @@ describe('data.TextLayer', () => {
         callback();
       });
 
-      let bottom = 123;
+      const bottom = 123;
       layer['bottom_'] = bottom;
 
       layer.setBottom(bottom);
@@ -76,13 +73,42 @@ describe('data.TextLayer', () => {
     });
   });
 
+  describe('setColor', () => {
+    it('should dispatch the CHANGED event', () => {
+      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+        callback();
+      });
+
+      const color = 'color';
+      layer.setColor(color);
+
+      assert(layer.dispatch).to
+          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+      assert(layer.getColor()).to.equal(color);
+    });
+
+    it('should not dispatch the CHANGED event if the color does not change', () => {
+      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+        callback();
+      });
+
+      const color = 'color';
+      layer['color_'] = color;
+
+      layer.setColor(color);
+
+      assert(layer.dispatch).toNot.haveBeenCalled();
+      assert(layer.getColor()).to.equal(color);
+    });
+  });
+
   describe('setFontFamily', () => {
     it('should dispatch the CHANGED event', () => {
       spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
         callback();
       });
 
-      let fontFamily = 'fontFamily';
+      const fontFamily = 'fontFamily';
       layer.setFontFamily(fontFamily);
 
       assert(layer.dispatch).to
@@ -95,7 +121,7 @@ describe('data.TextLayer', () => {
         callback();
       });
 
-      let fontFamily = 'fontFamily';
+      const fontFamily = 'fontFamily';
       layer['fontFamily_'] = fontFamily;
 
       layer.setFontFamily(fontFamily);
@@ -111,7 +137,7 @@ describe('data.TextLayer', () => {
         callback();
       });
 
-      let fontUrl = 'fontUrl';
+      const fontUrl = 'fontUrl';
       layer.setFontUrl(fontUrl);
 
       assert(layer.dispatch).to
@@ -124,7 +150,7 @@ describe('data.TextLayer', () => {
         callback();
       });
 
-      let fontUrl = 'fontUrl';
+      const fontUrl = 'fontUrl';
       layer['fontUrl_'] = fontUrl;
 
       layer.setFontUrl(fontUrl);
@@ -140,7 +166,7 @@ describe('data.TextLayer', () => {
         callback();
       });
 
-      let left = 123;
+      const left = 123;
       layer.setLeft(left);
 
       assert(layer.dispatch).to
@@ -153,7 +179,7 @@ describe('data.TextLayer', () => {
         callback();
       });
 
-      let left = 123;
+      const left = 123;
       layer['left_'] = left;
 
       layer.setLeft(left);
@@ -169,7 +195,7 @@ describe('data.TextLayer', () => {
         callback();
       });
 
-      let right = 123;
+      const right = 123;
       layer.setRight(right);
 
       assert(layer.dispatch).to
@@ -182,7 +208,7 @@ describe('data.TextLayer', () => {
         callback();
       });
 
-      let right = 123;
+      const right = 123;
       layer['right_'] = right;
 
       layer.setRight(right);
@@ -192,13 +218,42 @@ describe('data.TextLayer', () => {
     });
   });
 
+  describe('setSize', () => {
+    it('should dispatch the CHANGED event', () => {
+      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+        callback();
+      });
+
+      const size = 'size';
+      layer.setSize(size);
+
+      assert(layer.dispatch).to
+          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+      assert(layer.getSize()).to.equal(size);
+    });
+
+    it('should not dispatch the CHANGED event if the size does not change', () => {
+      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+        callback();
+      });
+
+      const size = 'size';
+      layer['size_'] = size;
+
+      layer.setSize(size);
+
+      assert(layer.dispatch).toNot.haveBeenCalled();
+      assert(layer.getSize()).to.equal(size);
+    });
+  });
+
   describe('setText', () => {
     it('should dispatch the CHANGED event', () => {
       spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
         callback();
       });
 
-      let text = 'text';
+      const text = 'text';
       layer.setText(text);
 
       assert(layer.dispatch).to
@@ -211,7 +266,7 @@ describe('data.TextLayer', () => {
         callback();
       });
 
-      let text = 'text';
+      const text = 'text';
       layer['text_'] = text;
 
       layer.setText(text);
@@ -227,7 +282,7 @@ describe('data.TextLayer', () => {
         callback();
       });
 
-      let top = 123;
+      const top = 123;
       layer.setTop(top);
 
       assert(layer.dispatch).to
@@ -240,7 +295,7 @@ describe('data.TextLayer', () => {
         callback();
       });
 
-      let top = 123;
+      const top = 123;
       layer['top_'] = top;
 
       layer.setTop(top);
