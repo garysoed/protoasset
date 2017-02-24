@@ -1,4 +1,4 @@
-import {sequenced} from 'external/gs_tools/src/async';
+import {atomic} from 'external/gs_tools/src/async';
 import {Arrays} from 'external/gs_tools/src/collection';
 import {DisposableFunction} from 'external/gs_tools/src/dispose';
 import {DomEvent} from 'external/gs_tools/src/event';
@@ -132,7 +132,7 @@ export class LayerItem extends BaseThemedElement {
 
   @handle(null).attributeChange('asset-id', StringParser)
   @handle(null).attributeChange('project-id', StringParser)
-  @sequenced()
+  @atomic()
   async onAssetIdChanged_(): Promise<void> {
     if (this.assetDeregister_ !== null) {
       this.assetDeregister_.dispose();
@@ -178,7 +178,7 @@ export class LayerItem extends BaseThemedElement {
   }
 
   @handle(null).attributeChange('layer-id', StringParser)
-  @sequenced()
+  @atomic()
   async onLayerIdChanged_(): Promise<void> {
     if (this.layerDeregister_ !== null) {
       this.layerDeregister_.dispose();

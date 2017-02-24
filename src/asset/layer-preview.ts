@@ -1,4 +1,4 @@
-import {sequenced} from 'external/gs_tools/src/async';
+import {atomic} from 'external/gs_tools/src/async';
 import {Arrays} from 'external/gs_tools/src/collection';
 import {DisposableFunction} from 'external/gs_tools/src/dispose';
 import {inject} from 'external/gs_tools/src/inject';
@@ -110,7 +110,7 @@ export class LayerPreview extends BaseThemedElement {
   }
 
   @handle(null).attributeChange('layer-id')
-  @sequenced()
+  @atomic()
   async onLayerIdChanged_(): Promise<void> {
     if (this.layerDeregister_ !== null) {
       this.layerDeregister_.dispose();

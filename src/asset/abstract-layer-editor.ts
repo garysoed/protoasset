@@ -1,4 +1,4 @@
-import {sequenced} from 'external/gs_tools/src/async';
+import {atomic} from 'external/gs_tools/src/async';
 import {Arrays} from 'external/gs_tools/src/collection';
 import {DisposableFunction} from 'external/gs_tools/src/dispose';
 import {
@@ -98,7 +98,7 @@ export abstract class AbstractLayerEditor<T extends BaseLayer> extends BaseTheme
   @handle(null).attributeChange('asset-id')
   @handle(null).attributeChange('project-id')
   @handle(null).attributeChange('layer-id')
-  @sequenced()
+  @atomic()
   protected async onLayerIdChange_(): Promise<void> {
     if (this.layerDeregister_ !== null) {
       this.layerDeregister_.dispose();
