@@ -33,55 +33,7 @@
 </style>
 <div fill-parent id="root">
   <h2>Create new asset</h2>
-  <div id="nameRow">
-    <div layout="row">
-      <label>
-        Name:
-      </label>
-      <gs-text-input flex gs-value="" id="nameInput"></gs-text-input>
-    </div>
-  </div>
-  <div id="assetRow" layout="row">
-    <label>
-      Asset type:
-    </label>
-    <gs-basic-button flex>
-      <div gs-content layout="row">
-        <div flex id="assetType"></div>
-        <gs-icon>arrow_drop_down</gs-icon>
-      </div>
-      <gs-menu gs-anchor-point="top_left" gs-anchor-target="top_left" gs-fit-parent-width="true">
-        <div gs-content id="assetTypeMenu"></div>
-      </gs-menu>
-    </gs-basic-button>
-  </div>
-  <fieldset id="templateSection" layout="column">
-    <legend>Template</legend>
-    <div id="presetRow" layout="row">
-      <label>Choose preset:</label>
-      <gs-basic-button flex>
-        <div gs-content layout="row">
-          <div flex id="presetType"></div>
-          <gs-icon>arrow_drop_down</gs-icon>
-        </div>
-        <gs-menu gs-anchor-point="top_left" gs-anchor-target="top_left">
-          <div gs-content id="presetTypeMenu"></div>
-        </gs-menu>
-      </gs-basic-button>
-    </div>
-    <div layout="row">
-      <div flex id="widthSection" layout="row">
-        <label>Width</label>
-        <gs-float-input flex id="widthInput"></gs-float-input>
-        <div>px</div>
-      </div>
-      <div flex layout="row">
-        <label>Height</label>
-        <gs-float-input flex id="heightInput"></gs-float-input>
-        <div>px</div>
-      </div>
-    </div>
-  </fieldset>
+  <pa-asset-editor id="assetEditor"></pa-asset-editor>
   <div layout="row" flex-justify="flex-end">
     <gs-basic-button id="createButton" class="gs-primary">
       <div gs-content>Create</div>
