@@ -8,12 +8,14 @@ import {RouteServiceEvents} from 'external/gs_ui/src/routing';
 
 import {SampleDataServiceEvent} from '../common/sample-data-service-event';
 import {DataEvents} from '../data/data-events';
+import {TextLayer} from '../data/text-layer';
 
 import {LayerPreview} from './layer-preview';
 
 
 describe('asset.LayerPreview', () => {
   let mockAssetCollection;
+  let mockCssImportService;
   let mockRouteFactoryService;
   let mockRouteService;
   let mockSampleDataService;
@@ -22,12 +24,14 @@ describe('asset.LayerPreview', () => {
 
   beforeEach(() => {
     mockAssetCollection = jasmine.createSpyObj('AssetCollection', ['get']);
+    mockCssImportService = jasmine.createSpyObj('CssImportService', ['import']);
     mockRouteFactoryService = jasmine.createSpyObj('RouteFactoryService', ['layer']);
     mockRouteService = jasmine.createSpyObj('RouteService', ['getParams', 'on']);
     mockSampleDataService = jasmine.createSpyObj('SampleDataService', ['getRowData', 'on']);
     mockTemplateCompilerService = jasmine.createSpyObj('TemplateCompilerService', ['create']);
     preview = new LayerPreview(
         mockAssetCollection,
+        mockCssImportService,
         mockRouteFactoryService,
         mockRouteService,
         mockSampleDataService,
@@ -68,8 +72,11 @@ describe('asset.LayerPreview', () => {
 
       const css = 'css';
       const html = 'html';
-      const mockLayer = jasmine.createSpyObj('Layer', ['asPreviewHtml']);
+      const fontUrl = 'fontUrl';
+      const mockLayer = jasmine.createSpyObj('Layer', ['asPreviewHtml', 'getFontUrl']);
+      mockLayer.getFontUrl.and.returnValue(fontUrl);
       mockLayer.asPreviewHtml.and.returnValue({css, html});
+      Object.setPrototypeOf(mockLayer, TextLayer.prototype);
 
       const asset = Mocks.object('asset');
 
@@ -93,12 +100,58 @@ describe('asset.LayerPreview', () => {
 
       preview['onLayerChange_'](asset, rowData, mockLayer);
 
+      assert(mockCssImportService.import).to.haveBeenCalledWith(fontUrl);
       assert(preview['rootInnerHtmlHook_'].set).to.haveBeenCalledWith(compiledHtml);
       assert(preview['cssInnerHtmlHook_'].set).to.haveBeenCalledWith(compiledCss);
       assert(mockCompiler.compile).to.haveBeenCalledWith(html);
       assert(mockCompiler.compile).to.haveBeenCalledWith(css);
       assert(mockTemplateCompilerService.create).to.haveBeenCalledWith(asset, rowData);
       assert(mockLayer.asPreviewHtml).to.haveBeenCalledWith(previewMode, isActive);
+    });
+
+    it('should not import the CSS if there are no font URLs', () => {
+      spyOn(preview.previewModeHook_, 'get').and.returnValue(Mocks.object('previewMode'));
+      spyOn(preview.isSelectedHook_, 'get').and.returnValue(true);
+
+      const css = 'css';
+      const html = 'html';
+      const mockLayer = jasmine.createSpyObj('Layer', ['asPreviewHtml', 'getFontUrl']);
+      mockLayer.getFontUrl.and.returnValue(null);
+      mockLayer.asPreviewHtml.and.returnValue({css, html});
+      Object.setPrototypeOf(mockLayer, TextLayer.prototype);
+
+      const mockCompiler = jasmine.createSpyObj('Compiler', ['compile']);
+      mockCompiler.compile.and.returnValue('compiled');
+      mockTemplateCompilerService.create.and.returnValue(mockCompiler);
+
+      spyOn(preview['rootInnerHtmlHook_'], 'set');
+      spyOn(preview['cssInnerHtmlHook_'], 'set');
+
+      preview['onLayerChange_'](Mocks.object('asset'), Mocks.object('rowData'), mockLayer);
+
+      assert(mockCssImportService.import).toNot.haveBeenCalled();
+    });
+
+    it('should not import the CSS if the layer is not TextLayer', () => {
+      spyOn(preview.previewModeHook_, 'get').and.returnValue(Mocks.object('previewMode'));
+      spyOn(preview.isSelectedHook_, 'get').and.returnValue(true);
+
+      const css = 'css';
+      const html = 'html';
+      const mockLayer = jasmine.createSpyObj('Layer', ['asPreviewHtml', 'getFontUrl']);
+      mockLayer.getFontUrl.and.returnValue(null);
+      mockLayer.asPreviewHtml.and.returnValue({css, html});
+
+      const mockCompiler = jasmine.createSpyObj('Compiler', ['compile']);
+      mockCompiler.compile.and.returnValue('compiled');
+      mockTemplateCompilerService.create.and.returnValue(mockCompiler);
+
+      spyOn(preview['rootInnerHtmlHook_'], 'set');
+      spyOn(preview['cssInnerHtmlHook_'], 'set');
+
+      preview['onLayerChange_'](Mocks.object('asset'), Mocks.object('rowData'), mockLayer);
+
+      assert(mockCssImportService.import).toNot.haveBeenCalled();
     });
   });
 

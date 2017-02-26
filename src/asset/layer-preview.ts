@@ -15,6 +15,7 @@ import {BaseThemedElement} from 'external/gs_ui/src/common';
 import {RouteService, RouteServiceEvents} from 'external/gs_ui/src/routing';
 import {ThemeService} from 'external/gs_ui/src/theming';
 
+import {CssImportService} from '../common/css-import-service';
 import {SampleDataService} from '../common/sample-data-service';
 import {SampleDataServiceEvent} from '../common/sample-data-service-event';
 import {Asset} from '../data/asset';
@@ -23,6 +24,7 @@ import {BaseLayer} from '../data/base-layer';
 import {DataEvents} from '../data/data-events';
 import {LayerPreviewMode} from '../data/layer-preview-mode';
 import {TemplateCompilerService} from '../data/template-compiler-service';
+import {TextLayer} from '../data/text-layer';
 import {RouteFactoryService} from '../routing/route-factory-service';
 import {Views} from '../routing/views';
 
@@ -31,6 +33,7 @@ import {Views} from '../routing/views';
  * Previews layers
  */
 @customElement({
+  dependencies: [CssImportService],
   tag: 'pa-asset-layer-preview',
   templateKey: 'src/asset/layer-preview',
 })
@@ -51,6 +54,7 @@ export class LayerPreview extends BaseThemedElement {
   readonly rootInnerHtmlHook_: DomHook<string>;
 
   private readonly assetCollection_: AssetCollection;
+  private readonly cssImportService_: CssImportService;
   private readonly routeFactoryService_: RouteFactoryService;
   private readonly routeService_: RouteService<Views>;
   private readonly sampleDataService_: SampleDataService;
@@ -60,6 +64,7 @@ export class LayerPreview extends BaseThemedElement {
 
   constructor(
       @inject('pa.data.AssetCollection') assetCollection: AssetCollection,
+      @inject('pa.common.CssImportService') cssImportService: CssImportService,
       @inject('pa.routing.RouteFactoryService') routeFactoryService: RouteFactoryService,
       @inject('gs.routing.RouteService') routeService: RouteService<Views>,
       @inject('pa.common.SampleDataService') sampleDataService: SampleDataService,
@@ -67,6 +72,7 @@ export class LayerPreview extends BaseThemedElement {
       @inject('theming.ThemeService') themeService: ThemeService) {
     super(themeService);
     this.assetCollection_ = assetCollection;
+    this.cssImportService_ = cssImportService;
     this.cssInnerHtmlHook_ = DomHook.of<string>();
     this.isSelectedHook_ = DomHook.of<boolean>();
     this.layerDeregister_ = null;
@@ -101,6 +107,13 @@ export class LayerPreview extends BaseThemedElement {
     const compiler = this.templateCompilerService_.create(asset, rowData);
     this.cssInnerHtmlHook_.set(compiler.compile(css));
     this.rootInnerHtmlHook_.set(compiler.compile(html));
+
+    if (layer instanceof TextLayer) {
+      const fontUrl = layer.getFontUrl();
+      if (fontUrl !== null) {
+        this.cssImportService_.import(fontUrl);
+      }
+    }
   }
 
   @handle(null).attributeChange('preview-mode')

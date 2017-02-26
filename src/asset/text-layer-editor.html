@@ -1,21 +1,68 @@
+<style>
+  .inputRow {
+    margin-bottom: .5rem;
+    margin-top: .5rem;
+  }
+
+  gs-text-input {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  #verticalAlign {
+    padding-right: 1rem;
+  }
+</style>
+
 <div layout="column">
-  <div layout="row">
+  <div class="inputRow" layout="row">
     <label>Font</label>
     <gs-text-input flex id="fontFamily"></gs-text-input>
   </div>
-  <div layout ="row">
+  <div class="inputRow" layout="row">
     <label>Font URL</label>
     <gs-text-input flex id="fontUrl"></gs-text-input>
   </div>
-  <div layout="row">
+  <div class="inputRow" layout="row">
     <label>Size</label>
     <gs-text-input flex id="size"></gs-text-input>
   </div>
-  <div layout="row">
+  <div class="inputRow" layout="row">
+    <label>Weight</label>
+    <gs-text-input flex id="fontWeight"></gs-text-input>
+  </div>
+  <div class="inputRow" layout="row">
     <label>Color</label>
     <gs-text-input flex id="color"></gs-text-input>
   </div>
-  <div layout="row">
+  <div class="inputRow" flex-justify="space-between" layout="row">
+    <gs-horizontal-tab id="horizontalAlign">
+      <gs-basic-button gs-tab-id="left">
+        <gs-icon gs-content>format_align_left</gs-icon>
+      </gs-basic-button>
+      <gs-basic-button gs-tab-id="center">
+        <gs-icon gs-content>format_align_center</gs-icon>
+      </gs-basic-button>
+      <gs-basic-button gs-tab-id="right">
+        <gs-icon gs-content>format_align_right</gs-icon>
+      </gs-basic-button>
+      <gs-basic-button gs-tab-id="justify">
+        <gs-icon gs-content>format_align_justify</gs-icon>
+      </gs-basic-button>
+    </gs-horizontal-tab>
+    <gs-horizontal-tab id="verticalAlign">
+      <gs-basic-button gs-tab-id="bottom">
+        <gs-icon gs-content>vertical_align_bottom</gs-icon>
+      </gs-basic-button>
+      <gs-basic-button gs-tab-id="center">
+        <gs-icon gs-content>vertical_align_center</gs-icon>
+      </gs-basic-button>
+      <gs-basic-button gs-tab-id="top">
+        <gs-icon gs-content>vertical_align_top</gs-icon>
+      </gs-basic-button>
+    </gs-horizontal-tab>
+  </div>
+  <div class="inputRow" layout="row">
     <label>Text</label>
     <gs-text-input flex id="text"></gs-text-input>
   </div>

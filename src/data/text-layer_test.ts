@@ -4,7 +4,7 @@ TestBase.setup();
 import {TestDispose} from 'external/gs_tools/src/testing';
 
 import {DataEvents} from './data-events';
-import {TextLayer} from './text-layer';
+import {HorizontalAlign, TextLayer, VerticalAlign} from './text-layer';
 
 
 describe('data.TextLayer', () => {
@@ -15,32 +15,188 @@ describe('data.TextLayer', () => {
     TestDispose.add(layer);
   });
 
+  describe('asActiveBoundaryPreviewHtml_', () => {
+    it('should return the correct HTML and CSS components', () => {
+      const boxStyles = 'boxStyles';
+      spyOn(layer, 'getBoxStyles_').and.returnValue([boxStyles]);
+      const styles = [
+        boxStyles,
+        'background-color: var(--gsThemeNormal);',
+      ];
+      const {css, html} = layer['asActiveBoundaryPreviewHtml_']();
+      assert(css).to.equal('');
+      assert(html).to.equal(`<div style="${styles.join('')}"></div>`);
+    });
+  });
+
   describe('asHtml', () => {
     it('should return the correct HTML and CSS components', () => {
       const color = 'color';
       const fontUrl = 'fontUrl';
       const fontFamily = 'fontFamily';
       const fontSize = 'fontSize';
-      const text = 'text';
+      const fontWeight = 'fontWeight';
       layer.setColor(color);
       layer.setFontUrl(fontUrl);
       layer.setFontFamily(fontFamily);
+      layer.setFontWeight(fontWeight);
       layer.setSize(fontSize);
-      layer.setText(text);
+
+      const alignItems = 'alignItems';
+      spyOn(layer, 'getAlignItems_').and.returnValue(alignItems);
 
       const boxStyle = 'boxStyle';
       spyOn(layer, 'getBoxStyles_').and.returnValue([boxStyle]);
 
+      const div = 'div';
+      spyOn(layer, 'createDiv_').and.returnValue(div);
+
       const {css, html} = layer.asHtml();
       assert(css).to.equal(`@import url('${fontUrl}');`);
 
-      const styles = [
+      assert(html).to.equal(div);
+      assert(layer['createDiv_']).to.haveBeenCalledWith([
         boxStyle,
+        `align-items: ${alignItems};`,
         `color: ${color};`,
+        `display: flex;`,
         `font-family: ${fontFamily};`,
         `font-size: ${fontSize};`,
+        `line-height: initial;`,
+        `font-weight: ${fontWeight};`,
+      ]);
+    });
+
+    it('should not include the font weight or url if they are null', () => {
+      const color = 'color';
+      const fontFamily = 'fontFamily';
+      const fontSize = 'fontSize';
+      layer.setColor(color);
+      layer.setFontFamily(fontFamily);
+      layer.setSize(fontSize);
+
+      const alignItems = 'alignItems';
+      spyOn(layer, 'getAlignItems_').and.returnValue(alignItems);
+
+      const boxStyle = 'boxStyle';
+      spyOn(layer, 'getBoxStyles_').and.returnValue([boxStyle]);
+
+      const div = 'div';
+      spyOn(layer, 'createDiv_').and.returnValue(div);
+
+      const {css, html} = layer.asHtml();
+      assert(css).to.equal(``);
+
+      assert(html).to.equal(div);
+      assert(layer['createDiv_']).to.haveBeenCalledWith([
+        boxStyle,
+        `align-items: ${alignItems};`,
+        `color: ${color};`,
+        `display: flex;`,
+        `font-family: ${fontFamily};`,
+        `font-size: ${fontSize};`,
+        `line-height: initial;`,
+      ]);
+    });
+  });
+
+  describe('asInactiveNormalPreviewHtml_', () => {
+    it('should return the correct HTML and CSS components', () => {
+      const color = 'color';
+      const fontUrl = 'fontUrl';
+      const fontFamily = 'fontFamily';
+      const fontSize = 'fontSize';
+      const fontWeight = 'fontWeight';
+      layer.setColor(color);
+      layer.setFontUrl(fontUrl);
+      layer.setFontFamily(fontFamily);
+      layer.setFontWeight(fontWeight);
+      layer.setSize(fontSize);
+
+      const alignItems = 'alignItems';
+      spyOn(layer, 'getAlignItems_').and.returnValue(alignItems);
+
+      const boxStyle = 'boxStyle';
+      spyOn(layer, 'getBoxStyles_').and.returnValue([boxStyle]);
+
+      const div = 'div';
+      spyOn(layer, 'createDiv_').and.returnValue(div);
+
+      const {css, html} = layer['asInactiveNormalPreviewHtml_']();
+      assert(css).to.equal(`@import url('${fontUrl}');`);
+
+      assert(html).to.equal(div);
+      assert(layer['createDiv_']).to.haveBeenCalledWith([
+        boxStyle,
+        `align-items: ${alignItems};`,
+        `color: ${color};`,
+        `display: flex;`,
+        `font-family: ${fontFamily};`,
+        `font-size: ${fontSize};`,
+        `filter: grayscale(50%);`,
+        `line-height: initial;`,
+        `opacity: .5;`,
+        `font-weight: ${fontWeight};`,
+      ]);
+    });
+
+    it('should exclude the font-weight and font-url if they are null', () => {
+      const color = 'color';
+      const fontFamily = 'fontFamily';
+      const fontSize = 'fontSize';
+      layer.setColor(color);
+      layer.setFontFamily(fontFamily);
+      layer.setSize(fontSize);
+
+      const alignItems = 'alignItems';
+      spyOn(layer, 'getAlignItems_').and.returnValue(alignItems);
+
+      const boxStyle = 'boxStyle';
+      spyOn(layer, 'getBoxStyles_').and.returnValue([boxStyle]);
+
+      const div = 'div';
+      spyOn(layer, 'createDiv_').and.returnValue(div);
+
+      const {css, html} = layer['asInactiveNormalPreviewHtml_']();
+      assert(css).to.equal('');
+
+      assert(html).to.equal(div);
+      assert(layer['createDiv_']).to.haveBeenCalledWith([
+        boxStyle,
+        `align-items: ${alignItems};`,
+        `color: ${color};`,
+        `display: flex;`,
+        `font-family: ${fontFamily};`,
+        `font-size: ${fontSize};`,
+        `filter: grayscale(50%);`,
+        `line-height: initial;`,
+        `opacity: .5;`,
+      ]);
+    });
+  });
+
+  describe('createDiv_', () => {
+    it('should apply the correct parent and child styles and return the correct div', () => {
+      const parentStyle1 = 'parentStyle1';
+      const parentStyle2 = 'parentStyle2';
+
+      const text = 'text';
+      layer['text_'] = text;
+
+      const childStyles = [
+        `text-align: left;`,
+        `width: 100%;`,
       ];
-      assert(html).to.equal(`<div style="${styles.join('')}">${text}</div>`);
+      const childHtml = `<div style="${childStyles.join('')}">${text}</div>`;
+      assert(layer['createDiv_']([parentStyle1, parentStyle2])).to
+          .equal(`<div style="${parentStyle1}${parentStyle2}">${childHtml}</div>`);
+    });
+  });
+
+  describe('getAlignItems_', () => {
+    it('should return the correct align-items value', () => {
+      layer['verticalAlign_'] = VerticalAlign.TOP;
+      assert(layer['getAlignItems_']()).to.equal('flex-start');
     });
   });
 
@@ -157,6 +313,64 @@ describe('data.TextLayer', () => {
 
       assert(layer.dispatch).toNot.haveBeenCalled();
       assert(layer.getFontUrl()).to.equal(fontUrl);
+    });
+  });
+
+  describe('setFontWeight', () => {
+    it('should dispatch the CHANGED event', () => {
+      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+        callback();
+      });
+
+      const fontWeight = 'fontWeight';
+      layer.setFontWeight(fontWeight);
+
+      assert(layer.dispatch).to
+          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+      assert(layer.getFontWeight()).to.equal(fontWeight);
+    });
+
+    it('should not dispatch the CHANGED event if the fontUrl does not change', () => {
+      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+        callback();
+      });
+
+      const fontWeight = 'fontWeight';
+      layer['fontWeight_'] = fontWeight;
+
+      layer.setFontWeight(fontWeight);
+
+      assert(layer.dispatch).toNot.haveBeenCalled();
+      assert(layer.getFontWeight()).to.equal(fontWeight);
+    });
+  });
+
+  describe('setHorizontalAlign', () => {
+    it('should dispatch the CHANGED event', () => {
+      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+        callback();
+      });
+
+      const horizontalAlign = HorizontalAlign.JUSTIFY;
+      layer.setHorizontalAlign(horizontalAlign);
+
+      assert(layer.dispatch).to
+          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+      assert(layer.getHorizontalAlign()).to.equal(horizontalAlign);
+    });
+
+    it('should not dispatch the CHANGED event if the fontUrl does not change', () => {
+      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+        callback();
+      });
+
+      const horizontalAlign = HorizontalAlign.LEFT;
+      layer['horizontalAlign_'] = horizontalAlign;
+
+      layer.setHorizontalAlign(horizontalAlign);
+
+      assert(layer.dispatch).toNot.haveBeenCalled();
+      assert(layer.getHorizontalAlign()).to.equal(horizontalAlign);
     });
   });
 
@@ -302,6 +516,35 @@ describe('data.TextLayer', () => {
 
       assert(layer.dispatch).toNot.haveBeenCalled();
       assert(layer.getTop()).to.equal(top);
+    });
+  });
+
+  describe('setVerticalAlign', () => {
+    it('should dispatch the CHANGED event', () => {
+      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+        callback();
+      });
+
+      const verticalAlign = VerticalAlign.CENTER;
+      layer.setVerticalAlign(verticalAlign);
+
+      assert(layer.dispatch).to
+          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+      assert(layer.getVerticalAlign()).to.equal(verticalAlign);
+    });
+
+    it('should not dispatch the CHANGED event if the fontUrl does not change', () => {
+      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+        callback();
+      });
+
+      const verticalAlign = VerticalAlign.BOTTOM;
+      layer['verticalAlign_'] = verticalAlign;
+
+      layer.setVerticalAlign(verticalAlign);
+
+      assert(layer.dispatch).toNot.haveBeenCalled();
+      assert(layer.getVerticalAlign()).to.equal(verticalAlign);
     });
   });
 });

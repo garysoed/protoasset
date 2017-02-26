@@ -46,6 +46,7 @@ export class ImageLayer extends BaseLayer {
    * @override
    */
   protected asInactiveNormalPreviewHtml_(): {css: string, html: string} {
+    // TODO: Refactor this better.
     const styles: string[] = this.getBoxStyles_().concat([
       `background: url('${this.imageUrl_}');`,
       `background-repeat: no-repeat;`,

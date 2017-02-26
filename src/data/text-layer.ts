@@ -1,8 +1,24 @@
 import {Field, Serializable} from 'external/gs_tools/src/data';
+import {Enums} from 'external/gs_tools/src/typescript';
 
 import {BaseLayer} from './base-layer';
 import {DataEvents} from './data-events';
 import {LayerType} from './layer-type';
+
+
+export enum HorizontalAlign {
+  LEFT,
+  CENTER,
+  RIGHT,
+  JUSTIFY,
+}
+
+
+export enum VerticalAlign {
+  TOP,
+  CENTER,
+  BOTTOM,
+}
 
 
 @Serializable('textLayer')
@@ -10,39 +26,85 @@ export class TextLayer extends BaseLayer {
   @Field('color') private color_: string;
   @Field('fontFamily') private fontFamily_: string;
   @Field('fontUrl') private fontUrl_: string | null;
+  @Field('fontWeight') private fontWeight_: string | null;
+  @Field('hAlign') private horizontalAlign_: HorizontalAlign;
   @Field('size') private size_: string;
   @Field('text') private text_: string;
+  @Field('vAlign') private verticalAlign_: VerticalAlign;
 
   constructor(id: string, name: string) {
     super(id, name, LayerType.TEXT);
     this.color_ = 'black';
     this.fontFamily_ = 'Sans';
     this.fontUrl_ = null;
+    this.fontWeight_ = null;
+    this.horizontalAlign_ = HorizontalAlign.LEFT;
     this.size_ = '14px';
     this.text_ = '';
+    this.verticalAlign_ = VerticalAlign.TOP;
   }
 
-  asActiveBoundaryPreviewHtml_(): {css: string, html: string} {
-    return this.asHtml();
+  /**
+   * @override
+   */
+  protected asActiveBoundaryPreviewHtml_(): {css: string, html: string} {
+    const styles: string[] = this.getBoxStyles_().concat([
+      `background-color: var(--gsThemeNormal);`,
+    ]);
+    const html = `<div style="${styles.join('')}"></div>`;
+    return {css: '', html};
   }
 
   /**
    * @override
    */
   asHtml(): {css: string, html: string} {
-    let css = this.fontUrl_ !== null ? `@import url('${this.fontUrl_}');` : '';
-    let styles: string[] = this.getBoxStyles_().concat([
+    const css = this.fontUrl_ !== null ? `@import url('${this.fontUrl_}');` : '';
+    const parentStyles: string[] = this.getBoxStyles_().concat([
+      `align-items: ${this.getAlignItems_()};`,
       `color: ${this.color_};`,
+      `display: flex;`,
       `font-family: ${this.fontFamily_};`,
       `font-size: ${this.size_};`,
+      `line-height: initial;`,
     ]);
 
-    let html = `<div style="${styles.join('')}">${this.text_}</div>`;
-    return {css, html};
+    if (this.fontWeight_ !== null) {
+      parentStyles.push(`font-weight: ${this.fontWeight_};`);
+    }
+
+    return {css, html: this.createDiv_(parentStyles)};
   }
 
-  asInactiveNormalPreviewHtml_(): {css: string, html: string} {
-    return this.asHtml();
+  protected asInactiveNormalPreviewHtml_(): {css: string, html: string} {
+    // TODO: Refactor this better.
+    const css = this.fontUrl_ !== null ? `@import url('${this.fontUrl_}');` : '';
+    const parentStyles: string[] = this.getBoxStyles_().concat([
+      `align-items: ${this.getAlignItems_()};`,
+      `color: ${this.color_};`,
+      `display: flex;`,
+      `font-family: ${this.fontFamily_};`,
+      `font-size: ${this.size_};`,
+      `filter: grayscale(50%);`,
+      `line-height: initial;`,
+      `opacity: .5;`,
+    ]);
+
+    if (this.fontWeight_ !== null) {
+      parentStyles.push(`font-weight: ${this.fontWeight_};`);
+    }
+
+    return {css, html: this.createDiv_(parentStyles)};
+  }
+
+  private createDiv_(parentStyles: string[]): string {
+    const childStyles: string[] = [
+      `text-align: ${Enums.toLowerCaseString(this.horizontalAlign_, HorizontalAlign)};`,
+      `width: 100%;`,
+    ];
+    const childHtml = `<div style="${childStyles.join('')}">${this.text_}</div>`;
+
+    return `<div style="${parentStyles.join('')}">${childHtml}</div>`;
   }
 
   /**
@@ -67,6 +129,34 @@ export class TextLayer extends BaseLayer {
   }
 
   /**
+   * @return The font weight of the text.
+   */
+  getFontWeight(): string | null {
+    return this.fontWeight_;
+  }
+
+  /**
+   * @return The horizontal align of the text.
+   */
+  getHorizontalAlign(): HorizontalAlign {
+    return this.horizontalAlign_;
+  }
+
+  /**
+   * @return The correct 'align-items' value corresponding to the vertical align.
+   */
+  private getAlignItems_(): string {
+    switch (this.verticalAlign_) {
+      case VerticalAlign.BOTTOM:
+        return 'flex-end';
+      case VerticalAlign.CENTER:
+        return 'center';
+      case VerticalAlign.TOP:
+        return 'flex-start';
+    }
+  }
+
+  /**
    * @return The size of the font.
    */
   getSize(): string {
@@ -78,6 +168,13 @@ export class TextLayer extends BaseLayer {
    */
   getText(): string {
     return this.text_;
+  }
+
+  /**
+   * @return The vertical align of the text.
+   */
+  getVerticalAlign(): VerticalAlign {
+    return this.verticalAlign_;
   }
 
   /**
@@ -119,6 +216,32 @@ export class TextLayer extends BaseLayer {
     });
   }
 
+  /**
+   * @param fontWeight The weight of the text.
+   */
+  setFontWeight(fontWeight: string | null): void {
+    if (this.fontWeight_ === fontWeight) {
+      return;
+    }
+
+    this.dispatch(DataEvents.CHANGED, () => {
+      this.fontWeight_ = fontWeight;
+    });
+  }
+
+  /**
+   * @param align Horizontal alignment of the text.
+   */
+  setHorizontalAlign(align: HorizontalAlign): void {
+    if (this.horizontalAlign_ === align) {
+      return;
+    }
+
+    this.dispatch(DataEvents.CHANGED, () => {
+      this.horizontalAlign_ = align;
+    });
+  }
+
   setSize(size: string): void {
     if (this.size_ === size) {
       return;
@@ -139,6 +262,19 @@ export class TextLayer extends BaseLayer {
 
     this.dispatch(DataEvents.CHANGED, () => {
       this.text_ = text;
+    });
+  }
+
+  /**
+   * @param align Vertical alignment of the text.
+   */
+  setVerticalAlign(align: VerticalAlign): void {
+    if (this.verticalAlign_ === align) {
+      return;
+    }
+
+    this.dispatch(DataEvents.CHANGED, () => {
+      this.verticalAlign_ = align;
     });
   }
 }

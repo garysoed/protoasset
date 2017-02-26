@@ -3,6 +3,7 @@ TestBase.setup();
 
 import {Mocks} from 'external/gs_tools/src/mock';
 
+import {BuiltInHelpers} from './built-in-helpers';
 import {TemplateCompiler} from './template-compiler';
 import {TemplateCompilerService} from './template-compiler-service';
 
@@ -46,6 +47,10 @@ describe('data.TemplateCompilerService', () => {
       assert(TemplateCompiler.of).to.haveBeenCalledWith(dataValue, mockHandlebarsInstance);
       assert(mockHandlebarsInstance.registerHelper).to.haveBeenCalledWith(name1, function1);
       assert(mockHandlebarsInstance.registerHelper).to.haveBeenCalledWith(name2, function2);
+      assert(mockHandlebarsInstance.registerHelper).to
+          .haveBeenCalledWith('case', BuiltInHelpers.case);
+      assert(mockHandlebarsInstance.registerHelper).to
+          .haveBeenCalledWith('ifeq', BuiltInHelpers.ifeq);
     });
   });
 });

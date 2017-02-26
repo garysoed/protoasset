@@ -1,8 +1,8 @@
 import {Arrays} from 'external/gs_tools/src/collection';
 import {bind, inject} from 'external/gs_tools/src/inject';
-import {Cases} from 'external/gs_tools/src/string';
 
 import {Asset} from './asset';
+import {BuiltInHelpers} from './built-in-helpers';
 import {Helper} from './helper';
 import {TemplateCompiler} from './template-compiler';
 
@@ -34,9 +34,8 @@ export class TemplateCompilerService {
         .forEach((helper: Helper) => {
           handlebars.registerHelper(helper.getName(), helper.asFunction());
         });
-    handlebars.registerHelper('case', function(caseString: string, options: any): string {
-      return Cases.of(options.fn(this)).toLowerCase();
-    });
+    handlebars.registerHelper('case', BuiltInHelpers.case);
+    handlebars.registerHelper('ifeq', BuiltInHelpers.ifeq);
     return TemplateCompiler.of(data, handlebars);
   }
 }
