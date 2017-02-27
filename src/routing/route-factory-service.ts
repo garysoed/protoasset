@@ -11,6 +11,7 @@ import {ProjectCollection} from '../data/project-collection';
 
 import {AssetListRouteFactory} from './asset-list-route-factory';
 import {AssetMainRouteFactory} from './asset-main-route-factory';
+import {AssetSettingsRouteFactory} from './asset-settings-route-factory';
 import {HelperRouteFactory} from './helper-route-factory';
 import {Views} from './views';
 
@@ -24,6 +25,7 @@ export class RouteFactoryService implements IRouteFactoryService<Views> {
   private assetData_: SimpleRouteFactory<Views, {assetId: string, projectId: string}>;
   private assetList_: AssetListRouteFactory;
   private assetMain_: AssetMainRouteFactory;
+  private assetSettings_: AssetSettingsRouteFactory;
   private createAsset_: SimpleRouteFactory<Views, {projectId: string}>;
   private createProject_: SimpleRouteFactory<Views, {}>;
   private helper_: HelperRouteFactory;
@@ -90,6 +92,9 @@ export class RouteFactoryService implements IRouteFactoryService<Views> {
         '/layer',
         'Layers',
         this.assetMain_);
+
+    // /home/project/:projectId/asset/:assetId/settings
+    this.assetSettings_ = new AssetSettingsRouteFactory(this.assetCollection_, this.assetMain_);
   }
 
   assetData(): SimpleRouteFactory<Views, {assetId: string, projectId: string}> {
@@ -108,6 +113,13 @@ export class RouteFactoryService implements IRouteFactoryService<Views> {
    */
   assetMain(): AssetMainRouteFactory {
     return this.assetMain_;
+  }
+
+  /**
+   * @return The route factory for the asset settings view.
+   */
+  assetSettings(): AssetSettingsRouteFactory {
+    return this.assetSettings_;
   }
 
   /**
@@ -135,6 +147,7 @@ export class RouteFactoryService implements IRouteFactoryService<Views> {
       this.assetMain_,
       this.createAsset_,
       this.assetData_,
+      this.assetSettings_,
       this.helper_,
       this.helperList_,
       this.layer_,

@@ -66,6 +66,10 @@ export class NavBar extends BaseThemedElement {
    * Handles when a nav button is clicked.
    * @param tabId Tab ID corresponding to the clicked button.
    */
+  @handle('#data').event(DomEvent.CLICK, ['data'])
+  @handle('#helper').event(DomEvent.CLICK, ['helper'])
+  @handle('#layer').event(DomEvent.CLICK, ['layer'])
+  @handle('#settings').event(DomEvent.CLICK, ['settings'])
   protected onButtonClick_(tabId: string): void {
     let routeFactory = this.routeMap_.get(tabId);
     if (routeFactory === undefined) {
@@ -88,21 +92,6 @@ export class NavBar extends BaseThemedElement {
     this.routeService_.goTo(routeFactory, currentParams);
   }
 
-  @handle('#data').event(DomEvent.CLICK)
-  protected onDataButtonClick_(): void {
-    this.onButtonClick_('data');
-  }
-
-  @handle('#helper').event(DomEvent.CLICK)
-  protected onHelperButtonClick_(): void {
-    this.onButtonClick_('helper');
-  }
-
-  @handle('#layer').event(DomEvent.CLICK)
-  protected onLayerButtonClick_(): void {
-    this.onButtonClick_('layer');
-  }
-
   @handle(null).event(DomEvent.MOUSEENTER)
   protected onMouseEnter_(): void {
     this.drawerHook_.set(true);
@@ -113,11 +102,6 @@ export class NavBar extends BaseThemedElement {
     this.drawerHook_.set(false);
   }
 
-  @handle('#render').event(DomEvent.CLICK)
-  protected onRenderButtonClick_(): void {
-    this.onButtonClick_('render');
-  }
-
   /**
    * @override
    */
@@ -126,6 +110,7 @@ export class NavBar extends BaseThemedElement {
     this.routeMap_.set('data', this.routeFactoryService_.assetData());
     this.routeMap_.set('helper', this.routeFactoryService_.helper());
     this.routeMap_.set('layer', this.routeFactoryService_.layer());
+    this.routeMap_.set('settings', this.routeFactoryService_.assetSettings());
 
     this.addDisposable(this.routeService_.on(
         RouteServiceEvents.CHANGED,

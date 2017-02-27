@@ -13,13 +13,14 @@ import {DataView} from './data-view';
 import {HelperView} from './helper-view';
 import {LayerView} from './layer-view';
 import {NavBar} from './nav-bar';
+import {SettingsView} from './settings-view';
 
 
 /**
  * Main view for the asset section.
  */
 @customElement({
-  dependencies: [DataView, HelperView, LayerView, NavBar],
+  dependencies: [DataView, HelperView, LayerView, NavBar, SettingsView],
   tag: 'pa-asset-view',
   templateKey: 'src/asset/asset-view',
 })
@@ -37,10 +38,17 @@ export class AssetView extends BaseThemedElement {
   }
 
   /**
+   * @override
+   */
+  [Reflect.__initialize](): void {
+    this.routeService_.on(RouteServiceEvents.CHANGED, this.onRouteChanged_, this);
+  }
+
+  /**
    * Handles when the route was changed.
    */
   private onRouteChanged_(): void {
-    let params = this.routeService_.getParams(this.routeFactoryService_.assetMain());
+    const params = this.routeService_.getParams(this.routeFactoryService_.assetMain());
     if (params === null) {
       return;
     }
@@ -48,12 +56,5 @@ export class AssetView extends BaseThemedElement {
     this.routeService_.goTo(
         this.routeFactoryService_.assetData(),
         {assetId: params.assetId, projectId: params.projectId});
-  }
-
-  /**
-   * @override
-   */
-  [Reflect.__initialize](): void {
-    this.routeService_.on(RouteServiceEvents.CHANGED, this.onRouteChanged_, this);
   }
 }
