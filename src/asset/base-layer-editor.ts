@@ -1,18 +1,16 @@
-import {inject} from 'external/gs_tools/src/inject';
+import { inject } from 'external/gs_tools/src/inject';
 import {
   bind,
   customElement,
   DomHook,
   FloatParser,
-  handle,
-  StringParser} from 'external/gs_tools/src/webc';
+  handle } from 'external/gs_tools/src/webc';
 
-import {ThemeService} from 'external/gs_ui/src/theming';
+import { ThemeService } from 'external/gs_ui/src/theming';
 
-import {AssetCollection} from '../data/asset-collection';
-import {BaseLayer} from '../data/base-layer';
-
-import {AbstractLayerEditor} from './abstract-layer-editor';
+import { AbstractLayerEditor } from '../asset/abstract-layer-editor';
+import { AssetCollection } from '../data/asset-collection';
+import { BaseLayer } from '../data/base-layer';
 
 
 /**
@@ -23,20 +21,11 @@ import {AbstractLayerEditor} from './abstract-layer-editor';
   templateKey: 'src/asset/base-layer-editor',
 })
 export class BaseLayerEditor extends AbstractLayerEditor<BaseLayer> {
-  @bind(null).attribute('asset-id', StringParser)
-  readonly assetIdHook_: DomHook<string>;
-
   @bind('#bottom').attribute('gs-value', FloatParser)
   readonly bottomHook_: DomHook<number | null>;
 
-  @bind(null).attribute('layer-id', StringParser)
-  readonly layerIdHook_: DomHook<string>;
-
   @bind('#left').attribute('gs-value', FloatParser)
   readonly leftHook_: DomHook<number | null>;
-
-  @bind(null).attribute('project-id', StringParser)
-  readonly projectIdHook_: DomHook<string>;
 
   @bind('#right').attribute('gs-value', FloatParser)
   readonly rightHook_: DomHook<number | null>;
@@ -48,11 +37,8 @@ export class BaseLayerEditor extends AbstractLayerEditor<BaseLayer> {
       @inject('pa.data.AssetCollection') assetCollection: AssetCollection,
       @inject('theming.ThemeService') themeService: ThemeService) {
     super(assetCollection, themeService);
-    this.assetIdHook_ = DomHook.of<string>();
     this.bottomHook_ = DomHook.of<number>();
-    this.layerIdHook_ = DomHook.of<string>();
     this.leftHook_ = DomHook.of<number>();
-    this.projectIdHook_ = DomHook.of<string>();
     this.rightHook_ = DomHook.of<number>();
     this.topHook_ = DomHook.of<number>();
   }

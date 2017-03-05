@@ -39,6 +39,7 @@ karma_run(
         "//src/data:test_src",
         "//src/landing:test_src",
         "//src/project:test_src",
+        "//src/render:test_src",
         "//src/routing:test_src",
     ]
 )
@@ -51,6 +52,7 @@ test_suite(
         "//src/data:lint",
         "//src/landing:lint",
         "//src/project:lint",
+        "//src/render:lint",
         "//src/routing:lint",
     ]
 )

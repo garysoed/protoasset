@@ -1,16 +1,11 @@
-import {assert, Matchers, TestBase} from '../test-base';
+import { assert, Matchers, TestBase } from '../test-base';
 TestBase.setup();
 
-import {DomEvent, ListenableDom} from 'external/gs_tools/src/event';
-import {Mocks} from 'external/gs_tools/src/mock';
-import {TestDispose} from 'external/gs_tools/src/testing';
+import { DomEvent, ListenableDom } from 'external/gs_tools/src/event';
+import { Mocks } from 'external/gs_tools/src/mock';
+import { TestDispose } from 'external/gs_tools/src/testing';
 
-import {RouteServiceEvents} from 'external/gs_ui/src/routing';
-
-import {DataEvents} from '../data/data-events';
-import {HtmlLayer} from '../data/html-layer';
-import {LayerPreviewMode} from '../data/layer-preview-mode';
-import {LayerType} from '../data/layer-type';
+import { RouteServiceEvents } from 'external/gs_ui/src/routing';
 
 import {
   layerItemDataSetter,
@@ -19,7 +14,11 @@ import {
   layerPreviewGenerator,
   layerPreviewModeDataSetter,
   layerPreviewModeGenerator,
-  LayerView} from './layer-view';
+  LayerView } from '../asset/layer-view';
+import { DataEvents } from '../data/data-events';
+import { HtmlLayer } from '../data/html-layer';
+import { LayerPreviewMode } from '../data/layer-preview-mode';
+import { LayerType } from '../data/layer-type';
 
 
 describe('layerItemDataSetter', () => {
@@ -134,8 +133,10 @@ describe('asset.LayerView', () => {
     view = new LayerView(
         mockAssetCollection,
         mockOverlayService,
+        Mocks.object('RenderService'),
         mockRouteFactoryService,
         mockRouteService,
+        Mocks.object('SampleDataService'),
         jasmine.createSpyObj('ThemeService', ['applyTheme']));
     TestDispose.add(view);
   });

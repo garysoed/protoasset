@@ -9,5 +9,6 @@ ts_library(
     deps = [
       "//typings/globals/fuse",
       "//typings/globals/handlebars",
+      "//typings/globals/html2canvas",
     ]
 )

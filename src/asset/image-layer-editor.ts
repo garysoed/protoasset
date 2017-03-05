@@ -1,22 +1,21 @@
-import {inject} from 'external/gs_tools/src/inject';
+import { inject } from 'external/gs_tools/src/inject';
 import {
   bind,
   customElement,
   DomHook,
   handle,
   IntegerParser,
-  StringParser} from 'external/gs_tools/src/webc';
+  StringParser } from 'external/gs_tools/src/webc';
 
-import {ThemeService} from 'external/gs_ui/src/theming';
+import { ThemeService } from 'external/gs_ui/src/theming';
 
-import {SampleDataService} from '../common/sample-data-service';
-import {SampleDataServiceEvent} from '../common/sample-data-service-event';
-import {AssetCollection} from '../data/asset-collection';
-import {BaseLayer} from '../data/base-layer';
-import {ImageLayer} from '../data/image-layer';
-import {TemplateCompilerService} from '../data/template-compiler-service';
-
-import {AbstractLayerEditor} from './abstract-layer-editor';
+import { AbstractLayerEditor } from '../asset/abstract-layer-editor';
+import { SampleDataService } from '../common/sample-data-service';
+import { SampleDataServiceEvent } from '../common/sample-data-service-event';
+import { AssetCollection } from '../data/asset-collection';
+import { BaseLayer } from '../data/base-layer';
+import { ImageLayer } from '../data/image-layer';
+import { TemplateCompilerService } from '../data/template-compiler-service';
 
 
 /**
@@ -28,9 +27,6 @@ import {AbstractLayerEditor} from './abstract-layer-editor';
   templateKey: 'src/asset/image-layer-editor',
 })
 export class ImageLayerEditor extends AbstractLayerEditor<ImageLayer> {
-  @bind(null).attribute('asset-id', StringParser)
-  readonly assetIdHook_: DomHook<string>;
-
   @bind(null).attribute('data-row', IntegerParser)
   readonly dataRowHook_: DomHook<number>;
 
@@ -39,12 +35,6 @@ export class ImageLayerEditor extends AbstractLayerEditor<ImageLayer> {
 
   @bind('#imageUrl').attribute('gs-value', StringParser)
   readonly imageUrlHook_: DomHook<string>;
-
-  @bind(null).attribute('layer-id', StringParser)
-  readonly layerIdHook_: DomHook<string>;
-
-  @bind(null).attribute('project-id', StringParser)
-  readonly projectIdHook_: DomHook<string>;
 
   private readonly sampleDataService_: SampleDataService;
   private readonly templateCompilerService_: TemplateCompilerService;
@@ -55,12 +45,9 @@ export class ImageLayerEditor extends AbstractLayerEditor<ImageLayer> {
       @inject('pa.data.TemplateCompilerService') templateCompilerService: TemplateCompilerService,
       @inject('theming.ThemeService') themeService: ThemeService) {
     super(assetCollection, themeService);
-    this.assetIdHook_ = DomHook.of<string>();
     this.dataRowHook_ = DomHook.of<number>();
     this.imagePreviewStyleHook_ = DomHook.of<CSSStyleDeclaration>();
     this.imageUrlHook_ = DomHook.of<string>();
-    this.layerIdHook_ = DomHook.of<string>();
-    this.projectIdHook_ = DomHook.of<string>();
     this.sampleDataService_ = sampleDataService;
     this.templateCompilerService_ = templateCompilerService;
   }

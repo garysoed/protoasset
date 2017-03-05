@@ -1,11 +1,11 @@
-import {atomic} from 'external/gs_tools/src/async';
-import {Arrays} from 'external/gs_tools/src/collection';
-import {DisposableFunction} from 'external/gs_tools/src/dispose';
-import {DomEvent, ListenableDom} from 'external/gs_tools/src/event';
-import {inject} from 'external/gs_tools/src/inject';
-import {IdGenerator, SimpleIdGenerator} from 'external/gs_tools/src/random';
-import {Enums} from 'external/gs_tools/src/typescript';
-import {Validate} from 'external/gs_tools/src/valid';
+import { atomic } from 'external/gs_tools/src/async';
+import { Arrays } from 'external/gs_tools/src/collection';
+import { DisposableFunction } from 'external/gs_tools/src/dispose';
+import { DomEvent, ListenableDom } from 'external/gs_tools/src/event';
+import { inject } from 'external/gs_tools/src/inject';
+import { IdGenerator, SimpleIdGenerator } from 'external/gs_tools/src/random';
+import { Enums } from 'external/gs_tools/src/typescript';
+import { Validate } from 'external/gs_tools/src/valid';
 import {
   bind,
   BooleanParser,
@@ -14,31 +14,32 @@ import {
   EnumParser,
   handle,
   IntegerParser,
-  StringParser} from 'external/gs_tools/src/webc';
+  StringParser } from 'external/gs_tools/src/webc';
 
-import {BaseThemedElement} from 'external/gs_ui/src/common';
-import {RouteService, RouteServiceEvents} from 'external/gs_ui/src/routing';
-import {ThemeService} from 'external/gs_ui/src/theming';
-import {MenuItem, OverlayService} from 'external/gs_ui/src/tool';
+import { BaseThemedElement } from 'external/gs_ui/src/common';
+import { RouteService, RouteServiceEvents } from 'external/gs_ui/src/routing';
+import { ThemeService } from 'external/gs_ui/src/theming';
+import { MenuItem, OverlayService } from 'external/gs_ui/src/tool';
 
-import {SampleDataPicker} from '../common/sample-data-picker';
-import {Asset} from '../data/asset';
-import {AssetCollection} from '../data/asset-collection';
-import {BaseLayer} from '../data/base-layer';
-import {DataEvents} from '../data/data-events';
-import {HtmlLayer} from '../data/html-layer';
-import {ImageLayer} from '../data/image-layer';
-import {LayerPreviewMode} from '../data/layer-preview-mode';
-import {LayerType} from '../data/layer-type';
-import {TextLayer} from '../data/text-layer';
-import {RouteFactoryService} from '../routing/route-factory-service';
-import {Views} from '../routing/views';
-
-import {BaseLayerEditor} from './base-layer-editor';
-import {ImageLayerEditor} from './image-layer-editor';
-import {LayerItem} from './layer-item';
-import {LayerPreview} from './layer-preview';
-import {TextLayerEditor} from './text-layer-editor';
+import { BaseLayerEditor } from '../asset/base-layer-editor';
+import { ImageLayerEditor } from '../asset/image-layer-editor';
+import { LayerItem } from '../asset/layer-item';
+import { LayerPreview } from '../asset/layer-preview';
+import { TextLayerEditor } from '../asset/text-layer-editor';
+import { SampleDataPicker } from '../common/sample-data-picker';
+import { SampleDataService } from '../common/sample-data-service';
+import { Asset } from '../data/asset';
+import { AssetCollection } from '../data/asset-collection';
+import { BaseLayer } from '../data/base-layer';
+import { DataEvents } from '../data/data-events';
+import { HtmlLayer } from '../data/html-layer';
+import { ImageLayer } from '../data/image-layer';
+import { LayerPreviewMode } from '../data/layer-preview-mode';
+import { LayerType } from '../data/layer-type';
+import { TextLayer } from '../data/text-layer';
+import { RenderService } from '../render/render-service';
+import { RouteFactoryService } from '../routing/route-factory-service';
+import { Views } from '../routing/views';
 
 
 type LayerItemData = {assetId: string, layerId: string, projectId: string};
@@ -100,6 +101,7 @@ export function layerPreviewModeGenerator(document: Document, instance: LayerVie
     LayerItem,
     LayerPreview,
     MenuItem,
+    RenderService,
     SampleDataPicker,
     TextLayerEditor,
   ],
@@ -171,8 +173,10 @@ export class LayerView extends BaseThemedElement {
   private readonly assetCollection_: AssetCollection;
   private readonly layerIdGenerator_: IdGenerator;
   private readonly overlayService_: OverlayService;
+  private readonly renderService_: RenderService;
   private readonly routeFactoryService_: RouteFactoryService;
   private readonly routeService_: RouteService<Views>;
+  private readonly sampleDataService_: SampleDataService;
 
   private assetChangedDeregister_: DisposableFunction | null;
   private layerChangedDeregister_: DisposableFunction | null;
@@ -182,8 +186,10 @@ export class LayerView extends BaseThemedElement {
   constructor(
       @inject('pa.data.AssetCollection') assetCollection: AssetCollection,
       @inject('gs.tool.OverlayService') overlayService: OverlayService,
+      @inject('pa.render.RenderService') renderService: RenderService,
       @inject('pa.routing.RouteFactoryService') routeFactoryService: RouteFactoryService,
       @inject('gs.routing.RouteService') routeService: RouteService<Views>,
+      @inject('pa.common.SampleDataService') sampleDataService: SampleDataService,
       @inject('theming.ThemeService') themeService: ThemeService) {
     super(themeService);
     this.assetChangedDeregister_ = null;
@@ -207,8 +213,10 @@ export class LayerView extends BaseThemedElement {
     this.layersChildElementHook_ = DomHook.of<LayerItemData[]>();
     this.overlayService_ = overlayService;
     this.previewModeChildElementHook_ = DomHook.of<LayerPreviewMode[]>();
+    this.renderService_ = renderService;
     this.routeFactoryService_ = routeFactoryService;
     this.routeService_ = routeService;
+    this.sampleDataService_ = sampleDataService;
     this.selectedLayerId_ = null;
     this.selectedLayerPreviewMode_ = LayerPreviewMode.NORMAL;
     this.selectedPreviewModeHook_ = DomHook.of<string>();
@@ -514,5 +522,18 @@ export class LayerView extends BaseThemedElement {
         .reverse()
         .asArray();
     this.layerPreviewsChildElementHook_.set(layerPreviewData);
+  }
+
+  @handle('#renderButton').event(DomEvent.CLICK)
+  async onRenderClick_(): Promise<void> {
+    const [asset, sampleData] = await Promise.all([
+      this.getAsset_(),
+      this.sampleDataService_.getRowData(),
+    ]);
+    if (asset === null || sampleData === null) {
+      return;
+    }
+
+    this.renderService_.render(asset, sampleData);
   }
 }
