@@ -17,6 +17,14 @@ ts_library(
     ]
 )
 
+ts_library(
+    name = "render_lib_js",
+    srcs = [],
+    deps = [
+        "//src/render",
+    ]
+)
+
 ts_binary(
     name = "bin_js",
     deps = [":lib_js"],
@@ -25,6 +33,16 @@ webpack_binary(
     name = "pack_js",
     package = ":bin_js",
     entry = "src/main/exports.js",
+)
+
+ts_binary(
+    name = "render_bin_js",
+    deps = [":render_lib_js"]
+)
+webpack_binary(
+    name = "render_pack",
+    package = ":render_bin_js",
+    entry = "src/render/exports.js",
 )
 
 filegroup(

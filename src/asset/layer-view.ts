@@ -534,6 +534,6 @@ export class LayerView extends BaseThemedElement {
       return;
     }
 
-    this.renderService_.render(asset, sampleData);
+    await this.renderService_.render(asset, sampleData);
   }
 }

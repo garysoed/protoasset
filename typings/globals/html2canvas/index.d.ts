@@ -17,6 +17,8 @@ declare namespace Html2Canvas {
         /** Whether to log events in the console. */
         logging?: boolean;
 
+        onrendered: (canvas: HTMLCanvasElement) => void;
+
         /** Url to the proxy which is to be used for loading cross-origin images. If left empty, cross-origin images won't be loaded. */
         proxy?: string;
 
