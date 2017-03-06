@@ -1,8 +1,8 @@
-import {Field, Serializable} from 'external/gs_tools/src/data';
+import { Field, Serializable } from 'external/gs_tools/src/data';
 
-import {BaseLayer} from './base-layer';
-import {DataEvents} from './data-events';
-import {LayerType} from './layer-type';
+import { BaseLayer } from '../data/base-layer';
+import { DataEvents } from '../data/data-events';
+import { LayerType } from '../data/layer-type';
 
 
 /**
@@ -15,7 +15,6 @@ export class ImageLayer extends BaseLayer {
   constructor(id: string, name: string) {
     super(id, name, LayerType.IMAGE);
     this.imageUrl_ = '';
-    // TODO: Move the box stuff to BaseLayer.
   }
 
   /**
@@ -32,10 +31,10 @@ export class ImageLayer extends BaseLayer {
    * @override
    */
   asHtml(): {css: string, html: string} {
+    // NOTE: html2canvas does not support background-size.
     const styles: string[] = this.getBoxStyles_().concat([
       `background: url('${this.imageUrl_}');`,
       `background-repeat: no-repeat;`,
-      `background-size: contain;`,
     ]);
 
     // TODO: Use the layer ID for CSS selection.
@@ -47,10 +46,10 @@ export class ImageLayer extends BaseLayer {
    */
   protected asInactiveNormalPreviewHtml_(): {css: string, html: string} {
     // TODO: Refactor this better.
+    // NOTE: html2canvas does not support background-size.
     const styles: string[] = this.getBoxStyles_().concat([
       `background: url('${this.imageUrl_}');`,
       `background-repeat: no-repeat;`,
-      `background-size: contain;`,
       `filter: grayscale(50%);`,
       `opacity: .5;`,
     ]);

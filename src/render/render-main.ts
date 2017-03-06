@@ -32,11 +32,9 @@ export class RenderMain extends BaseDisposable {
     styleEl.innerHTML = request.css;
 
     const rootEl = this.window_.document.body.querySelector('div');
+    rootEl.style.height = `${request.height}px`;
+    rootEl.style.width = `${request.width}px`;
     rootEl.innerHTML = request.html;
-
-    const canvasEl = this.getCanvasEl_();
-    canvasEl.width = request.width;
-    canvasEl.height = request.height;
 
     return new Promise((resolve: (value: RenderResponse) => void) => {
       this.window_.setTimeout(() => {
@@ -59,6 +57,8 @@ export class RenderMain extends BaseDisposable {
       request: RenderRequest,
       canvas: HTMLCanvasElement): void {
     const targetCanvasEl = this.getCanvasEl_();
+    targetCanvasEl.width = request.width;
+    targetCanvasEl.height = request.height;
     const ctx = targetCanvasEl.getContext('2d');
     if (ctx === null) {
       throw new Error('2d context cannot be found');

@@ -139,6 +139,9 @@ export class LayerView extends BaseThemedElement {
   @bind('#imageEditor').attribute('project-id', StringParser)
   readonly imageEditorProjectIdHook_: DomHook<string>;
 
+  @bind('#imageRender').attribute('src', StringParser)
+  readonly imageRenderSrcHook_: DomHook<string>;
+
   @bind('#selectedLayerName').innerText()
   readonly layerNameHook_: DomHook<string>;
 
@@ -156,6 +159,9 @@ export class LayerView extends BaseThemedElement {
 
   @bind('#previewModes').childrenElements(layerPreviewModeGenerator, layerPreviewModeDataSetter)
   readonly previewModeChildElementHook_: DomHook<LayerPreviewMode[]>;
+
+  @bind('#previewSwitch').attribute('gs-value', BooleanParser)
+  readonly previewSwitchHook_: DomHook<boolean>;
 
   // TODO: Add parser to innerText.
   @bind('#selectedPreviewMode').innerText()
@@ -204,6 +210,7 @@ export class LayerView extends BaseThemedElement {
     this.imageEditorDataRowHook_ = DomHook.of<number>();
     this.imageEditorLayerIdHook_ = DomHook.of<string>();
     this.imageEditorProjectIdHook_ = DomHook.of<string>();
+    this.imageRenderSrcHook_ = DomHook.of<string>();
     this.layerChangedDeregister_ = null;
     this.layerIdGenerator_ = new SimpleIdGenerator();
     this.layerNameHook_ = DomHook.of<string>();
@@ -213,6 +220,7 @@ export class LayerView extends BaseThemedElement {
     this.layersChildElementHook_ = DomHook.of<LayerItemData[]>();
     this.overlayService_ = overlayService;
     this.previewModeChildElementHook_ = DomHook.of<LayerPreviewMode[]>();
+    this.previewSwitchHook_ = DomHook.of<boolean>();
     this.renderService_ = renderService;
     this.routeFactoryService_ = routeFactoryService;
     this.routeService_ = routeService;
@@ -503,37 +511,42 @@ export class LayerView extends BaseThemedElement {
     this.updateLayerPreviews_();
   }
 
-  private async updateLayerPreviews_(): Promise<void> {
+  @handle('#refreshButton').event(DomEvent.CLICK)
+  async updateLayerPreviews_(): Promise<void> {
     const asset = await this.getAsset_();
     if (asset === null) {
       return;
     }
 
-    const layerPreviewData = Arrays
-        .of(asset.getLayers())
-        .map((layer: BaseLayer) => {
-          const layerId = layer.getId();
-          return {
-            isSelected: layerId === this.selectedLayerId_,
-            layerId: layerId,
-            mode: this.selectedLayerPreviewMode_,
-          };
-        })
-        .reverse()
-        .asArray();
-    this.layerPreviewsChildElementHook_.set(layerPreviewData);
-  }
+    const isRenderMode = this.selectedLayerPreviewMode_ === LayerPreviewMode.RENDER;
+    this.previewSwitchHook_.set(isRenderMode);
 
-  @handle('#renderButton').event(DomEvent.CLICK)
-  async onRenderClick_(): Promise<void> {
-    const [asset, sampleData] = await Promise.all([
-      this.getAsset_(),
-      this.sampleDataService_.getRowData(),
-    ]);
-    if (asset === null || sampleData === null) {
-      return;
+    if (isRenderMode) {
+      const sampleData = await this.sampleDataService_.getRowData();
+      if (sampleData === null) {
+        return;
+      }
+
+      const uri = await this.renderService_.render(asset, sampleData);
+      if (uri === null) {
+        return;
+      }
+
+      this.imageRenderSrcHook_.set(uri);
+    } else {
+      const layerPreviewData = Arrays
+          .of(asset.getLayers())
+          .map((layer: BaseLayer) => {
+            const layerId = layer.getId();
+            return {
+              isSelected: layerId === this.selectedLayerId_,
+              layerId: layerId,
+              mode: this.selectedLayerPreviewMode_,
+            };
+          })
+          .reverse()
+          .asArray();
+      this.layerPreviewsChildElementHook_.set(layerPreviewData);
     }
-
-    await this.renderService_.render(asset, sampleData);
   }
 }

@@ -39,7 +39,9 @@ describe('render.RenderMain', () => {
       const mockHead = jasmine.createSpyObj('Head', ['querySelector']);
       mockHead.querySelector.and.returnValue(styleEl);
 
+      const rootStyle = Mocks.object('rootStyle');
       const rootEl = Mocks.object('rootEl');
+      rootEl.style = rootStyle;
       const mockBody = jasmine.createSpyObj('Body', ['querySelector']);
       mockBody.querySelector.and.returnValue(rootEl);
 
@@ -58,9 +60,6 @@ describe('render.RenderMain', () => {
         resolveFn(response);
       });
 
-      const canvasEl = Mocks.object('canvasEl');
-      spyOn(main, 'getCanvasEl_').and.returnValue(canvasEl);
-
       const css = 'css';
       const height = 123;
       const html = 'html';
@@ -75,9 +74,9 @@ describe('render.RenderMain', () => {
         useCORS: true,
       });
       assert(mockWindow.setTimeout).to.haveBeenCalledWith(Matchers.any(Function), 100);
-      assert(canvasEl.width).to.equal(width);
-      assert(canvasEl.height).to.equal(height);
       assert(rootEl.innerHTML).to.equal(html);
+      assert(rootStyle.height).to.equal(`${height}px`);
+      assert(rootStyle.width).to.equal(`${width}px`);
       assert(mockBody.querySelector).to.haveBeenCalledWith('div');
       assert(styleEl.innerHTML).to.equal(css);
       assert(mockHead.querySelector).to.haveBeenCalledWith('style');
@@ -111,6 +110,8 @@ describe('render.RenderMain', () => {
       assert(mockTargetCanvasEl.toDataURL).to.haveBeenCalledWith('image/png');
       assert(mockContext.drawImage).to.haveBeenCalledWith(canvas, 0, 0, width, height);
       assert(mockTargetCanvasEl.getContext).to.haveBeenCalledWith('2d');
+      assert(mockTargetCanvasEl.height).to.equal(height);
+      assert(mockTargetCanvasEl.width).to.equal(width);
     });
 
     it('should throw error if the 2d context cannot be found', () => {

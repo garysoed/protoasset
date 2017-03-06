@@ -1,10 +1,10 @@
-import {assert, Matchers, TestBase} from '../test-base';
+import { assert, Matchers, TestBase } from '../test-base';
 TestBase.setup();
 
-import {TestDispose} from 'external/gs_tools/src/testing';
+import { TestDispose } from 'external/gs_tools/src/testing';
 
-import {DataEvents} from './data-events';
-import {ImageLayer} from './image-layer';
+import { DataEvents } from '../data/data-events';
+import { ImageLayer } from '../data/image-layer';
 
 
 describe('data.ImageLayer', () => {
@@ -59,7 +59,6 @@ describe('data.ImageLayer', () => {
         `position: absolute;`,
         `background: url('${imageUrl}');`,
         `background-repeat: no-repeat;`,
-        `background-size: contain;`,
       ];
       assert(html).to.equal(`<div style="${expectedStyles.join('')}"></div>`);
     });

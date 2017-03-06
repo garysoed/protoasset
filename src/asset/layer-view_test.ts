@@ -121,22 +121,26 @@ describe('layerPreviewModeGenerator', () => {
 describe('asset.LayerView', () => {
   let mockAssetCollection;
   let mockOverlayService;
+  let mockRenderService;
   let mockRouteFactoryService;
   let mockRouteService;
+  let mockSampleDataService;
   let view: LayerView;
 
   beforeEach(() => {
     mockAssetCollection = jasmine.createSpyObj('AssetCollection', ['get', 'update']);
     mockOverlayService = jasmine.createSpyObj('OverlayService', ['hideOverlay']);
+    mockRenderService = jasmine.createSpyObj('RenderService', ['render']);
     mockRouteFactoryService = jasmine.createSpyObj('RouteFactoryService', ['layer']);
     mockRouteService = jasmine.createSpyObj('RouteService', ['getParams', 'on']);
+    mockSampleDataService = jasmine.createSpyObj('SampleDataService', ['getRowData']);
     view = new LayerView(
         mockAssetCollection,
         mockOverlayService,
-        Mocks.object('RenderService'),
+        mockRenderService,
         mockRouteFactoryService,
         mockRouteService,
-        Mocks.object('SampleDataService'),
+        mockSampleDataService,
         jasmine.createSpyObj('ThemeService', ['applyTheme']));
     TestDispose.add(view);
   });
@@ -740,6 +744,7 @@ describe('asset.LayerView', () => {
         LayerPreviewMode.BOUNDARY,
         LayerPreviewMode.NORMAL,
         LayerPreviewMode.FULL,
+        LayerPreviewMode.RENDER,
       ]);
     });
   });
@@ -831,20 +836,42 @@ describe('asset.LayerView', () => {
       mockAsset.getLayers.and.returnValue([mockLayer1, mockLayer2]);
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
       spyOn(view.layerPreviewsChildElementHook_, 'set');
+      spyOn(view.previewSwitchHook_, 'set');
 
       view['selectedLayerId_'] = layerId1;
-      await view['updateLayerPreviews_']();
+      view['selectedLayerPreviewMode_'] = LayerPreviewMode.NORMAL;
+      await view.updateLayerPreviews_();
       assert(view.layerPreviewsChildElementHook_.set).to.haveBeenCalledWith([
         {isSelected: false, layerId: layerId2, mode: LayerPreviewMode.NORMAL},
         {isSelected: true, layerId: layerId1, mode: LayerPreviewMode.NORMAL},
       ]);
+      assert(view.previewSwitchHook_.set).to.haveBeenCalledWith(false);
+    });
+
+    it('should update the image render if render was selected', async (done: any) => {
+      const uri = 'uri';
+      mockRenderService.render.and.returnValue(uri);
+      spyOn(view.imageRenderSrcHook_, 'set');
+
+      const asset = Mocks.object('asset');
+      spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(asset));
+
+      const sampleData = Mocks.object('sampleData');
+      mockSampleDataService.getRowData.and.returnValue(Promise.resolve(sampleData));
+      spyOn(view.previewSwitchHook_, 'set');
+
+      view['selectedLayerPreviewMode_'] = LayerPreviewMode.RENDER;
+      await view.updateLayerPreviews_();
+      assert(view.imageRenderSrcHook_.set).to.haveBeenCalledWith(uri);
+      assert(mockRenderService.render).to.haveBeenCalledWith(asset, sampleData);
+      assert(view.previewSwitchHook_.set).to.haveBeenCalledWith(true);
     });
 
     it('should do nothing if asset cannot be found', async (done: any) => {
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(null));
       spyOn(view.layerPreviewsChildElementHook_, 'set');
 
-      await view['updateLayerPreviews_']();
+      await view.updateLayerPreviews_();
       assert(view.layerPreviewsChildElementHook_.set).toNot.haveBeenCalled();
     });
   });

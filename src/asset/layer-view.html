@@ -23,12 +23,16 @@
     padding: 1rem;
   }
 
+  #previewSwitchContainer {
+    overflow: scroll;
+  }
+
   #previews {
     position: relative;
   }
 
-  #previewsContainer {
-    overflow: scroll;
+  #refreshButton {
+    margin-right: 3.5rem;
   }
 
   #root {
@@ -48,6 +52,10 @@
   #selectedLayerName {
     text-align: left;
     text-transform: none;
+  }
+
+  #tools {
+    min-height: 3.5rem;
   }
 </style>
 <div fill-parent id="root" layout="row">
@@ -80,13 +88,19 @@
           <div gs-content id="previewModes"></div>
         </gs-menu>
       </gs-basic-button>
+      <div flex></div>
+      <gs-basic-button id="refreshButton">
+        <gs-icon gs-content>refresh</gs-icon>
+      </gs-basic-button>
     </div>
-    <div flex id="previewsContainer">
-      <div id="previews"></div>
+    <div id="previewSwitchContainer">
+      <gs-switch id="previewSwitch">
+        <div flex gs-when="false">
+          <div id="previews"></div>
+        </div>
+        <img flex gs-when="true" id="imageRender"></img>
+      </gs-switch>
     </div>
-    <gs-basic-button id="renderButton">
-      <div gs-content>Render</div>
-    </gs-basic-button>
   </div>
 </div>
 <gs-basic-button class="gs-theme-normal gs-primary" id="createButton">
