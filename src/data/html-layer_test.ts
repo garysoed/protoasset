@@ -1,11 +1,12 @@
-import {assert, Matchers, TestBase} from '../test-base';
+import { assert, Matchers, TestBase } from '../test-base';
 TestBase.setup();
 
-import {Mocks} from 'external/gs_tools/src/mock';
-import {TestDispose} from 'external/gs_tools/src/testing';
+import { Mocks } from 'external/gs_tools/src/mock';
+import { TestDispose } from 'external/gs_tools/src/testing';
 
-import {DataEvents} from './data-events';
-import {HtmlLayer} from './html-layer';
+import { DataEvents } from '../data/data-events';
+import { HtmlLayer } from '../data/html-layer';
+import { BaseLayer } from 'src/data/base-layer';
 
 
 describe('data.HtmlLayer', () => {
@@ -40,6 +41,40 @@ describe('data.HtmlLayer', () => {
       const html = Mocks.object('html');
       spyOn(layer, 'asHtml').and.returnValue(html);
       assert(layer['asInactiveNormalPreviewHtml_']()).to.equal(html);
+    });
+  });
+
+  describe('copy', () => {
+    it('should create the correct copy', () => {
+      const id = 'id';
+      const layerName = 'layerName';
+      layer.setName(layerName);
+      spyOn(layer, 'copyInto_');
+
+      const copy = layer.copy(id);
+      TestDispose.add(copy);
+      assert(copy).to.beAnInstanceOf(HtmlLayer);
+      assert(copy.getId()).to.equal(id);
+      assert(copy.getName()).to.equal(layerName);
+      assert(layer['copyInto_']).to.haveBeenCalledWith(copy);
+    });
+  });
+
+  describe('copyInto_', () => {
+    it('should copy the correct properties', () => {
+      const mockTargetLayer = jasmine.createSpyObj('TargetLayer', ['setCss', 'setHtml']);
+      const css = 'css';
+      layer.setCss(css);
+
+      const html = 'html';
+      layer.setHtml(html);
+
+      spyOn(BaseLayer.prototype, 'copyInto_');
+
+      layer['copyInto_'](mockTargetLayer);
+      assert(mockTargetLayer.setHtml).to.haveBeenCalledWith(html);
+      assert(mockTargetLayer.setCss).to.haveBeenCalledWith(css);
+      assert(BaseLayer.prototype['copyInto_']).to.haveBeenCalledWith(mockTargetLayer);
     });
   });
 

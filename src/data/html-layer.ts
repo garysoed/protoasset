@@ -1,8 +1,8 @@
-import {Field, Serializable} from 'external/gs_tools/src/data';
+import { Field, Serializable } from 'external/gs_tools/src/data';
 
-import {BaseLayer} from './base-layer';
-import {DataEvents} from './data-events';
-import {LayerType} from './layer-type';
+import { BaseLayer } from '../data/base-layer';
+import { DataEvents } from '../data/data-events';
+import { LayerType } from '../data/layer-type';
 
 
 @Serializable('htmlLayer')
@@ -38,6 +38,26 @@ export class HtmlLayer extends BaseLayer {
    */
   asInactiveNormalPreviewHtml_(): {css: string, html: string} {
     return this.asHtml();
+  }
+
+  /**
+   * Creates a copy of the current layer.
+   * @param id ID of the layer copy.
+   * @return Copy of the current layer.
+   */
+  copy(id: string): HtmlLayer {
+    const newLayer = new HtmlLayer(id, this.getName());
+    this.copyInto_(newLayer);
+    return newLayer;
+  }
+
+  /**
+   * @override
+   */
+  protected copyInto_(targetLayer: HtmlLayer): void {
+    super.copyInto_(targetLayer);
+    targetLayer.setCss(this.getCss());
+    targetLayer.setHtml(this.getHtml());
   }
 
   /**

@@ -3,7 +3,7 @@ import { Arrays } from 'external/gs_tools/src/collection';
 import { DisposableFunction } from 'external/gs_tools/src/dispose';
 import { DomEvent, ListenableDom } from 'external/gs_tools/src/event';
 import { inject } from 'external/gs_tools/src/inject';
-import { IdGenerator, SimpleIdGenerator } from 'external/gs_tools/src/random';
+import { BaseIdGenerator, SimpleIdGenerator } from 'external/gs_tools/src/random';
 import { Enums } from 'external/gs_tools/src/typescript';
 import { Validate } from 'external/gs_tools/src/valid';
 import {
@@ -177,7 +177,7 @@ export class LayerView extends BaseThemedElement {
   readonly textEditorProjectIdHook_: DomHook<string>;
 
   private readonly assetCollection_: AssetCollection;
-  private readonly layerIdGenerator_: IdGenerator;
+  private readonly layerIdGenerator_: BaseIdGenerator;
   private readonly overlayService_: OverlayService;
   private readonly renderService_: RenderService;
   private readonly routeFactoryService_: RouteFactoryService;
@@ -241,19 +241,7 @@ export class LayerView extends BaseThemedElement {
     if (asset === null) {
       return;
     }
-    const layers = asset.getLayers();
-    const existingIds = new Set(
-        Arrays
-            .of(layers)
-            .map((layer: BaseLayer) => {
-              return layer.getId();
-            })
-            .asArray());
-    let id = this.layerIdGenerator_.generate();
-    while (existingIds.has(id)) {
-      id = this.layerIdGenerator_.resolveConflict(id);
-    }
-
+    const id = this.layerIdGenerator_.generate(asset.getLayerIds());
     const name = `New ${Enums.toLowerCaseString(layerType, LayerType)} layer`;
     let layer: BaseLayer;
 

@@ -1,11 +1,11 @@
-import {assert, Matchers, TestBase} from '../test-base';
+import { assert, Matchers, TestBase } from '../test-base';
 TestBase.setup();
 
-import {Mocks} from 'external/gs_tools/src/mock';
-import {TestDispose} from 'external/gs_tools/src/testing';
+import { Mocks } from 'external/gs_tools/src/mock';
+import { TestDispose } from 'external/gs_tools/src/testing';
 
-import {Asset, AssetType} from './asset';
-import {DataEvents} from './data-events';
+import { Asset, AssetType } from '../data/asset';
+import { DataEvents } from '../data/data-events';
 
 
 describe('data.Asset', () => {
@@ -78,6 +78,20 @@ describe('data.Asset', () => {
         [helperId]: helper,
       };
       assert(asset.getHelper('otherHelperId')).to.beNull();
+    });
+  });
+
+  describe('getLayerIds', () => {
+    it('should return the correct IDs', () => {
+      const id1 = 'id1';
+      const mockLayer1 = jasmine.createSpyObj('Layer1', ['dispose', 'getId']);
+      mockLayer1.getId.and.returnValue(id1);
+
+      const id2 = 'id2';
+      const mockLayer2 = jasmine.createSpyObj('Layer2', ['dispose', 'getId']);
+      mockLayer2.getId.and.returnValue(id2);
+      asset.setLayers([mockLayer1, mockLayer2]);
+      assert(asset.getLayerIds()).to.equal([id1, id2]);
     });
   });
 

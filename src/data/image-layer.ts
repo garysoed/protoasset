@@ -57,6 +57,24 @@ export class ImageLayer extends BaseLayer {
   }
 
   /**
+   * @param id ID of the layer copy to use.
+   * @return Copy of the current layer with the given ID.
+   */
+  copy(id: string): ImageLayer {
+    const newLayer = new ImageLayer(id, this.getName());
+    this.copyInto_(newLayer);
+    return newLayer;
+  }
+
+  /**
+   * @override
+   */
+  protected copyInto_(targetLayer: ImageLayer): void {
+    super.copyInto_(targetLayer);
+    targetLayer.setImageUrl(this.getImageUrl());
+  }
+
+  /**
    * @param styles Styles to apply to the created div.
    * @return Newly created DIV element with the gien styles applied.
    */

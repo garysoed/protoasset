@@ -1,12 +1,12 @@
-import {assert, Matchers, TestBase} from '../test-base';
+import { assert, Matchers, TestBase } from '../test-base';
 TestBase.setup();
 
-import {Mocks} from 'external/gs_tools/src/mock';
-import {TestDispose} from 'external/gs_tools/src/testing';
+import { Mocks } from 'external/gs_tools/src/mock';
+import { TestDispose } from 'external/gs_tools/src/testing';
 
-import {BaseLayer} from './base-layer';
-import {DataEvents} from './data-events';
-import {LayerPreviewMode} from './layer-preview-mode';
+import { BaseLayer } from '../data/base-layer';
+import { DataEvents } from '../data/data-events';
+import { LayerPreviewMode } from '../data/layer-preview-mode';
 
 
 class TestLayer extends BaseLayer {
@@ -63,6 +63,27 @@ describe('data.BaseLayer', () => {
       const html = Mocks.object('html');
       spyOn(layer, 'asHtml').and.returnValue(html);
       assert(layer.asPreviewHtml(LayerPreviewMode.FULL, true)).to.equal(html);
+    });
+  });
+
+  describe('copyInto_', () => {
+    it('should copy the current data to the target layer', () => {
+      const mockTarget =
+          jasmine.createSpyObj('Target', ['setBottom', 'setLeft', 'setRight', 'setTop']);
+      const bottom = 12;
+      const left = 34;
+      const right = 56;
+      const top = 78;
+      layer.setBottom(bottom);
+      layer.setLeft(left);
+      layer.setRight(right);
+      layer.setTop(top);
+
+      layer['copyInto_'](mockTarget);
+      assert(mockTarget.setBottom).to.haveBeenCalledWith(bottom);
+      assert(mockTarget.setLeft).to.haveBeenCalledWith(left);
+      assert(mockTarget.setRight).to.haveBeenCalledWith(right);
+      assert(mockTarget.setTop).to.haveBeenCalledWith(top);
     });
   });
 

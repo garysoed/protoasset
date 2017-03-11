@@ -62,6 +62,14 @@ describe('asset.LayerPreview', () => {
     });
   });
 
+  describe('onDataChanged_', () => {
+    it('should call onLayerIdChanged_', () => {
+      spyOn(preview, 'onLayerIdChanged_');
+      preview['onDataChanged_']();
+      assert(preview['onLayerIdChanged_']).to.haveBeenCalledWith();
+    });
+  });
+
   describe('onLayerChange_', () => {
     it('should update the css and root inner HTMLs correctly', () => {
       const previewMode = Mocks.object('previewMode');
@@ -152,6 +160,38 @@ describe('asset.LayerPreview', () => {
       preview['onLayerChange_'](Mocks.object('asset'), Mocks.object('rowData'), mockLayer);
 
       assert(mockCssImportService.import).toNot.haveBeenCalled();
+    });
+
+    it('should set the inner HTML hooks to empty string if compiler throws error', () => {
+      const previewMode = Mocks.object('previewMode');
+      spyOn(preview.previewModeHook_, 'get').and.returnValue(previewMode);
+
+      const isActive = true;
+      spyOn(preview.isSelectedHook_, 'get').and.returnValue(isActive);
+
+      const fontUrl = 'fontUrl';
+      const mockLayer = jasmine.createSpyObj('Layer', ['asPreviewHtml', 'getFontUrl']);
+      mockLayer.getFontUrl.and.returnValue(fontUrl);
+      mockLayer.asPreviewHtml.and.returnValue({css: 'css', html: 'html'});
+      Object.setPrototypeOf(mockLayer, TextLayer.prototype);
+
+      const asset = Mocks.object('asset');
+      const rowData = Mocks.object('rowData');
+
+      const mockCompiler = jasmine.createSpyObj('Compiler', ['compile']);
+      mockCompiler.compile.and.throwError(new Error('Expected error'));
+      mockTemplateCompilerService.create.and.returnValue(mockCompiler);
+
+      spyOn(preview['rootInnerHtmlHook_'], 'set');
+      spyOn(preview['cssInnerHtmlHook_'], 'set');
+
+      preview['onLayerChange_'](asset, rowData, mockLayer);
+
+      assert(mockCssImportService.import).to.haveBeenCalledWith(fontUrl);
+      assert(preview['rootInnerHtmlHook_'].set).to.haveBeenCalledWith('');
+      assert(preview['cssInnerHtmlHook_'].set).to.haveBeenCalledWith('');
+      assert(mockTemplateCompilerService.create).to.haveBeenCalledWith(asset, rowData);
+      assert(mockLayer.asPreviewHtml).to.haveBeenCalledWith(previewMode, isActive);
     });
   });
 

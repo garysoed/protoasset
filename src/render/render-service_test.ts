@@ -169,6 +169,7 @@ describe('render.RenderService', () => {
       assert(iframeEl.height).to.equal(`${height}px`);
       assert(iframeEl.width).to.equal(`${width}px`);
       assert(mockTemplateCompilerService.create).to.haveBeenCalledWith(mockAsset, data);
+      assert(service['idGenerator_'].generate).to.haveBeenCalledWith([]);
     });
   });
 });

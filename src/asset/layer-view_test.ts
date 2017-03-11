@@ -154,14 +154,13 @@ describe('asset.LayerView', () => {
       const mockOldLayer = jasmine.createSpyObj('OldLayer', ['getId']);
       mockOldLayer.getId.and.returnValue(oldId);
 
-      const mockAsset = jasmine.createSpyObj('Asset', ['getLayers', 'insertLayer']);
-      mockAsset.getLayers.and.returnValue([mockOldLayer]);
+      const mockAsset = jasmine.createSpyObj('Asset', ['getLayerIds', 'insertLayer']);
+      mockAsset.getLayerIds.and.returnValue([oldId]);
       mockAssetCollection.get.and.returnValue(Promise.resolve(mockAsset));
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
 
       const id = 'id';
-      spyOn(view['layerIdGenerator_'], 'generate').and.returnValue(oldId);
-      spyOn(view['layerIdGenerator_'], 'resolveConflict').and.returnValue(id);
+      spyOn(view['layerIdGenerator_'], 'generate').and.returnValue(id);
 
       const selectLayerSpy = spyOn(view, 'selectLayer_');
       const layerType = LayerType.HTML;
@@ -177,15 +176,15 @@ describe('asset.LayerView', () => {
       assert(mockAsset.insertLayer).to.haveBeenCalledWith(layer);
       assert(layer.getName()).to.equal(Matchers.stringMatching(/New html layer/));
       assert(layer.getId()).to.equal(id);
-      assert(view['layerIdGenerator_'].resolveConflict).to.haveBeenCalledWith(oldId);
+      assert(view['layerIdGenerator_'].generate).to.haveBeenCalledWith([oldId]);
     });
 
     it('should reject the promise if the layer type is not supported', async (done: any) => {
       const layerRouteFactory = Mocks.object('layerRouteFactory');
       mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
 
-      const mockAsset = jasmine.createSpyObj('Asset', ['getLayers', 'insertLayer']);
-      mockAsset.getLayers.and.returnValue([]);
+      const mockAsset = jasmine.createSpyObj('Asset', ['getLayerIds', 'insertLayer']);
+      mockAsset.getLayerIds.and.returnValue([]);
       mockAssetCollection.get.and.returnValue(Promise.resolve(mockAsset));
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
 

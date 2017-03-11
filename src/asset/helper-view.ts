@@ -1,35 +1,34 @@
-import {atomic} from 'external/gs_tools/src/async';
-import {Arrays} from 'external/gs_tools/src/collection';
-import {DisposableFunction} from 'external/gs_tools/src/dispose';
-import {DomEvent, ListenableDom} from 'external/gs_tools/src/event';
-import {inject} from 'external/gs_tools/src/inject';
-import {IdGenerator, SimpleIdGenerator} from 'external/gs_tools/src/random';
+import { atomic } from 'external/gs_tools/src/async';
+import { Arrays } from 'external/gs_tools/src/collection';
+import { DisposableFunction } from 'external/gs_tools/src/dispose';
+import { DomEvent, ListenableDom } from 'external/gs_tools/src/event';
+import { inject } from 'external/gs_tools/src/inject';
+import { BaseIdGenerator, SimpleIdGenerator } from 'external/gs_tools/src/random';
 import {
   bind,
   BooleanParser,
   customElement,
   DomHook,
   handle,
-  StringParser} from 'external/gs_tools/src/webc';
+  StringParser } from 'external/gs_tools/src/webc';
 
-import {BaseThemedElement} from 'external/gs_ui/src/common';
-import {RouteService, RouteServiceEvents} from 'external/gs_ui/src/routing';
-import {ThemeService} from 'external/gs_ui/src/theming';
+import { BaseThemedElement } from 'external/gs_ui/src/common';
+import { RouteService, RouteServiceEvents } from 'external/gs_ui/src/routing';
+import { ThemeService } from 'external/gs_ui/src/theming';
 
-import {SampleDataPicker} from '../common/sample-data-picker';
-import {SampleDataService} from '../common/sample-data-service';
-import {Asset} from '../data/asset';
-import {AssetCollection} from '../data/asset-collection';
-import {DataEvents} from '../data/data-events';
-import {Helper} from '../data/helper';
-import {TemplateCompilerService} from '../data/template-compiler-service';
-import {RouteFactoryService} from '../routing/route-factory-service';
-import {Views} from '../routing/views';
+import { HelperItem } from '../asset/helper-item';
+import { SampleDataPicker } from '../common/sample-data-picker';
+import { SampleDataService } from '../common/sample-data-service';
+import { Asset } from '../data/asset';
+import { AssetCollection } from '../data/asset-collection';
+import { DataEvents } from '../data/data-events';
+import { Helper } from '../data/helper';
+import { TemplateCompilerService } from '../data/template-compiler-service';
+import { RouteFactoryService } from '../routing/route-factory-service';
+import { Views } from '../routing/views';
 
-import {HelperItem} from './helper-item';
 
-
-type HelperIdParams = {assetId: string, helperId: string, projectId: string};
+type HelperIdParams = {assetId: string, helperId: string, projectId: string };
 type ConsoleEntry = {command: string, isError: boolean, result: string};
 
 /**
@@ -155,7 +154,7 @@ export class HelperView extends BaseThemedElement {
   readonly sampleDataPickerProjectIdHook_: DomHook<string>;
 
   private readonly assetCollection_: AssetCollection;
-  private readonly helperIdGenerator_: IdGenerator;
+  private readonly helperIdGenerator_: BaseIdGenerator;
   private readonly routeFactoryService_: RouteFactoryService;
   private readonly routeService_: RouteService<Views>;
   private readonly sampleDataService_: SampleDataService;
@@ -195,11 +194,13 @@ export class HelperView extends BaseThemedElement {
    * Creates a new helper object.
    */
   private async createHelper_(asset: Asset): Promise<void> {
-    let newHelperId = this.helperIdGenerator_.generate();
-    while (asset.getHelper(newHelperId) !== null) {
-      newHelperId = this.helperIdGenerator_.resolveConflict(newHelperId);
-    }
-
+    const existingHelperIds = Arrays
+        .of(asset.getAllHelpers())
+        .map((helper: Helper) => {
+          return helper.getId();
+        })
+        .asArray();
+    const newHelperId = this.helperIdGenerator_.generate(existingHelperIds);
     const helper = Helper.of(newHelperId, `helper_${newHelperId}`);
     asset.setHelper(newHelperId, helper);
 

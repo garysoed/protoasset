@@ -5,6 +5,7 @@ import { TestDispose } from 'external/gs_tools/src/testing';
 
 import { DataEvents } from '../data/data-events';
 import { ImageLayer } from '../data/image-layer';
+import { BaseLayer } from 'src/data/base-layer';
 
 
 describe('data.ImageLayer', () => {
@@ -85,6 +86,35 @@ describe('data.ImageLayer', () => {
         boxStyle2,
         `background: url('${imageUrl}');`,
       ]));
+    });
+  });
+
+  describe('copy', () => {
+    it('should create the correct copy', () => {
+      const id = 'id';
+      const layerName = 'layerName';
+      layer.setName(layerName);
+      spyOn(layer, 'copyInto_');
+
+      const copy = layer.copy(id);
+      TestDispose.add(copy);
+      assert(copy).to.beAnInstanceOf(ImageLayer);
+      assert(copy.getId()).to.equal(id);
+      assert(copy.getName()).to.equal(layerName);
+      assert(layer['copyInto_']).to.haveBeenCalledWith(copy);
+    });
+  });
+
+  describe('copyInto_', () => {
+    it('should set the fields correctly', () => {
+      const mockTargetLayer = jasmine.createSpyObj('TargetLayer', ['setImageUrl']);
+      const imageUrl = 'imageUrl';
+      layer.setImageUrl(imageUrl);
+      spyOn(BaseLayer.prototype, 'copyInto_');
+
+      layer['copyInto_'](mockTargetLayer);
+      assert(mockTargetLayer.setImageUrl).to.haveBeenCalledWith(imageUrl);
+      assert(BaseLayer.prototype['copyInto_']).to.haveBeenCalledWith(mockTargetLayer);
     });
   });
 

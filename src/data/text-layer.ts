@@ -1,9 +1,9 @@
-import {Field, Serializable} from 'external/gs_tools/src/data';
-import {Enums} from 'external/gs_tools/src/typescript';
+import { Field, Serializable } from 'external/gs_tools/src/data';
+import { Enums } from 'external/gs_tools/src/typescript';
 
-import {BaseLayer} from './base-layer';
-import {DataEvents} from './data-events';
-import {LayerType} from './layer-type';
+import { BaseLayer } from '../data/base-layer';
+import { DataEvents } from '../data/data-events';
+import { LayerType } from '../data/layer-type';
 
 
 export enum HorizontalAlign {
@@ -95,6 +95,31 @@ export class TextLayer extends BaseLayer {
     }
 
     return {css, html: this.createDiv_(parentStyles)};
+  }
+
+  /**
+   * @param id ID of the layer copy to use.
+   * @return Copy of the current layer with the given ID.
+   */
+  copy(id: string): TextLayer {
+    const newLayer = new TextLayer(id, this.getName());
+    this.copyInto_(newLayer);
+    return newLayer;
+  }
+
+  /**
+   * @override
+   */
+  protected copyInto_(targetLayer: TextLayer): void {
+    super.copyInto_(targetLayer);
+    targetLayer.setColor(this.getColor());
+    targetLayer.setFontFamily(this.getFontFamily());
+    targetLayer.setFontUrl(this.getFontUrl());
+    targetLayer.setFontWeight(this.getFontWeight());
+    targetLayer.setHorizontalAlign(this.getHorizontalAlign());
+    targetLayer.setSize(this.getSize());
+    targetLayer.setText(this.getText());
+    targetLayer.setVerticalAlign(this.getVerticalAlign());
   }
 
   private createDiv_(parentStyles: string[]): string {

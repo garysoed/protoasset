@@ -1,10 +1,11 @@
-import {assert, Matchers, TestBase} from '../test-base';
+import { assert, Matchers, TestBase } from '../test-base';
 TestBase.setup();
 
-import {TestDispose} from 'external/gs_tools/src/testing';
+import { TestDispose } from 'external/gs_tools/src/testing';
 
-import {DataEvents} from './data-events';
-import {HorizontalAlign, TextLayer, VerticalAlign} from './text-layer';
+import { DataEvents } from '../data/data-events';
+import { HorizontalAlign, TextLayer, VerticalAlign } from '../data/text-layer';
+import { BaseLayer } from 'src/data/base-layer';
 
 
 describe('data.TextLayer', () => {
@@ -172,6 +173,67 @@ describe('data.TextLayer', () => {
         `line-height: initial;`,
         `opacity: .5;`,
       ]);
+    });
+  });
+
+  describe('copy', () => {
+    it('should create the correct copy', () => {
+      const id = 'id';
+      const layerName = 'layerName';
+      layer.setName(layerName);
+      spyOn(layer, 'copyInto_');
+
+      const copy = layer.copy(id);
+      TestDispose.add(copy);
+      assert(copy).to.beAnInstanceOf(TextLayer);
+      assert(copy.getId()).to.equal(id);
+      assert(copy.getName()).to.equal(layerName);
+      assert(layer['copyInto_']).to.haveBeenCalledWith(copy);
+    });
+  });
+
+  describe('copyInto_', () => {
+    it('should set the fields correctly', () => {
+      const color = 'color';
+      const fontFamily = 'fontFamily';
+      const fontUrl = 'fontUrl';
+      const fontWeight = 'fontWeight';
+      const horizontalAlign = HorizontalAlign.JUSTIFY;
+      const size = 'size';
+      const text = 'text';
+      const verticalAlign = VerticalAlign.TOP;
+      layer.setColor(color);
+      layer.setFontFamily(fontFamily);
+      layer.setFontUrl(fontUrl);
+      layer.setFontWeight(fontWeight);
+      layer.setHorizontalAlign(horizontalAlign);
+      layer.setSize(size);
+      layer.setText(text);
+      layer.setVerticalAlign(verticalAlign);
+
+      const mockTargetLayer = jasmine.createSpyObj('TargetLayer', [
+        'setColor',
+        'setFontFamily',
+        'setFontUrl',
+        'setFontWeight',
+        'setHorizontalAlign',
+        'setSize',
+        'setText',
+        'setVerticalAlign',
+      ]);
+
+      spyOn(BaseLayer.prototype, 'copyInto_');
+
+      layer['copyInto_'](mockTargetLayer);
+      assert(mockTargetLayer.setColor).to.haveBeenCalledWith(color);
+      assert(mockTargetLayer.setFontFamily).to.haveBeenCalledWith(fontFamily);
+      assert(mockTargetLayer.setFontUrl).to.haveBeenCalledWith(fontUrl);
+      assert(mockTargetLayer.setFontWeight).to.haveBeenCalledWith(fontWeight);
+      assert(mockTargetLayer.setHorizontalAlign).to.haveBeenCalledWith(horizontalAlign);
+      assert(mockTargetLayer.setSize).to.haveBeenCalledWith(size);
+      assert(mockTargetLayer.setText).to.haveBeenCalledWith(text);
+      assert(mockTargetLayer.setVerticalAlign).to.haveBeenCalledWith(verticalAlign);
+      assert(BaseLayer.prototype['copyInto_']).to.haveBeenCalledWith(mockTargetLayer);
     });
   });
 

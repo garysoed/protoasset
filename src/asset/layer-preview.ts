@@ -1,7 +1,7 @@
-import {atomic} from 'external/gs_tools/src/async';
-import {Arrays} from 'external/gs_tools/src/collection';
-import {DisposableFunction} from 'external/gs_tools/src/dispose';
-import {inject} from 'external/gs_tools/src/inject';
+import { atomic } from 'external/gs_tools/src/async';
+import { Arrays } from 'external/gs_tools/src/collection';
+import { DisposableFunction } from 'external/gs_tools/src/dispose';
+import { inject } from 'external/gs_tools/src/inject';
 import {
   bind,
   BooleanParser,
@@ -9,24 +9,24 @@ import {
   DomHook,
   EnumParser,
   handle,
-  StringParser} from 'external/gs_tools/src/webc';
+  StringParser } from 'external/gs_tools/src/webc';
 
-import {BaseThemedElement} from 'external/gs_ui/src/common';
-import {RouteService, RouteServiceEvents} from 'external/gs_ui/src/routing';
-import {ThemeService} from 'external/gs_ui/src/theming';
+import { BaseThemedElement } from 'external/gs_ui/src/common';
+import { RouteService, RouteServiceEvents } from 'external/gs_ui/src/routing';
+import { ThemeService } from 'external/gs_ui/src/theming';
 
-import {CssImportService} from '../common/css-import-service';
-import {SampleDataService} from '../common/sample-data-service';
-import {SampleDataServiceEvent} from '../common/sample-data-service-event';
-import {Asset} from '../data/asset';
-import {AssetCollection} from '../data/asset-collection';
-import {BaseLayer} from '../data/base-layer';
-import {DataEvents} from '../data/data-events';
-import {LayerPreviewMode} from '../data/layer-preview-mode';
-import {TemplateCompilerService} from '../data/template-compiler-service';
-import {TextLayer} from '../data/text-layer';
-import {RouteFactoryService} from '../routing/route-factory-service';
-import {Views} from '../routing/views';
+import { CssImportService } from '../common/css-import-service';
+import { SampleDataService } from '../common/sample-data-service';
+import { SampleDataServiceEvent } from '../common/sample-data-service-event';
+import { Asset } from '../data/asset';
+import { AssetCollection } from '../data/asset-collection';
+import { BaseLayer } from '../data/base-layer';
+import { DataEvents } from '../data/data-events';
+import { LayerPreviewMode } from '../data/layer-preview-mode';
+import { TemplateCompilerService } from '../data/template-compiler-service';
+import { TextLayer } from '../data/text-layer';
+import { RouteFactoryService } from '../routing/route-factory-service';
+import { Views } from '../routing/views';
 
 
 /**
@@ -99,14 +99,29 @@ export class LayerPreview extends BaseThemedElement {
     this.onLayerIdChanged_();
   }
 
+  @handle(null).attributeChange('preview-mode')
+  @handle(null).attributeChange('is-selected')
+  private onDataChanged_(): void {
+    this.onLayerIdChanged_();
+  }
+
   private onLayerChange_(asset: Asset, rowData: string[], layer: BaseLayer): void {
     const previewMode = this.previewModeHook_.get() || LayerPreviewMode.NORMAL;
     const isActive = this.isSelectedHook_.get() || false;
 
     const {css, html} = layer.asPreviewHtml(previewMode, isActive);
     const compiler = this.templateCompilerService_.create(asset, rowData);
-    this.cssInnerHtmlHook_.set(compiler.compile(css));
-    this.rootInnerHtmlHook_.set(compiler.compile(html));
+    try {
+      this.cssInnerHtmlHook_.set(compiler.compile(css));
+    } catch (e) {
+      this.cssInnerHtmlHook_.set('');
+    }
+
+    try {
+      this.rootInnerHtmlHook_.set(compiler.compile(html));
+    } catch (e) {
+      this.rootInnerHtmlHook_.set('');
+    }
 
     if (layer instanceof TextLayer) {
       const fontUrl = layer.getFontUrl();
@@ -114,12 +129,6 @@ export class LayerPreview extends BaseThemedElement {
         this.cssImportService_.import(fontUrl);
       }
     }
-  }
-
-  @handle(null).attributeChange('preview-mode')
-  @handle(null).attributeChange('is-selected')
-  private onDataChanged_(): void {
-    this.onLayerIdChanged_();
   }
 
   @handle(null).attributeChange('layer-id')

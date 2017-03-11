@@ -1,12 +1,12 @@
-import {assert, Matchers, TestBase} from '../test-base';
+import { assert, Matchers, TestBase } from '../test-base';
 TestBase.setup();
 
-import {Mocks} from 'external/gs_tools/src/mock';
-import {TestDispose} from 'external/gs_tools/src/testing';
+import { Mocks } from 'external/gs_tools/src/mock';
+import { TestDispose } from 'external/gs_tools/src/testing';
 
-import {DataEvents} from '../data/data-events';
-
-import {LayerItem, Mode} from './layer-item';
+import { LayerItem, Mode } from '../asset/layer-item';
+import { DataEvents } from '../data/data-events';
+import { ImageLayer } from '../data/image-layer';
 
 
 describe('asset.LayerItem', () => {
@@ -188,6 +188,78 @@ describe('asset.LayerItem', () => {
       item.onChangeModeClick_(mode, mockEvent);
       assert(item.switchModeHook_.set).to.haveBeenCalledWith(mode);
       assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
+    });
+  });
+
+  describe('onCopyClick_', () => {
+    it('should create the correct copy and update the asset', async (done: any) => {
+      const layerIds = Mocks.object('layerIds');
+      const mockAsset = jasmine.createSpyObj('Asset', ['getLayerIds', 'insertLayer']);
+      mockAsset.getLayerIds.and.returnValue(layerIds);
+      spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
+
+      const layerName = 'layerName';
+      const mockLayer = jasmine.createSpyObj('Layer', ['copy', 'getName']);
+      mockLayer.getName.and.returnValue(layerName);
+      Object.setPrototypeOf(mockLayer, ImageLayer.prototype);
+      spyOn(item, 'getLayer_').and.returnValue(Promise.resolve(mockLayer));
+
+      const mockNewLayer = jasmine.createSpyObj('NewLayer', ['setName']);
+      mockLayer.copy.and.returnValue(mockNewLayer);
+
+      const id = 'id';
+      spyOn(item['layerIdGenerator_'], 'generate').and.returnValue(id);
+
+      await item.onCopyClick_();
+      assert(mockAssetCollection.update).to.haveBeenCalledWith(mockAsset);
+      assert(mockAsset.insertLayer).to.haveBeenCalledWith(mockNewLayer);
+      assert(mockNewLayer.setName).to
+          .haveBeenCalledWith(Matchers.stringMatching(new RegExp(`layer ${layerName}`)));
+      assert(mockLayer.copy).to.haveBeenCalledWith(id);
+      assert(item['layerIdGenerator_'].generate).to.haveBeenCalledWith(layerIds);
+    });
+
+    it('should throw error if the layer is of an unsupported type', async (done: any) => {
+      const layerIds = Mocks.object('layerIds');
+      const mockAsset = jasmine.createSpyObj('Asset', ['getLayerIds', 'insertLayer']);
+      mockAsset.getLayerIds.and.returnValue(layerIds);
+      spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
+
+      const mockLayer = jasmine.createSpyObj('Layer', ['copy', 'getType']);
+      spyOn(item, 'getLayer_').and.returnValue(Promise.resolve(mockLayer));
+
+      const id = 'id';
+      spyOn(item['layerIdGenerator_'], 'generate').and.returnValue(id);
+
+      try {
+        await item.onCopyClick_();
+        done.fail('Error expected');
+      } catch (e) {
+        assert(e).to.equal(Matchers.stringMatching(/layer type/));
+      }
+      assert(mockAssetCollection.update).toNot.haveBeenCalled();
+      assert(mockAsset.insertLayer).toNot.haveBeenCalled();
+      assert(item['layerIdGenerator_'].generate).to.haveBeenCalledWith(layerIds);
+    });
+
+    it('should do nothing if asset is null', async (done: any) => {
+      spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(null));
+
+      const mockLayer = jasmine.createSpyObj('Layer', ['copy', 'getType']);
+      Object.setPrototypeOf(mockLayer, ImageLayer.prototype);
+      spyOn(item, 'getLayer_').and.returnValue(Promise.resolve(mockLayer));
+
+      await item.onCopyClick_();
+      assert(mockAssetCollection.update).toNot.haveBeenCalled();
+    });
+
+    it('should do nothing if layer is null', async (done: any) => {
+      const mockAsset = jasmine.createSpyObj('Asset', ['getLayerIds', 'insertLayer']);
+      spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
+      spyOn(item, 'getLayer_').and.returnValue(Promise.resolve(null));
+
+      await item.onCopyClick_();
+      assert(mockAssetCollection.update).toNot.haveBeenCalled();
     });
   });
 

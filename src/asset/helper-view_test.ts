@@ -170,20 +170,19 @@ describe('asset.HelperView', () => {
 
       const assetId = 'assetId';
       const projectId = 'projectId';
-      const existingHelperId = 'existingHelperId';
-      spyOn(view['helperIdGenerator_'], 'generate').and.returnValue(existingHelperId);
-
       const newHelperId = 'newHelperId';
-      spyOn(view['helperIdGenerator_'], 'resolveConflict').and.returnValue(newHelperId);
+      spyOn(view['helperIdGenerator_'], 'generate').and.returnValue(newHelperId);
 
       const mockHelper = Mocks.object('newHelper');
       spyOn(Helper, 'of').and.returnValue(mockHelper);
 
-      const existingHelper = Mocks.object('otherHelper');
+      const existingHelperId = 'existingHelperId';
+      const mockExistingHelper = jasmine.createSpyObj('ExistingHelper', ['getId']);
+      mockExistingHelper.getId.and.returnValue(existingHelperId);
       const mockAsset = jasmine.createSpyObj(
           'Asset',
-          ['getHelper', 'getId', 'getProjectId', 'setHelper']);
-      mockAsset.getHelper.and.returnValues(existingHelper, null);
+          ['getAllHelpers', 'getId', 'getProjectId', 'setHelper']);
+      mockAsset.getAllHelpers.and.returnValues([mockExistingHelper]);
       mockAsset.getId.and.returnValue(assetId);
       mockAsset.getProjectId.and.returnValue(projectId);
       mockAssetCollection.get.and.returnValue(Promise.resolve(mockAsset));
@@ -199,10 +198,7 @@ describe('asset.HelperView', () => {
       assert(mockAssetCollection.update).to.haveBeenCalledWith(mockAsset);
       assert(mockAsset.setHelper).to.haveBeenCalledWith(newHelperId, mockHelper);
       assert(Helper.of).to.haveBeenCalledWith(newHelperId, `helper_${newHelperId}`);
-      assert(view['helperIdGenerator_'].resolveConflict).to
-          .haveBeenCalledWith(existingHelperId);
-      assert(mockAsset.getHelper).to.haveBeenCalledWith(existingHelperId);
-      assert(mockAsset.getHelper).to.haveBeenCalledWith(newHelperId);
+      assert(view['helperIdGenerator_'].generate).to.haveBeenCalledWith([existingHelperId]);
     });
   });
 

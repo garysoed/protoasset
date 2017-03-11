@@ -1,10 +1,10 @@
-import {Field} from 'external/gs_tools/src/data';
-import {BaseListenable} from 'external/gs_tools/src/event';
-import {Validate} from 'external/gs_tools/src/valid';
+import { Field } from 'external/gs_tools/src/data';
+import { BaseListenable } from 'external/gs_tools/src/event';
+import { Validate } from 'external/gs_tools/src/valid';
 
-import {DataEvents} from './data-events';
-import {LayerPreviewMode} from './layer-preview-mode';
-import {LayerType} from './layer-type';
+import { DataEvents } from '../data/data-events';
+import { LayerPreviewMode } from '../data/layer-preview-mode';
+import { LayerType } from '../data/layer-type';
 
 
 type HtmlRender = {css: string, html: string};
@@ -70,6 +70,17 @@ export abstract class BaseLayer extends BaseListenable<DataEvents> {
       default:
         throw Validate.fail(`Unsuppored layer preview mode: ${mode}`);
     }
+  }
+
+  /**
+   * Copy this layer's data to the given layer.
+   * @param target Layer to copy the data of this layer into.
+   */
+  protected copyInto_(target: BaseLayer): void {
+    target.setBottom(this.getBottom());
+    target.setLeft(this.getLeft());
+    target.setRight(this.getRight());
+    target.setTop(this.getTop());
   }
 
   /**

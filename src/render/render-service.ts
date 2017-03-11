@@ -2,7 +2,7 @@ import { atomic } from 'external/gs_tools/src/async';
 import { Arrays } from 'external/gs_tools/src/collection';
 import { BaseDisposable } from 'external/gs_tools/src/dispose';
 import { bind, inject } from 'external/gs_tools/src/inject';
-import { IdGenerator, SimpleIdGenerator } from 'external/gs_tools/src/random';
+import { BaseIdGenerator, SimpleIdGenerator } from 'external/gs_tools/src/random';
 import { ApiClient, PostMessageChannel } from 'external/gs_tools/src/rpc';
 
 import { Asset } from '../data/asset';
@@ -21,7 +21,7 @@ export function checkResponse(request: RenderRequest, response: RenderResponse):
 
 @bind('pa.render.RenderService')
 export class RenderService extends BaseDisposable {
-  private readonly idGenerator_: IdGenerator;
+  private readonly idGenerator_: BaseIdGenerator;
   private readonly templateCompilerService_: TemplateCompilerService;
   private readonly window_: Window;
 
@@ -102,7 +102,7 @@ export class RenderService extends BaseDisposable {
     iframeEl.height = `${height}px`;
     iframeEl.width = `${width}px`;
 
-    const id = this.idGenerator_.generate();
+    const id = this.idGenerator_.generate([]);
     const response = await client.post({
       css: compiler.compile(htmlComponents.css),
       height: height,

@@ -1,11 +1,11 @@
-import {Arrays, Maps} from 'external/gs_tools/src/collection';
-import {Field, Serializable} from 'external/gs_tools/src/data';
-import {BaseListenable} from 'external/gs_tools/src/event';
+import { Arrays, Maps } from 'external/gs_tools/src/collection';
+import { Field, Serializable } from 'external/gs_tools/src/data';
+import { BaseListenable } from 'external/gs_tools/src/event';
 
-import {BaseLayer} from './base-layer';
-import {DataEvents} from './data-events';
-import {Helper} from './helper';
-import {IDataSource} from './i-data-source';
+import { BaseLayer } from '../data/base-layer';
+import { DataEvents } from '../data/data-events';
+import { Helper } from '../data/helper';
+import { IDataSource } from '../data/i-data-source';
 
 
 /**
@@ -107,6 +107,18 @@ export class Asset extends BaseListenable<DataEvents> {
    */
   getId(): string {
     return this.id_;
+  }
+
+  /**
+   * @return IDs of the layers in the asset.
+   */
+  getLayerIds(): string[] {
+    return Arrays
+        .of(this.layers_)
+        .map((layer: BaseLayer) => {
+          return layer.getId();
+        })
+        .asArray();
   }
 
   /**

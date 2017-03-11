@@ -1,8 +1,9 @@
-import {atomic} from 'external/gs_tools/src/async';
-import {Arrays} from 'external/gs_tools/src/collection';
-import {DisposableFunction} from 'external/gs_tools/src/dispose';
-import {DomEvent} from 'external/gs_tools/src/event';
-import {inject} from 'external/gs_tools/src/inject';
+import { atomic } from 'external/gs_tools/src/async';
+import { Arrays } from 'external/gs_tools/src/collection';
+import { DisposableFunction } from 'external/gs_tools/src/dispose';
+import { DomEvent } from 'external/gs_tools/src/event';
+import { inject } from 'external/gs_tools/src/inject';
+import { Validate } from 'external/gs_tools/src/valid';
 import {
   bind,
   BooleanParser,
@@ -10,15 +11,19 @@ import {
   DomHook,
   EnumParser,
   handle,
-  StringParser} from 'external/gs_tools/src/webc';
+  StringParser } from 'external/gs_tools/src/webc';
 
-import {BaseThemedElement} from 'external/gs_ui/src/common';
-import {ThemeService} from 'external/gs_ui/src/theming';
+import { BaseThemedElement } from 'external/gs_ui/src/common';
+import { ThemeService } from 'external/gs_ui/src/theming';
 
-import {Asset} from '../data/asset';
-import {AssetCollection} from '../data/asset-collection';
-import {BaseLayer} from '../data/base-layer';
-import {DataEvents} from '../data/data-events';
+import { Asset } from '../data/asset';
+import { AssetCollection } from '../data/asset-collection';
+import { BaseLayer } from '../data/base-layer';
+import { DataEvents } from '../data/data-events';
+import { BaseIdGenerator, SimpleIdGenerator } from 'external/gs_tools/src/random';
+import { HtmlLayer } from 'src/data/html-layer';
+import { ImageLayer } from 'src/data/image-layer';
+import { TextLayer } from 'src/data/text-layer';
 
 
 export enum Mode {
@@ -60,6 +65,7 @@ export class LayerItem extends BaseThemedElement {
   readonly upDisabledHook_: DomHook<boolean>;
 
   private readonly assetCollection_: AssetCollection;
+  private readonly layerIdGenerator_: BaseIdGenerator;
 
   private assetDeregister_: DisposableFunction | null;
   private layerDeregister_: DisposableFunction | null;
@@ -74,6 +80,7 @@ export class LayerItem extends BaseThemedElement {
     this.downDisabledHook_ = DomHook.of<boolean>(true);
     this.layerDeregister_ = null;
     this.layerIdHook_ = DomHook.of<string>();
+    this.layerIdGenerator_ = new SimpleIdGenerator();
     this.nameHook_ = DomHook.of<string>();
     this.nameInputHook_ = DomHook.of<string>();
     this.projectIdHook_ = DomHook.of<string>();
@@ -154,6 +161,30 @@ export class LayerItem extends BaseThemedElement {
   onChangeModeClick_(mode: Mode, event: Event): void {
     this.switchModeHook_.set(mode);
     event.stopPropagation();
+  }
+
+  @handle('#copy').event(DomEvent.CLICK)
+  async onCopyClick_(): Promise<void> {
+    const [asset, layer] = await Promise.all([this.getAsset_(), this.getLayer_()]);
+    if (asset === null || layer === null) {
+      return;
+    }
+
+    let id = this.layerIdGenerator_.generate(asset.getLayerIds());
+    let newLayer: BaseLayer;
+
+    if (layer instanceof HtmlLayer
+        || layer instanceof ImageLayer
+        || layer instanceof TextLayer) {
+      newLayer = layer.copy(id);
+    } else {
+      throw Validate.fail(`Unsupported layer type: ${layer.getType()}`);
+    }
+    newLayer.setName(`Copy of layer ${layer.getName()}`);
+
+    asset.insertLayer(newLayer);
+
+    this.assetCollection_.update(asset);
   }
 
   @handle('#delete').event(DomEvent.CLICK)
