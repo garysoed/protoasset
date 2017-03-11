@@ -20,16 +20,6 @@ export class ImageLayer extends BaseLayer {
   /**
    * @override
    */
-  protected asActiveBoundaryPreviewHtml_(): {css: string, html: string} {
-    const styles: string[] = this.getBoxStyles_().concat([
-      `background-color: var(--gsThemeNormal);`,
-    ]);
-    return {css: '', html: this.createDiv_(styles)};
-  }
-
-  /**
-   * @override
-   */
   asHtml(): {css: string, html: string} {
     // NOTE: html2canvas does not support background-size.
     const styles: string[] = this.getBoxStyles_().concat([

@@ -10,10 +10,6 @@ import { LayerPreviewMode } from '../data/layer-preview-mode';
 
 
 class TestLayer extends BaseLayer {
-  asActiveBoundaryPreviewHtml_(): {css: string, html: string} {
-    return {css: '', html: ''};
-  }
-
   asHtml(): {css: string, html: string} {
     return {css: '', html: ''};
   }
@@ -29,6 +25,20 @@ describe('data.BaseLayer', () => {
   beforeEach(() => {
     layer = new TestLayer('id', 'name', Mocks.object('layerType'));
     TestDispose.add(layer);
+  });
+
+  describe('asActiveBoundaryPreviewHtml_', () => {
+    it('should return the correct HTML and CSS components', () => {
+      const boxStyles = 'boxStyles';
+      spyOn(layer, 'getBoxStyles_').and.returnValue([boxStyles]);
+      const styles = [
+        boxStyles,
+        'background-color: var(--gsThemeNormal);',
+      ];
+      const {css, html} = layer['asActiveBoundaryPreviewHtml_']();
+      assert(css).to.equal('');
+      assert(html).to.equal(`<div style="${styles.join('')}"></div>`);
+    });
   });
 
   describe('asPreviewHtml', () => {

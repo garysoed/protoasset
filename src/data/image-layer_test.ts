@@ -16,26 +16,6 @@ describe('data.ImageLayer', () => {
     TestDispose.add(layer);
   });
 
-  describe('asActiveBoundaryPreviewHtml_', () => {
-    it('should return the correct CSS and HTML components', () => {
-      const boxStyle1 = 'boxStyle1';
-      const boxStyle2 = 'boxStyle2';
-      spyOn(layer, 'getBoxStyles_').and.returnValue([boxStyle1, boxStyle2]);
-
-      const html = 'html';
-      spyOn(layer, 'createDiv_').and.returnValue(html);
-      assert(layer['asActiveBoundaryPreviewHtml_']()).to.equal({
-        css: '',
-        html,
-      });
-      assert(layer['createDiv_']).to.haveBeenCalledWith([
-        boxStyle1,
-        boxStyle2,
-        `background-color: var(--gsThemeNormal);`,
-      ]);
-    });
-  });
-
   describe('asHtml', () => {
     it('should return the correct CSS and HTML components', () => {
       const top = 12;

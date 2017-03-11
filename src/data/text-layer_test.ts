@@ -16,20 +16,6 @@ describe('data.TextLayer', () => {
     TestDispose.add(layer);
   });
 
-  describe('asActiveBoundaryPreviewHtml_', () => {
-    it('should return the correct HTML and CSS components', () => {
-      const boxStyles = 'boxStyles';
-      spyOn(layer, 'getBoxStyles_').and.returnValue([boxStyles]);
-      const styles = [
-        boxStyles,
-        'background-color: var(--gsThemeNormal);',
-      ];
-      const {css, html} = layer['asActiveBoundaryPreviewHtml_']();
-      assert(css).to.equal('');
-      assert(html).to.equal(`<div style="${styles.join('')}"></div>`);
-    });
-  });
-
   describe('asHtml', () => {
     it('should return the correct HTML and CSS components', () => {
       const color = 'color';

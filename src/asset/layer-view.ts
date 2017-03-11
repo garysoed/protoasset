@@ -22,6 +22,7 @@ import { ThemeService } from 'external/gs_ui/src/theming';
 import { MenuItem, OverlayService } from 'external/gs_ui/src/tool';
 
 import { BaseLayerEditor } from '../asset/base-layer-editor';
+import { HtmlLayerEditor } from '../asset/html-layer-editor';
 import { ImageLayerEditor } from '../asset/image-layer-editor';
 import { LayerItem } from '../asset/layer-item';
 import { LayerPreview } from '../asset/layer-preview';
@@ -97,6 +98,7 @@ export function layerPreviewModeGenerator(document: Document, instance: LayerVie
 @customElement({
   dependencies: [
     BaseLayerEditor,
+    HtmlLayerEditor,
     ImageLayerEditor,
     LayerItem,
     LayerPreview,

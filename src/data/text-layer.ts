@@ -47,17 +47,6 @@ export class TextLayer extends BaseLayer {
   /**
    * @override
    */
-  protected asActiveBoundaryPreviewHtml_(): {css: string, html: string} {
-    const styles: string[] = this.getBoxStyles_().concat([
-      `background-color: var(--gsThemeNormal);`,
-    ]);
-    const html = `<div style="${styles.join('')}"></div>`;
-    return {css: '', html};
-  }
-
-  /**
-   * @override
-   */
   asHtml(): {css: string, html: string} {
     const css = this.fontUrl_ !== null ? `@import url('${this.fontUrl_}');` : '';
     const parentStyles: string[] = this.getBoxStyles_().concat([

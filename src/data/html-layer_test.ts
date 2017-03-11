@@ -17,30 +17,41 @@ describe('data.HtmlLayer', () => {
     TestDispose.add(layer);
   });
 
-  describe('asActiveBoundaryPreviewHtml_', () => {
-    it('should return the correct CSS and HTML components', () => {
-      const html = Mocks.object('html');
-      spyOn(layer, 'asHtml').and.returnValue(html);
-      assert(layer['asActiveBoundaryPreviewHtml_']()).to.equal(html);
-    });
-  });
-
   describe('asHtml', () => {
     it('should return the correct CSS and HTML components', () => {
-      const css = 'css';
-      const html = 'html';
-      layer.setCss(css);
-      layer.setHtml(html);
+      const cssContent = 'cssContent';
+      const htmlContent = 'htmlContent';
+      layer.setCss(cssContent);
+      layer.setHtml(htmlContent);
 
-      assert(layer.asHtml()).to.equal({css, html});
+      const boxStyles = 'boxStyles';
+      spyOn(layer, 'getBoxStyles_').and.returnValue([boxStyles]);
+
+      const {css, html} = layer.asHtml();
+      assert(css).to.equal(cssContent);
+      assert(html).to.equal(`<div style="${boxStyles}">${htmlContent}</div>`);
     });
   });
 
   describe('asInactiveNormalPreviewHtml_', () => {
     it('should return the correct CSS and HTML components', () => {
-      const html = Mocks.object('html');
-      spyOn(layer, 'asHtml').and.returnValue(html);
-      assert(layer['asInactiveNormalPreviewHtml_']()).to.equal(html);
+      const boxStyles = 'boxStyles';
+      spyOn(layer, 'getBoxStyles_').and.returnValue([boxStyles]);
+
+      const styles = [
+        boxStyles,
+        'filter: grayscale(50%);',
+        'opacity: .5;',
+      ];
+
+      const cssContent = 'cssContent';
+      const htmlContent = 'htmlContent';
+      layer.setCss(cssContent);
+      layer.setHtml(htmlContent);
+
+      const {css, html} = layer['asInactiveNormalPreviewHtml_']();
+      assert(css).to.equal(cssContent);
+      assert(html).to.equal(`<div style="${styles.join('')}">${htmlContent}</div>`);
     });
   });
 

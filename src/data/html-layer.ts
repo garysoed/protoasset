@@ -3,6 +3,7 @@ import { Field, Serializable } from 'external/gs_tools/src/data';
 import { BaseLayer } from '../data/base-layer';
 import { DataEvents } from '../data/data-events';
 import { LayerType } from '../data/layer-type';
+import { Arrays } from 'external/gs_tools/src/collection';
 
 
 @Serializable('htmlLayer')
@@ -19,17 +20,11 @@ export class HtmlLayer extends BaseLayer {
   /**
    * @override
    */
-  asActiveBoundaryPreviewHtml_(): {css: string, html: string} {
-    return this.asHtml();
-  }
-
-  /**
-   * @override
-   */
   asHtml(): {css: string, html: string} {
+    const styles = this.getBoxStyles_();
     return {
       css: this.css_,
-      html: this.html_,
+      html: `<div style="${styles.join('')}">${this.html_}</div>`,
     };
   }
 
@@ -37,7 +32,13 @@ export class HtmlLayer extends BaseLayer {
    * @override
    */
   asInactiveNormalPreviewHtml_(): {css: string, html: string} {
-    return this.asHtml();
+    const styles = Arrays.of(this.getBoxStyles_())
+        .addAllArray(['filter: grayscale(50%);', 'opacity: .5;'])
+        .asArray();
+    return {
+      css: this.css_,
+      html: `<div style="${styles.join('')}">${this.html_}</div>`,
+    };
   }
 
   /**

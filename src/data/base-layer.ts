@@ -41,7 +41,13 @@ export abstract class BaseLayer extends BaseListenable<DataEvents> {
    * @return The layer as HTML and CSS components when the layer is actively previewe in BOUNDARY
    *     mode.
    */
-  protected abstract asActiveBoundaryPreviewHtml_(): HtmlRender;
+  protected asActiveBoundaryPreviewHtml_(): {css: string, html: string} {
+    const styles: string[] = this.getBoxStyles_().concat([
+      `background-color: var(--gsThemeNormal);`,
+    ]);
+    const html = `<div style="${styles.join('')}"></div>`;
+    return {css: '', html};
+  }
 
   /**
    * @return The layer as HTML and CSS components.
