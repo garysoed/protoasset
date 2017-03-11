@@ -3,9 +3,7 @@ import {
   bind,
   customElement,
   DomHook,
-  handle,
-  IntegerParser,
-  StringParser } from 'external/gs_tools/src/webc';
+  IntegerParser } from 'external/gs_tools/src/webc';
 
 import { ThemeService } from 'external/gs_ui/src/theming';
 
@@ -14,8 +12,8 @@ import { SampleDataService } from '../common/sample-data-service';
 import { SampleDataServiceEvent } from '../common/sample-data-service-event';
 import { AssetCollection } from '../data/asset-collection';
 import { BaseLayer } from '../data/base-layer';
+import { HtmlLayer } from '../data/html-layer';
 import { TemplateCompilerService } from '../data/template-compiler-service';
-import { HtmlLayer } from 'src/data/html-layer';
 
 
 /**

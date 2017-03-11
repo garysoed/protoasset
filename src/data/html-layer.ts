@@ -1,9 +1,10 @@
 import { Field, Serializable } from 'external/gs_tools/src/data';
 
+import { Arrays } from 'external/gs_tools/src/collection';
+
 import { BaseLayer } from '../data/base-layer';
 import { DataEvents } from '../data/data-events';
 import { LayerType } from '../data/layer-type';
-import { Arrays } from 'external/gs_tools/src/collection';
 
 
 @Serializable('htmlLayer')
