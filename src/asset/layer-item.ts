@@ -3,6 +3,7 @@ import { Arrays } from 'external/gs_tools/src/collection';
 import { DisposableFunction } from 'external/gs_tools/src/dispose';
 import { DomEvent } from 'external/gs_tools/src/event';
 import { inject } from 'external/gs_tools/src/inject';
+import { BaseIdGenerator, SimpleIdGenerator } from 'external/gs_tools/src/random';
 import { Validate } from 'external/gs_tools/src/valid';
 import {
   bind,
@@ -20,10 +21,9 @@ import { Asset } from '../data/asset';
 import { AssetCollection } from '../data/asset-collection';
 import { BaseLayer } from '../data/base-layer';
 import { DataEvents } from '../data/data-events';
-import { BaseIdGenerator, SimpleIdGenerator } from 'external/gs_tools/src/random';
-import { HtmlLayer } from 'src/data/html-layer';
-import { ImageLayer } from 'src/data/image-layer';
-import { TextLayer } from 'src/data/text-layer';
+import { HtmlLayer } from '../data/html-layer';
+import { ImageLayer } from '../data/image-layer';
+import { TextLayer } from '../data/text-layer';
 
 
 export enum Mode {

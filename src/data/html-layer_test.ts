@@ -4,9 +4,9 @@ TestBase.setup();
 import { Mocks } from 'external/gs_tools/src/mock';
 import { TestDispose } from 'external/gs_tools/src/testing';
 
+import { BaseLayer } from '../data/base-layer';
 import { DataEvents } from '../data/data-events';
 import { HtmlLayer } from '../data/html-layer';
-import { BaseLayer } from 'src/data/base-layer';
 
 
 describe('data.HtmlLayer', () => {

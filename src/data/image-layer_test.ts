@@ -3,9 +3,9 @@ TestBase.setup();
 
 import { TestDispose } from 'external/gs_tools/src/testing';
 
+import { BaseLayer } from '../data/base-layer';
 import { DataEvents } from '../data/data-events';
 import { ImageLayer } from '../data/image-layer';
-import { BaseLayer } from 'src/data/base-layer';
 
 
 describe('data.ImageLayer', () => {
