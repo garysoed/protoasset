@@ -4,7 +4,6 @@ import {
   customElement,
   DomHook,
   handle,
-  IntegerParser,
   StringParser } from 'external/gs_tools/src/webc';
 
 import { ThemeService } from 'external/gs_ui/src/theming';
@@ -27,9 +26,6 @@ import { TemplateCompilerService } from '../data/template-compiler-service';
   templateKey: 'src/asset/image-layer-editor',
 })
 export class ImageLayerEditor extends AbstractLayerEditor<ImageLayer> {
-  @bind(null).attribute('data-row', IntegerParser)
-  readonly dataRowHook_: DomHook<number>;
-
   @bind('#imagePreview').property('style')
   readonly imagePreviewStyleHook_: DomHook<CSSStyleDeclaration>;
 
@@ -45,7 +41,6 @@ export class ImageLayerEditor extends AbstractLayerEditor<ImageLayer> {
       @inject('pa.data.TemplateCompilerService') templateCompilerService: TemplateCompilerService,
       @inject('theming.ThemeService') themeService: ThemeService) {
     super(assetCollection, themeService);
-    this.dataRowHook_ = DomHook.of<number>();
     this.imagePreviewStyleHook_ = DomHook.of<CSSStyleDeclaration>();
     this.imageUrlHook_ = DomHook.of<string>();
     this.sampleDataService_ = sampleDataService;

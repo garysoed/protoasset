@@ -3,13 +3,13 @@ import {
   bind,
   customElement,
   DomHook,
-  IntegerParser } from 'external/gs_tools/src/webc';
+  handle,
+  StringParser,
+} from 'external/gs_tools/src/webc';
 
 import { ThemeService } from 'external/gs_ui/src/theming';
 
 import { AbstractLayerEditor } from '../asset/abstract-layer-editor';
-import { SampleDataService } from '../common/sample-data-service';
-import { SampleDataServiceEvent } from '../common/sample-data-service-event';
 import { AssetCollection } from '../data/asset-collection';
 import { BaseLayer } from '../data/base-layer';
 import { HtmlLayer } from '../data/html-layer';
@@ -25,21 +25,18 @@ import { TemplateCompilerService } from '../data/template-compiler-service';
   templateKey: 'src/asset/html-layer-editor',
 })
 export class HtmlLayerEditor extends AbstractLayerEditor<HtmlLayer> {
-  @bind(null).attribute('data-row', IntegerParser)
-  readonly dataRowHook_: DomHook<number>;
+  @bind('#cssInput').attribute('gs-value', StringParser)
+  readonly cssValueHook_: DomHook<string>;
 
-  private readonly sampleDataService_: SampleDataService;
-  private readonly templateCompilerService_: TemplateCompilerService;
+  @bind('#htmlInput').attribute('gs-value', StringParser)
+  readonly htmlValueHook_: DomHook<string>;
 
   constructor(
       @inject('pa.data.AssetCollection') assetCollection: AssetCollection,
-      @inject('pa.common.SampleDataService') sampleDataService: SampleDataService,
-      @inject('pa.data.TemplateCompilerService') templateCompilerService: TemplateCompilerService,
       @inject('theming.ThemeService') themeService: ThemeService) {
     super(assetCollection, themeService);
-    this.dataRowHook_ = DomHook.of<number>();
-    this.sampleDataService_ = sampleDataService;
-    this.templateCompilerService_ = templateCompilerService;
+    this.cssValueHook_ = DomHook.of<string>();
+    this.htmlValueHook_ = DomHook.of<string>();
   }
 
   /**
@@ -49,37 +46,25 @@ export class HtmlLayerEditor extends AbstractLayerEditor<HtmlLayer> {
     return layer instanceof HtmlLayer ? layer : null;
   }
 
-  /**
-   * @override
-   */
-  onCreated(element: HTMLElement): void {
-    super.onCreated(element);
-    this.addDisposable(this.sampleDataService_.on(
-        SampleDataServiceEvent.ROW_CHANGED,
-        this.onSampleDataRowChanged_,
-        this));
-  }
-
+  @handle('#cssInput').attributeChange('gs-value')
+  @handle('#htmlInput').attributeChange('gs-value')
   async onDataChanged_(): Promise<void> {
     const [asset, layer] = await Promise.all([this.getAsset_(), this.getLayer_()]);
     if (asset === null || layer === null) {
       return;
     }
-    // TODO: Implement
 
-    await this.assetCollection_.update(asset);
-  }
-
-  async onFieldChange_(): Promise<void> {
-    const [asset, rowData] = await Promise.all([
-      this.getAsset_(),
-      this.sampleDataService_.getRowData(),
-    ]);
-    if (asset === null || rowData === null) {
-      return;
+    const css = this.cssValueHook_.get();
+    if (css !== null) {
+      layer.setCss(css);
     }
 
-    // TODO: Implement
+    const html = this.htmlValueHook_.get();
+    if (html !== null) {
+      layer.setHtml(html);
+    }
+
+    this.assetCollection_.update(asset);
   }
 
   /**
@@ -87,13 +72,7 @@ export class HtmlLayerEditor extends AbstractLayerEditor<HtmlLayer> {
    * @param layer Layer whose data was changed.
    */
   protected onLayerChange_(layer: HtmlLayer): void {
-    // TODO: Implement
-  }
-
-  /**
-   * Handles when the sample data row is changed.
-   */
-  private onSampleDataRowChanged_(): void {
-    this.onFieldChange_();
+    this.cssValueHook_.set(layer.getCss());
+    this.htmlValueHook_.set(layer.getHtml());
   }
 }
