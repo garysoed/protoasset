@@ -6,6 +6,16 @@
   #filenameRow {
     padding: 1rem;
   }
+
+  #renders {
+    overflow: scroll;
+  }
+
+  #renders pa-asset-render-item {
+    width: 15rem;
+    height: 15rem;
+    position: relative;
+  }
 </style>
 
 <div fill-parent layout="column">
@@ -15,8 +25,11 @@
     </label>
     <gs-text-input flex id="filenameInput"></gs-text-input>
   </div>
-  <div flex></div>
-  <div flex-justify="flex-end" layout="row">
+  <div flex flex-wrap id="renders" layout="row"></div>
+  <div class="gs-theme-normal-hilite" flex-justify="flex-end" layout="row">
+    <gs-basic-button id="renderButton">
+      <div gs-content>Render</div>
+    </gs-basic-button>
     <gs-basic-button class="gs-primary" id="downloadButton">
       <div gs-content>Download</div>
     </gs-basic-button>

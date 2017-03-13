@@ -16,6 +16,7 @@ import { Views } from '../routing/views';
 
 
 @bind('pa.routing.RouteFactoryService', [
+  AssetCollection,
   ProjectCollection,
 ])
 export class RouteFactoryService implements IRouteFactoryService<Views> {
