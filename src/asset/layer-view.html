@@ -10,10 +10,6 @@
     margin: .2rem;
   }
 
-  #editorColumn {
-    flex: .5;
-  }
-
   #layerTypeSwitch {
     position: relative;
   }
@@ -49,7 +45,7 @@
     top: 3.5rem;
   }
 
-  #selectedLayerName {
+#selectedLayerName {
     text-align: left;
     text-transform: none;
   }
@@ -59,7 +55,7 @@
   }
 </style>
 <div fill-parent id="root" layout="row">
-  <div id="editorColumn" layout="column">
+  <div flex id="editorColumn" layout="column">
     <gs-basic-button>
       <div gs-content layout="row">
         <div flex id="selectedLayerName"></div>

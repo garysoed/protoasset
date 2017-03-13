@@ -1,20 +1,20 @@
-import {Maps} from 'external/gs_tools/src/collection';
-import {DomEvent} from 'external/gs_tools/src/event';
-import {inject} from 'external/gs_tools/src/inject';
+import { Maps } from 'external/gs_tools/src/collection';
+import { DomEvent } from 'external/gs_tools/src/event';
+import { inject } from 'external/gs_tools/src/inject';
 import {
   bind,
   BooleanParser,
   customElement,
   DomHook,
   handle,
-  StringParser} from 'external/gs_tools/src/webc';
+  StringParser } from 'external/gs_tools/src/webc';
 
-import {BaseThemedElement} from 'external/gs_ui/src/common';
-import {AbstractRouteFactory, RouteService, RouteServiceEvents} from 'external/gs_ui/src/routing';
-import {ThemeService} from 'external/gs_ui/src/theming';
+import { BaseThemedElement } from 'external/gs_ui/src/common';
+import { AbstractRouteFactory, RouteService, RouteServiceEvents } from 'external/gs_ui/src/routing';
+import { ThemeService } from 'external/gs_ui/src/theming';
 
-import {RouteFactoryService} from '../routing/route-factory-service';
-import {Views} from '../routing/views';
+import { RouteFactoryService } from '../routing/route-factory-service';
+import { Views } from '../routing/views';
 
 
 /**
@@ -69,6 +69,7 @@ export class NavBar extends BaseThemedElement {
   @handle('#data').event(DomEvent.CLICK, ['data'])
   @handle('#helper').event(DomEvent.CLICK, ['helper'])
   @handle('#layer').event(DomEvent.CLICK, ['layer'])
+  @handle('#render').event(DomEvent.CLICK, ['render'])
   @handle('#settings').event(DomEvent.CLICK, ['settings'])
   protected onButtonClick_(tabId: string): void {
     let routeFactory = this.routeMap_.get(tabId);
@@ -111,6 +112,7 @@ export class NavBar extends BaseThemedElement {
     this.routeMap_.set('helper', this.routeFactoryService_.helper());
     this.routeMap_.set('layer', this.routeFactoryService_.layer());
     this.routeMap_.set('settings', this.routeFactoryService_.assetSettings());
+    this.routeMap_.set('render', this.routeFactoryService_.render());
 
     this.addDisposable(this.routeService_.on(
         RouteServiceEvents.CHANGED,

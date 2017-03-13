@@ -12,4 +12,5 @@ export enum Views {
   LANDING,
   LAYER,
   PROJECT,
+  RENDER,
 }

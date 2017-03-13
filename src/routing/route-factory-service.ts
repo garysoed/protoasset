@@ -1,19 +1,18 @@
-import {bind, inject} from 'external/gs_tools/src/inject';
-import {Reflect} from 'external/gs_tools/src/util';
+import { bind, inject } from 'external/gs_tools/src/inject';
+import { Reflect } from 'external/gs_tools/src/util';
 
 import {
   AbstractRouteFactory,
   IRouteFactoryService,
-  SimpleRouteFactory} from 'external/gs_ui/src/routing';
+  SimpleRouteFactory } from 'external/gs_ui/src/routing';
 
-import {AssetCollection} from '../data/asset-collection';
-import {ProjectCollection} from '../data/project-collection';
-
-import {AssetListRouteFactory} from './asset-list-route-factory';
-import {AssetMainRouteFactory} from './asset-main-route-factory';
-import {AssetSettingsRouteFactory} from './asset-settings-route-factory';
-import {HelperRouteFactory} from './helper-route-factory';
-import {Views} from './views';
+import { AssetCollection } from '../data/asset-collection';
+import { ProjectCollection } from '../data/project-collection';
+import { AssetListRouteFactory } from '../routing/asset-list-route-factory';
+import { AssetMainRouteFactory } from '../routing/asset-main-route-factory';
+import { AssetSettingsRouteFactory } from '../routing/asset-settings-route-factory';
+import { HelperRouteFactory } from '../routing/helper-route-factory';
+import { Views } from '../routing/views';
 
 
 @bind('pa.routing.RouteFactoryService', [
@@ -32,6 +31,7 @@ export class RouteFactoryService implements IRouteFactoryService<Views> {
   private helperList_: SimpleRouteFactory<Views, {assetId: string, projectId: string}>;
   private landing_: SimpleRouteFactory<Views, {}>;
   private layer_: SimpleRouteFactory<Views, {assetId: string, projectId: string}>;
+  private render_: SimpleRouteFactory<Views, {assetId: string, projectId: string}>;
 
   constructor(
       @inject('pa.data.AssetCollection') assetCollection: AssetCollection,
@@ -93,6 +93,13 @@ export class RouteFactoryService implements IRouteFactoryService<Views> {
         'Layers',
         this.assetMain_);
 
+    // /home/project/:projectId/asset/:assetId/render
+    this.render_ = new SimpleRouteFactory(
+        Views.RENDER,
+        '/render',
+        'Render',
+        this.assetMain_);
+
     // /home/project/:projectId/asset/:assetId/settings
     this.assetSettings_ = new AssetSettingsRouteFactory(this.assetCollection_, this.assetMain_);
   }
@@ -151,6 +158,7 @@ export class RouteFactoryService implements IRouteFactoryService<Views> {
       this.helper_,
       this.helperList_,
       this.layer_,
+      this.render_,
     ];
   }
 
@@ -180,5 +188,12 @@ export class RouteFactoryService implements IRouteFactoryService<Views> {
    */
   layer(): SimpleRouteFactory<Views, {assetId: string, projectId: string}> {
     return this.layer_;
+  }
+
+  /**
+   * @return The route factory for the render view.
+   */
+  render(): SimpleRouteFactory<Views, {assetId: string, projectId: string}> {
+    return this.render_;
   }
 }

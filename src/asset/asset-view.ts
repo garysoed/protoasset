@@ -1,26 +1,26 @@
-import {inject} from 'external/gs_tools/src/inject';
-import {Reflect} from 'external/gs_tools/src/util';
-import {customElement} from 'external/gs_tools/src/webc';
+import { inject } from 'external/gs_tools/src/inject';
+import { Reflect } from 'external/gs_tools/src/util';
+import { customElement } from 'external/gs_tools/src/webc';
 
-import {BaseThemedElement} from 'external/gs_ui/src/common';
-import {RouteService, RouteServiceEvents} from 'external/gs_ui/src/routing';
-import {ThemeService} from 'external/gs_ui/src/theming';
+import { BaseThemedElement } from 'external/gs_ui/src/common';
+import { RouteService, RouteServiceEvents } from 'external/gs_ui/src/routing';
+import { ThemeService } from 'external/gs_ui/src/theming';
 
-import {RouteFactoryService} from '../routing/route-factory-service';
-import {Views} from '../routing/views';
-
-import {DataView} from './data-view';
-import {HelperView} from './helper-view';
-import {LayerView} from './layer-view';
-import {NavBar} from './nav-bar';
-import {SettingsView} from './settings-view';
+import { DataView } from '../asset/data-view';
+import { HelperView } from '../asset/helper-view';
+import { LayerView } from '../asset/layer-view';
+import { NavBar } from '../asset/nav-bar';
+import { RenderView } from '../asset/render-view';
+import { SettingsView } from '../asset/settings-view';
+import { RouteFactoryService } from '../routing/route-factory-service';
+import { Views } from '../routing/views';
 
 
 /**
  * Main view for the asset section.
  */
 @customElement({
-  dependencies: [DataView, HelperView, LayerView, NavBar, SettingsView],
+  dependencies: [DataView, HelperView, LayerView, NavBar, RenderView, SettingsView],
   tag: 'pa-asset-view',
   templateKey: 'src/asset/asset-view',
 })
