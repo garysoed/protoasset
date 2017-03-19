@@ -1,67 +1,113 @@
-import {assert, TestBase} from '../test-base';
+import { assert, TestBase } from '../test-base';
 TestBase.setup();
 
-import {DomEvent, ListenableDom} from 'external/gs_tools/src/event';
-import {Mocks} from 'external/gs_tools/src/mock';
-import {TestDispose} from 'external/gs_tools/src/testing';
+import { DomEvent, ListenableDom } from 'external/gs_tools/src/event';
+import { Mocks } from 'external/gs_tools/src/mock';
+import { TestDispose } from 'external/gs_tools/src/testing';
 
-import {resultsDataSetter, resultsGenerator, SampleDataPicker} from './sample-data-picker';
+import { RESULTS_DATA_HELPER, SampleDataPicker } from './sample-data-picker';
 
 
-describe('resultsDataSetter', () => {
-  it('should set the attribute, class, inner text correctly', () => {
-    const style = Mocks.object('style');
-    const mockElement = jasmine.createSpyObj('Element', ['setAttribute']);
-    mockElement.style = style;
+describe('RESULTS_DATA_HELPER', () => {
+  describe('create', () => {
+    it('should return the correct element', () => {
+      const mockClassList = jasmine.createSpyObj('ClassList', ['add']);
+      const element = Mocks.object('element');
+      element.classList = mockClassList;
 
-    const row = 123;
-    const displayText = 'displayText';
-    const data = {item: {display: displayText, row}, matches: {indices: []}};
+      const disposableFunction = Mocks.object('disposableFunction');
+      const mockListenableElement = jasmine.createSpyObj('ListenableElement', ['on']);
+      mockListenableElement.on.and.returnValue(disposableFunction);
+      spyOn(ListenableDom, 'of').and.returnValue(mockListenableElement);
 
-    resultsDataSetter(data, mockElement);
-    assert(mockElement.setAttribute).to.haveBeenCalledWith('gs-display', displayText);
-    assert(mockElement.setAttribute).to.haveBeenCalledWith('gs-row', `${row}`);
-    assert(mockElement.innerText).to.equal(displayText);
-    assert(style.display).to.equal('');
+      const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
+      mockDocument.createElement.and.returnValue(element);
+
+      const mockInstance = jasmine.createSpyObj('Instance', ['addDisposable', 'onResultClick_']);
+
+      assert(RESULTS_DATA_HELPER.create(mockDocument, mockInstance)).to.equal(element);
+      assert(mockInstance.addDisposable).to.haveBeenCalledWith(mockListenableElement);
+      assert(mockInstance.addDisposable).to.haveBeenCalledWith(disposableFunction);
+      assert(mockListenableElement.on).to
+          .haveBeenCalledWith(DomEvent.CLICK, mockInstance.onResultClick_, mockInstance);
+      assert(ListenableDom.of).to.haveBeenCalledWith(element);
+      assert(mockClassList.add).to.haveBeenCalledWith('result');
+      assert(mockDocument.createElement).to.haveBeenCalledWith('div');
+    });
   });
 
-  it('should hide the element if there are no display strings', () => {
-    const style = Mocks.object('style');
-    const mockElement = jasmine.createSpyObj('Element', ['setAttribute']);
-    mockElement.style = style;
+  describe('get', () => {
+    it('should return the correct data', () => {
+      const row = 123;
+      const display = 'display';
+      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
+      mockElement.getAttribute.and.callFake((query: string) => {
+        switch (query) {
+          case 'gs-display':
+            return display;
+          case 'gs-row':
+            return `${row}`;
+        }
+      });
+      assert(RESULTS_DATA_HELPER.get(mockElement)).to.equal({display, row});
+    });
 
-    const data = {item: {display: '', row: 123}, matches: {indices: []}};
+    it('should return null if the display is null', () => {
+      const row = 123;
+      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
+      mockElement.getAttribute.and.callFake((query: string) => {
+        switch (query) {
+          case 'gs-display':
+            return null;
+          case 'gs-row':
+            return `${row}`;
+        }
+      });
+      assert(RESULTS_DATA_HELPER.get(mockElement)).to.beNull();
+    });
 
-    resultsDataSetter(data, mockElement);
-    assert(style.display).to.equal('none');
+    it('should return null if the row is NaN', () => {
+      const display = 'display';
+      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
+      mockElement.getAttribute.and.callFake((query: string) => {
+        switch (query) {
+          case 'gs-display':
+            return display;
+          case 'gs-row':
+            return NaN;
+        }
+      });
+      assert(RESULTS_DATA_HELPER.get(mockElement)).to.beNull();
+    });
   });
-});
 
+  describe('set', () => {
+    it('should set the attribute, class, inner text correctly', () => {
+      const style = Mocks.object('style');
+      const mockElement = jasmine.createSpyObj('Element', ['setAttribute']);
+      mockElement.style = style;
 
-describe('resultsGenerator', () => {
-  it('should return the correct element', () => {
-    const mockClassList = jasmine.createSpyObj('ClassList', ['add']);
-    const element = Mocks.object('element');
-    element.classList = mockClassList;
+      const row = 123;
+      const displayText = 'displayText';
+      const data = {display: displayText, row};
 
-    const disposableFunction = Mocks.object('disposableFunction');
-    const mockListenableElement = jasmine.createSpyObj('ListenableElement', ['on']);
-    mockListenableElement.on.and.returnValue(disposableFunction);
-    spyOn(ListenableDom, 'of').and.returnValue(mockListenableElement);
+      RESULTS_DATA_HELPER.set(data, mockElement, Mocks.object('instance'));
+      assert(mockElement.setAttribute).to.haveBeenCalledWith('gs-display', displayText);
+      assert(mockElement.setAttribute).to.haveBeenCalledWith('gs-row', `${row}`);
+      assert(mockElement.innerText).to.equal(displayText);
+      assert(style.display).to.equal('');
+    });
 
-    const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
-    mockDocument.createElement.and.returnValue(element);
+    it('should hide the element if there are no display strings', () => {
+      const style = Mocks.object('style');
+      const mockElement = jasmine.createSpyObj('Element', ['setAttribute']);
+      mockElement.style = style;
 
-    const mockInstance = jasmine.createSpyObj('Instance', ['addDisposable', 'onResultClick_']);
+      const data = {display: '', row: 123};
 
-    assert(resultsGenerator(mockDocument, mockInstance)).to.equal(element);
-    assert(mockInstance.addDisposable).to.haveBeenCalledWith(mockListenableElement);
-    assert(mockInstance.addDisposable).to.haveBeenCalledWith(disposableFunction);
-    assert(mockListenableElement.on).to
-        .haveBeenCalledWith(DomEvent.CLICK, mockInstance.onResultClick_, mockInstance);
-    assert(ListenableDom.of).to.haveBeenCalledWith(element);
-    assert(mockClassList.add).to.haveBeenCalledWith('result');
-    assert(mockDocument.createElement).to.haveBeenCalledWith('div');
+      RESULTS_DATA_HELPER.set(data, mockElement, Mocks.object('instance'));
+      assert(style.display).to.equal('none');
+    });
   });
 });
 
@@ -166,18 +212,23 @@ describe('common.SampleDataPicker', () => {
       const searchText = 'searchText';
       spyOn(picker.searchTextValueHook_, 'get').and.returnValue(searchText);
 
-      const result0 = Mocks.object('result0');
-      const result1 = Mocks.object('result1');
-      const result2 = Mocks.object('result2');
-      const result3 = Mocks.object('result3');
-      const result4 = Mocks.object('result4');
+      const display0 = 'display0';
+      const row0 = 120;
+      const display1 = 'display1';
+      const row1 = 121;
+      const display2 = 'display2';
+      const row2 = 122;
+      const display3 = 'display3';
+      const row3 = 123;
+      const display4 = 'display4';
+      const row4 = 124;
       const mockFuse = jasmine.createSpyObj('Fuse', ['search']);
       mockFuse.search.and.returnValue([
-        result0,
-        result1,
-        result2,
-        result3,
-        result4,
+        {item: {display: display0, row: row0}},
+        {item: {display: display1, row: row1}},
+        {item: {display: display2, row: row2}},
+        {item: {display: display3, row: row3}},
+        {item: {display: display4, row: row4}},
         Mocks.object('discardedResult1'),
         Mocks.object('discardedResult2'),
       ]);
@@ -186,8 +237,13 @@ describe('common.SampleDataPicker', () => {
       spyOn(picker.resultsChildrenHook_, 'set');
 
       await picker.updateResults_();
-      assert(picker.resultsChildrenHook_.set).to
-          .haveBeenCalledWith([result0, result1, result2, result3, result4]);
+      assert(picker.resultsChildrenHook_.set).to.haveBeenCalledWith([
+        {display: display0, row: row0},
+        {display: display1, row: row1},
+        {display: display2, row: row2},
+        {display: display3, row: row3},
+        {display: display4, row: row4},
+      ]);
       assert(mockFuse.search).to.haveBeenCalledWith(searchText);
     });
 

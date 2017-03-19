@@ -4,35 +4,170 @@ TestBase.setup();
 import { Mocks } from 'external/gs_tools/src/mock';
 import { TestDispose } from 'external/gs_tools/src/testing';
 
-import { renderItemDataSetter, renderItemGenerator, RenderView } from '../asset/render-view';
+import { RENDER_ITEM_DATA_HELPER, RenderView } from '../asset/render-view';
 
 
-describe('renderItemDataSetter', () => {
-  it('should assign the data correctly', () => {
-    const mockElement = jasmine.createSpyObj('Element', ['setAttribute']);
-    const assetId = 'assetId';
-    const filename = 'filename';
-    const projectId = 'projectId';
-    const key = 'key';
-    const row = 123;
-    const renderData = {assetId, filename, projectId, key, row};
-    renderItemDataSetter(renderData, mockElement);
-    assert(mockElement.setAttribute).to.haveBeenCalledWith('asset-id', assetId);
-    assert(mockElement.setAttribute).to.haveBeenCalledWith('file-name', filename);
-    assert(mockElement.setAttribute).to.haveBeenCalledWith('project-id', projectId);
-    assert(mockElement.setAttribute).to.haveBeenCalledWith('render-key', key);
-    assert(mockElement.setAttribute).to.haveBeenCalledWith('render-row', `${row}`);
+describe('RENDER_ITEM_DATA_HELPER', () => {
+  describe('create', () => {
+    it('should create the correct element', () => {
+      const element = Mocks.object('element');
+      const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
+      mockDocument.createElement.and.returnValue(element);
+      assert(RENDER_ITEM_DATA_HELPER.create(mockDocument, Mocks.object('instance')))
+          .to.equal(element);
+      assert(mockDocument.createElement).to.haveBeenCalledWith('pa-asset-render-item');
+    });
   });
-});
 
+  describe('get', () => {
+    it('should return the data correctly', () => {
+      const assetId = 'assetId';
+      const filename = 'filename';
+      const projectId = 'projectId';
+      const key = 'key';
+      const row = 123;
+      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
+      mockElement.getAttribute.and.callFake((attrName: string) => {
+        switch (attrName) {
+          case 'asset-id':
+            return assetId;
+          case 'file-name':
+            return filename;
+          case 'project-id':
+            return projectId;
+          case 'render-key':
+            return key;
+          case 'render-row':
+            return `${row}`;
+        }
+      });
 
-describe('renderItemGenerator', () => {
-  it('should create the correct element', () => {
-    const element = Mocks.object('element');
-    const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
-    mockDocument.createElement.and.returnValue(element);
-    assert(renderItemGenerator(mockDocument)).to.equal(element);
-    assert(mockDocument.createElement).to.haveBeenCalledWith('pa-asset-render-item');
+      assert(RENDER_ITEM_DATA_HELPER.get(mockElement)).to
+          .equal({assetId, filename, projectId, key, row});
+      assert(mockElement.getAttribute).to.haveBeenCalledWith('asset-id');
+      assert(mockElement.getAttribute).to.haveBeenCalledWith('file-name');
+      assert(mockElement.getAttribute).to.haveBeenCalledWith('project-id');
+      assert(mockElement.getAttribute).to.haveBeenCalledWith('render-key');
+      assert(mockElement.getAttribute).to.haveBeenCalledWith('render-row');
+    });
+
+    it('should return null if there are no asset IDs', () => {
+      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
+      mockElement.getAttribute.and.callFake((attrName: string) => {
+        switch (attrName) {
+          case 'asset-id':
+            return null;
+          case 'file-name':
+            return 'filename';
+          case 'project-id':
+            return 'projectId';
+          case 'render-key':
+            return 'key';
+          case 'render-row':
+            return `123`;
+        }
+      });
+
+      assert(RENDER_ITEM_DATA_HELPER.get(mockElement)).to.beNull();
+    });
+
+    it('should return null if there are no file names', () => {
+      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
+      mockElement.getAttribute.and.callFake((attrName: string) => {
+        switch (attrName) {
+          case 'asset-id':
+            return 'assetId';
+          case 'file-name':
+            return null;
+          case 'project-id':
+            return 'projectId';
+          case 'render-key':
+            return 'key';
+          case 'render-row':
+            return `123`;
+        }
+      });
+
+      assert(RENDER_ITEM_DATA_HELPER.get(mockElement)).to.beNull();
+    });
+
+    it('should return null if there are no project IDs', () => {
+      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
+      mockElement.getAttribute.and.callFake((attrName: string) => {
+        switch (attrName) {
+          case 'asset-id':
+            return 'assetId';
+          case 'file-name':
+            return 'filename';
+          case 'project-id':
+            return null;
+          case 'render-key':
+            return 'key';
+          case 'render-row':
+            return `123`;
+        }
+      });
+
+      assert(RENDER_ITEM_DATA_HELPER.get(mockElement)).to.beNull();
+    });
+
+    it('should return null if there are no keys', () => {
+      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
+      mockElement.getAttribute.and.callFake((attrName: string) => {
+        switch (attrName) {
+          case 'asset-id':
+            return 'assetId';
+          case 'file-name':
+            return 'filename';
+          case 'project-id':
+            return 'projectId';
+          case 'render-key':
+            return null;
+          case 'render-row':
+            return `123`;
+        }
+      });
+
+      assert(RENDER_ITEM_DATA_HELPER.get(mockElement)).to.beNull();
+    });
+
+    it('should return null if there are no rows', () => {
+      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
+      mockElement.getAttribute.and.callFake((attrName: string) => {
+        switch (attrName) {
+          case 'asset-id':
+            return 'assetId';
+          case 'file-name':
+            return 'filename';
+          case 'project-id':
+            return 'projectId';
+          case 'render-key':
+            return 'key';
+          case 'render-row':
+            return NaN;
+        }
+      });
+
+      assert(RENDER_ITEM_DATA_HELPER.get(mockElement)).to.beNull();
+    });
+  });
+
+  describe('set', () => {
+    it('should assign the data correctly', () => {
+      const mockElement = jasmine.createSpyObj('Element', ['setAttribute']);
+      const assetId = 'assetId';
+      const filename = 'filename';
+      const projectId = 'projectId';
+      const key = 'key';
+      const row = 123;
+      const renderData = {assetId, filename, projectId, key, row};
+      RENDER_ITEM_DATA_HELPER.set(renderData, mockElement, Mocks.object('instance'));
+      assert(mockElement.setAttribute).to.haveBeenCalledWith('asset-id', assetId);
+      assert(mockElement.setAttribute).to.haveBeenCalledWith('file-name', filename);
+      assert(mockElement.setAttribute).to.haveBeenCalledWith('project-id', projectId);
+      assert(mockElement.setAttribute).to.haveBeenCalledWith('render-key', key);
+      assert(mockElement.setAttribute).to.haveBeenCalledWith('render-row', `${row}`);
+    });
   });
 });
 

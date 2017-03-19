@@ -1,46 +1,64 @@
-import {DomEvent, ListenableDom} from 'external/gs_tools/src/event';
-import {inject} from 'external/gs_tools/src/inject';
+import { DomEvent, ListenableDom } from 'external/gs_tools/src/event';
+import { inject } from 'external/gs_tools/src/inject';
 import {
   bind,
   BooleanParser,
+  ChildElementDataHelper,
   customElement,
   DomHook,
   handle,
   IntegerParser,
-  StringParser} from 'external/gs_tools/src/webc';
+  StringParser } from 'external/gs_tools/src/webc';
 
-import {BaseThemedElement} from 'external/gs_ui/src/common';
-import {ThemeService} from 'external/gs_ui/src/theming';
+import { BaseThemedElement } from 'external/gs_ui/src/common';
+import { ThemeService } from 'external/gs_ui/src/theming';
 
-import {SampleDataSearchIndex, SampleDataService} from './sample-data-service';
+import { SampleDataSearchIndex, SampleDataService } from '../common/sample-data-service';
+import { Arrays } from 'external/gs_tools/src/collection';
 
 
+type SampleItemData = {display: string, row: number};
 type SearchResultData = {dataRow: number, dataString: string};
 
 
-/**
- * Sets data to the result item element.
- * @param data The data to set.
- * @param element The result item element.
- */
-export function resultsDataSetter(data: SampleDataSearchIndex, element: HTMLElement): void {
-  const displayText = data.item.display;
-  element.style.display = displayText === '' ? 'none' : '';
-  element.innerText = displayText;
-  element.setAttribute('gs-row', IntegerParser.stringify(data.item.row));
-  element.setAttribute('gs-display', displayText);
-}
+export const RESULTS_DATA_HELPER: ChildElementDataHelper<SampleItemData> = {
+  /**
+   * @override
+   */
+  create(document: Document, instance: SampleDataPicker): Element {
+    const element = document.createElement('div');
+    element.classList.add('result');
+    const listenableElement = ListenableDom.of(element);
+    instance.addDisposable(
+        listenableElement.on(DomEvent.CLICK, instance.onResultClick_, instance));
+    instance.addDisposable(listenableElement);
+    return element;
+  },
 
+  /**
+   * @override
+   */
+  get(element: HTMLElement): SampleItemData | null {
+    const display = element.getAttribute('gs-display');
+    const row = IntegerParser.parse(element.getAttribute('gs-row'));
+    if (display === null || row === null) {
+      return null;
+    }
 
-export function resultsGenerator(document: Document, instance: SampleDataPicker): Element {
-  const element = document.createElement('div');
-  element.classList.add('result');
-  const listenableElement = ListenableDom.of(element);
-  instance.addDisposable(
-      listenableElement.on(DomEvent.CLICK, instance.onResultClick_, instance));
-  instance.addDisposable(listenableElement);
-  return element;
-}
+    return {display, row};
+  },
+
+  /**
+   * @override
+   */
+  set(data: SampleItemData, element: HTMLElement): void {
+    const displayText = data.display;
+    element.style.display = displayText === '' ? 'none' : '';
+    element.innerText = displayText;
+    element.setAttribute('gs-row', IntegerParser.stringify(data.row));
+    element.setAttribute('gs-display', displayText);
+  },
+};
 
 
 /**
@@ -54,8 +72,8 @@ export class SampleDataPicker extends BaseThemedElement {
   @bind('#drawer').attribute('gs-is-expanded', BooleanParser)
   readonly drawerExpandedHook_: DomHook<boolean>;
 
-  @bind('#results').childrenElements(resultsGenerator, resultsDataSetter)
-  readonly resultsChildrenHook_: DomHook<SampleDataSearchIndex[]>;
+  @bind('#results').childrenElements(RESULTS_DATA_HELPER)
+  readonly resultsChildrenHook_: DomHook<SampleItemData[]>;
 
   @bind('#searchText').attribute('gs-value', StringParser)
   readonly searchTextValueHook_: DomHook<string>;
@@ -69,7 +87,7 @@ export class SampleDataPicker extends BaseThemedElement {
     super(themeService);
     this.drawerExpandedHook_ = DomHook.of<boolean>();
     this.fusePromise_ = null;
-    this.resultsChildrenHook_ = DomHook.of<SampleDataSearchIndex[]>();
+    this.resultsChildrenHook_ = DomHook.of<SampleItemData[]>();
     this.sampleDataService_ = sampleDataService;
     this.searchTextValueHook_ = DomHook.of<string>();
   }
@@ -124,6 +142,15 @@ export class SampleDataPicker extends BaseThemedElement {
     }
 
     const results = fuse.search(searchText);
-    this.resultsChildrenHook_.set(results.slice(0, 5));
+    const sampleItemData = Arrays
+        .of(results.slice(0, 5))
+        .map((index: SampleDataSearchIndex) => {
+          return {
+            display: index.item.display,
+            row: index.item.row,
+          };
+        })
+        .asArray();
+    this.resultsChildrenHook_.set(sampleItemData);
   }
 }

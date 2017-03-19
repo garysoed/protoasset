@@ -53,6 +53,7 @@ filegroup(
 karma_run(
     name = "test",
     srcs = [
+        "//src/asset:test_src",
         "//src/common:test_src",
         "//src/data:test_src",
         "//src/landing:test_src",

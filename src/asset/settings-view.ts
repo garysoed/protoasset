@@ -1,7 +1,7 @@
-import {Serializer} from 'external/gs_tools/src/data';
-import {DomEvent} from 'external/gs_tools/src/event';
-import {inject} from 'external/gs_tools/src/inject';
-import {Cases} from 'external/gs_tools/src/string';
+import { Serializer } from 'external/gs_tools/src/data';
+import { DomEvent } from 'external/gs_tools/src/event';
+import { inject } from 'external/gs_tools/src/inject';
+import { Cases } from 'external/gs_tools/src/string';
 import {
   bind,
   customElement,
@@ -9,19 +9,18 @@ import {
   EnumParser,
   FloatParser,
   handle,
-  StringParser} from 'external/gs_tools/src/webc';
+  StringParser } from 'external/gs_tools/src/webc';
 
-import {BaseThemedElement} from 'external/gs_ui/src/common';
-import {RouteService, RouteServiceEvents} from 'external/gs_ui/src/routing';
-import {ThemeService} from 'external/gs_ui/src/theming';
-import {DownloadService} from 'external/gs_ui/src/tool';
+import { BaseThemedElement } from 'external/gs_ui/src/common';
+import { RouteService, RouteServiceEvents } from 'external/gs_ui/src/routing';
+import { ThemeService } from 'external/gs_ui/src/theming';
+import { DownloadService } from 'external/gs_ui/src/tool';
 
-import {Asset, AssetType} from '../data/asset';
-import {AssetCollection} from '../data/asset-collection';
-import {RouteFactoryService} from '../routing/route-factory-service';
-import {Views} from '../routing/views';
-
-import {Editor} from './editor';
+import { Editor } from '../asset/editor';
+import { Asset, AssetType } from '../data/asset';
+import { AssetCollection } from '../data/asset-collection';
+import { RouteFactoryService } from '../routing/route-factory-service';
+import { Views } from '../routing/views';
 
 
 /**

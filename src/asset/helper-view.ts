@@ -7,6 +7,7 @@ import { BaseIdGenerator, SimpleIdGenerator } from 'external/gs_tools/src/random
 import {
   bind,
   BooleanParser,
+  ChildElementDataHelper,
   customElement,
   DomHook,
   handle,
@@ -31,86 +32,119 @@ import { Views } from '../routing/views';
 type HelperIdParams = {assetId: string, helperId: string, projectId: string };
 type ConsoleEntry = {command: string, isError: boolean, result: string};
 
-/**
- * Generates a new element to represent a helper's arg.
- * @param document The document that the element belongs to.
- * @param instance Instance of the HelperView.
- * @return The newly created element.
- */
-export function argElementGenerator(document: Document, instance: HelperView): Element {
-  const element = document.createElement('div');
-  const listenable = ListenableDom.of(element);
-  instance.addDisposable(listenable);
-  listenable.on(DomEvent.CLICK, instance.onArgClick, instance);
-  return element;
-}
 
-/**
- * Sets the data to the given arg element.
- * @param label The arg label to set.
- * @param element The arg element.
- */
-export function argElementDataSetter(label: string, element: Element): void {
-  element.textContent = label;
-}
+export const ARG_DATA_HELPER: ChildElementDataHelper<string> = {
+  /**
+   * @override
+   */
+  create(document: Document, instance: HelperView): Element {
+    const element = document.createElement('div');
+    const listenable = ListenableDom.of(element);
+    instance.addDisposable(listenable);
+    listenable.on(DomEvent.CLICK, instance.onArgClick, instance);
+    return element;
+  },
 
-/**
- * Generates a new element for the console entry.
- * @param document The document that the element belongs to.
- * @return The newly created element.
- */
-export function consoleEntryGenerator(document: Document): Element {
-  const root = document.createElement('div');
-  root.classList.add('consoleEntry');
-  const command = document.createElement('div');
-  command.classList.add('gs-theme-invert');
-  const result = document.createElement('div');
-  root.appendChild(command);
-  root.appendChild(result);
-  return root;
-}
+  /**
+   * @override
+   */
+  get(element: Element): string | null {
+    return element.textContent;
+  },
 
-/**
- * Sets the data to the given console entry element.
- * @param data The console entry data.
- * @param element The console entry element.
- */
-export function consoleEntryDataSetter(data: ConsoleEntry, element: Element): void {
-  element.children.item(0).textContent = data.command;
+  /**
+   * @override
+   */
+  set(label: string, element: Element): void {
+    element.textContent = label;
+  },
+};
 
-  const resultEl = element.children.item(1);
-  resultEl.innerHTML = Arrays
-      .of(data.result.split('\n'))
-      .map((line: string) => {
-        return line.replace(/ /g, '&nbsp;');
-      })
-      .map((line: string) => {
-        return `<p>${line}</p>`;
-      })
-      .asArray()
-      .join('');
-  resultEl.classList.toggle('error', data.isError);
-}
 
-/**
- * Sets the data to the helper item.
- * @param helperIdParams Data to set.
- * @param element The helper item element.
- */
-export function helperItemDataSetter(helperIdParams: HelperIdParams, element: Element): void {
-  element.setAttribute('helper-id', helperIdParams.helperId);
-  element.setAttribute('asset-id', helperIdParams.assetId);
-  element.setAttribute('project-id', helperIdParams.projectId);
-}
+export const CONSOLE_ENTRY_DATA_HELPER: ChildElementDataHelper<ConsoleEntry> = {
+  /**
+   * @override
+   */
+  create(document: Document): Element {
+    const root = document.createElement('div');
+    root.classList.add('consoleEntry');
+    const command = document.createElement('div');
+    command.classList.add('gs-theme-invert');
+    const result = document.createElement('div');
+    root.appendChild(command);
+    root.appendChild(result);
+    return root;
+  },
 
-/**
- * Creates a new helper item element.
- * @param document The document that the element belongs to.
- * @return The newly created element.
- */
-export function helperItemGenerator(document: Document): Element {
-  return document.createElement('pa-asset-helper-item');
-}
+  /**
+   * @override
+   */
+  get(element: Element): ConsoleEntry | null {
+    const command = element.children.item(0).textContent;
+    const isError = element.children.item(1).classList.contains('error');
+    const result = element.getAttribute('pa-result');
+    if (command === null || result === null) {
+      return null;
+    }
+    return {command, isError, result};
+  },
+
+  /**
+   * @override
+   */
+  set(data: ConsoleEntry, element: Element): void {
+    element.setAttribute('pa-result', data.result);
+    element.children.item(0).textContent = data.command;
+
+    const resultEl = element.children.item(1);
+    resultEl.innerHTML = Arrays
+        .of(data.result.split('\n'))
+        .map((line: string) => {
+          return line.replace(/ /g, '&nbsp;');
+        })
+        .map((line: string) => {
+          return `<p>${line}</p>`;
+        })
+        .asArray()
+        .join('');
+    resultEl.classList.toggle('error', data.isError);
+  },
+};
+
+
+export const HELPER_ITEM_DATA_HELPER: ChildElementDataHelper<HelperIdParams> = {
+  /**
+   * @override
+   */
+  create(document: Document): Element {
+    return document.createElement('pa-asset-helper-item');
+  },
+
+  /**
+   * @override
+   */
+  get(element: Element): HelperIdParams | null {
+    const helperId = element.getAttribute('helper-id');
+    const assetId = element.getAttribute('asset-id');
+    const projectId = element.getAttribute('project-id');
+
+    if (assetId === null || helperId === null || projectId === null) {
+      return null;
+    }
+
+    return {assetId, helperId, projectId};
+  },
+
+  /**
+   * @override
+   */
+  set(helperIdParams: HelperIdParams, element: Element): void {
+    element.setAttribute('helper-id', helperIdParams.helperId);
+    element.setAttribute('asset-id', helperIdParams.assetId);
+    element.setAttribute('project-id', helperIdParams.projectId);
+  },
+};
+
 
 /**
  * Helper view
@@ -126,7 +160,7 @@ export function helperItemGenerator(document: Document): Element {
   templateKey: 'src/asset/helper-view',
 })
 export class HelperView extends BaseThemedElement {
-  @bind('#args').childrenElements<string>(argElementGenerator, argElementDataSetter, 0)
+  @bind('#args').childrenElements<string>(ARG_DATA_HELPER, 0)
   readonly argElementsHook_: DomHook<string[]>;
 
   @bind('#argInput').attribute('gs-value', StringParser)
@@ -135,13 +169,13 @@ export class HelperView extends BaseThemedElement {
   @bind('#bodyInput').attribute('gs-value', StringParser)
   readonly bodyInputHook_: DomHook<string>;
 
-  @bind('#console').childrenElements<ConsoleEntry>(consoleEntryGenerator, consoleEntryDataSetter)
+  @bind('#console').childrenElements<ConsoleEntry>(CONSOLE_ENTRY_DATA_HELPER)
   readonly consoleEntryHook_: DomHook<ConsoleEntry[]>;
 
   @bind('#consoleInput').attribute('gs-value', StringParser)
   readonly consoleInputHook_: DomHook<string>;
 
-  @bind('#helpers').childrenElements<HelperIdParams>(helperItemGenerator, helperItemDataSetter)
+  @bind('#helpers').childrenElements<HelperIdParams>(HELPER_ITEM_DATA_HELPER)
   readonly helperItemsHook_: DomHook<HelperIdParams[]>;
 
   @bind('#name').innerText()

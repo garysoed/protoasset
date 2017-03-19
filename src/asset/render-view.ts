@@ -5,6 +5,7 @@ import { inject } from 'external/gs_tools/src/inject';
 import { SimpleIdGenerator } from 'external/gs_tools/src/random';
 import {
   bind,
+  ChildElementDataHelper,
   customElement,
   DomHook,
   handle,
@@ -25,26 +26,45 @@ import { Views } from '../routing/views';
 type RenderData = {assetId: string, filename: string, key: string, projectId: string, row: number};
 
 
-/**
- * @param renderData Data to set to the element.
- * @param element Element to set the data into.
- */
-export function renderItemDataSetter(renderData: RenderData, element: Element): void {
-  element.setAttribute('asset-id', renderData.assetId);
-  element.setAttribute('file-name', renderData.filename);
-  element.setAttribute('project-id', renderData.projectId);
-  element.setAttribute('render-key', renderData.key);
-  element.setAttribute('render-row', IntegerParser.stringify(renderData.row));
-}
+export const RENDER_ITEM_DATA_HELPER: ChildElementDataHelper<RenderData> = {
+  /**
+   * @override
+   */
+  create(document: Document): Element {
+    return document.createElement('pa-asset-render-item');
+  },
 
+  /**
+   * @override
+   */
+  get(element: Element): RenderData | null {
+    const assetId = element.getAttribute('asset-id');
+    const filename = element.getAttribute('file-name');
+    const projectId = element.getAttribute('project-id');
+    const key = element.getAttribute('render-key');
+    const row = IntegerParser.parse(element.getAttribute('render-row'));
+    if (assetId === null
+        || filename === null
+        || projectId === null
+        || key === null
+        || row === null) {
+      return null;
+    }
 
-/**
- * @param document Document to create the render item element.
- * @return The render item element.
- */
-export function renderItemGenerator(document: Document): Element {
-  return document.createElement('pa-asset-render-item');
-}
+    return {assetId, filename, key, projectId, row};
+  },
+
+  /**
+   * @override
+   */
+  set(renderData: RenderData, element: Element): void {
+    element.setAttribute('asset-id', renderData.assetId);
+    element.setAttribute('file-name', renderData.filename);
+    element.setAttribute('project-id', renderData.projectId);
+    element.setAttribute('render-key', renderData.key);
+    element.setAttribute('render-row', IntegerParser.stringify(renderData.row));
+  },
+};
 
 
 /**
@@ -56,7 +76,7 @@ export function renderItemGenerator(document: Document): Element {
   templateKey: 'src/asset/render-view',
 })
 export class RenderView extends BaseThemedElement {
-  @bind('#renders').childrenElements(renderItemGenerator, renderItemDataSetter)
+  @bind('#renders').childrenElements(RENDER_ITEM_DATA_HELPER)
   readonly rendersChildrenHook_: DomHook<RenderData[]>;
 
   @bind('#filenameInput').attribute('gs-value', StringParser)

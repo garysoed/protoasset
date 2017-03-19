@@ -1,56 +1,70 @@
-import {Arrays, Maps} from 'external/gs_tools/src/collection';
-import {inject} from 'external/gs_tools/src/inject';
+import { Arrays, Maps } from 'external/gs_tools/src/collection';
+import { inject } from 'external/gs_tools/src/inject';
 import {
     bind,
     BooleanParser,
+    ChildElementDataHelper,
     customElement,
     DomHook,
     FloatParser,
     handle,
-    StringParser} from 'external/gs_tools/src/webc';
+    StringParser } from 'external/gs_tools/src/webc';
 
-import {BaseThemedElement} from 'external/gs_ui/src/common';
-import {FileService} from 'external/gs_ui/src/input';
-import {RouteService} from 'external/gs_ui/src/routing';
-import {ThemeService} from 'external/gs_ui/src/theming';
+import { BaseThemedElement } from 'external/gs_ui/src/common';
+import { FileService } from 'external/gs_ui/src/input';
+import { RouteService } from 'external/gs_ui/src/routing';
+import { ThemeService } from 'external/gs_ui/src/theming';
 
-import {Asset} from '../data/asset';
-import {AssetCollection} from '../data/asset-collection';
-import {InMemoryDataSource} from '../data/in-memory-data-source';
-import {TsvDataSource} from '../data/tsv-data-source';
-import {RouteFactoryService} from '../routing/route-factory-service';
-import {Views} from '../routing/views';
+import { Asset } from '../data/asset';
+import { AssetCollection } from '../data/asset-collection';
+import { InMemoryDataSource } from '../data/in-memory-data-source';
+import { TsvDataSource } from '../data/tsv-data-source';
+import { RouteFactoryService } from '../routing/route-factory-service';
+import { Views } from '../routing/views';
+import { ArrayOfType, NonNullType } from 'external/gs_tools/src/check';
 
 
-/**
- * Sets the data on the given element.
- *
- * @param data The data to set.
- * @param root The root element.
- */
-export function previewRowDataSetter(data: string[], root: Element): void {
-  Arrays
-      .of(data)
-      .forEach((value: string, index: number) => {
-        let column: Element;
-        if (root.childElementCount <= index) {
-          column = root.ownerDocument.createElement('td');
-          root.appendChild(column);
-        } else {
-          column = root.children.item(index);
-        }
+export const PREVIEW_ROW_DATA_HELPER: ChildElementDataHelper<string[]> = {
+  /**
+   * @override
+   */
+  create(document: Document): Element {
+    return document.createElement('tr');
+  },
 
-        column.textContent = value;
-      });
-}
+  /**
+   * @override
+   */
+  get(root: Element): string[] | null {
+    const values = Arrays
+        .fromItemList(root.children)
+        .map((child: Element) => {
+          return child.textContent;
+        })
+        .asArray();
+    return ArrayOfType<string>(NonNullType<string>()).check(values) ? values : null;
+  },
 
-/**
- * Generates an element for the preview.
- * @return The newly generated row element.
- */
-export function previewRowGenerator(document: Document): Element {
-  return document.createElement('tr');
-}
+  /**
+   * @override
+   */
+  set(data: string[], root: Element): void {
+    Arrays
+        .of(data)
+        .forEach((value: string, index: number) => {
+          let column: Element;
+          if (root.childElementCount <= index) {
+            column = root.ownerDocument.createElement('td');
+            root.appendChild(column);
+          } else {
+            column = root.children.item(index);
+          }
+
+          column.textContent = value;
+        });
+  },
+};
+
 
 /**
  * Asset data view
@@ -67,7 +81,7 @@ export class DataView extends BaseThemedElement {
   @bind('#endRowInput').attribute('gs-value', FloatParser)
   private readonly endRowValueHook_: DomHook<number>;
 
-  @bind('#preview').childrenElements(previewRowGenerator, previewRowDataSetter)
+  @bind('#preview').childrenElements(PREVIEW_ROW_DATA_HELPER)
   private readonly previewChildrenHook_: DomHook<string[][]>;
 
   @bind('#startRowInput').attribute('gs-value', FloatParser)

@@ -9,6 +9,7 @@ import { Validate } from 'external/gs_tools/src/valid';
 import {
   bind,
   BooleanParser,
+  ChildElementDataHelper,
   customElement,
   DomHook,
   EnumParser,
@@ -47,49 +48,113 @@ type LayerItemData = {assetId: string, layerId: string, projectId: string};
 type LayerPreviewData = {isSelected: boolean, layerId: string, mode: LayerPreviewMode};
 
 
-export function layerItemDataSetter(data: LayerItemData, element: Element): void {
-  element.setAttribute('asset-id', data.assetId);
-  element.setAttribute('layer-id', data.layerId);
-  element.setAttribute('project-id', data.projectId);
-}
+export const LAYER_ITEM_DATA_HELPER: ChildElementDataHelper<LayerItemData> = {
+  /**
+   * @override
+   */
+  create(document: Document, instance: LayerView): Element {
+    const element = document.createElement('pa-asset-layer-item');
+    const listenableDom = ListenableDom.of(element);
+    instance.addDisposable(
+        listenableDom.on(
+            DomEvent.CLICK,
+            () => {
+              instance.onLayerItemClick_(element.getAttribute('layer-id'));
+            },
+            instance));
+    instance.addDisposable(listenableDom);
+    return element;
+  },
 
-export function layerItemGenerator(document: Document, instance: LayerView): Element {
-  const element = document.createElement('pa-asset-layer-item');
-  const listenableDom = ListenableDom.of(element);
-  instance.addDisposable(
-      listenableDom.on(
-          DomEvent.CLICK,
-          () => {
-            instance.onLayerItemClick_(element.getAttribute('layer-id'));
-          },
-          instance));
-  instance.addDisposable(listenableDom);
-  return element;
-}
+  /**
+   * @override
+   */
+  get(element: Element): LayerItemData | null {
+    const assetId = element.getAttribute('asset-id');
+    const layerId = element.getAttribute('layer-id');
+    const projectId = element.getAttribute('project-id');
 
-export function layerPreviewDataSetter(data: LayerPreviewData, element: Element): void {
-  element.setAttribute('is-selected', BooleanParser.stringify(data.isSelected));
-  element.setAttribute('layer-id', data.layerId);
-  element.setAttribute('preview-mode', EnumParser(LayerPreviewMode).stringify(data.mode));
-}
+    if (assetId === null || layerId === null || projectId === null) {
+      return null;
+    }
 
-export function layerPreviewGenerator(document: Document): Element {
-  return document.createElement('pa-asset-layer-preview');
-}
+    return {assetId, layerId, projectId};
+  },
 
-export function layerPreviewModeDataSetter(data: LayerPreviewMode, element: Element): void {
-  element.setAttribute('gs-content', Enums.toLowerCaseString(data, LayerPreviewMode));
-  element.setAttribute('gs-value', EnumParser(LayerPreviewMode).stringify(data));
-}
+  /**
+   * @override
+   */
+  set(data: LayerItemData, element: Element): void {
+    element.setAttribute('asset-id', data.assetId);
+    element.setAttribute('layer-id', data.layerId);
+    element.setAttribute('project-id', data.projectId);
+  },
+};
 
-export function layerPreviewModeGenerator(document: Document, instance: LayerView): Element {
-  const element = document.createElement('gs-menu-item');
-  const listenableDom = ListenableDom.of(element);
-  instance.addDisposable(
-      listenableDom.on(DomEvent.CLICK, instance.onLayerPreviewModeSelected_, instance));
-  instance.addDisposable(listenableDom);
-  return element;
-}
+
+export const LAYER_PREVIEW_DATA_HELPER: ChildElementDataHelper<LayerPreviewData> = {
+  /**
+   * @override
+   */
+  create(document: Document): Element {
+    return document.createElement('pa-asset-layer-preview');
+  },
+
+  /**
+   * @override
+   */
+  get(element: Element): LayerPreviewData | null {
+    const isSelected = BooleanParser.parse(element.getAttribute('is-selected'));
+    const layerId = element.getAttribute('layer-id');
+    const previewMode = EnumParser<LayerPreviewMode>(LayerPreviewMode)
+        .parse(element.getAttribute('preview-mode'));
+
+    if (isSelected === null || layerId === null || previewMode === null) {
+      return null;
+    }
+
+    return {isSelected, layerId, mode: previewMode};
+  },
+
+  /**
+   * @override
+   */
+  set(data: LayerPreviewData, element: Element): void {
+    element.setAttribute('is-selected', BooleanParser.stringify(data.isSelected));
+    element.setAttribute('layer-id', data.layerId);
+    element.setAttribute('preview-mode', EnumParser(LayerPreviewMode).stringify(data.mode));
+  },
+};
+
+
+export const LAYER_PREVIEW_MODE_DATA_HELPER: ChildElementDataHelper<LayerPreviewMode> = {
+  /**
+   * @override
+   */
+  create(document: Document, instance: LayerView): Element {
+    const element = document.createElement('gs-menu-item');
+    const listenableDom = ListenableDom.of(element);
+    instance.addDisposable(
+        listenableDom.on(DomEvent.CLICK, instance.onLayerPreviewModeSelected_, instance));
+    instance.addDisposable(listenableDom);
+    return element;
+  },
+
+  /**
+   * @override
+   */
+  get(element: Element): LayerPreviewMode | null {
+    return EnumParser<LayerPreviewMode>(LayerPreviewMode).parse(element.getAttribute('gs-value'));
+  },
+
+  /**
+   * @override
+   */
+  set(data: LayerPreviewMode, element: Element): void {
+    element.setAttribute('gs-content', Enums.toLowerCaseString(data, LayerPreviewMode));
+    element.setAttribute('gs-value', EnumParser(LayerPreviewMode).stringify(data));
+  },
+};
 
 
 /**
@@ -147,7 +212,7 @@ export class LayerView extends BaseThemedElement {
   @bind('#selectedLayerName').innerText()
   readonly layerNameHook_: DomHook<string>;
 
-  @bind('#previews').childrenElements(layerPreviewGenerator, layerPreviewDataSetter)
+  @bind('#previews').childrenElements(LAYER_PREVIEW_DATA_HELPER)
   readonly layerPreviewsChildElementHook_: DomHook<LayerPreviewData[]>;
 
   @bind('#previews').property('style')
@@ -156,10 +221,10 @@ export class LayerView extends BaseThemedElement {
   @bind('#layerTypeSwitch').attribute('gs-value', EnumParser(LayerType))
   readonly layerTypeSwitchHook_: DomHook<LayerType>;
 
-  @bind('#layers').childrenElements<LayerItemData>(layerItemGenerator, layerItemDataSetter)
+  @bind('#layers').childrenElements<LayerItemData>(LAYER_ITEM_DATA_HELPER)
   readonly layersChildElementHook_: DomHook<LayerItemData[]>;
 
-  @bind('#previewModes').childrenElements(layerPreviewModeGenerator, layerPreviewModeDataSetter)
+  @bind('#previewModes').childrenElements(LAYER_PREVIEW_MODE_DATA_HELPER)
   readonly previewModeChildElementHook_: DomHook<LayerPreviewMode[]>;
 
   @bind('#previewSwitch').attribute('gs-value', BooleanParser)

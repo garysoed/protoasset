@@ -1,12 +1,12 @@
-import {assert, TestBase} from '../test-base';
+import { assert, TestBase } from '../test-base';
 TestBase.setup();
 
-import {Mocks} from 'external/gs_tools/src/mock';
-import {TestDispose} from 'external/gs_tools/src/testing';
+import { Mocks } from 'external/gs_tools/src/mock';
+import { TestDispose } from 'external/gs_tools/src/testing';
 
-import {RouteServiceEvents} from 'external/gs_ui/src/routing';
+import { RouteServiceEvents } from 'external/gs_ui/src/routing';
 
-import {NavBar} from './nav-bar';
+import { NavBar } from './nav-bar';
 
 
 describe('asset.NavBar', () => {
@@ -15,8 +15,9 @@ describe('asset.NavBar', () => {
   let navbar: NavBar;
 
   beforeEach(() => {
-    mockRouteFactoryService = jasmine
-        .createSpyObj('RouteFactoryService', ['assetData', 'assetSettings', 'helper', 'layer']);
+    mockRouteFactoryService = jasmine.createSpyObj(
+        'RouteFactoryService',
+        ['assetData', 'assetSettings', 'helper', 'layer', 'render']);
     mockRouteService = jasmine.createSpyObj('RouteService', ['getParams', 'goTo', 'on']);
     navbar = new NavBar(
         mockRouteFactoryService,
@@ -128,6 +129,8 @@ describe('asset.NavBar', () => {
           mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
           const settingsRouteFactory = Mocks.object('settingsRouteFactory');
           mockRouteFactoryService.assetSettings.and.returnValue(settingsRouteFactory);
+          const renderRouteFactory = Mocks.object('renderRouteFactory');
+          mockRouteFactoryService.render.and.returnValue(renderRouteFactory);
 
           const mockDisposable = jasmine.createSpyObj('Disposable', ['dispose']);
           mockRouteService.on.and.returnValue(mockDisposable);
@@ -147,6 +150,7 @@ describe('asset.NavBar', () => {
             ['helper', helperRouteFactory],
             ['layer', layerRouteFactory],
             ['settings', settingsRouteFactory],
+            ['render', renderRouteFactory],
           ]);
         });
   });

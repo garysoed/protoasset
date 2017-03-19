@@ -1,97 +1,137 @@
-import {assert, Matchers, TestBase} from '../test-base';
+import { assert, Matchers, TestBase } from '../test-base';
 TestBase.setup();
 
-import {DomEvent, ListenableDom} from 'external/gs_tools/src/event';
-import {Mocks} from 'external/gs_tools/src/mock';
-import {TestDispose} from 'external/gs_tools/src/testing';
+import { DomEvent, ListenableDom } from 'external/gs_tools/src/event';
+import { Mocks } from 'external/gs_tools/src/mock';
+import { TestDispose } from 'external/gs_tools/src/testing';
+import { EnumParser } from 'external/gs_tools/src/webc';
 
-import {Asset, AssetType} from '../data/asset';
-import {ASSET_PRESETS, PresetType, Render} from './asset-presets';
-
+import { ASSET_PRESETS, PresetType, Render } from '../asset/asset-presets';
 import {
   ASSET_MAP_,
-  assetTypeMenuDataSetter,
-  assetTypeMenuGenerator,
+  ASSET_TYPE_MENU_DATA_HELPER,
   Editor,
-  presetTypeMenuDataSetter,
-  presetTypeMenuGenerator} from './editor';
+  PRESET_TYPE_MENU_DATA_HELPER,
+} from '../asset/editor';
+import { Asset, AssetType } from '../data/asset';
 
 
-describe('assetTypeMenuGenerator', () => {
-  it('should create the element correctly and listen to the click event', () => {
-    const mockView = Mocks.disposable('View');
-    mockView.onTypeClicked = jasmine.createSpy('View.onTypeClicked');
-    TestDispose.add(mockView);
+describe('ASSET_TYPE_MENU_DATA_HELPER', () => {
+  describe('create', () => {
+    it('should create the element correctly and listen to the click event', () => {
+      const mockView = Mocks.disposable('View');
+      mockView.onTypeClicked = jasmine.createSpy('View.onTypeClicked');
+      TestDispose.add(mockView);
 
-    const mockListenableElement = Mocks.listenable('ListenableElement');
-    spyOn(mockListenableElement, 'on').and.callThrough();
-    TestDispose.add(mockListenableElement);
-    spyOn(ListenableDom, 'of').and.returnValue(mockListenableElement);
+      const mockListenableElement = Mocks.listenable('ListenableElement');
+      spyOn(mockListenableElement, 'on').and.callThrough();
+      TestDispose.add(mockListenableElement);
+      spyOn(ListenableDom, 'of').and.returnValue(mockListenableElement);
 
-    const element = Mocks.object('element');
-    const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
-    mockDocument.createElement.and.returnValue(element);
+      const element = Mocks.object('element');
+      const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
+      mockDocument.createElement.and.returnValue(element);
 
-    assert(assetTypeMenuGenerator(mockDocument, mockView)).to.equal(element);
-    assert(mockListenableElement.on).to
-        .haveBeenCalledWith(DomEvent.CLICK, mockView.onTypeClicked, mockView);
-    assert(ListenableDom.of).to.haveBeenCalledWith(element);
-    assert(mockDocument.createElement).to.haveBeenCalledWith('gs-menu-item');
+      assert(ASSET_TYPE_MENU_DATA_HELPER.create(mockDocument, mockView)).to.equal(element);
+      assert(mockListenableElement.on).to
+          .haveBeenCalledWith(DomEvent.CLICK, mockView.onTypeClicked, mockView);
+      assert(ListenableDom.of).to.haveBeenCalledWith(element);
+      assert(mockDocument.createElement).to.haveBeenCalledWith('gs-menu-item');
+    });
+  });
+
+  describe('get', () => {
+    it('should return the correct AssetType', () => {
+      const assetType = AssetType.CARD;
+      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
+      mockElement.getAttribute.and.returnValue(EnumParser(AssetType).stringify(assetType));
+      assert(ASSET_TYPE_MENU_DATA_HELPER.get(mockElement)).to.equal(assetType);
+      assert(mockElement.getAttribute).to.haveBeenCalledWith('gs-value');
+    });
+
+    it('should return null if there are no gs-value attributes', () => {
+      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
+      mockElement.getAttribute.and.returnValue(null);
+      assert(ASSET_TYPE_MENU_DATA_HELPER.get(mockElement)).to.beNull();
+    });
+  });
+
+  describe('set', () => {
+    it('should set the attribute correctly', () => {
+      const renderedAsset = 'renderedAsset';
+      spyOn(Asset, 'renderType').and.returnValue(renderedAsset);
+
+      const mockElement = jasmine.createSpyObj('Element', ['setAttribute']);
+
+      ASSET_TYPE_MENU_DATA_HELPER.set(AssetType.CARD, mockElement, Mocks.object('instance'));
+
+      assert(mockElement.setAttribute).to.haveBeenCalledWith('gs-value', 'card');
+      assert(mockElement.setAttribute).to.haveBeenCalledWith('gs-content', renderedAsset);
+      assert(Asset.renderType).to.haveBeenCalledWith(AssetType.CARD);
+    });
   });
 });
 
-describe('assetTypeMenuDataSetter', () => {
-  it('should set the attribute correctly', () => {
-    const renderedAsset = 'renderedAsset';
-    spyOn(Asset, 'renderType').and.returnValue(renderedAsset);
 
-    const mockElement = jasmine.createSpyObj('Element', ['setAttribute']);
+describe('PRESET_TYPE_MENU_DATA_HELPER', () => {
+  describe('create', () => {
+    it('should create the element correctly and listen to the click event', () => {
+      const mockView = Mocks.disposable('View');
+      mockView.onPresetClicked = jasmine.createSpy('View.onPresetClicked');
+      TestDispose.add(mockView);
 
-    assetTypeMenuDataSetter(AssetType.CARD, mockElement);
+      const mockListenableElement = Mocks.listenable('ListenableElement');
+      spyOn(mockListenableElement, 'on').and.callThrough();
+      TestDispose.add(mockListenableElement);
+      spyOn(ListenableDom, 'of').and.returnValue(mockListenableElement);
 
-    assert(mockElement.setAttribute).to.haveBeenCalledWith('gs-value', 'card');
-    assert(mockElement.setAttribute).to.haveBeenCalledWith('gs-content', renderedAsset);
-    assert(Asset.renderType).to.haveBeenCalledWith(AssetType.CARD);
+      const element = Mocks.object('element');
+      const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
+      mockDocument.createElement.and.returnValue(element);
+
+      assert(PRESET_TYPE_MENU_DATA_HELPER.create(mockDocument, mockView)).to.equal(element);
+      assert(mockListenableElement.on).to
+          .haveBeenCalledWith(DomEvent.CLICK, mockView.onPresetClicked, mockView);
+      assert(ListenableDom.of).to.haveBeenCalledWith(element);
+      assert(mockDocument.createElement).to.haveBeenCalledWith('gs-menu-item');
+    });
+  });
+
+  describe('get', () => {
+    it('should return the correct PresetType', () => {
+      const presetType = PresetType.GAME_CRAFTER_DECK_POKER;
+      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
+      mockElement.getAttribute.and.returnValue(EnumParser(PresetType).stringify(presetType));
+      assert(PRESET_TYPE_MENU_DATA_HELPER.get(mockElement)).to.equal(presetType);
+      assert(mockElement.getAttribute).to.haveBeenCalledWith('gs-value');
+    });
+
+    it('should return null if there are no gs-value attributes', () => {
+      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
+      mockElement.getAttribute.and.returnValue(null);
+      assert(PRESET_TYPE_MENU_DATA_HELPER.get(mockElement)).to.beNull();
+    });
+  });
+
+  describe('set', () => {
+    it('should set the attributes correctly', () => {
+      const renderedPreset = 'renderedPreset';
+      spyOn(Render, 'preset').and.returnValue(renderedPreset);
+
+      const mockElement = jasmine.createSpyObj('Element', ['setAttribute']);
+
+      PRESET_TYPE_MENU_DATA_HELPER.set(
+          PresetType.GAME_CRAFTER_DECK_POKER,
+          mockElement,
+          Mocks.object('instance'));
+
+      assert(mockElement.setAttribute).to.haveBeenCalledWith('gs-value', 'game_crafter_deck_poker');
+      assert(mockElement.setAttribute).to.haveBeenCalledWith('gs-content', renderedPreset);
+      assert(Render.preset).to.haveBeenCalledWith(PresetType.GAME_CRAFTER_DECK_POKER);
+    });
   });
 });
 
-describe('presetTypeMenuGenerator', () => {
-  it('should create the element correctly and listen to the click event', () => {
-    const mockView = Mocks.disposable('View');
-    mockView.onPresetClicked = jasmine.createSpy('View.onPresetClicked');
-    TestDispose.add(mockView);
-
-    const mockListenableElement = Mocks.listenable('ListenableElement');
-    spyOn(mockListenableElement, 'on').and.callThrough();
-    TestDispose.add(mockListenableElement);
-    spyOn(ListenableDom, 'of').and.returnValue(mockListenableElement);
-
-    const element = Mocks.object('element');
-    const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
-    mockDocument.createElement.and.returnValue(element);
-
-    assert(presetTypeMenuGenerator(mockDocument, mockView)).to.equal(element);
-    assert(mockListenableElement.on).to
-        .haveBeenCalledWith(DomEvent.CLICK, mockView.onPresetClicked, mockView);
-    assert(ListenableDom.of).to.haveBeenCalledWith(element);
-    assert(mockDocument.createElement).to.haveBeenCalledWith('gs-menu-item');
-  });
-});
-
-describe('presetTypeMenuDataSetter', () => {
-  it('should set the attributes correctly', () => {
-    const renderedPreset = 'renderedPreset';
-    spyOn(Render, 'preset').and.returnValue(renderedPreset);
-
-    const mockElement = jasmine.createSpyObj('Element', ['setAttribute']);
-
-    presetTypeMenuDataSetter(PresetType.GAME_CRAFTER_DECK_POKER, mockElement);
-
-    assert(mockElement.setAttribute).to.haveBeenCalledWith('gs-value', 'game_crafter_deck_poker');
-    assert(mockElement.setAttribute).to.haveBeenCalledWith('gs-content', renderedPreset);
-    assert(Render.preset).to.haveBeenCalledWith(PresetType.GAME_CRAFTER_DECK_POKER);
-  });
-});
 
 describe('asset.Editor', () => {
   let editor: Editor;

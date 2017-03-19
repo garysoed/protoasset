@@ -4,16 +4,14 @@ TestBase.setup();
 import { DomEvent, ListenableDom } from 'external/gs_tools/src/event';
 import { Mocks } from 'external/gs_tools/src/mock';
 import { TestDispose } from 'external/gs_tools/src/testing';
+import { BooleanParser, EnumParser } from 'external/gs_tools/src/webc';
 
 import { RouteServiceEvents } from 'external/gs_ui/src/routing';
 
 import {
-  layerItemDataSetter,
-  layerItemGenerator,
-  layerPreviewDataSetter,
-  layerPreviewGenerator,
-  layerPreviewModeDataSetter,
-  layerPreviewModeGenerator,
+  LAYER_ITEM_DATA_HELPER,
+  LAYER_PREVIEW_DATA_HELPER,
+  LAYER_PREVIEW_MODE_DATA_HELPER,
   LayerView } from '../asset/layer-view';
 import { DataEvents } from '../data/data-events';
 import { HtmlLayer } from '../data/html-layer';
@@ -21,102 +19,263 @@ import { LayerPreviewMode } from '../data/layer-preview-mode';
 import { LayerType } from '../data/layer-type';
 
 
-describe('layerItemDataSetter', () => {
-  it('should set the correct attributes', () => {
-    const assetId = 'assetId';
-    const layerId = 'layerId';
-    const projectId = 'projectId';
-    const mockElement = jasmine.createSpyObj('Element', ['setAttribute']);
-    layerItemDataSetter({assetId, layerId, projectId}, mockElement);
-    assert(mockElement.setAttribute).to.haveBeenCalledWith('asset-id', assetId);
-    assert(mockElement.setAttribute).to.haveBeenCalledWith('layer-id', layerId);
-    assert(mockElement.setAttribute).to.haveBeenCalledWith('project-id', projectId);
+describe('LAYER_ITEM_DATA_HELPER', () => {
+  describe('create', () => {
+    it('should generate the correct element', () => {
+      const layerId = 'layerId';
+      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
+      mockElement.getAttribute.and.returnValue(layerId);
+
+      const disposableFunction = Mocks.object('disposableFunction');
+      const mockListenableDom = jasmine.createSpyObj('ListenableDom', ['on']);
+      mockListenableDom.on.and.returnValue(disposableFunction);
+      spyOn(ListenableDom, 'of').and.returnValue(mockListenableDom);
+
+      const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
+      mockDocument.createElement.and.returnValue(mockElement);
+      const mockInstance =
+          jasmine.createSpyObj('Instance', ['addDisposable', 'onLayerItemClick_']);
+      assert(LAYER_ITEM_DATA_HELPER.create(mockDocument, mockInstance)).to.equal(mockElement);
+      assert(mockDocument.createElement).to.haveBeenCalledWith('pa-asset-layer-item');
+      assert(mockInstance.addDisposable).to.haveBeenCalledWith(mockListenableDom);
+      assert(mockInstance.addDisposable).to.haveBeenCalledWith(disposableFunction);
+
+      assert(mockListenableDom.on).to
+          .haveBeenCalledWith(DomEvent.CLICK, Matchers.any(Function), mockInstance);
+      mockListenableDom.on.calls.argsFor(0)[1]();
+      assert(mockInstance.onLayerItemClick_).to.haveBeenCalledWith(layerId);
+      assert(mockElement.getAttribute).to.haveBeenCalledWith('layer-id');
+
+      assert(ListenableDom.of).to.haveBeenCalledWith(mockElement);
+    });
+  });
+
+  describe('get', () => {
+    it('should return the data correctly', () => {
+      const assetId = 'assetId';
+      const layerId = 'layerId';
+      const projectId = 'projectId';
+      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
+      mockElement.getAttribute.and.callFake((attrName: string) => {
+        switch (attrName) {
+          case 'asset-id':
+            return assetId;
+          case 'layer-id':
+            return layerId;
+          case 'project-id':
+            return projectId;
+        }
+      });
+      assert(LAYER_ITEM_DATA_HELPER.get(mockElement)).to.equal({assetId, layerId, projectId});
+      assert(mockElement.getAttribute).to.haveBeenCalledWith('asset-id');
+      assert(mockElement.getAttribute).to.haveBeenCalledWith('layer-id');
+      assert(mockElement.getAttribute).to.haveBeenCalledWith('project-id');
+    });
+
+    it('should return null if assetId is null', () => {
+      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
+      mockElement.getAttribute.and.callFake((attrName: string) => {
+        switch (attrName) {
+          case 'asset-id':
+            return null;
+          case 'layer-id':
+            return 'layerId';
+          case 'project-id':
+            return 'projectId';
+        }
+      });
+      assert(LAYER_ITEM_DATA_HELPER.get(mockElement)).to.beNull();
+    });
+
+    it('should return null if layerId is null', () => {
+      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
+      mockElement.getAttribute.and.callFake((attrName: string) => {
+        switch (attrName) {
+          case 'asset-id':
+            return 'assetId';
+          case 'layer-id':
+            return null;
+          case 'project-id':
+            return 'projectId';
+        }
+      });
+      assert(LAYER_ITEM_DATA_HELPER.get(mockElement)).to.beNull();
+    });
+
+    it('should return null if projectId is null', () => {
+      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
+      mockElement.getAttribute.and.callFake((attrName: string) => {
+        switch (attrName) {
+          case 'asset-id':
+            return 'assetId';
+          case 'layer-id':
+            return 'layerId';
+          case 'project-id':
+            return null;
+        }
+      });
+      assert(LAYER_ITEM_DATA_HELPER.get(mockElement)).to.beNull();
+    });
+  });
+
+  describe('set', () => {
+    it('should set the correct attributes', () => {
+      const assetId = 'assetId';
+      const layerId = 'layerId';
+      const projectId = 'projectId';
+      const mockElement = jasmine.createSpyObj('Element', ['setAttribute']);
+      LAYER_ITEM_DATA_HELPER
+          .set({assetId, layerId, projectId}, mockElement, Mocks.object('instance'));
+      assert(mockElement.setAttribute).to.haveBeenCalledWith('asset-id', assetId);
+      assert(mockElement.setAttribute).to.haveBeenCalledWith('layer-id', layerId);
+      assert(mockElement.setAttribute).to.haveBeenCalledWith('project-id', projectId);
+    });
   });
 });
 
-describe('layerItemGenerator', () => {
-  it('should generate the correct element', () => {
-    const layerId = 'layerId';
-    const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
-    mockElement.getAttribute.and.returnValue(layerId);
 
-    const disposableFunction = Mocks.object('disposableFunction');
-    const mockListenableDom = jasmine.createSpyObj('ListenableDom', ['on']);
-    mockListenableDom.on.and.returnValue(disposableFunction);
-    spyOn(ListenableDom, 'of').and.returnValue(mockListenableDom);
+describe('LAYER_PREVIEW_DATA_HELPER', () => {
+  describe('create', () => {
+    it('should create the element correctly', () => {
+      const element = Mocks.object('element');
+      const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
+      mockDocument.createElement.and.returnValue(element);
+      assert(LAYER_PREVIEW_DATA_HELPER.create(mockDocument, Mocks.object('instance')))
+          .to.equal(element);
+      assert(mockDocument.createElement).to.haveBeenCalledWith('pa-asset-layer-preview');
+    });
+  });
 
-    const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
-    mockDocument.createElement.and.returnValue(mockElement);
-    const mockInstance =
-        jasmine.createSpyObj('Instance', ['addDisposable', 'onLayerItemClick_']);
-    assert(layerItemGenerator(mockDocument, mockInstance)).to.equal(mockElement);
-    assert(mockDocument.createElement).to.haveBeenCalledWith('pa-asset-layer-item');
-    assert(mockInstance.addDisposable).to.haveBeenCalledWith(mockListenableDom);
-    assert(mockInstance.addDisposable).to.haveBeenCalledWith(disposableFunction);
+  describe('get', () => {
+    it('should return the correct data', () => {
+      const isSelected = true;
+      const layerId = 'layerId';
+      const mode = LayerPreviewMode.NORMAL;
+      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
+      mockElement.getAttribute.and.callFake((attrName: string) => {
+        switch (attrName) {
+          case 'is-selected':
+            return BooleanParser.stringify(isSelected);
+          case 'layer-id':
+            return layerId;
+          case 'preview-mode':
+            return EnumParser(LayerPreviewMode).stringify(mode);
+        }
+      });
+      assert(LAYER_PREVIEW_DATA_HELPER.get(mockElement)).to.equal({isSelected, layerId, mode});
+      assert(mockElement.getAttribute).to.haveBeenCalledWith('is-selected');
+      assert(mockElement.getAttribute).to.haveBeenCalledWith('layer-id');
+      assert(mockElement.getAttribute).to.haveBeenCalledWith('preview-mode');
+    });
 
-    assert(mockListenableDom.on).to
-        .haveBeenCalledWith(DomEvent.CLICK, Matchers.any(Function), mockInstance);
-    mockListenableDom.on.calls.argsFor(0)[1]();
-    assert(mockInstance.onLayerItemClick_).to.haveBeenCalledWith(layerId);
-    assert(mockElement.getAttribute).to.haveBeenCalledWith('layer-id');
+    it('should return null if isSelected is null', () => {
+      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
+      mockElement.getAttribute.and.callFake((attrName: string) => {
+        switch (attrName) {
+          case 'is-selected':
+            return null;
+          case 'layer-id':
+            return 'layerId';
+          case 'preview-mode':
+            return EnumParser(LayerPreviewMode).stringify(LayerPreviewMode.NORMAL);
+        }
+      });
+      assert(LAYER_PREVIEW_DATA_HELPER.get(mockElement)).to.beNull();
+    });
 
-    assert(ListenableDom.of).to.haveBeenCalledWith(mockElement);
+    it('should return null if layer ID is null', () => {
+      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
+      mockElement.getAttribute.and.callFake((attrName: string) => {
+        switch (attrName) {
+          case 'is-selected':
+            return BooleanParser.stringify(true);
+          case 'layer-id':
+            return null;
+          case 'preview-mode':
+            return EnumParser(LayerPreviewMode).stringify(LayerPreviewMode.NORMAL);
+        }
+      });
+      assert(LAYER_PREVIEW_DATA_HELPER.get(mockElement)).to.beNull();
+    });
+
+    it('should return null if previewMode is null', () => {
+      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
+      mockElement.getAttribute.and.callFake((attrName: string) => {
+        switch (attrName) {
+          case 'is-selected':
+            return BooleanParser.stringify(true);
+          case 'layer-id':
+            return 'layerId';
+          case 'preview-mode':
+            return null;
+        }
+      });
+      assert(LAYER_PREVIEW_DATA_HELPER.get(mockElement)).to.beNull();
+    });
+  });
+
+  describe('set', () => {
+    it('should set the attributes correctly', () => {
+      const layerId = 'layerId';
+      const mockElement = jasmine.createSpyObj('Element', ['setAttribute']);
+      LAYER_PREVIEW_DATA_HELPER.set(
+          {isSelected: true, layerId, mode: LayerPreviewMode.NORMAL},
+          mockElement,
+          Mocks.object('instance'));
+      assert(mockElement.setAttribute).to.haveBeenCalledWith('is-selected', 'true');
+      assert(mockElement.setAttribute).to.haveBeenCalledWith('layer-id', layerId);
+    });
   });
 });
 
-describe('layerPreviewDataSetter', () => {
-  it('should set the attributes correctly', () => {
-    const layerId = 'layerId';
-    const mockElement = jasmine.createSpyObj('Element', ['setAttribute']);
-    layerPreviewDataSetter({isSelected: true, layerId, mode: LayerPreviewMode.NORMAL}, mockElement);
-    assert(mockElement.setAttribute).to.haveBeenCalledWith('is-selected', 'true');
-    assert(mockElement.setAttribute).to.haveBeenCalledWith('layer-id', layerId);
+
+describe('LAYER_PREVIEW_MODE_DATA_HELPER', () => {
+  describe('create', () => {
+    it('should create the correct element', () => {
+      const mockInstance = jasmine.createSpyObj('Instance', ['addDisposable']);
+
+      const disposable = Mocks.object('disposable');
+      const mockListenableDom = jasmine.createSpyObj('ListenableDom', ['on']);
+      mockListenableDom.on.and.returnValue(disposable);
+      spyOn(ListenableDom, 'of').and.returnValue(mockListenableDom);
+
+      const element = Mocks.object('element');
+      const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
+      mockDocument.createElement.and.returnValue(element);
+
+      assert(LAYER_PREVIEW_MODE_DATA_HELPER.create(mockDocument, mockInstance)).to.equal(element);
+      assert(mockInstance.addDisposable).to.haveBeenCalledWith(mockListenableDom);
+      assert(mockInstance.addDisposable).to.haveBeenCalledWith(disposable);
+      assert(mockListenableDom.on).to.haveBeenCalledWith(
+          DomEvent.CLICK,
+          mockInstance.onLayerPreviewModeSelected_,
+          mockInstance);
+      assert(ListenableDom.of).to.haveBeenCalledWith(element);
+      assert(mockDocument.createElement).to.haveBeenCalledWith('gs-menu-item');
+    });
+  });
+
+  describe('get', () => {
+    it('should return the correct preview mode', () => {
+      const mode = LayerPreviewMode.FULL;
+      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
+      mockElement.getAttribute.and.returnValue(EnumParser(LayerPreviewMode).stringify(mode));
+      assert(LAYER_PREVIEW_MODE_DATA_HELPER.get(mockElement)).to.equal(mode);
+      assert(mockElement.getAttribute).to.haveBeenCalledWith('gs-value');
+    });
+  });
+
+  describe('set', () => {
+    it('should set the data correctly', () => {
+      const mockElement = jasmine.createSpyObj('Element', ['setAttribute']);
+      LAYER_PREVIEW_MODE_DATA_HELPER
+          .set(LayerPreviewMode.BOUNDARY, mockElement, Mocks.object('instance'));
+      assert(mockElement.setAttribute).to.haveBeenCalledWith('gs-content', 'boundary');
+      assert(mockElement.setAttribute).to.haveBeenCalledWith('gs-value', 'boundary');
+    });
   });
 });
 
-describe('layerPreviewGenerator', () => {
-  it('should create the element correctly', () => {
-    const element = Mocks.object('element');
-    const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
-    mockDocument.createElement.and.returnValue(element);
-    assert(layerPreviewGenerator(mockDocument)).to.equal(element);
-    assert(mockDocument.createElement).to.haveBeenCalledWith('pa-asset-layer-preview');
-  });
-});
-
-describe('layerPreviewModeDataSetter', () => {
-  it('should set the data correctly', () => {
-    const mockElement = jasmine.createSpyObj('Element', ['setAttribute']);
-    layerPreviewModeDataSetter(LayerPreviewMode.BOUNDARY, mockElement);
-    assert(mockElement.setAttribute).to.haveBeenCalledWith('gs-content', 'boundary');
-    assert(mockElement.setAttribute).to.haveBeenCalledWith('gs-value', 'boundary');
-  });
-});
-
-describe('layerPreviewModeGenerator', () => {
-  it('should create the correct element', () => {
-    const mockInstance = jasmine.createSpyObj('Instance', ['addDisposable']);
-
-    const disposable = Mocks.object('disposable');
-    const mockListenableDom = jasmine.createSpyObj('ListenableDom', ['on']);
-    mockListenableDom.on.and.returnValue(disposable);
-    spyOn(ListenableDom, 'of').and.returnValue(mockListenableDom);
-
-    const element = Mocks.object('element');
-    const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
-    mockDocument.createElement.and.returnValue(element);
-
-    assert(layerPreviewModeGenerator(mockDocument, mockInstance)).to.equal(element);
-    assert(mockInstance.addDisposable).to.haveBeenCalledWith(mockListenableDom);
-    assert(mockInstance.addDisposable).to.haveBeenCalledWith(disposable);
-    assert(mockListenableDom.on).to.haveBeenCalledWith(
-        DomEvent.CLICK,
-        mockInstance.onLayerPreviewModeSelected_,
-        mockInstance);
-    assert(ListenableDom.of).to.haveBeenCalledWith(element);
-    assert(mockDocument.createElement).to.haveBeenCalledWith('gs-menu-item');
-  });
-});
 
 describe('asset.LayerView', () => {
   let mockAssetCollection;

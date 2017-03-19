@@ -1,76 +1,83 @@
-import {DomEvent, ListenableDom} from 'external/gs_tools/src/event';
-import {inject} from 'external/gs_tools/src/inject';
+import { DomEvent, ListenableDom } from 'external/gs_tools/src/event';
+import { inject } from 'external/gs_tools/src/inject';
 import {
   bind,
   BooleanParser,
+  ChildElementDataHelper,
   customElement,
   DomHook,
   EnumParser,
   FloatParser,
   handle,
-  StringParser} from 'external/gs_tools/src/webc';
+  StringParser } from 'external/gs_tools/src/webc';
 
-import {BaseThemedElement} from 'external/gs_ui/src/common';
-import {ThemeService} from 'external/gs_ui/src/theming';
+import { BaseThemedElement } from 'external/gs_ui/src/common';
+import { ThemeService } from 'external/gs_ui/src/theming';
 
-import {Asset, AssetType} from '../data/asset';
-import {ASSET_PRESETS, PresetType, Render} from './asset-presets';
+import { ASSET_PRESETS, PresetType, Render } from '../asset/asset-presets';
+import { Asset, AssetType } from '../data/asset';
 
 
-/**
- * Sets the data to the generated menu element.
- *
- * @param data The data to set.
- * @param element The element to set the data to.
- */
-export function assetTypeMenuDataSetter(data: AssetType, element: Element): void {
-  element.setAttribute('gs-content', Asset.renderType(data));
-  element.setAttribute('gs-value', EnumParser(AssetType).stringify(data));
-}
+export const ASSET_TYPE_MENU_DATA_HELPER: ChildElementDataHelper<AssetType> = {
+  /**
+   * @override
+   */
+  create(document: Document, instance: Editor): Element {
+    const element = document.createElement('gs-menu-item');
+    const listenable = ListenableDom.of(element);
+    instance.addDisposable(
+        listenable,
+        listenable.on(DomEvent.CLICK, instance.onTypeClicked, instance));
+    return element;
+  },
 
-/**
- * Generates the menu to pick asset types.
- *
- * @param document The owner document.
- * @param instance Pointer to instance of the view.
- * @return The newly generated element.
- */
-export function assetTypeMenuGenerator(document: Document, instance: Editor): Element {
-  let element = document.createElement('gs-menu-item');
-  let listenable = ListenableDom.of(element);
-  instance.addDisposable(
-      listenable,
-      listenable.on(DomEvent.CLICK, instance.onTypeClicked, instance));
-  return element;
-}
+  /**
+   * @override
+   */
+  get(element: Element): AssetType | null {
+    const strValue = element.getAttribute('gs-value');
+    return strValue === null ? null : EnumParser<AssetType>(AssetType).parse(strValue);
+  },
 
-/**
- * Generates the menu to pick preset types.
- *
- * @param document The owner document.
- * @param instance Pointer to the instance of the view.
- * @return The newly generated element.
- */
-export function presetTypeMenuGenerator(document: Document, instance: Editor): Element {
-  let element = document.createElement('gs-menu-item');
-  let listenable = ListenableDom.of(element);
-  instance.addDisposable(
-      listenable,
-      listenable.on(DomEvent.CLICK, instance.onPresetClicked, instance));
-  return element;
-}
+  /**
+   * @override
+   */
+  set(data: AssetType, element: Element): void {
+    element.setAttribute('gs-content', Asset.renderType(data));
+    element.setAttribute('gs-value', EnumParser(AssetType).stringify(data));
+  },
+};
 
-/**
- * Sets the data to the generated menu element.
- *
- * @param data The data to set.
- * @param element The element to set the data to.
- */
-export function presetTypeMenuDataSetter(data: PresetType, element: Element): void {
-  element.setAttribute('gs-content', Render.preset(data));
-  element.setAttribute('gs-value', EnumParser(PresetType).stringify(data));
-}
 
+export const PRESET_TYPE_MENU_DATA_HELPER: ChildElementDataHelper<PresetType> = {
+  /**
+   * @override
+   */
+  create(document: Document, instance: Editor): Element {
+    const element = document.createElement('gs-menu-item');
+    const listenable = ListenableDom.of(element);
+    instance.addDisposable(
+        listenable,
+        listenable.on(DomEvent.CLICK, instance.onPresetClicked, instance));
+    return element;
+  },
+
+  /**
+   * @override
+   */
+  get(element: Element): PresetType | null {
+    const strValue = element.getAttribute('gs-value');
+    return strValue === null ? null : EnumParser<PresetType>(PresetType).parse(strValue);
+  },
+
+  /**
+   * @override
+   */
+  set(data: PresetType, element: Element): void {
+    element.setAttribute('gs-content', Render.preset(data));
+    element.setAttribute('gs-value', EnumParser(PresetType).stringify(data));
+  },
+};
 
 
 export const ASSET_MAP_: Map<AssetType, PresetType[]> = new Map([
@@ -95,8 +102,7 @@ export class Editor extends BaseThemedElement {
   @bind('#assetType').innerText()
   readonly assetTypeHook_: DomHook<string>;
 
-  @bind('#assetTypeMenu')
-      .childrenElements<AssetType>(assetTypeMenuGenerator, assetTypeMenuDataSetter)
+  @bind('#assetTypeMenu').childrenElements<AssetType>(ASSET_TYPE_MENU_DATA_HELPER)
   readonly assetTypeMenuHook_: DomHook<AssetType[]>;
 
   @bind(null).attribute('asset-name', StringParser)
@@ -108,8 +114,7 @@ export class Editor extends BaseThemedElement {
   @bind('#presetType').innerText()
   readonly presetTypeHook_: DomHook<string>;
 
-  @bind('#presetTypeMenu')
-      .childrenElements<PresetType>(presetTypeMenuGenerator, presetTypeMenuDataSetter)
+  @bind('#presetTypeMenu').childrenElements<PresetType>(PRESET_TYPE_MENU_DATA_HELPER)
   readonly presetTypeMenuHook_: DomHook<PresetType[]>;
 
   @bind(null).attribute('asset-height', FloatParser)
@@ -226,8 +231,8 @@ export class Editor extends BaseThemedElement {
    * @param event The click event.
    */
   onPresetClicked(event: Event): void {
-    let target: Element = <Element> event.target;
-    let type = EnumParser<PresetType>(PresetType).parse(target.getAttribute('gs-value'));
+    const target: Element = <Element> event.target;
+    const type = EnumParser<PresetType>(PresetType).parse(target.getAttribute('gs-value'));
     this.setPresetType_(type);
   }
 
@@ -296,7 +301,7 @@ export class Editor extends BaseThemedElement {
     } else {
       this.presetTypeHook_.set(Render.preset(type));
 
-      let presetObj = ASSET_PRESETS.get(type);
+      const presetObj = ASSET_PRESETS.get(type);
       if (presetObj !== undefined) {
         this.templateHeightHook_.set(presetObj.heightPx);
         this.templateWidthHook_.set(presetObj.widthPx);

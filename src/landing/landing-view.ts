@@ -1,36 +1,49 @@
-import {inject} from 'external/gs_tools/src/inject';
-import {bind, customElement, DomHook, handle, StringParser} from 'external/gs_tools/src/webc';
+import { Arrays } from 'external/gs_tools/src/collection';
+import { inject } from 'external/gs_tools/src/inject';
+import {
+  bind,
+  ChildElementDataHelper,
+  customElement,
+  DomHook,
+  handle,
+  StringParser } from 'external/gs_tools/src/webc';
 
-import {BaseThemedElement} from 'external/gs_ui/src/common';
-import {Event} from 'external/gs_ui/src/const';
-import {RouteService, RouteServiceEvents} from 'external/gs_ui/src/routing';
-import {ThemeService} from 'external/gs_ui/src/theming';
+import { BaseThemedElement } from 'external/gs_ui/src/common';
+import { Event } from 'external/gs_ui/src/const';
+import { RouteService, RouteServiceEvents } from 'external/gs_ui/src/routing';
+import { ThemeService } from 'external/gs_ui/src/theming';
 
-import {FilterButton} from '../common/filter-button';
-import {CollectionEvents} from '../data/collection-events';
-import {Project} from '../data/project';
-import {ProjectCollection} from '../data/project-collection';
-import {RouteFactoryService} from '../routing/route-factory-service';
-import {Views} from '../routing/views';
-
-import {ProjectItem} from './project-item';
-
-/**
- * @param document The document to create the element in.
- * @return The newly created project item element.
- */
-export function projectItemElGenerator(document: Document): Element {
-  return document.createElement('pa-project-item');
-}
+import { FilterButton } from '../common/filter-button';
+import { CollectionEvents } from '../data/collection-events';
+import { Project } from '../data/project';
+import { ProjectCollection } from '../data/project-collection';
+import { ProjectItem } from '../landing/project-item';
+import { RouteFactoryService } from '../routing/route-factory-service';
+import { Views } from '../routing/views';
 
 
-/**
- * @param data The data to set on the given element.
- * @param element The element that the given data should be set to.
- */
-export function projectItemElDataSetter(project: Project, element: Element): void {
-  element.setAttribute('project-id', project.getId());
-}
+export const PROJECT_ITEM_DATA_HELPER: ChildElementDataHelper<string> = {
+  /**
+   * @override
+   */
+  create(document: Document): Element {
+    return document.createElement('pa-project-item');
+  },
+
+  /**
+   * @override
+   */
+  get(element: Element): string | null {
+    return element.getAttribute('project-id');
+  },
+
+  /**
+   * @override
+   */
+  set(projectId: string, element: Element): void {
+    element.setAttribute('project-id', projectId);
+  },
+};
 
 
 /**
@@ -42,8 +55,8 @@ export function projectItemElDataSetter(project: Project, element: Element): voi
   templateKey: 'src/landing/landing-view',
 })
 export class LandingView extends BaseThemedElement {
-  @bind('#projects').childrenElements(projectItemElGenerator, projectItemElDataSetter)
-  private readonly projectCollectionHook_: DomHook<Project[]>;
+  @bind('#projects').childrenElements(PROJECT_ITEM_DATA_HELPER)
+  private readonly projectCollectionHook_: DomHook<string[]>;
 
   private readonly routeFactoryService_: RouteFactoryService;
   private readonly routeService_: RouteService<Views>;
@@ -58,21 +71,21 @@ export class LandingView extends BaseThemedElement {
     this.routeFactoryService_ = routeFactoryService;
     this.routeService_ = routeService;
     this.projectCollection_ = projectCollection;
-    this.projectCollectionHook_ = DomHook.of<Project[]>();
+    this.projectCollectionHook_ = DomHook.of<string[]>();
   }
 
   /**
    * Handles event when the location was changed.
    */
   private async onRouteChanged_(): Promise<void> {
-    let route = this.routeService_.getRoute();
+    const route = this.routeService_.getRoute();
     if (route === null) {
       this.routeService_.goTo(this.routeFactoryService_.landing(), {});
       return;
     }
 
     if (route.getType() === Views.LANDING) {
-      let projects = await this.projectCollection_.list();
+      const projects = await this.projectCollection_.list();
       if (projects.length === 0) {
         this.routeService_.goTo(this.routeFactoryService_.createProject(), {});
       }
@@ -89,12 +102,17 @@ export class LandingView extends BaseThemedElement {
 
   @handle('#filterButton').attributeChange('filter-text', StringParser)
   protected async onFilterButtonTextAttrChange_(newValue: string | null): Promise<void> {
-    let projectsPromise = (newValue === null || newValue === '')
+    const projectsPromise = (newValue === null || newValue === '')
         ? this.projectCollection_.list()
         : this.projectCollection_.search(newValue);
 
-    let projects = await projectsPromise;
-    this.projectCollectionHook_.set(projects);
+    const projects = await projectsPromise;
+    const projectIds = Arrays.of(projects)
+        .map((project: Project) => {
+          return project.getId();
+        })
+        .asArray();
+    this.projectCollectionHook_.set(projectIds);
   }
 
   /**
@@ -102,8 +120,8 @@ export class LandingView extends BaseThemedElement {
    * @param project The added project.
    */
   private onProjectAdded_(project: Project): void {
-    let projects = this.projectCollectionHook_.get() || [];
-    projects.push(project);
+    const projects = this.projectCollectionHook_.get() || [];
+    projects.push(project.getId());
     this.projectCollectionHook_.set(projects);
   }
 
@@ -128,7 +146,12 @@ export class LandingView extends BaseThemedElement {
    */
   async onInserted(element: HTMLElement): Promise<void> {
     super.onInserted(element);
-    let projects = await this.projectCollection_.list();
-    this.projectCollectionHook_.set(projects);
+    const projects = await this.projectCollection_.list();
+    const projectIds = Arrays.of(projects)
+        .map((project: Project) => {
+          return project.getId();
+        })
+        .asArray();
+    this.projectCollectionHook_.set(projectIds);
   }
 }

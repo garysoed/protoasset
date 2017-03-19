@@ -1,19 +1,18 @@
-import {inject} from 'external/gs_tools/src/inject';
+import { inject } from 'external/gs_tools/src/inject';
 import {
   bind,
   customElement,
   DomHook,
   EnumParser,
   handle,
-  StringParser} from 'external/gs_tools/src/webc';
+  StringParser } from 'external/gs_tools/src/webc';
 
-import {ThemeService} from 'external/gs_ui/src/theming';
+import { ThemeService } from 'external/gs_ui/src/theming';
 
-import {AssetCollection} from '../data/asset-collection';
-import {BaseLayer} from '../data/base-layer';
-import {HorizontalAlign, TextLayer, VerticalAlign} from '../data/text-layer';
-
-import {AbstractLayerEditor} from './abstract-layer-editor';
+import { AbstractLayerEditor } from '../asset/abstract-layer-editor';
+import { AssetCollection } from '../data/asset-collection';
+import { BaseLayer } from '../data/base-layer';
+import { HorizontalAlign, TextLayer, VerticalAlign } from '../data/text-layer';
 
 
 /**

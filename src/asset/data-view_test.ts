@@ -1,78 +1,105 @@
-import {assert, TestBase} from '../test-base';
+import { assert, TestBase } from '../test-base';
 TestBase.setup();
 
-import {Mocks} from 'external/gs_tools/src/mock';
-import {TestDispose} from 'external/gs_tools/src/testing';
+import { Mocks } from 'external/gs_tools/src/mock';
+import { TestDispose } from 'external/gs_tools/src/testing';
 
-import {InMemoryDataSource} from '../data/in-memory-data-source';
-import {TsvDataSource} from '../data/tsv-data-source';
+import { InMemoryDataSource } from '../data/in-memory-data-source';
+import { TsvDataSource } from '../data/tsv-data-source';
 
-import {DataView, previewRowDataSetter, previewRowGenerator} from './data-view';
+import { DataView, PREVIEW_ROW_DATA_HELPER } from './data-view';
 
 
-describe('previewRowDataSetter', () => {
-  it('should generate additional cell elements if the are not enough elements', () => {
-    let data1 = 'data1';
-    let data2 = 'data2';
-
-    let cell1 = Mocks.object('cell1');
-    let cell2 = Mocks.object('cell2');
-    let mockDocument = jasmine.createSpyObj('Document', ['createElement']);
-    mockDocument.createElement.and.returnValues(cell1, cell2);
-
-    let mockRoot = jasmine.createSpyObj('Root', ['appendChild']);
-    mockRoot.ownerDocument = mockDocument;
-    mockRoot.childElementCount = 0;
-
-    previewRowDataSetter([data1, data2], mockRoot);
-
-    assert(cell1.textContent).to.equal(data1);
-    assert(cell2.textContent).to.equal(data2);
-    assert(mockRoot.appendChild).to.haveBeenCalledWith(cell1);
-    assert(mockRoot.appendChild).to.haveBeenCalledWith(cell2);
-    assert(mockDocument.createElement).to.haveBeenCalledWith('td');
-  });
-
-  it('should reuse existing cell elements if there are enough elements', () => {
-    let data1 = 'data1';
-    let data2 = 'data2';
-
-    let cell1 = Mocks.object('cell1');
-    let cell2 = Mocks.object('cell2');
-
-    let mockRoot = jasmine.createSpyObj('Root', ['appendChild']);
-    mockRoot.childElementCount = 2;
-
-    let mockChildrenList = jasmine.createSpyObj('ChildrenList', ['item']);
-    mockChildrenList.item.and.callFake((index: number) => {
-      switch (index) {
-        case 0:
-          return cell1;
-        case 1:
-          return cell2;
-      }
+describe('PREVIEW_ROW_DATA_HELPER', () => {
+  describe('create', () => {
+    it('should return the correct element', () => {
+      let element = Mocks.object('element');
+      let mockDocument = jasmine.createSpyObj('Document', ['createElement']);
+      mockDocument.createElement.and.returnValue(element);
+      assert(PREVIEW_ROW_DATA_HELPER.create(mockDocument, Mocks.object('instance')))
+          .to.equal(element);
+      assert(mockDocument.createElement).to.haveBeenCalledWith('tr');
     });
-    mockRoot.children = mockChildrenList;
+  });
 
-    previewRowDataSetter([data1, data2], mockRoot);
+  describe('get', () => {
+    it('should return the correct texts', () => {
+      const text1 = 'text1';
+      const text2 = 'text2';
+      const element = Mocks.object('element');
+      element.children = Mocks.itemList([
+        {textContent: text1},
+        {textContent: text2},
+      ]);
+      assert(PREVIEW_ROW_DATA_HELPER.get(element)).to.equal([text1, text2]);
+    });
 
-    assert(cell1.textContent).to.equal(data1);
-    assert(cell2.textContent).to.equal(data2);
-    assert(mockRoot.appendChild).toNot.haveBeenCalled();
-    assert(mockChildrenList.item).to.haveBeenCalledWith(0);
-    assert(mockChildrenList.item).to.haveBeenCalledWith(1);
+    it('should return null if one of the values is null', () => {
+      const text = 'text';
+      const element = Mocks.object('element');
+      element.children = Mocks.itemList([
+        {textContent: text},
+        {textContent: null},
+      ]);
+      assert(PREVIEW_ROW_DATA_HELPER.get(element)).to.beNull();
+    });
+  });
+
+  describe('set', () => {
+    it('should generate additional cell elements if the are not enough elements', () => {
+      let data1 = 'data1';
+      let data2 = 'data2';
+
+      let cell1 = Mocks.object('cell1');
+      let cell2 = Mocks.object('cell2');
+      let mockDocument = jasmine.createSpyObj('Document', ['createElement']);
+      mockDocument.createElement.and.returnValues(cell1, cell2);
+
+      let mockRoot = jasmine.createSpyObj('Root', ['appendChild']);
+      mockRoot.ownerDocument = mockDocument;
+      mockRoot.childElementCount = 0;
+
+      PREVIEW_ROW_DATA_HELPER.set([data1, data2], mockRoot, Mocks.object('instance'));
+
+      assert(cell1.textContent).to.equal(data1);
+      assert(cell2.textContent).to.equal(data2);
+      assert(mockRoot.appendChild).to.haveBeenCalledWith(cell1);
+      assert(mockRoot.appendChild).to.haveBeenCalledWith(cell2);
+      assert(mockDocument.createElement).to.haveBeenCalledWith('td');
+    });
+
+    it('should reuse existing cell elements if there are enough elements', () => {
+      let data1 = 'data1';
+      let data2 = 'data2';
+
+      let cell1 = Mocks.object('cell1');
+      let cell2 = Mocks.object('cell2');
+
+      let mockRoot = jasmine.createSpyObj('Root', ['appendChild']);
+      mockRoot.childElementCount = 2;
+
+      let mockChildrenList = jasmine.createSpyObj('ChildrenList', ['item']);
+      mockChildrenList.item.and.callFake((index: number) => {
+        switch (index) {
+          case 0:
+            return cell1;
+          case 1:
+            return cell2;
+        }
+      });
+      mockRoot.children = mockChildrenList;
+
+      PREVIEW_ROW_DATA_HELPER.set([data1, data2], mockRoot, Mocks.object('instance'));
+
+      assert(cell1.textContent).to.equal(data1);
+      assert(cell2.textContent).to.equal(data2);
+      assert(mockRoot.appendChild).toNot.haveBeenCalled();
+      assert(mockChildrenList.item).to.haveBeenCalledWith(0);
+      assert(mockChildrenList.item).to.haveBeenCalledWith(1);
+    });
   });
 });
 
-describe('previewRowGenerator', () => {
-  it('should return the correct element', () => {
-    let element = Mocks.object('element');
-    let mockDocument = jasmine.createSpyObj('Document', ['createElement']);
-    mockDocument.createElement.and.returnValue(element);
-    assert(previewRowGenerator(mockDocument)).to.equal(element);
-    assert(mockDocument.createElement).to.haveBeenCalledWith('tr');
-  });
-});
 
 describe('asset.DataView', () => {
   let mockAssetCollection;

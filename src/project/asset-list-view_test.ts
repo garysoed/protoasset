@@ -1,12 +1,81 @@
-import {assert, TestBase} from '../test-base';
+import { assert, TestBase } from '../test-base';
 TestBase.setup();
 
-import {Mocks} from 'external/gs_tools/src/mock';
-import {TestDispose} from 'external/gs_tools/src/testing';
+import { Mocks } from 'external/gs_tools/src/mock';
+import { TestDispose } from 'external/gs_tools/src/testing';
 
-import {RouteServiceEvents} from 'external/gs_ui/src/routing';
+import { RouteServiceEvents } from 'external/gs_ui/src/routing';
 
-import {AssetListView} from './asset-list-view';
+import { ASSET_DATA_HELPER, AssetListView } from '../project/asset-list-view';
+
+
+describe('ASSET_DATA_HELPER', () => {
+  describe('create', () => {
+    it('should create the correct element', () => {
+      const element = Mocks.object('element');
+      const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
+      mockDocument.createElement.and.returnValue(element);
+      assert(ASSET_DATA_HELPER.create(mockDocument, Mocks.object('instance'))).to.equal(element);
+      assert(mockDocument.createElement).to.haveBeenCalledWith('pa-asset-item');
+    });
+  });
+
+  describe('get', () => {
+    it('should return the correct data', () => {
+      const assetId = 'assetId';
+      const projectId = 'projectId';
+      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
+      mockElement.getAttribute.and.callFake((attrName: string) => {
+        switch (attrName) {
+          case 'gs-asset-id':
+            return assetId;
+          case 'gs-project-id':
+            return projectId;
+        }
+      });
+      assert(ASSET_DATA_HELPER.get(mockElement)).to.equal({assetId, projectId});
+      assert(mockElement.getAttribute).to.haveBeenCalledWith('gs-asset-id');
+      assert(mockElement.getAttribute).to.haveBeenCalledWith('gs-project-id');
+    });
+
+    it('should return null if assetId is null', () => {
+      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
+      mockElement.getAttribute.and.callFake((attrName: string) => {
+        switch (attrName) {
+          case 'gs-asset-id':
+            return null;
+          case 'gs-project-id':
+            return 'projectId';
+        }
+      });
+      assert(ASSET_DATA_HELPER.get(mockElement)).to.beNull();
+    });
+
+    it('should return null if projectId is null', () => {
+      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
+      mockElement.getAttribute.and.callFake((attrName: string) => {
+        switch (attrName) {
+          case 'gs-asset-id':
+            return 'assetId';
+          case 'gs-project-id':
+            return null;
+        }
+      });
+      assert(ASSET_DATA_HELPER.get(mockElement)).to.beNull();
+    });
+  });
+
+  describe('set', () => {
+    it('should set the attributes correctly', () => {
+      const assetId = 'assetId';
+      const projectId = 'projectId';
+      const mockElement = jasmine.createSpyObj('Element', ['setAttribute']);
+      ASSET_DATA_HELPER.set({assetId, projectId}, mockElement, Mocks.object('instance'));
+      assert(mockElement.setAttribute).to.haveBeenCalledWith('gs-asset-id', assetId);
+      assert(mockElement.setAttribute).to.haveBeenCalledWith('gs-project-id', projectId);
+    });
+  });
+});
 
 
 describe('project.AssetListView', () => {
@@ -37,9 +106,9 @@ describe('project.AssetListView', () => {
 
   describe('getProjectId_', () => {
     it('should return the correct project ID if there is a match', () => {
-      let projectId = 'projectId';
+      const projectId = 'projectId';
 
-      let routeFactory = Mocks.object('routeFactory');
+      const routeFactory = Mocks.object('routeFactory');
       mockRouteFactoryService.assetList.and.returnValue(routeFactory);
 
       mockRouteService.getParams.and.returnValue({projectId: projectId});
@@ -49,7 +118,7 @@ describe('project.AssetListView', () => {
     });
 
     it('should return null if there are no project IDs', () => {
-      let routeFactory = Mocks.object('routeFactory');
+      const routeFactory = Mocks.object('routeFactory');
       mockRouteFactoryService.assetList.and.returnValue(routeFactory);
 
       mockRouteService.getParams.and.returnValue(null);
@@ -61,13 +130,13 @@ describe('project.AssetListView', () => {
 
   describe('onProjectIdChanged_', () => {
     it('should update the project name corretly if there are matches', async (done: any) => {
-      let projectId = 'projectId';
-      let projectName = 'projectName';
+      const projectId = 'projectId';
+      const projectName = 'projectName';
 
-      let mockProject = jasmine.createSpyObj('Project', ['getName']);
+      const mockProject = jasmine.createSpyObj('Project', ['getName']);
       mockProject.getName.and.returnValue(projectName);
 
-      mockAssetCollection.list.and.returnValue(Promise.resolve());
+      mockAssetCollection.list.and.returnValue(Promise.resolve([]));
       mockProjectCollection.get.and.returnValue(Promise.resolve(mockProject));
 
       spyOn(view, 'getProjectId_').and.returnValue(projectId);
@@ -80,10 +149,21 @@ describe('project.AssetListView', () => {
     });
 
     it('should set the assets', async (done: any) => {
-      let projectId = 'projectId';
-      let assets = Mocks.object('assets');
+      const projectId = 'projectId';
 
-      mockAssetCollection.list.and.returnValue(Promise.resolve(assets));
+      const assetId1 = 'assetId1';
+      const projectId1 = 'projectId1';
+      const mockAsset1 = jasmine.createSpyObj('Asset1', ['getId', 'getProjectId']);
+      mockAsset1.getId.and.returnValue(assetId1);
+      mockAsset1.getProjectId.and.returnValue(projectId1);
+
+      const assetId2 = 'assetId2';
+      const projectId2 = 'projectId2';
+      const mockAsset2 = jasmine.createSpyObj('Asset2', ['getId', 'getProjectId']);
+      mockAsset2.getId.and.returnValue(assetId2);
+      mockAsset2.getProjectId.and.returnValue(projectId2);
+
+      mockAssetCollection.list.and.returnValue(Promise.resolve([mockAsset1, mockAsset2]));
       mockProjectCollection.get.and.returnValue(Promise.resolve(null));
 
       spyOn(view, 'getProjectId_').and.returnValue(projectId);
@@ -91,15 +171,18 @@ describe('project.AssetListView', () => {
       spyOn(view['projectNameTextHook_'], 'set');
 
       await view['onProjectIdChanged_']();
-      assert(view['assetsHook_'].set).to.haveBeenCalledWith(assets);
+      assert(view['assetsHook_'].set).to.haveBeenCalledWith([
+        {assetId: assetId1, projectId: projectId1},
+        {assetId: assetId2, projectId: projectId2},
+      ]);
       assert(mockAssetCollection.list).to.haveBeenCalledWith(projectId);
     });
 
     it('should not throw error if there are no projects corresponding to the project ID',
         async (done: any) => {
-          let projectId = 'projectId';
+          const projectId = 'projectId';
 
-          mockAssetCollection.list.and.returnValue(Promise.resolve());
+          mockAssetCollection.list.and.returnValue(Promise.resolve([]));
           mockProjectCollection.get.and.returnValue(Promise.resolve(null));
           spyOn(view, 'getProjectId_').and.returnValue(projectId);
           spyOn(view['assetsHook_'], 'set');
@@ -120,10 +203,10 @@ describe('project.AssetListView', () => {
 
   describe('onCreateButtonClicked_', () => {
     it('should navigate to create asset view', () => {
-      let projectId = 'projectId';
+      const projectId = 'projectId';
       spyOn(view, 'getProjectId_').and.returnValue(projectId);
 
-      let routeFactory = Mocks.object('routeFactory');
+      const routeFactory = Mocks.object('routeFactory');
       mockRouteFactoryService.createAsset.and.returnValue(routeFactory);
 
       view['onCreateButtonClicked_']();

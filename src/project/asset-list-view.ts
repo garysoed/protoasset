@@ -1,29 +1,59 @@
-import {inject} from 'external/gs_tools/src/inject';
-import {bind, customElement, DomHook, handle} from 'external/gs_tools/src/webc';
+import { Arrays } from 'external/gs_tools/src/collection';
+import { inject } from 'external/gs_tools/src/inject';
+import {
+  bind,
+  ChildElementDataHelper,
+  customElement,
+  DomHook,
+  handle } from 'external/gs_tools/src/webc';
 
-import {BaseThemedElement} from 'external/gs_ui/src/common';
-import {Event} from 'external/gs_ui/src/const';
-import {RouteService, RouteServiceEvents} from 'external/gs_ui/src/routing';
-import {ThemeService} from 'external/gs_ui/src/theming';
+import { BaseThemedElement } from 'external/gs_ui/src/common';
+import { Event } from 'external/gs_ui/src/const';
+import { RouteService, RouteServiceEvents } from 'external/gs_ui/src/routing';
+import { ThemeService } from 'external/gs_ui/src/theming';
 
-import {FilterButton} from '../common/filter-button';
-import {Asset} from '../data/asset';
-import {AssetCollection} from '../data/asset-collection';
-import {ProjectCollection} from '../data/project-collection';
-import {RouteFactoryService} from '../routing/route-factory-service';
-import {Views} from '../routing/views';
+import { FilterButton } from '../common/filter-button';
+import { Asset } from '../data/asset';
+import { AssetCollection } from '../data/asset-collection';
+import { ProjectCollection } from '../data/project-collection';
+import { AssetItem } from '../project/asset-item';
+import { RouteFactoryService } from '../routing/route-factory-service';
+import { Views } from '../routing/views';
 
-import {AssetItem} from './asset-item';
+
+type AssetItemData = {assetId: string, projectId: string};
 
 
-export function assetsGenerator(document: Document): Element {
-  return document.createElement('pa-asset-item');
-}
+export const ASSET_DATA_HELPER: ChildElementDataHelper<AssetItemData> = {
+  /**
+   * @override
+   */
+  create(document: Document): Element {
+    return document.createElement('pa-asset-item');
+  },
 
-export function assetsDataSetter(asset: Asset, element: Element): void {
-  element.setAttribute('gs-asset-id', asset.getId());
-  element.setAttribute('gs-project-id', asset.getProjectId());
-}
+  /**
+   * @override
+   */
+  get(element: Element): AssetItemData | null {
+    const assetId = element.getAttribute('gs-asset-id');
+    const projectId = element.getAttribute('gs-project-id');
+    if (assetId === null || projectId === null) {
+      return null;
+    }
+
+    return {assetId, projectId};
+  },
+
+  /**
+   * @override
+   */
+  set(data: AssetItemData, element: Element): void {
+    element.setAttribute('gs-asset-id', data.assetId);
+    element.setAttribute('gs-project-id', data.projectId);
+  },
+};
+
 
 /**
  * The main landing view of the app.
@@ -34,8 +64,8 @@ export function assetsDataSetter(asset: Asset, element: Element): void {
   templateKey: 'src/project/asset-list-view',
 })
 export class AssetListView extends BaseThemedElement {
-  @bind('#assets').childrenElements<Asset>(assetsGenerator, assetsDataSetter)
-  private readonly assetsHook_: DomHook<Asset[]>;
+  @bind('#assets').childrenElements<AssetItemData>(ASSET_DATA_HELPER)
+  private readonly assetsHook_: DomHook<AssetItemData[]>;
 
   @bind('#projectName').innerText()
   private readonly projectNameTextHook_: DomHook<string>;
@@ -53,7 +83,7 @@ export class AssetListView extends BaseThemedElement {
       @inject('theming.ThemeService') themeService: ThemeService) {
     super(themeService);
     this.assetCollection_ = assetCollection;
-    this.assetsHook_ = DomHook.of<Asset[]>();
+    this.assetsHook_ = DomHook.of<AssetItemData[]>();
     this.projectCollection_ = projectCollection;
     this.projectNameTextHook_ = DomHook.of<string>();
     this.routeFactoryService_ = routeFactoryService;
@@ -64,7 +94,7 @@ export class AssetListView extends BaseThemedElement {
    * @return The project ID of the view, or null if the view has no project IDs.
    */
   private getProjectId_(): null | string {
-    let params = this.routeService_.getParams(this.routeFactoryService_.assetList());
+    const params = this.routeService_.getParams(this.routeFactoryService_.assetList());
     return params === null ? null : params.projectId;
   }
 
@@ -72,17 +102,24 @@ export class AssetListView extends BaseThemedElement {
    * Updates the project name.
    */
   private async onProjectIdChanged_(): Promise<void> {
-    let projectId = this.getProjectId_();
+    const projectId = this.getProjectId_();
     if (projectId === null) {
       return;
     }
 
-    let [assets, project] = await Promise.all([
+    const [assets, project] = await Promise.all([
       this.assetCollection_.list(projectId),
       this.projectCollection_.get(projectId),
     ]);
 
-    this.assetsHook_.set(assets);
+    const assetItemData = Arrays
+        .of(assets)
+        .map((asset: Asset) => {
+          return {assetId: asset.getId(), projectId: asset.getProjectId()};
+        })
+        .asArray();
+
+    this.assetsHook_.set(assetItemData);
     if (project !== null) {
       this.projectNameTextHook_.set(project.getName());
     }
@@ -90,7 +127,7 @@ export class AssetListView extends BaseThemedElement {
 
   @handle('#createButton').event(Event.ACTION)
   protected onCreateButtonClicked_(): void {
-    let projectId = this.getProjectId_();
+    const projectId = this.getProjectId_();
     if (projectId !== null) {
       this.routeService_.goTo(
           this.routeFactoryService_.createAsset(), {projectId: projectId});

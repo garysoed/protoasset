@@ -1,143 +1,286 @@
-import {assert, Matchers, TestBase} from '../test-base';
+import { assert, Matchers, TestBase } from '../test-base';
 TestBase.setup();
 
-import {Arrays} from 'external/gs_tools/src/collection';
-import {DomEvent, ListenableDom} from 'external/gs_tools/src/event';
-import {Mocks} from 'external/gs_tools/src/mock';
-import {TestDispose} from 'external/gs_tools/src/testing';
+import { Arrays } from 'external/gs_tools/src/collection';
+import { DomEvent, ListenableDom } from 'external/gs_tools/src/event';
+import { Mocks } from 'external/gs_tools/src/mock';
+import { TestDispose } from 'external/gs_tools/src/testing';
 
-import {RouteServiceEvents} from 'external/gs_ui/src/routing';
+import { RouteServiceEvents } from 'external/gs_ui/src/routing';
 
-import {DataEvents} from '../data/data-events';
-import {Helper} from '../data/helper';
+import { DataEvents } from '../data/data-events';
+import { Helper } from '../data/helper';
 
 import {
-  argElementDataSetter,
-  argElementGenerator,
-  consoleEntryDataSetter,
-  consoleEntryGenerator,
-  helperItemDataSetter,
-  helperItemGenerator,
+  ARG_DATA_HELPER,
+  CONSOLE_ENTRY_DATA_HELPER,
+  HELPER_ITEM_DATA_HELPER,
   HelperView} from './helper-view';
 
 
-describe('argElementGenerator', () => {
-  it('should generate the correct element and listen to the click event', () => {
-    const element = Mocks.object('element');
-    const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
-    mockDocument.createElement.and.returnValue(element);
+describe('ARG_DATA_HELPER', () => {
+  describe('create', () => {
+    it('should generate the correct element and listen to the click event', () => {
+      const element = Mocks.object('element');
+      const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
+      mockDocument.createElement.and.returnValue(element);
 
-    const mockListenable = jasmine.createSpyObj('Listenable', ['on']);
-    spyOn(ListenableDom, 'of').and.returnValue(mockListenable);
+      const mockListenable = jasmine.createSpyObj('Listenable', ['on']);
+      spyOn(ListenableDom, 'of').and.returnValue(mockListenable);
 
-    const mockInstance = jasmine.createSpyObj('Instance', ['addDisposable', 'onArgClick']);
+      const mockInstance = jasmine.createSpyObj('Instance', ['addDisposable', 'onArgClick']);
 
-    const actualElement = argElementGenerator(mockDocument, mockInstance);
-    assert(actualElement).to.equal(element);
-    assert(mockListenable.on).to
-        .haveBeenCalledWith(DomEvent.CLICK, mockInstance.onArgClick, mockInstance);
-    assert(mockInstance.addDisposable).to.haveBeenCalledWith(mockListenable);
-    assert(ListenableDom.of).to.haveBeenCalledWith(element);
-    assert(mockDocument.createElement).to.haveBeenCalledWith('div');
+      const actualElement = ARG_DATA_HELPER.create(mockDocument, mockInstance);
+      assert(actualElement).to.equal(element);
+      assert(mockListenable.on).to
+          .haveBeenCalledWith(DomEvent.CLICK, mockInstance.onArgClick, mockInstance);
+      assert(mockInstance.addDisposable).to.haveBeenCalledWith(mockListenable);
+      assert(ListenableDom.of).to.haveBeenCalledWith(element);
+      assert(mockDocument.createElement).to.haveBeenCalledWith('div');
+    });
+  });
+
+  describe('get', () => {
+    it('should return the correct content', () => {
+      const content = 'content';
+      const element = Mocks.object('element');
+      element.textContent = content;
+      assert(ARG_DATA_HELPER.get(element)).to.equal(content);
+    });
+  });
+
+  describe('set', () => {
+    it('should set the arg label correctly', () => {
+      const element = Mocks.object('element');
+      const label = 'label';
+      ARG_DATA_HELPER.set(label, element, Mocks.object('instance'));
+      assert(element.textContent).to.equal(label);
+    });
   });
 });
 
-describe('argElementDataSetter', () => {
-  it('should set the arg label correctly', () => {
-    const element = Mocks.object('element');
-    const label = 'label';
-    argElementDataSetter(label, element);
-    assert(element.textContent).to.equal(label);
+
+describe('CONSOLE_ENTRY_DATA_HELPER', () => {
+  describe('create', () => {
+    it('should generate the console entry element correctly', () => {
+      const mockRootClassList = jasmine.createSpyObj('RootClassList', ['add']);
+      const mockRootEl = jasmine.createSpyObj('RootEl', ['appendChild']);
+      mockRootEl.classList = mockRootClassList;
+
+      const mockCommandClassList = jasmine.createSpyObj('CommandClassList', ['add']);
+      const commandEl = Mocks.object('commandEl');
+      commandEl.classList = mockCommandClassList;
+
+      const resultEl = Mocks.object('resultEl');
+
+      const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
+      mockDocument.createElement.and.returnValues(mockRootEl, commandEl, resultEl);
+
+      assert(CONSOLE_ENTRY_DATA_HELPER.create(mockDocument, Mocks.object('instance')))
+          .to.equal(mockRootEl);
+      assert(mockRootEl.appendChild).to.haveBeenCalledWith(resultEl);
+      assert(mockRootEl.appendChild).to.haveBeenCalledWith(commandEl);
+      assert(mockDocument.createElement).to.haveBeenCalledWith('div');
+      assert(mockCommandClassList.add).to.haveBeenCalledWith('gs-theme-invert');
+      assert(mockRootClassList.add).to.haveBeenCalledWith('consoleEntry');
+    });
+  });
+
+  describe('get', () => {
+    it('should return the correct entry', () => {
+      const isError = true;
+      const mockClassList = jasmine.createSpyObj('ClassList', ['contains']);
+      mockClassList.contains.and.returnValue(isError);
+      const command = 'command';
+      const result = 'result';
+
+      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
+      mockElement.children = Mocks.itemList([
+        {textContent: command},
+        {classList: mockClassList},
+      ]);
+      mockElement.getAttribute.and.returnValue(result);
+      assert(CONSOLE_ENTRY_DATA_HELPER.get(mockElement)).to.equal({command, isError, result});
+      assert(mockElement.getAttribute).to.haveBeenCalledWith('pa-result');
+      assert(mockClassList.contains).to.haveBeenCalledWith('error');
+    });
+
+    it('should return null if the command is null', () => {
+      const isError = true;
+      const mockClassList = jasmine.createSpyObj('ClassList', ['contains']);
+      mockClassList.contains.and.returnValue(isError);
+      const result = 'result';
+
+      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
+      mockElement.children = Mocks.itemList([
+        {textContent: null},
+        {classList: mockClassList},
+      ]);
+      mockElement.getAttribute.and.returnValue(result);
+      assert(CONSOLE_ENTRY_DATA_HELPER.get(mockElement)).to.beNull();
+      assert(mockElement.getAttribute).to.haveBeenCalledWith('pa-result');
+      assert(mockClassList.contains).to.haveBeenCalledWith('error');
+    });
+
+    it('should return null if the result is null', () => {
+      const isError = true;
+      const mockClassList = jasmine.createSpyObj('ClassList', ['contains']);
+      mockClassList.contains.and.returnValue(isError);
+      const command = 'command';
+
+      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
+      mockElement.children = Mocks.itemList([
+        {textContent: command},
+        {classList: mockClassList},
+      ]);
+      mockElement.getAttribute.and.returnValue(null);
+      assert(CONSOLE_ENTRY_DATA_HELPER.get(mockElement)).to.beNull();
+      assert(mockElement.getAttribute).to.haveBeenCalledWith('pa-result');
+      assert(mockClassList.contains).to.haveBeenCalledWith('error');
+    });
+  });
+
+  describe('set', () => {
+    it('should set the data correctly', () => {
+      const command = 'command';
+      const line1 = 'line1';
+      const line2 = 'line2';
+      const result = `${line1}\n  ${line2}`;
+
+      const commandEl = document.createElement('div');
+      const resultEl = document.createElement('div');
+      const rootEl = document.createElement('div');
+      rootEl.appendChild(commandEl);
+      rootEl.appendChild(resultEl);
+
+      CONSOLE_ENTRY_DATA_HELPER
+          .set({command, isError: false, result}, rootEl, Mocks.object('instance'));
+
+      assert(Arrays.fromItemList(resultEl.classList).asArray()).to.equal([]);
+      assert(resultEl.innerHTML).to.equal(`<p>${line1}</p><p>&nbsp;&nbsp;${line2}</p>`);
+      assert(commandEl.textContent).to.equal(command);
+      assert(rootEl.getAttribute('pa-result')).to.equal(result);
+    });
+
+    it('should set the data correctly for errors', () => {
+      const command = 'command';
+      const line1 = 'line1';
+      const line2 = 'line2';
+      const result = `${line1}\n  ${line2}`;
+
+      const commandEl = document.createElement('div');
+      const resultEl = document.createElement('div');
+      const rootEl = document.createElement('div');
+      rootEl.appendChild(commandEl);
+      rootEl.appendChild(resultEl);
+
+      CONSOLE_ENTRY_DATA_HELPER
+          .set({command, isError: true, result}, rootEl, Mocks.object('instance'));
+
+      assert(Arrays.fromItemList(resultEl.classList).asArray()).to.equal(['error']);
+      assert(resultEl.innerHTML).to.equal(`<p>${line1}</p><p>&nbsp;&nbsp;${line2}</p>`);
+      assert(commandEl.textContent).to.equal(command);
+    });
   });
 });
 
-describe('consoleEntryGenerator', () => {
-  it('should generate the console entry element correctly', () => {
-    const mockRootClassList = jasmine.createSpyObj('RootClassList', ['add']);
-    const mockRootEl = jasmine.createSpyObj('RootEl', ['appendChild']);
-    mockRootEl.classList = mockRootClassList;
 
-    const mockCommandClassList = jasmine.createSpyObj('CommandClassList', ['add']);
-    const commandEl = Mocks.object('commandEl');
-    commandEl.classList = mockCommandClassList;
+describe('HELPER_ITEM_DATA_HELPER', () => {
+  describe('create', () => {
+    it('should set the attribute correctly', () => {
+      const element = Mocks.object('element');
+      const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
+      mockDocument.createElement.and.returnValue(element);
+      assert(HELPER_ITEM_DATA_HELPER.create(mockDocument, Mocks.object('instance')))
+          .to.equal(element);
+      assert(mockDocument.createElement).to.haveBeenCalledWith('pa-asset-helper-item');
+    });
+  });
 
-    const resultEl = Mocks.object('resultEl');
+  describe('get', () => {
+    it('should return the correct params', () => {
+      const assetId = 'assetId';
+      const helperId = 'helperId';
+      const projectId = 'projectId';
+      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
+      mockElement.getAttribute.and.callFake((attrName: string) => {
+        switch (attrName) {
+          case 'asset-id':
+            return assetId;
+          case 'helper-id':
+            return helperId;
+          case 'project-id':
+            return projectId;
+        }
+      });
+      assert(HELPER_ITEM_DATA_HELPER.get(mockElement)).to.equal({assetId, helperId, projectId});
+      assert(mockElement.getAttribute).to.haveBeenCalledWith('asset-id');
+      assert(mockElement.getAttribute).to.haveBeenCalledWith('helper-id');
+      assert(mockElement.getAttribute).to.haveBeenCalledWith('project-id');
+    });
 
-    const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
-    mockDocument.createElement.and.returnValues(mockRootEl, commandEl, resultEl);
+    it('should return null if assetId is null', () => {
+      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
+      mockElement.getAttribute.and.callFake((attrName: string) => {
+        switch (attrName) {
+          case 'asset-id':
+            return null;
+          case 'helper-id':
+            return 'helperId';
+          case 'project-id':
+            return 'projectId';
+        }
+      });
+      assert(HELPER_ITEM_DATA_HELPER.get(mockElement)).to.beNull();
+    });
 
-    assert(consoleEntryGenerator(mockDocument)).to.equal(mockRootEl);
-    assert(mockRootEl.appendChild).to.haveBeenCalledWith(resultEl);
-    assert(mockRootEl.appendChild).to.haveBeenCalledWith(commandEl);
-    assert(mockDocument.createElement).to.haveBeenCalledWith('div');
-    assert(mockCommandClassList.add).to.haveBeenCalledWith('gs-theme-invert');
-    assert(mockRootClassList.add).to.haveBeenCalledWith('consoleEntry');
+    it('should return null if helperId is null', () => {
+      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
+      mockElement.getAttribute.and.callFake((attrName: string) => {
+        switch (attrName) {
+          case 'asset-id':
+            return 'assetId';
+          case 'helper-id':
+            return null;
+          case 'project-id':
+            return 'projectId';
+        }
+      });
+      assert(HELPER_ITEM_DATA_HELPER.get(mockElement)).to.beNull();
+    });
+
+    it('should return null if projectId is null', () => {
+      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
+      mockElement.getAttribute.and.callFake((attrName: string) => {
+        switch (attrName) {
+          case 'asset-id':
+            return 'assetId';
+          case 'helper-id':
+            return 'helperId';
+          case 'project-id':
+            return null;
+        }
+      });
+      assert(HELPER_ITEM_DATA_HELPER.get(mockElement)).to.beNull();
+    });
+  });
+
+  describe('set', () => {
+    it('should set the attribute correctly', () => {
+      const helperId = 'helperId';
+      const assetId = 'assetId';
+      const projectId = 'projectId';
+      const mockElement = jasmine.createSpyObj('Element', ['setAttribute']);
+      HELPER_ITEM_DATA_HELPER
+          .set({assetId, helperId, projectId}, mockElement, Mocks.object('instance'));
+
+      assert(mockElement.setAttribute).to.haveBeenCalledWith('asset-id', assetId);
+      assert(mockElement.setAttribute).to.haveBeenCalledWith('helper-id', helperId);
+      assert(mockElement.setAttribute).to.haveBeenCalledWith('project-id', projectId);
+    });
   });
 });
 
-describe('consoleEntryDataSetter', () => {
-  it('should set the data correctly', () => {
-    const command = 'command';
-    const line1 = 'line1';
-    const line2 = 'line2';
-    const result = `${line1}\n  ${line2}`;
-
-    const commandEl = document.createElement('div');
-    const resultEl = document.createElement('div');
-    const rootEl = document.createElement('div');
-    rootEl.appendChild(commandEl);
-    rootEl.appendChild(resultEl);
-
-    consoleEntryDataSetter({command, isError: false, result}, rootEl);
-
-    assert(Arrays.fromItemList(resultEl.classList).asArray()).to.equal([]);
-    assert(resultEl.innerHTML).to.equal(`<p>${line1}</p><p>&nbsp;&nbsp;${line2}</p>`);
-    assert(commandEl.textContent).to.equal(command);
-  });
-
-  it('should set the data correctly for errors', () => {
-    const command = 'command';
-    const line1 = 'line1';
-    const line2 = 'line2';
-    const result = `${line1}\n  ${line2}`;
-
-    const commandEl = document.createElement('div');
-    const resultEl = document.createElement('div');
-    const rootEl = document.createElement('div');
-    rootEl.appendChild(commandEl);
-    rootEl.appendChild(resultEl);
-
-    consoleEntryDataSetter({command, isError: true, result}, rootEl);
-
-    assert(Arrays.fromItemList(resultEl.classList).asArray()).to.equal(['error']);
-    assert(resultEl.innerHTML).to.equal(`<p>${line1}</p><p>&nbsp;&nbsp;${line2}</p>`);
-    assert(commandEl.textContent).to.equal(command);
-  });
-});
-
-describe('helperItemDataSetter', () => {
-  it('should set the attribute correctly', () => {
-    const helperId = 'helperId';
-    const assetId = 'assetId';
-    const projectId = 'projectId';
-    const mockElement = jasmine.createSpyObj('Element', ['setAttribute']);
-    helperItemDataSetter({assetId, helperId, projectId}, mockElement);
-
-    assert(mockElement.setAttribute).to.haveBeenCalledWith('asset-id', assetId);
-    assert(mockElement.setAttribute).to.haveBeenCalledWith('helper-id', helperId);
-    assert(mockElement.setAttribute).to.haveBeenCalledWith('project-id', projectId);
-  });
-});
-
-describe('helperItemGenerator', () => {
-  it('should set the attribute correctly', () => {
-    const element = Mocks.object('element');
-    const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
-    mockDocument.createElement.and.returnValue(element);
-    assert(helperItemGenerator(mockDocument)).to.equal(element);
-    assert(mockDocument.createElement).to.haveBeenCalledWith('pa-asset-helper-item');
-  });
-});
 
 describe('asset.HelperView', () => {
   let mockAssetCollection;

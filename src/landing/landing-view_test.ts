@@ -1,41 +1,51 @@
-import {assert, TestBase} from '../test-base';
+import { assert, TestBase } from '../test-base';
 TestBase.setup();
 
-import {DisposableFunction} from 'external/gs_tools/src/dispose';
-import {Mocks} from 'external/gs_tools/src/mock';
-import {TestDispose} from 'external/gs_tools/src/testing';
-import {LocationServiceEvents} from 'external/gs_tools/src/ui';
+import { DisposableFunction } from 'external/gs_tools/src/dispose';
+import { Mocks } from 'external/gs_tools/src/mock';
+import { TestDispose } from 'external/gs_tools/src/testing';
+import { LocationServiceEvents } from 'external/gs_tools/src/ui';
 
-import {CollectionEvents} from '../data/collection-events';
-import {Views} from '../routing/views';
+import { CollectionEvents } from '../data/collection-events';
+import { LandingView, PROJECT_ITEM_DATA_HELPER } from '../landing/landing-view';
+import { Views } from '../routing/views';
 
-import {LandingView, projectItemElDataSetter, projectItemElGenerator} from './landing-view';
 
+describe('PROJECT_ITEM_DATA_HELPER', () => {
+  describe('create', () => {
+    it('should create the correct element', () => {
+      const element = Mocks.object('element');
+      const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
+      mockDocument.createElement.and.returnValue(element);
 
-describe('landing.projectItemElGenerator', () => {
-  it('should create the correct element', () => {
-    let element = Mocks.object('element');
-    let mockDocument = jasmine.createSpyObj('Document', ['createElement']);
-    mockDocument.createElement.and.returnValue(element);
+      assert(PROJECT_ITEM_DATA_HELPER.create(mockDocument, Mocks.object('instance')))
+          .to.equal(element);
+      assert(mockDocument.createElement).to.haveBeenCalledWith('pa-project-item');
+    });
+  });
 
-    assert(projectItemElGenerator(mockDocument)).to.equal(element);
-    assert(mockDocument.createElement).to.haveBeenCalledWith('pa-project-item');
+  describe('get', () => {
+    it('should return the correct project ID', () => {
+      const projectId = 'projectId';
+      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
+      mockElement.getAttribute.and.returnValue(projectId);
+      assert(PROJECT_ITEM_DATA_HELPER.get(mockElement)).to.equal(projectId);
+      assert(mockElement.getAttribute).to.haveBeenCalledWith('project-id');
+    });
+  });
+
+  describe('set', () => {
+    it('should set the attribute value correctly', () => {
+      const projectId = 'projectId';
+      const mockElement = jasmine.createSpyObj('Element', ['setAttribute']);
+
+      PROJECT_ITEM_DATA_HELPER.set(projectId, mockElement, Mocks.object('instance'));
+
+      assert(mockElement.setAttribute).to.haveBeenCalledWith('project-id', projectId);
+    });
   });
 });
 
-describe('landing.projectItemElDataSetter', () => {
-  it('should set the attribute value correctly', () => {
-    let projectId = 'projectId';
-    let mockProject = jasmine.createSpyObj('Project', ['getId']);
-    mockProject.getId.and.returnValue(projectId);
-
-    let mockElement = jasmine.createSpyObj('Element', ['setAttribute']);
-
-    projectItemElDataSetter(mockProject, mockElement);
-
-    assert(mockElement.setAttribute).to.haveBeenCalledWith('project-id', projectId);
-  });
-});
 
 describe('landing.LandingView', () => {
   let view: LandingView;
@@ -60,7 +70,7 @@ describe('landing.LandingView', () => {
 
   describe('onCreateAction_', () => {
     it('should go to create project view', () => {
-      let routeFactory = Mocks.object('routeFactory');
+      const routeFactory = Mocks.object('routeFactory');
       mockRouteFactoryService.createProject.and.returnValue(routeFactory);
 
       view['onCreateAction_']();
@@ -72,68 +82,91 @@ describe('landing.LandingView', () => {
   describe('onFilterButtonTextAttrChange_', () => {
     it('should set the project collection to the search results if there is filter text',
         async (done: any) => {
-          let newValue = 'newValue';
-          let projects = Mocks.object('projects');
-          mockProjectCollection.search.and.returnValue(Promise.resolve(projects));
+          const newValue = 'newValue';
+          const projectId1 = 'projectId1';
+          const mockProject1 = jasmine.createSpyObj('Project1', ['getId']);
+          mockProject1.getId.and.returnValue(projectId1);
+          const projectId2 = 'projectId2';
+          const mockProject2 = jasmine.createSpyObj('Project2', ['getId']);
+          mockProject2.getId.and.returnValue(projectId2);
+          mockProjectCollection.search.and
+              .returnValue(Promise.resolve([mockProject1, mockProject2]));
           spyOn(view['projectCollectionHook_'], 'set');
           await view['onFilterButtonTextAttrChange_'](newValue);
-          assert(view['projectCollectionHook_'].set).to.haveBeenCalledWith(projects);
+          assert(view['projectCollectionHook_'].set).to
+              .haveBeenCalledWith([projectId1, projectId2]);
           assert(mockProjectCollection.search).to.haveBeenCalledWith(newValue);
         });
 
     it('should set the project collection to all projects if the filter text is null',
         async (done: any) => {
-          let newValue = null;
-          let projects = Mocks.object('projects');
-          mockProjectCollection.list.and.returnValue(Promise.resolve(projects));
+          const newValue = null;
+          const projectId1 = 'projectId1';
+          const mockProject1 = jasmine.createSpyObj('Project1', ['getId']);
+          mockProject1.getId.and.returnValue(projectId1);
+          const projectId2 = 'projectId2';
+          const mockProject2 = jasmine.createSpyObj('Project2', ['getId']);
+          mockProject2.getId.and.returnValue(projectId2);
+          mockProjectCollection.list.and.returnValue(Promise.resolve([mockProject1, mockProject2]));
           spyOn(view['projectCollectionHook_'], 'set');
           await view['onFilterButtonTextAttrChange_'](newValue);
-          assert(view['projectCollectionHook_'].set).to.haveBeenCalledWith(projects);
+          assert(view['projectCollectionHook_'].set).to
+              .haveBeenCalledWith([projectId1, projectId2]);
         });
 
     it('should set the project collection to all projects if the filter text is empty string',
         async (done: any) => {
-          let newValue = '';
-          let projects = Mocks.object('projects');
-          mockProjectCollection.list.and.returnValue(Promise.resolve(projects));
+          const newValue = '';
+          const projectId1 = 'projectId1';
+          const mockProject1 = jasmine.createSpyObj('Project1', ['getId']);
+          mockProject1.getId.and.returnValue(projectId1);
+          const projectId2 = 'projectId2';
+          const mockProject2 = jasmine.createSpyObj('Project2', ['getId']);
+          mockProject2.getId.and.returnValue(projectId2);
+          mockProjectCollection.list.and.returnValue(Promise.resolve([mockProject1, mockProject2]));
           spyOn(view['projectCollectionHook_'], 'set');
           await view['onFilterButtonTextAttrChange_'](newValue);
-          assert(view['projectCollectionHook_'].set).to.haveBeenCalledWith(projects);
+          assert(view['projectCollectionHook_'].set).to
+              .haveBeenCalledWith([projectId1, projectId2]);
         });
   });
 
   describe('onProjectAdded_', () => {
     it('should add the project to the bridge', () => {
-      let project = Mocks.object('project');
+      const projectId = 'projectId';
+      const mockProject = jasmine.createSpyObj('Project', ['getId']);
+      mockProject.getId.and.returnValue(projectId);
       spyOn(view['projectCollectionHook_'], 'get').and.returnValue([]);
 
       spyOn(view['projectCollectionHook_'], 'set');
 
-      view['onProjectAdded_'](project);
+      view['onProjectAdded_'](mockProject);
 
-      assert(view['projectCollectionHook_'].set).to.haveBeenCalledWith([project]);
+      assert(view['projectCollectionHook_'].set).to.haveBeenCalledWith([projectId]);
     });
 
     it('should handle the case when project collection bridge has null value', () => {
-      let project = Mocks.object('project');
+      const projectId = 'projectId';
+      const mockProject = jasmine.createSpyObj('Project', ['getId']);
+      mockProject.getId.and.returnValue(projectId);
       spyOn(view['projectCollectionHook_'], 'get').and.returnValue(null);
 
       spyOn(view['projectCollectionHook_'], 'set');
 
-      view['onProjectAdded_'](project);
+      view['onProjectAdded_'](mockProject);
 
-      assert(view['projectCollectionHook_'].set).to.haveBeenCalledWith([project]);
+      assert(view['projectCollectionHook_'].set).to.haveBeenCalledWith([projectId]);
     });
   });
 
   describe('onRouteChanged_', () => {
     it('should redirect to create page if the new location is landing but there are no projects',
         async (done: any) => {
-          let mockRoute = jasmine.createSpyObj('Route', ['getType']);
+          const mockRoute = jasmine.createSpyObj('Route', ['getType']);
           mockRoute.getType.and.returnValue(Views.LANDING);
           mockRouteService.getRoute.and.returnValue(mockRoute);
 
-          let routeFactory = Mocks.object('routeFactory');
+          const routeFactory = Mocks.object('routeFactory');
           mockRouteFactoryService.createProject.and.returnValue(routeFactory);
 
           mockProjectCollection.list.and.returnValue(Promise.resolve([]));
@@ -144,7 +177,7 @@ describe('landing.LandingView', () => {
 
     it('should not redirect if the new location is landing but there are projects',
         async (done: any) => {
-          let mockRoute = jasmine.createSpyObj('Route', ['getType']);
+          const mockRoute = jasmine.createSpyObj('Route', ['getType']);
           mockRoute.getType.and.returnValue(Views.LANDING);
           mockRouteService.getRoute.and.returnValue(mockRoute);
 
@@ -157,7 +190,7 @@ describe('landing.LandingView', () => {
     it('should redirect to landing page if there are no valid routes', async (done: any) => {
       mockRouteService.getRoute.and.returnValue(null);
 
-      let routeFactory = Mocks.object('routeFactory');
+      const routeFactory = Mocks.object('routeFactory');
       mockRouteFactoryService.landing.and.returnValue(routeFactory);
 
       await view['onRouteChanged_']();
@@ -165,7 +198,7 @@ describe('landing.LandingView', () => {
     });
 
     it('should not redirect if the new location is not landing', async (done: any) => {
-      let mockRoute = jasmine.createSpyObj('Route', ['getType']);
+      const mockRoute = jasmine.createSpyObj('Route', ['getType']);
       mockRoute.getType.and.returnValue(Views.CREATE_ASSET);
       mockRouteService.getRoute.and.returnValue(mockRoute);
 
@@ -199,22 +232,25 @@ describe('landing.LandingView', () => {
 
   describe('onInserted', () => {
     it('should populate the project collection bridge correctly', async (done: any) => {
-      let projectName1 = 'projectName1';
-      let mockProject1 = jasmine.createSpyObj('Project1', ['getName']);
+      const projectId1 = 'projectId1';
+      const projectName1 = 'projectName1';
+      const mockProject1 = jasmine.createSpyObj('Project1', ['getId', 'getName']);
+      mockProject1.getId.and.returnValue(projectId1);
       mockProject1.getName.and.returnValue(projectName1);
 
-      let projectName2 = 'projectName2';
-      let mockProject2 = jasmine.createSpyObj('Project2', ['getName']);
+      const projectId2 = 'projectId2';
+      const projectName2 = 'projectName2';
+      const mockProject2 = jasmine.createSpyObj('Project2', ['getId', 'getName']);
+      mockProject2.getId.and.returnValue(projectId2);
       mockProject2.getName.and.returnValue(projectName2);
 
       mockProjectCollection.list.and.returnValue(Promise.resolve([mockProject1, mockProject2]));
 
       spyOn(view['projectCollectionHook_'], 'set');
 
-      let element = Mocks.object('element');
+      const element = Mocks.object('element');
       await view.onInserted(element);
-      assert(view['projectCollectionHook_'].set).to
-          .haveBeenCalledWith([mockProject1, mockProject2]);
+      assert(view['projectCollectionHook_'].set).to.haveBeenCalledWith([projectId1, projectId2]);
     });
   });
 });

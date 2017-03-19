@@ -4,9 +4,8 @@ TestBase.setup();
 import {Mocks} from 'external/gs_tools/src/mock';
 import {TestDispose} from 'external/gs_tools/src/testing';
 
+import {TextLayerEditor} from '../asset/text-layer-editor';
 import {HorizontalAlign, TextLayer, VerticalAlign} from '../data/text-layer';
-
-import {TextLayerEditor} from './text-layer-editor';
 
 
 describe('namespace.TextLayerEditor', () => {
