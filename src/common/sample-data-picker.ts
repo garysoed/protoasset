@@ -1,3 +1,4 @@
+import { Arrays } from 'external/gs_tools/src/collection';
 import { DomEvent, ListenableDom } from 'external/gs_tools/src/event';
 import { inject } from 'external/gs_tools/src/inject';
 import {
@@ -14,7 +15,6 @@ import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { ThemeService } from 'external/gs_ui/src/theming';
 
 import { SampleDataSearchIndex, SampleDataService } from '../common/sample-data-service';
-import { Arrays } from 'external/gs_tools/src/collection';
 
 
 type SampleItemData = {display: string, row: number};

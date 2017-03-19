@@ -1,3 +1,4 @@
+import { ArrayOfType, NonNullType } from 'external/gs_tools/src/check';
 import { Arrays, Maps } from 'external/gs_tools/src/collection';
 import { inject } from 'external/gs_tools/src/inject';
 import {
@@ -21,7 +22,6 @@ import { InMemoryDataSource } from '../data/in-memory-data-source';
 import { TsvDataSource } from '../data/tsv-data-source';
 import { RouteFactoryService } from '../routing/route-factory-service';
 import { Views } from '../routing/views';
-import { ArrayOfType, NonNullType } from 'external/gs_tools/src/check';
 
 
 export const PREVIEW_ROW_DATA_HELPER: ChildElementDataHelper<string[]> = {
