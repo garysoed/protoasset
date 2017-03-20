@@ -1,13 +1,13 @@
-import {assert, TestBase} from '../test-base';
+import { assert, TestBase } from '../test-base';
 TestBase.setup();
 
-import {Mocks} from 'external/gs_tools/src/mock';
-import {TestDispose} from 'external/gs_tools/src/testing';
-import {Reflect} from 'external/gs_tools/src/util';
+import { Mocks } from 'external/gs_tools/src/mock';
+import { TestDispose } from 'external/gs_tools/src/testing';
+import { Reflect } from 'external/gs_tools/src/util';
 
-import {RouteServiceEvents} from 'external/gs_ui/src/routing';
+import { RouteServiceEvents } from 'external/gs_ui/src/routing';
 
-import {AssetView} from './asset-view';
+import { AssetView } from './asset-view';
 
 
 describe('asset.AssetView', () => {

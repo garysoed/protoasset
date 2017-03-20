@@ -1,5 +1,5 @@
-import {Arrays} from 'external/gs_tools/src/collection';
-import {Storage as GsStorage} from 'external/gs_tools/src/store';
+import { Arrays } from 'external/gs_tools/src/collection';
+import { Storage as GsStorage } from 'external/gs_tools/src/store';
 
 
 export class CollectionStorage<T, I extends {this: T}> {

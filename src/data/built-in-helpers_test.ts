@@ -1,7 +1,7 @@
-import {assert, Matchers, TestBase} from '../test-base';
+import { assert, Matchers, TestBase } from '../test-base';
 TestBase.setup();
 
-import {BuiltInHelpers} from './built-in-helpers';
+import { BuiltInHelpers } from './built-in-helpers';
 
 
 describe('data.BuiltInHelpers', () => {

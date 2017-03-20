@@ -1,20 +1,20 @@
-import {atomic} from 'external/gs_tools/src/async';
-import {DisposableFunction} from 'external/gs_tools/src/dispose';
-import {DomEvent} from 'external/gs_tools/src/event';
-import {inject} from 'external/gs_tools/src/inject';
-import {bind, customElement, DomHook, handle, StringParser} from 'external/gs_tools/src/webc';
+import { atomic } from 'external/gs_tools/src/async';
+import { DisposableFunction } from 'external/gs_tools/src/dispose';
+import { DomEvent } from 'external/gs_tools/src/event';
+import { inject } from 'external/gs_tools/src/inject';
+import { bind, customElement, DomHook, handle, StringParser } from 'external/gs_tools/src/webc';
 
-import {BaseThemedElement} from 'external/gs_ui/src/common';
-import {RouteService} from 'external/gs_ui/src/routing';
-import {ThemeService} from 'external/gs_ui/src/theming';
-import {OverlayService} from 'external/gs_ui/src/tool';
+import { BaseThemedElement } from 'external/gs_ui/src/common';
+import { RouteService } from 'external/gs_ui/src/routing';
+import { ThemeService } from 'external/gs_ui/src/theming';
+import { OverlayService } from 'external/gs_ui/src/tool';
 
-import {Asset} from '../data/asset';
-import {AssetCollection} from '../data/asset-collection';
-import {DataEvents} from '../data/data-events';
-import {Helper} from '../data/helper';
-import {RouteFactoryService} from '../routing/route-factory-service';
-import {Views} from '../routing/views';
+import { Asset } from '../data/asset';
+import { AssetCollection } from '../data/asset-collection';
+import { DataEvents } from '../data/data-events';
+import { Helper } from '../data/helper';
+import { RouteFactoryService } from '../routing/route-factory-service';
+import { Views } from '../routing/views';
 
 
 /**

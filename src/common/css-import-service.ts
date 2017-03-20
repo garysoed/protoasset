@@ -1,4 +1,4 @@
-import {bind, inject} from 'external/gs_tools/src/inject';
+import { bind, inject } from 'external/gs_tools/src/inject';
 
 
 @bind('pa.common.CssImportService')

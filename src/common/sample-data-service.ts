@@ -1,14 +1,14 @@
-import {Arrays} from 'external/gs_tools/src/collection';
-import {BaseListenable} from 'external/gs_tools/src/event';
-import {bind, inject} from 'external/gs_tools/src/inject';
+import { Arrays } from 'external/gs_tools/src/collection';
+import { BaseListenable } from 'external/gs_tools/src/event';
+import { bind, inject } from 'external/gs_tools/src/inject';
 
-import {RouteService} from 'external/gs_ui/src/routing';
+import { RouteService } from 'external/gs_ui/src/routing';
 
-import {AssetCollection} from '../data/asset-collection';
-import {RouteFactoryService} from '../routing/route-factory-service';
-import {Views} from '../routing/views';
+import { AssetCollection } from '../data/asset-collection';
+import { RouteFactoryService } from '../routing/route-factory-service';
+import { Views } from '../routing/views';
 
-import {SampleDataServiceEvent} from './sample-data-service-event';
+import { SampleDataServiceEvent } from './sample-data-service-event';
 
 
 export type SampleDataSearchIndex = {

@@ -1,7 +1,7 @@
-import {AbstractRouteFactory} from 'external/gs_ui/src/routing';
+import { AbstractRouteFactory } from 'external/gs_ui/src/routing';
 
-import {AssetCollection} from '../data/asset-collection';
-import {Views} from './views';
+import { AssetCollection } from '../data/asset-collection';
+import { Views } from './views';
 
 
 type CP = {helperId: string};

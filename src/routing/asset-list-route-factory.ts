@@ -1,7 +1,7 @@
-import {AbstractRouteFactory} from 'external/gs_ui/src/routing';
+import { AbstractRouteFactory } from 'external/gs_ui/src/routing';
 
-import {ProjectCollection} from '../data/project-collection';
-import {Views} from './views';
+import { ProjectCollection } from '../data/project-collection';
+import { Views } from './views';
 
 
 type CP = {projectId: string};

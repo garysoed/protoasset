@@ -1,4 +1,4 @@
-import {Field, Serializable} from 'external/gs_tools/src/data';
+import { Field, Serializable } from 'external/gs_tools/src/data';
 
 
 export type ProjectSearchIndex = {

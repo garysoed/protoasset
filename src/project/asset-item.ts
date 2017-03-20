@@ -1,14 +1,14 @@
-import {DomEvent} from 'external/gs_tools/src/event';
-import {inject} from 'external/gs_tools/src/inject';
-import {bind, customElement, DomHook, handle, StringParser} from 'external/gs_tools/src/webc';
+import { DomEvent } from 'external/gs_tools/src/event';
+import { inject } from 'external/gs_tools/src/inject';
+import { bind, customElement, DomHook, handle, StringParser } from 'external/gs_tools/src/webc';
 
-import {BaseThemedElement} from 'external/gs_ui/src/common';
-import {RouteService} from 'external/gs_ui/src/routing';
-import {ThemeService} from 'external/gs_ui/src/theming';
+import { BaseThemedElement } from 'external/gs_ui/src/common';
+import { RouteService } from 'external/gs_ui/src/routing';
+import { ThemeService } from 'external/gs_ui/src/theming';
 
-import {AssetCollection} from '../data/asset-collection';
-import {RouteFactoryService} from '../routing/route-factory-service';
-import {Views} from '../routing/views';
+import { AssetCollection } from '../data/asset-collection';
+import { RouteFactoryService } from '../routing/route-factory-service';
+import { Views } from '../routing/views';
 
 
 /**

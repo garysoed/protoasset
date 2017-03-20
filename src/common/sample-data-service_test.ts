@@ -1,11 +1,11 @@
-import {assert, Matchers, TestBase} from '../test-base';
+import { assert, Matchers, TestBase } from '../test-base';
 TestBase.setup();
 
-import {Mocks} from 'external/gs_tools/src/mock';
-import {TestDispose} from 'external/gs_tools/src/testing';
+import { Mocks } from 'external/gs_tools/src/mock';
+import { TestDispose } from 'external/gs_tools/src/testing';
 
-import {SampleDataService} from './sample-data-service';
-import {SampleDataServiceEvent} from './sample-data-service-event';
+import { SampleDataService } from './sample-data-service';
+import { SampleDataServiceEvent } from './sample-data-service-event';
 
 
 describe('common.SampleDataService', () => {

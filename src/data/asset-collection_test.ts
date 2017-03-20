@@ -1,13 +1,13 @@
-import {assert, Matchers, TestBase} from '../test-base';
+import { assert, Matchers, TestBase } from '../test-base';
 TestBase.setup();
 
-import {Mocks} from 'external/gs_tools/src/mock';
-import {CachedStorage, LocalStorage} from 'external/gs_tools/src/store';
-import {TestDispose} from 'external/gs_tools/src/testing';
+import { Mocks } from 'external/gs_tools/src/mock';
+import { CachedStorage, LocalStorage } from 'external/gs_tools/src/store';
+import { TestDispose } from 'external/gs_tools/src/testing';
 
-import {AssetCollection} from './asset-collection';
-import {CollectionEvents} from './collection-events';
-import {CollectionStorage} from './collection-storage';
+import { AssetCollection } from './asset-collection';
+import { CollectionEvents } from './collection-events';
+import { CollectionStorage } from './collection-storage';
 
 
 describe('data.AssetCollection', () => {

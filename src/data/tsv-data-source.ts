@@ -1,7 +1,7 @@
-import {Arrays} from 'external/gs_tools/src/collection';
-import {Field, Serializable} from 'external/gs_tools/src/data';
+import { Arrays } from 'external/gs_tools/src/collection';
+import { Field, Serializable } from 'external/gs_tools/src/data';
 
-import {IDataSource} from './i-data-source';
+import { IDataSource } from './i-data-source';
 
 
 @Serializable('tsvDataSource')

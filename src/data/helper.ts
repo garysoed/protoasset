@@ -1,8 +1,8 @@
-import {Arrays} from 'external/gs_tools/src/collection';
-import {Field, Serializable} from 'external/gs_tools/src/data';
-import {BaseListenable} from 'external/gs_tools/src/event';
+import { Arrays } from 'external/gs_tools/src/collection';
+import { Field, Serializable } from 'external/gs_tools/src/data';
+import { BaseListenable } from 'external/gs_tools/src/event';
 
-import {DataEvents} from './data-events';
+import { DataEvents } from './data-events';
 
 
 /**

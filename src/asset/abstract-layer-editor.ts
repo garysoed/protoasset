@@ -1,19 +1,19 @@
-import {atomic} from 'external/gs_tools/src/async';
-import {Arrays} from 'external/gs_tools/src/collection';
-import {DisposableFunction} from 'external/gs_tools/src/dispose';
+import { atomic } from 'external/gs_tools/src/async';
+import { Arrays } from 'external/gs_tools/src/collection';
+import { DisposableFunction } from 'external/gs_tools/src/dispose';
 import {
   bind,
   DomHook,
   handle,
-  StringParser} from 'external/gs_tools/src/webc';
+  StringParser } from 'external/gs_tools/src/webc';
 
-import {BaseThemedElement} from 'external/gs_ui/src/common';
-import {ThemeService} from 'external/gs_ui/src/theming';
+import { BaseThemedElement } from 'external/gs_ui/src/common';
+import { ThemeService } from 'external/gs_ui/src/theming';
 
-import {Asset} from '../data/asset';
-import {AssetCollection} from '../data/asset-collection';
-import {BaseLayer} from '../data/base-layer';
-import {DataEvents} from '../data/data-events';
+import { Asset } from '../data/asset';
+import { AssetCollection } from '../data/asset-collection';
+import { BaseLayer } from '../data/base-layer';
+import { DataEvents } from '../data/data-events';
 
 
 export abstract class AbstractLayerEditor<T extends BaseLayer> extends BaseThemedElement {

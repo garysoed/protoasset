@@ -15,7 +15,7 @@ import {
   ARG_DATA_HELPER,
   CONSOLE_ENTRY_DATA_HELPER,
   HELPER_ITEM_DATA_HELPER,
-  HelperView} from './helper-view';
+  HelperView } from './helper-view';
 
 
 describe('ARG_DATA_HELPER', () => {

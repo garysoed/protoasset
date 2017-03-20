@@ -1,23 +1,23 @@
-import {inject} from 'external/gs_tools/src/inject';
+import { inject } from 'external/gs_tools/src/inject';
 import {
     bind,
     BooleanParser,
     customElement,
     DomHook,
     handle,
-    StringParser} from 'external/gs_tools/src/webc';
+    StringParser } from 'external/gs_tools/src/webc';
 
-import {BaseThemedElement} from 'external/gs_ui/src/common';
-import {Event} from 'external/gs_ui/src/const';
-import {RouteService} from 'external/gs_ui/src/routing';
-import {ThemeService} from 'external/gs_ui/src/theming';
+import { BaseThemedElement } from 'external/gs_ui/src/common';
+import { Event } from 'external/gs_ui/src/const';
+import { RouteService } from 'external/gs_ui/src/routing';
+import { ThemeService } from 'external/gs_ui/src/theming';
 
-import {Validate} from 'external/gs_tools/src/valid';
+import { Validate } from 'external/gs_tools/src/valid';
 
-import {Project} from '../data/project';
-import {ProjectCollection} from '../data/project-collection';
-import {RouteFactoryService} from '../routing/route-factory-service';
-import {Views} from '../routing/views';
+import { Project } from '../data/project';
+import { ProjectCollection } from '../data/project-collection';
+import { RouteFactoryService } from '../routing/route-factory-service';
+import { Views } from '../routing/views';
 
 
 /**

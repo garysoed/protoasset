@@ -1,5 +1,5 @@
-import {inject} from 'external/gs_tools/src/inject';
-import {Validate} from 'external/gs_tools/src/valid';
+import { inject } from 'external/gs_tools/src/inject';
+import { Validate } from 'external/gs_tools/src/valid';
 import {
     bind,
     BooleanParser,
@@ -8,18 +8,18 @@ import {
     EnumParser,
     FloatParser,
     handle,
-    StringParser} from 'external/gs_tools/src/webc';
+    StringParser } from 'external/gs_tools/src/webc';
 
-import {BaseThemedElement} from 'external/gs_ui/src/common';
-import {Event} from 'external/gs_ui/src/const';
-import {RouteService} from 'external/gs_ui/src/routing';
-import {ThemeService} from 'external/gs_ui/src/theming';
+import { BaseThemedElement } from 'external/gs_ui/src/common';
+import { Event } from 'external/gs_ui/src/const';
+import { RouteService } from 'external/gs_ui/src/routing';
+import { ThemeService } from 'external/gs_ui/src/theming';
 
-import {Editor} from '../asset/editor';
-import {Asset, AssetType} from '../data/asset';
-import {AssetCollection} from '../data/asset-collection';
-import {RouteFactoryService} from '../routing/route-factory-service';
-import {Views} from '../routing/views';
+import { Editor } from '../asset/editor';
+import { Asset, AssetType } from '../data/asset';
+import { AssetCollection } from '../data/asset-collection';
+import { RouteFactoryService } from '../routing/route-factory-service';
+import { Views } from '../routing/views';
 
 
 /**

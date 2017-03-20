@@ -1,11 +1,11 @@
-import {assert, TestBase} from '../test-base';
+import { assert, TestBase } from '../test-base';
 TestBase.setup();
 
-import {Mocks} from 'external/gs_tools/src/mock';
-import {TestDispose} from 'external/gs_tools/src/testing';
+import { Mocks } from 'external/gs_tools/src/mock';
+import { TestDispose } from 'external/gs_tools/src/testing';
 
-import {TextLayerEditor} from '../asset/text-layer-editor';
-import {HorizontalAlign, TextLayer, VerticalAlign} from '../data/text-layer';
+import { TextLayerEditor } from '../asset/text-layer-editor';
+import { HorizontalAlign, TextLayer, VerticalAlign } from '../data/text-layer';
 
 
 describe('namespace.TextLayerEditor', () => {

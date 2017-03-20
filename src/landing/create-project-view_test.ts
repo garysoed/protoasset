@@ -1,12 +1,12 @@
-import {assert, Matchers, TestBase} from '../test-base';
+import { assert, Matchers, TestBase } from '../test-base';
 TestBase.setup();
 
-import {Mocks} from 'external/gs_tools/src/mock';
-import {TestDispose} from 'external/gs_tools/src/testing';
+import { Mocks } from 'external/gs_tools/src/mock';
+import { TestDispose } from 'external/gs_tools/src/testing';
 
-import {Project} from '../data/project';
+import { Project } from '../data/project';
 
-import {CreateProjectView} from './create-project-view';
+import { CreateProjectView } from './create-project-view';
 
 
 describe('landing.CreateProjectView', () => {

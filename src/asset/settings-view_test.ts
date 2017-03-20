@@ -1,15 +1,15 @@
-import {assert, TestBase} from '../test-base';
+import { assert, TestBase } from '../test-base';
 TestBase.setup();
 
-import {Serializer} from 'external/gs_tools/src/data';
-import {Mocks} from 'external/gs_tools/src/mock';
-import {TestDispose} from 'external/gs_tools/src/testing';
+import { Serializer } from 'external/gs_tools/src/data';
+import { Mocks } from 'external/gs_tools/src/mock';
+import { TestDispose } from 'external/gs_tools/src/testing';
 
-import {RouteServiceEvents} from 'external/gs_ui/src/routing';
+import { RouteServiceEvents } from 'external/gs_ui/src/routing';
 
-import {AssetType} from '../data/asset';
+import { AssetType } from '../data/asset';
 
-import {SettingsView} from './settings-view';
+import { SettingsView } from './settings-view';
 
 
 describe('asset.SettingsView', () => {

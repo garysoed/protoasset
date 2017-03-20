@@ -1,7 +1,7 @@
-import {assert, TestBase} from '../test-base';
+import { assert, TestBase } from '../test-base';
 TestBase.setup();
 
-import {Project} from './project';
+import { Project } from './project';
 
 
 describe('data.Project', () => {

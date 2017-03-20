@@ -1,13 +1,13 @@
-import {assert, Matchers, TestBase} from '../test-base';
+import { assert, Matchers, TestBase } from '../test-base';
 TestBase.setup();
 
-import {Mocks} from 'external/gs_tools/src/mock';
-import {TestDispose} from 'external/gs_tools/src/testing';
+import { Mocks } from 'external/gs_tools/src/mock';
+import { TestDispose } from 'external/gs_tools/src/testing';
 
-import {BaseLayer} from '../data/base-layer';
-import {DataEvents} from '../data/data-events';
+import { BaseLayer } from '../data/base-layer';
+import { DataEvents } from '../data/data-events';
 
-import {AbstractLayerEditor} from './abstract-layer-editor';
+import { AbstractLayerEditor } from './abstract-layer-editor';
 
 
 class TestLayerEditor extends AbstractLayerEditor<BaseLayer> {

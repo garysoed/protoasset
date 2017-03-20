@@ -1,16 +1,16 @@
-import {assert, Matchers, TestBase} from '../test-base';
+import { assert, Matchers, TestBase } from '../test-base';
 TestBase.setup();
 
-import {Fakes, Mocks} from 'external/gs_tools/src/mock';
-import {TestDispose} from 'external/gs_tools/src/testing';
+import { Fakes, Mocks } from 'external/gs_tools/src/mock';
+import { TestDispose } from 'external/gs_tools/src/testing';
 
-import {RouteServiceEvents} from 'external/gs_ui/src/routing';
+import { RouteServiceEvents } from 'external/gs_ui/src/routing';
 
-import {SampleDataServiceEvent} from '../common/sample-data-service-event';
-import {DataEvents} from '../data/data-events';
-import {TextLayer} from '../data/text-layer';
+import { SampleDataServiceEvent } from '../common/sample-data-service-event';
+import { DataEvents } from '../data/data-events';
+import { TextLayer } from '../data/text-layer';
 
-import {LayerPreview} from './layer-preview';
+import { LayerPreview } from './layer-preview';
 
 
 describe('asset.LayerPreview', () => {

@@ -1,5 +1,5 @@
-import {Cases} from 'external/gs_tools/src/string';
-import {Validate} from 'external/gs_tools/src/valid';
+import { Cases } from 'external/gs_tools/src/string';
+import { Validate } from 'external/gs_tools/src/valid';
 
 
 export const BuiltInHelpers = {

@@ -1,10 +1,10 @@
-import {assert, Matchers, TestBase} from '../test-base';
+import { assert, Matchers, TestBase } from '../test-base';
 TestBase.setup();
 
-import {TestDispose} from 'external/gs_tools/src/testing';
+import { TestDispose } from 'external/gs_tools/src/testing';
 
-import {DataEvents} from './data-events';
-import {Helper} from './helper';
+import { DataEvents } from './data-events';
+import { Helper } from './helper';
 
 
 describe('data.Helper', () => {

@@ -1,9 +1,9 @@
-import {assert, TestBase} from '../test-base';
+import { assert, TestBase } from '../test-base';
 TestBase.setup();
 
-import {Mocks} from 'external/gs_tools/src/mock';
+import { Mocks } from 'external/gs_tools/src/mock';
 
-import {AssetMainRouteFactory} from './asset-main-route-factory';
+import { AssetMainRouteFactory } from './asset-main-route-factory';
 
 
 describe('routing.AssetMainRouteFactory', () => {

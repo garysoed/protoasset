@@ -1,10 +1,10 @@
-import {BaseListenable} from 'external/gs_tools/src/event';
-import {bind, inject} from 'external/gs_tools/src/inject';
-import {CachedStorage, LocalStorage} from 'external/gs_tools/src/store';
+import { BaseListenable } from 'external/gs_tools/src/event';
+import { bind, inject } from 'external/gs_tools/src/inject';
+import { CachedStorage, LocalStorage } from 'external/gs_tools/src/store';
 
-import {CollectionEvents} from './collection-events';
-import {CollectionStorage} from './collection-storage';
-import {Project, ProjectSearchIndex} from './project';
+import { CollectionEvents } from './collection-events';
+import { CollectionStorage } from './collection-storage';
+import { Project, ProjectSearchIndex } from './project';
 
 
 /**
