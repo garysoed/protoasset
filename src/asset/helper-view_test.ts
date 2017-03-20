@@ -3,7 +3,7 @@ TestBase.setup();
 
 import { Arrays } from 'external/gs_tools/src/collection';
 import { DomEvent, ListenableDom } from 'external/gs_tools/src/event';
-import { Mocks } from 'external/gs_tools/src/mock';
+import { Fakes, Mocks } from 'external/gs_tools/src/mock';
 import { TestDispose } from 'external/gs_tools/src/testing';
 
 import { RouteServiceEvents } from 'external/gs_ui/src/routing';
@@ -203,16 +203,10 @@ describe('HELPER_ITEM_DATA_HELPER', () => {
       const helperId = 'helperId';
       const projectId = 'projectId';
       const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
-      mockElement.getAttribute.and.callFake((attrName: string) => {
-        switch (attrName) {
-          case 'asset-id':
-            return assetId;
-          case 'helper-id':
-            return helperId;
-          case 'project-id':
-            return projectId;
-        }
-      });
+      Fakes.build(mockElement.getAttribute)
+          .when('asset-id').return(assetId)
+          .when('helper-id').return(helperId)
+          .when('project-id').return(projectId);
       assert(HELPER_ITEM_DATA_HELPER.get(mockElement)).to.equal({assetId, helperId, projectId});
       assert(mockElement.getAttribute).to.haveBeenCalledWith('asset-id');
       assert(mockElement.getAttribute).to.haveBeenCalledWith('helper-id');
@@ -221,46 +215,28 @@ describe('HELPER_ITEM_DATA_HELPER', () => {
 
     it('should return null if assetId is null', () => {
       const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
-      mockElement.getAttribute.and.callFake((attrName: string) => {
-        switch (attrName) {
-          case 'asset-id':
-            return null;
-          case 'helper-id':
-            return 'helperId';
-          case 'project-id':
-            return 'projectId';
-        }
-      });
+      Fakes.build(mockElement.getAttribute)
+          .when('asset-id').return(null)
+          .when('helper-id').return('helperId')
+          .when('project-id').return('projectId');
       assert(HELPER_ITEM_DATA_HELPER.get(mockElement)).to.beNull();
     });
 
     it('should return null if helperId is null', () => {
       const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
-      mockElement.getAttribute.and.callFake((attrName: string) => {
-        switch (attrName) {
-          case 'asset-id':
-            return 'assetId';
-          case 'helper-id':
-            return null;
-          case 'project-id':
-            return 'projectId';
-        }
-      });
+      Fakes.build(mockElement.getAttribute)
+          .when('asset-id').return('assetId')
+          .when('helper-id').return(null)
+          .when('project-id').return('projectId');
       assert(HELPER_ITEM_DATA_HELPER.get(mockElement)).to.beNull();
     });
 
     it('should return null if projectId is null', () => {
       const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
-      mockElement.getAttribute.and.callFake((attrName: string) => {
-        switch (attrName) {
-          case 'asset-id':
-            return 'assetId';
-          case 'helper-id':
-            return 'helperId';
-          case 'project-id':
-            return null;
-        }
-      });
+      Fakes.build(mockElement.getAttribute)
+          .when('asset-id').return('assetId')
+          .when('helper-id').return('helperId')
+          .when('project-id').return(null);
       assert(HELPER_ITEM_DATA_HELPER.get(mockElement)).to.beNull();
     });
   });

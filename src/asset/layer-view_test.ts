@@ -2,7 +2,7 @@ import { assert, Matchers, TestBase } from '../test-base';
 TestBase.setup();
 
 import { DomEvent, ListenableDom } from 'external/gs_tools/src/event';
-import { Mocks } from 'external/gs_tools/src/mock';
+import { Fakes, Mocks } from 'external/gs_tools/src/mock';
 import { TestDispose } from 'external/gs_tools/src/testing';
 import { BooleanParser, EnumParser } from 'external/gs_tools/src/webc';
 
@@ -56,16 +56,10 @@ describe('LAYER_ITEM_DATA_HELPER', () => {
       const layerId = 'layerId';
       const projectId = 'projectId';
       const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
-      mockElement.getAttribute.and.callFake((attrName: string) => {
-        switch (attrName) {
-          case 'asset-id':
-            return assetId;
-          case 'layer-id':
-            return layerId;
-          case 'project-id':
-            return projectId;
-        }
-      });
+      Fakes.build(mockElement.getAttribute)
+          .when('asset-id').return(assetId)
+          .when('layer-id').return(layerId)
+          .when('project-id').return(projectId);
       assert(LAYER_ITEM_DATA_HELPER.get(mockElement)).to.equal({assetId, layerId, projectId});
       assert(mockElement.getAttribute).to.haveBeenCalledWith('asset-id');
       assert(mockElement.getAttribute).to.haveBeenCalledWith('layer-id');
@@ -74,46 +68,28 @@ describe('LAYER_ITEM_DATA_HELPER', () => {
 
     it('should return null if assetId is null', () => {
       const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
-      mockElement.getAttribute.and.callFake((attrName: string) => {
-        switch (attrName) {
-          case 'asset-id':
-            return null;
-          case 'layer-id':
-            return 'layerId';
-          case 'project-id':
-            return 'projectId';
-        }
-      });
+      Fakes.build(mockElement.getAttribute)
+          .when('asset-id').return(null)
+          .when('layer-id').return('layerId')
+          .when('project-id').return('projectId');
       assert(LAYER_ITEM_DATA_HELPER.get(mockElement)).to.beNull();
     });
 
     it('should return null if layerId is null', () => {
       const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
-      mockElement.getAttribute.and.callFake((attrName: string) => {
-        switch (attrName) {
-          case 'asset-id':
-            return 'assetId';
-          case 'layer-id':
-            return null;
-          case 'project-id':
-            return 'projectId';
-        }
-      });
+      Fakes.build(mockElement.getAttribute)
+          .when('asset-id').return('assetId')
+          .when('layer-id').return(null)
+          .when('project-id').return('projectId');
       assert(LAYER_ITEM_DATA_HELPER.get(mockElement)).to.beNull();
     });
 
     it('should return null if projectId is null', () => {
       const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
-      mockElement.getAttribute.and.callFake((attrName: string) => {
-        switch (attrName) {
-          case 'asset-id':
-            return 'assetId';
-          case 'layer-id':
-            return 'layerId';
-          case 'project-id':
-            return null;
-        }
-      });
+      Fakes.build(mockElement.getAttribute)
+          .when('asset-id').return('assetId')
+          .when('layer-id').return('layerId')
+          .when('project-id').return(null);
       assert(LAYER_ITEM_DATA_HELPER.get(mockElement)).to.beNull();
     });
   });
@@ -152,16 +128,10 @@ describe('LAYER_PREVIEW_DATA_HELPER', () => {
       const layerId = 'layerId';
       const mode = LayerPreviewMode.NORMAL;
       const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
-      mockElement.getAttribute.and.callFake((attrName: string) => {
-        switch (attrName) {
-          case 'is-selected':
-            return BooleanParser.stringify(isSelected);
-          case 'layer-id':
-            return layerId;
-          case 'preview-mode':
-            return EnumParser(LayerPreviewMode).stringify(mode);
-        }
-      });
+      Fakes.build(mockElement.getAttribute)
+          .when('is-selected').return(BooleanParser.stringify(isSelected))
+          .when('layer-id').return(layerId)
+          .when('preview-mode').return(EnumParser(LayerPreviewMode).stringify(mode));
       assert(LAYER_PREVIEW_DATA_HELPER.get(mockElement)).to.equal({isSelected, layerId, mode});
       assert(mockElement.getAttribute).to.haveBeenCalledWith('is-selected');
       assert(mockElement.getAttribute).to.haveBeenCalledWith('layer-id');
@@ -170,46 +140,31 @@ describe('LAYER_PREVIEW_DATA_HELPER', () => {
 
     it('should return null if isSelected is null', () => {
       const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
-      mockElement.getAttribute.and.callFake((attrName: string) => {
-        switch (attrName) {
-          case 'is-selected':
-            return null;
-          case 'layer-id':
-            return 'layerId';
-          case 'preview-mode':
-            return EnumParser(LayerPreviewMode).stringify(LayerPreviewMode.NORMAL);
-        }
-      });
+      Fakes.build(mockElement.getAttribute)
+          .when('is-selected').return(null)
+          .when('layer-id').return('layerId')
+          .when('preview-mode')
+              .return(EnumParser(LayerPreviewMode).stringify(LayerPreviewMode.NORMAL));
       assert(LAYER_PREVIEW_DATA_HELPER.get(mockElement)).to.beNull();
     });
 
     it('should return null if layer ID is null', () => {
       const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
-      mockElement.getAttribute.and.callFake((attrName: string) => {
-        switch (attrName) {
-          case 'is-selected':
-            return BooleanParser.stringify(true);
-          case 'layer-id':
-            return null;
-          case 'preview-mode':
-            return EnumParser(LayerPreviewMode).stringify(LayerPreviewMode.NORMAL);
-        }
-      });
-      assert(LAYER_PREVIEW_DATA_HELPER.get(mockElement)).to.beNull();
+      Fakes.build(mockElement.getAttribute)
+          .when('is-selected').return(BooleanParser.stringify(true))
+          .when('layer-id').return(null)
+          .when('preview-mode')
+              .return(EnumParser(LayerPreviewMode).stringify(LayerPreviewMode.NORMAL));
+      assert(LAYER_PREVIEW_DATA_HELPER
+          .get(mockElement)).to.beNull();
     });
 
     it('should return null if previewMode is null', () => {
       const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
-      mockElement.getAttribute.and.callFake((attrName: string) => {
-        switch (attrName) {
-          case 'is-selected':
-            return BooleanParser.stringify(true);
-          case 'layer-id':
-            return 'layerId';
-          case 'preview-mode':
-            return null;
-        }
-      });
+      Fakes.build(mockElement.getAttribute)
+          .when('is-selected').return(BooleanParser.stringify(true))
+          .when('layer-id').return('layerId')
+          .when('preview-mode').return(null);
       assert(LAYER_PREVIEW_DATA_HELPER.get(mockElement)).to.beNull();
     });
   });

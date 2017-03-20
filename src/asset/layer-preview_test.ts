@@ -1,7 +1,7 @@
 import {assert, Matchers, TestBase} from '../test-base';
 TestBase.setup();
 
-import {Mocks} from 'external/gs_tools/src/mock';
+import {Fakes, Mocks} from 'external/gs_tools/src/mock';
 import {TestDispose} from 'external/gs_tools/src/testing';
 
 import {RouteServiceEvents} from 'external/gs_ui/src/routing';
@@ -93,14 +93,9 @@ describe('asset.LayerPreview', () => {
       const compiledCss = 'compiledCss';
       const compiledHtml = 'compiledHtml';
       const mockCompiler = jasmine.createSpyObj('Compiler', ['compile']);
-      mockCompiler.compile.and.callFake((template: any) => {
-        switch (template) {
-          case css:
-            return compiledCss;
-          case html:
-            return compiledHtml;
-        }
-      });
+      Fakes.build(mockCompiler.compile)
+          .when(css).return(compiledCss)
+          .when(html).return(compiledHtml);
       mockTemplateCompilerService.create.and.returnValue(mockCompiler);
 
       spyOn(preview['rootInnerHtmlHook_'], 'set');

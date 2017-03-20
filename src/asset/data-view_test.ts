@@ -1,7 +1,7 @@
 import { assert, TestBase } from '../test-base';
 TestBase.setup();
 
-import { Mocks } from 'external/gs_tools/src/mock';
+import { Fakes, Mocks } from 'external/gs_tools/src/mock';
 import { TestDispose } from 'external/gs_tools/src/testing';
 
 import { InMemoryDataSource } from '../data/in-memory-data-source';
@@ -79,14 +79,9 @@ describe('PREVIEW_ROW_DATA_HELPER', () => {
       mockRoot.childElementCount = 2;
 
       let mockChildrenList = jasmine.createSpyObj('ChildrenList', ['item']);
-      mockChildrenList.item.and.callFake((index: number) => {
-        switch (index) {
-          case 0:
-            return cell1;
-          case 1:
-            return cell2;
-        }
-      });
+      Fakes.build(mockChildrenList.item)
+          .when(0).return(cell1)
+          .when(1).return(cell2);
       mockRoot.children = mockChildrenList;
 
       PREVIEW_ROW_DATA_HELPER.set([data1, data2], mockRoot, Mocks.object('instance'));
