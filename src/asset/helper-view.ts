@@ -160,7 +160,7 @@ export const HELPER_ITEM_DATA_HELPER: ChildElementDataHelper<HelperIdParams> = {
   templateKey: 'src/asset/helper-view',
 })
 export class HelperView extends BaseThemedElement {
-  @bind('#args').childrenElements<string>(ARG_DATA_HELPER, 0)
+  @bind('#args').childrenElements<string>(ARG_DATA_HELPER, 0, 1)
   readonly argElementsHook_: DomHook<string[]>;
 
   @bind('#argInput').attribute('gs-value', StringParser)

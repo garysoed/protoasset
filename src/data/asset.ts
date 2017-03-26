@@ -23,6 +23,7 @@ export type AssetSearchIndex = {
 
 @Serializable('asset')
 export class Asset extends BaseListenable<DataEvents> {
+  @Field('filename') private filename_: string;
   @Field('height') private height_: number;
   @Field('id') private id_: string;
   @Field('name') private name_: string;
@@ -35,6 +36,7 @@ export class Asset extends BaseListenable<DataEvents> {
 
   constructor(id: string, projectId: string) {
     super();
+    this.filename_ = 'unnamed_asset.png';
     this.height_ = NaN;
     this.id_ = id;
     this.name_ = 'Unnamed Asset';
@@ -85,6 +87,13 @@ export class Asset extends BaseListenable<DataEvents> {
    */
   getData(): IDataSource<string[][]> | null {
     return this.data_;
+  }
+
+  /**
+   * @return The filename of the assets generated.
+   */
+  getFilename(): string {
+    return this.filename_;
   }
 
   /**
@@ -206,8 +215,25 @@ export class Asset extends BaseListenable<DataEvents> {
    * @param data The data to set.
    */
   setData(data: IDataSource<string[][]>): void {
+    if (this.data_ === data) {
+      return;
+    }
+
     this.dispatch(DataEvents.CHANGED, () => {
       this.data_ = data;
+    });
+  }
+
+  /**
+   * @param filename The filename of the assets generated.
+   */
+  setFilename(filename: string): void {
+    if (this.filename_ === filename) {
+      return;
+    }
+
+    this.dispatch(DataEvents.CHANGED, () => {
+      this.filename_ = filename;
     });
   }
 

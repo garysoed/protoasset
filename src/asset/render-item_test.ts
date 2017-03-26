@@ -22,6 +22,16 @@ describe('asset.RenderItem', () => {
     TestDispose.add(item);
   });
 
+  describe('onFilenameChanged_', () => {
+    it('should set the label text correctly', () => {
+      const filename = 'filename';
+      spyOn(item.filenameHook_, 'get').and.returnValue(filename);
+      spyOn(item.labelTextHook_, 'set');
+      item.onFilenameChanged_();
+      assert(item.labelTextHook_.set).to.haveBeenCalledWith(filename);
+    });
+  });
+
   describe('onRenderDataChanged_', () => {
     it('should render correctly', async (done: any) => {
       spyOn(item.loadingHiddenHook_, 'set');

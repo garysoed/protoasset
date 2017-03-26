@@ -4,7 +4,28 @@
     background-repeat: no-repeat;
     background-position: center;
   }
+
+  :host(:hover) {
+    --paLabelDisplay: block;
+  }
+
+  :host {
+    --paLabelDisplay: none;
+  }
+
+  #label {
+    background-color: black;
+    bottom: 0;
+    color: white;
+    display: var(--paLabelDisplay);
+    height: 3rem;
+    line-height: 3rem;
+    position: absolute;
+    text-align: center;
+    width: 100%;
+  }
 </style>
 <div id="display" fill-parent flex-align="center" flex-justify="center" layout="row">
   <gs-indefinite-loading hidden id="loading"></gs-indefinite-loading>
+  <div id="label">Label</div>
 </div>

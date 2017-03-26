@@ -221,6 +221,43 @@ describe('data.Asset', () => {
           .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
       assert(asset.getData()).to.equal(data);
     });
+
+    it('should do nothing if the data is the same', () => {
+      spyOn(asset, 'dispatch');
+
+      const data = Mocks.object('data');
+      asset['data_'] = data;
+      asset.setData(data);
+
+      assert(asset.dispatch).toNot.haveBeenCalled();
+      assert(asset.getData()).to.equal(data);
+    });
+  });
+
+  describe('setFilename', () => {
+    it('should dispatch the CHANGED event', () => {
+      spyOn(asset, 'dispatch').and.callFake((event: any, callback: Function) => {
+        callback();
+      });
+
+      const filename = 'filename';
+      asset.setFilename(filename);
+
+      assert(asset.dispatch).to
+          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+      assert(asset.getFilename()).to.equal(filename);
+    });
+
+    it('should do nothing if the filename is the same', () => {
+      spyOn(asset, 'dispatch');
+
+      const filename = 'filename';
+      asset['filename_'] = filename;
+      asset.setFilename(filename);
+
+      assert(asset.dispatch).toNot.haveBeenCalled();
+      assert(asset.getFilename()).to.equal(filename);
+    });
   });
 
   describe('setHeight', () => {

@@ -34,6 +34,9 @@ export class RenderItem extends BaseThemedElement {
   @bind(null).attribute('file-name', StringParser)
   readonly filenameHook_: DomHook<string>;
 
+  @bind('#label').innerText()
+  readonly labelTextHook_: DomHook<string>;
+
   @bind('#loading').attribute('hidden', BooleanParser)
   readonly loadingHiddenHook_: DomHook<boolean>;
 
@@ -61,12 +64,18 @@ export class RenderItem extends BaseThemedElement {
     this.assetIdHook_ = DomHook.of<string>();
     this.displayStyleHook_ = DomHook.of<CSSStyleDeclaration>();
     this.filenameHook_ = DomHook.of<string>();
+    this.labelTextHook_ = DomHook.of<string>();
     this.loadingHiddenHook_ = DomHook.of<boolean>(true);
     this.projectIdHook_ = DomHook.of<string>();
     this.renderKeyHook_ = DomHook.of<string>();
     this.renderOutHook_ = DomHook.of<string>();
     this.renderService_ = renderService;
     this.rowHook_ = DomHook.of<number>();
+  }
+
+  @handle(null).attributeChange('file-name')
+  onFilenameChanged_(): void {
+    this.labelTextHook_.set(this.filenameHook_.get() || '');
   }
 
   @handle(null).attributeChange('asset-id')

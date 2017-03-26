@@ -1,5 +1,6 @@
 import { atomic } from 'external/gs_tools/src/async';
 import { Arrays } from 'external/gs_tools/src/collection';
+import { DisposableFunction } from 'external/gs_tools/src/dispose';
 import { DomEvent } from 'external/gs_tools/src/event';
 import { inject } from 'external/gs_tools/src/inject';
 import { SimpleIdGenerator } from 'external/gs_tools/src/random';
@@ -13,11 +14,13 @@ import {
   StringParser } from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
-import { RouteService } from 'external/gs_ui/src/routing';
+import { RouteService, RouteServiceEvents } from 'external/gs_ui/src/routing';
 import { ThemeService } from 'external/gs_ui/src/theming';
 
 import { RenderItem } from '../asset/render-item';
+import { Asset } from '../data/asset';
 import { AssetCollection } from '../data/asset-collection';
+import { DataEvents } from '../data/data-events';
 import { TemplateCompilerService } from '../data/template-compiler-service';
 import { RouteFactoryService } from '../routing/route-factory-service';
 import { Views } from '../routing/views';
@@ -89,6 +92,8 @@ export class RenderView extends BaseThemedElement {
   private readonly routeService_: RouteService<Views>;
   private readonly templateCompilerService_: TemplateCompilerService;
 
+  private assetChangedDeregister_: DisposableFunction | null;
+
   constructor(
       @inject('pa.data.AssetCollection') assetCollection: AssetCollection,
       @inject('pa.routing.RouteFactoryService') routeFactoryService: RouteFactoryService,
@@ -96,6 +101,7 @@ export class RenderView extends BaseThemedElement {
       @inject('pa.data.TemplateCompilerService') templateCompilerService: TemplateCompilerService,
       @inject('theming.ThemeService') themeService: ThemeService) {
     super(themeService);
+    this.assetChangedDeregister_ = null;
     this.assetCollection_ = assetCollection;
     this.expectedRenderKeys_ = new Set<string>();
     this.filenameInputHook_ = DomHook.of<string>();
@@ -106,20 +112,74 @@ export class RenderView extends BaseThemedElement {
     this.templateCompilerService_ = templateCompilerService;
   }
 
-  @atomic()
-  @handle('#renderButton').event(DomEvent.CLICK)
-  async onRenderButtonClick_(): Promise<void> {
+  /**
+   * @override
+   */
+  disposeInternal(): void {
+    if (this.assetChangedDeregister_ !== null) {
+      this.assetChangedDeregister_.dispose();
+    }
+
+    super.disposeInternal();
+  }
+
+  private getAsset_(): Promise<Asset | null> {
     const params = this.routeService_.getParams(this.routeFactoryService_.render());
     if (params === null) {
-      return;
+      return Promise.resolve(null);
     }
 
     const {assetId, projectId} = params;
     if (assetId === null || projectId === null) {
+      return Promise.resolve(null);
+    }
+
+    return this.assetCollection_.get(projectId, assetId);
+  }
+
+  private async onAssetChanged_(): Promise<void> {
+    const asset = await this.getAsset_();
+    if (asset === null) {
       return;
     }
 
-    const asset = await this.assetCollection_.get(projectId, assetId);
+    this.filenameInputHook_.set(asset.getFilename());
+  }
+
+  /**
+   * @override
+   */
+  onCreated(element: HTMLElement): void {
+    super.onCreated(element);
+    this.addDisposable(
+        this.routeService_.on(
+            RouteServiceEvents.CHANGED,
+            this.onRouteChanged_,
+            this));
+    this.onRouteChanged_();
+  }
+
+  @atomic()
+  @handle('#filenameInput').attributeChange('gs-value')
+  async onFilenameChanged_(): Promise<void> {
+    const asset = await this.getAsset_();
+    if (asset === null) {
+      return;
+    }
+
+    const filename = this.filenameInputHook_.get();
+    if (filename === null) {
+      return;
+    }
+
+    asset.setFilename(filename);
+    this.assetCollection_.update(asset);
+  }
+
+  @atomic()
+  @handle('#renderButton').event(DomEvent.CLICK)
+  async onRenderButtonClick_(): Promise<void> {
+    const asset = await this.getAsset_();
     if (asset === null) {
       return;
     }
@@ -146,10 +206,10 @@ export class RenderView extends BaseThemedElement {
 
           renderKeys.push(key);
           renderData.push({
-            assetId,
+            assetId: asset.getId(),
             filename,
             key,
-            projectId,
+            projectId: asset.getProjectId(),
             row: index,
           });
         });
@@ -158,5 +218,20 @@ export class RenderView extends BaseThemedElement {
       this.expectedRenderKeys_.add(key);
     });
     this.rendersChildrenHook_.set(renderData);
+  }
+
+  private async onRouteChanged_(): Promise<void> {
+    if (this.assetChangedDeregister_ !== null) {
+      this.assetChangedDeregister_.dispose();
+      this.assetChangedDeregister_ = null;
+    }
+
+    const asset = await this.getAsset_();
+    if (asset === null) {
+      return;
+    }
+
+    this.assetChangedDeregister_ = asset.on(DataEvents.CHANGED, this.onAssetChanged_, this);
+    this.onAssetChanged_();
   }
 }
