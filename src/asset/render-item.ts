@@ -121,16 +121,25 @@ export class RenderItem extends BaseThemedElement {
       return;
     }
 
-    const dataUri = await this.renderService_.render(asset, data);
-    if (this.renderKeyHook_.get() !== key) {
+    const element = this.getElement();
+    if (element === null) {
       return;
     }
-    this.loadingHiddenHook_.set(true);
 
-    const displayStyle = this.displayStyleHook_.get();
-    if (dataUri !== null && displayStyle !== null) {
-      displayStyle.backgroundImage = `url(${dataUri})`;
-      this.renderOutHook_.set(dataUri);
-    }
+    element.dispatchAsync('render', async () => {
+      const dataUri = await this.renderService_.render(asset, data);
+      if (this.renderKeyHook_.get() !== key) {
+        return;
+      }
+      this.loadingHiddenHook_.set(true);
+
+      if (dataUri !== null) {
+        const displayStyle = this.displayStyleHook_.get();
+        if (displayStyle !== null) {
+          displayStyle.backgroundImage = `url(${dataUri})`;
+        }
+        this.renderOutHook_.set(dataUri);
+      }
+    });
   }
 }

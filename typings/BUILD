@@ -10,5 +10,6 @@ ts_library(
       "//typings/globals/fuse",
       "//typings/globals/handlebars",
       "//typings/globals/html2canvas",
+      "//typings/globals/jszip",
     ]
 )

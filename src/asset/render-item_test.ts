@@ -1,7 +1,8 @@
 import { assert, TestBase } from '../test-base';
 TestBase.setup();
 
-import { Mocks } from 'external/gs_tools/src/mock';
+import { Matchers } from 'external/gs_tools/src/jasmine';
+import { Fakes, Mocks } from 'external/gs_tools/src/mock';
 import { TestDispose } from 'external/gs_tools/src/testing';
 
 import { RenderItem } from '../asset/render-item';
@@ -250,11 +251,18 @@ describe('asset.RenderItem', () => {
 
       spyOn(item.renderOutHook_, 'set');
 
+      const mockElement = jasmine.createSpyObj('Element', ['dispatchAsync']);
+      Fakes.build(mockElement.dispatchAsync).call((type: string, handler: () => any) => {
+        handler();
+      });
+      spyOn(item, 'getElement').and.returnValue(mockElement);
+
       await item['render_'](asset, data, key);
       assert(item.renderOutHook_.set).to.haveBeenCalledWith(dataUri);
       assert(displayStyle.backgroundImage).to.equal(`url(${dataUri})`);
       assert(item.loadingHiddenHook_.set).to.haveBeenCalledWith(true);
       assert(mockRenderService.render).to.haveBeenCalledWith(asset, data);
+      assert(mockElement.dispatchAsync).to.haveBeenCalledWith('render', Matchers.any(Function));
     });
 
     it('should just hide the loading indicator if dataUri cannot be found', async (done: any) => {
@@ -273,6 +281,12 @@ describe('asset.RenderItem', () => {
       spyOn(item.loadingHiddenHook_, 'set');
 
       spyOn(item.renderOutHook_, 'set');
+
+      const mockElement = jasmine.createSpyObj('Element', ['dispatchAsync']);
+      Fakes.build(mockElement.dispatchAsync).call((type: string, handler: () => any) => {
+        handler();
+      });
+      spyOn(item, 'getElement').and.returnValue(mockElement);
 
       await item['render_'](asset, data, key);
       assert(item.renderOutHook_.set).toNot.haveBeenCalled();
@@ -299,8 +313,13 @@ describe('asset.RenderItem', () => {
 
           spyOn(item.renderOutHook_, 'set');
 
+          const mockElement = jasmine.createSpyObj('Element', ['dispatchAsync']);
+          Fakes.build(mockElement.dispatchAsync).call((type: string, handler: () => any) => {
+            handler();
+          });
+          spyOn(item, 'getElement').and.returnValue(mockElement);
+
           await item['render_'](asset, data, key);
-          assert(item.renderOutHook_.set).toNot.haveBeenCalled();
           assert(item.loadingHiddenHook_.set).to.haveBeenCalledWith(true);
           assert(mockRenderService.render).to.haveBeenCalledWith(asset, data);
         });
@@ -321,6 +340,12 @@ describe('asset.RenderItem', () => {
           spyOn(item.loadingHiddenHook_, 'get').and.returnValue(false);
           spyOn(item.loadingHiddenHook_, 'set');
 
+          const mockElement = jasmine.createSpyObj('Element', ['dispatchAsync']);
+          Fakes.build(mockElement.dispatchAsync).call((type: string, handler: () => any) => {
+            handler();
+          });
+          spyOn(item, 'getElement').and.returnValue(mockElement);
+
           await item['render_'](asset, data, key);
           assert(item.loadingHiddenHook_.set).toNot.haveBeenCalled();
           assert(mockRenderService.render).to.haveBeenCalledWith(asset, data);
@@ -335,6 +360,29 @@ describe('asset.RenderItem', () => {
       spyOn(item.loadingHiddenHook_, 'set');
 
       await item['render_'](asset, data, 'key');
+      assert(item.loadingHiddenHook_.set).toNot.haveBeenCalled();
+      assert(mockRenderService.render).toNot.haveBeenCalled();
+    });
+
+    it('should do nothing if element is null', async (done: any) => {
+      const asset = Mocks.object('asset');
+      const data = Mocks.object('data');
+
+      const displayStyle = Mocks.object('displayStyle');
+      spyOn(item.displayStyleHook_, 'get').and.returnValue(displayStyle);
+
+      const key = 'key';
+      spyOn(item.renderKeyHook_, 'get').and.returnValue(key);
+
+      spyOn(item.loadingHiddenHook_, 'get').and.returnValue(false);
+      spyOn(item.loadingHiddenHook_, 'set');
+
+      spyOn(item.renderOutHook_, 'set');
+
+      spyOn(item, 'getElement').and.returnValue(null);
+
+      await item['render_'](asset, data, key);
+      assert(item.renderOutHook_.set).toNot.haveBeenCalled();
       assert(item.loadingHiddenHook_.set).toNot.haveBeenCalled();
       assert(mockRenderService.render).toNot.haveBeenCalled();
     });

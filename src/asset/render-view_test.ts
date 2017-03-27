@@ -1,7 +1,8 @@
 import { assert, TestBase } from '../test-base';
 TestBase.setup();
 
-import { Mocks } from 'external/gs_tools/src/mock';
+import { ListenableDom } from 'external/gs_tools/src/event';
+import { Fakes, Mocks } from 'external/gs_tools/src/mock';
 import { TestDispose } from 'external/gs_tools/src/testing';
 
 import { RouteServiceEvents } from 'external/gs_ui/src/routing';
@@ -14,11 +15,13 @@ describe('RENDER_ITEM_DATA_HELPER', () => {
   describe('create', () => {
     it('should create the correct element', () => {
       const element = Mocks.object('element');
+      const mockInstance = jasmine.createSpyObj('Instance', ['listenToRenderEvent']);
       const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
       mockDocument.createElement.and.returnValue(element);
-      assert(RENDER_ITEM_DATA_HELPER.create(mockDocument, Mocks.object('instance')))
+      assert(RENDER_ITEM_DATA_HELPER.create(mockDocument, mockInstance))
           .to.equal(element);
       assert(mockDocument.createElement).to.haveBeenCalledWith('pa-asset-render-item');
+      assert(mockInstance.listenToRenderEvent).to.haveBeenCalledWith(element);
     });
   });
 
@@ -177,6 +180,8 @@ describe('RENDER_ITEM_DATA_HELPER', () => {
 
 describe('asset.RenderView', () => {
   let mockAssetCollection;
+  let mockDownloadService;
+  let mockJsZipCtor;
   let mockRouteFactoryService;
   let mockRouteService;
   let mockTemplateCompilerService;
@@ -184,11 +189,15 @@ describe('asset.RenderView', () => {
 
   beforeEach(() => {
     mockAssetCollection = jasmine.createSpyObj('AssetCollection', ['get', 'update']);
+    mockDownloadService = jasmine.createSpyObj('DownloadService', ['download']);
+    mockJsZipCtor = jasmine.createSpy('JsZipCtor');
     mockRouteFactoryService = jasmine.createSpyObj('RouteFactoryService', ['render']);
     mockRouteService = jasmine.createSpyObj('RouteService', ['getParams', 'on']);
     mockTemplateCompilerService = jasmine.createSpyObj('TemplateCompilerService', ['create']);
     view = new RenderView(
         mockAssetCollection,
+        mockDownloadService,
+        mockJsZipCtor,
         mockRouteFactoryService,
         mockRouteService,
         mockTemplateCompilerService,
@@ -258,6 +267,22 @@ describe('asset.RenderView', () => {
     });
   });
 
+  describe('listenToRenderEvent', () => {
+    it('should listen to the element correctly', () => {
+      const mockListenableElement = jasmine.createSpyObj('ListenableElement', ['dispose', 'on']);
+      mockListenableElement.on.and.returnValue(Mocks.disposable('onDeregister'));
+      spyOn(ListenableDom, 'of').and.returnValue(mockListenableElement);
+
+      const element = Mocks.object('element');
+      view.listenToRenderEvent(element);
+      assert(mockListenableElement.on).to.haveBeenCalledWith(
+          'render',
+          view['onRendered_'],
+          view);
+      assert(ListenableDom.of).to.haveBeenCalledWith(element);
+    });
+  });
+
   describe('onAssetChanged_', () => {
     it('should update the filename input correctly', async (done: any) => {
       const filename = 'filename';
@@ -285,10 +310,12 @@ describe('asset.RenderView', () => {
       const element = Mocks.object('element');
       mockRouteService.on.and.returnValue(Mocks.disposable('RouteChangedDisposable'));
       spyOn(view, 'onRouteChanged_');
+      spyOn(view.downloadButtonDisabledHook_, 'set');
       view.onCreated(element);
       assert(mockRouteService.on).to
           .haveBeenCalledWith(RouteServiceEvents.CHANGED, view['onRouteChanged_'], view);
       assert(view['onRouteChanged_']).to.haveBeenCalledWith();
+      assert(view.downloadButtonDisabledHook_.set).to.haveBeenCalledWith(true);
     });
   });
 
@@ -364,17 +391,22 @@ describe('asset.RenderView', () => {
         }
       });
       spyOn(view.rendersChildrenHook_, 'set');
+      spyOn(view, 'updateRenderKey_');
+      spyOn(view['fileData_'], 'clear');
 
       await view.onRenderButtonClick_();
       assert(view.rendersChildrenHook_.set).to.haveBeenCalledWith([
         {assetId, filename: filename1, key: key1, projectId, row: 0},
         {assetId, filename: filename2, key: key2, projectId, row: 1},
       ]);
+      assert(view['updateRenderKey_']).to.haveBeenCalledWith();
       assert(view['expectedRenderKeys_']).to.haveElements([key1, key2]);
+      assert(view['fileData_'].clear).to.haveBeenCalledWith();
       assert(mockCompiler1.compile).to.haveBeenCalledWith(filenameTemplate);
       assert(mockCompiler2.compile).to.haveBeenCalledWith(filenameTemplate);
       assert(mockTemplateCompilerService.create).to.haveBeenCalledWith(mockAsset, value1);
       assert(mockTemplateCompilerService.create).to.haveBeenCalledWith(mockAsset, value2);
+      assert(view.rendersChildrenHook_.set).to.haveBeenCalledWith([]);
     });
 
     it('should do nothing if there are no filename templates', async (done: any) => {
@@ -396,7 +428,7 @@ describe('asset.RenderView', () => {
       spyOn(view.rendersChildrenHook_, 'set');
 
       await view.onRenderButtonClick_();
-      assert(view.rendersChildrenHook_.set).toNot.haveBeenCalled();
+      assert(view.rendersChildrenHook_.set).to.haveBeenCalledWith([]);
       assert(view['expectedRenderKeys_']).to.haveElements([]);
     });
 
@@ -417,7 +449,7 @@ describe('asset.RenderView', () => {
       spyOn(view.rendersChildrenHook_, 'set');
 
       await view.onRenderButtonClick_();
-      assert(view.rendersChildrenHook_.set).toNot.haveBeenCalled();
+      assert(view.rendersChildrenHook_.set).to.haveBeenCalledWith([]);
       assert(view['expectedRenderKeys_']).to.haveElements([]);
     });
 
@@ -436,8 +468,114 @@ describe('asset.RenderView', () => {
       spyOn(view.rendersChildrenHook_, 'set');
 
       await view.onRenderButtonClick_();
-      assert(view.rendersChildrenHook_.set).toNot.haveBeenCalled();
+      assert(view.rendersChildrenHook_.set).to.haveBeenCalledWith([]);
       assert(view['expectedRenderKeys_']).to.haveElements([]);
+    });
+  });
+
+  describe('onRendered_', () => {
+    it('should update the bookkeeping and the render key', () => {
+      const dataUrl = 'dataUrl';
+      const filename = 'filename';
+      const renderKey = 'renderKey';
+      const mockTarget = jasmine.createSpyObj('Target', ['getAttribute']);
+      Fakes.build(mockTarget.getAttribute)
+          .when('render-out').return(dataUrl)
+          .when('render-key').return(renderKey)
+          .when('file-name').return(filename);
+      Object.setPrototypeOf(mockTarget, Element.prototype);
+      view['expectedRenderKeys_'].add(renderKey);
+
+      spyOn(view, 'updateRenderKey_');
+
+      const event = Mocks.object('event');
+      event.target = mockTarget;
+      view['onRendered_'](event);
+      assert(view['updateRenderKey_']).to.haveBeenCalledWith();
+      assert(view['fileData_']).to.haveElements([{dataUrl, filename}]);
+      assert(view['expectedRenderKeys_']).to.haveElements([]);
+      assert(mockTarget.getAttribute).to.haveBeenCalledWith('file-name');
+      assert(mockTarget.getAttribute).to.haveBeenCalledWith('render-out');
+      assert(mockTarget.getAttribute).to.haveBeenCalledWith('render-key');
+    });
+
+    it('should do nothing if renderKey is null', () => {
+      const dataUrl = 'dataUrl';
+      const filename = 'filename';
+      const renderKey = 'renderKey';
+      const mockTarget = jasmine.createSpyObj('Target', ['getAttribute']);
+      Fakes.build(mockTarget.getAttribute)
+          .when('render-out').return(dataUrl)
+          .when('render-key').return(null)
+          .when('file-name').return(filename);
+      Object.setPrototypeOf(mockTarget, Element.prototype);
+      view['expectedRenderKeys_'].add(renderKey);
+
+      spyOn(view, 'updateRenderKey_');
+
+      const event = Mocks.object('event');
+      event.target = mockTarget;
+      view['onRendered_'](event);
+      assert(view['updateRenderKey_']).toNot.haveBeenCalled();
+      assert(view['fileData_']).to.haveElements([]);
+      assert(view['expectedRenderKeys_']).to.haveElements([renderKey]);
+    });
+
+    it('should do nothing if dataUrl is null', () => {
+      const filename = 'filename';
+      const renderKey = 'renderKey';
+      const mockTarget = jasmine.createSpyObj('Target', ['getAttribute']);
+      Fakes.build(mockTarget.getAttribute)
+          .when('render-out').return(null)
+          .when('render-key').return(renderKey)
+          .when('file-name').return(filename);
+      Object.setPrototypeOf(mockTarget, Element.prototype);
+      view['expectedRenderKeys_'].add(renderKey);
+
+      spyOn(view, 'updateRenderKey_');
+
+      const event = Mocks.object('event');
+      event.target = mockTarget;
+      view['onRendered_'](event);
+      assert(view['updateRenderKey_']).toNot.haveBeenCalled();
+      assert(view['fileData_']).to.haveElements([]);
+      assert(view['expectedRenderKeys_']).to.haveElements([renderKey]);
+    });
+
+    it('should do nothing if filename is null', () => {
+      const dataUrl = 'dataUrl';
+      const renderKey = 'renderKey';
+      const mockTarget = jasmine.createSpyObj('Target', ['getAttribute']);
+      Fakes.build(mockTarget.getAttribute)
+          .when('render-out').return(dataUrl)
+          .when('render-key').return(renderKey)
+          .when('file-name').return(null);
+      Object.setPrototypeOf(mockTarget, Element.prototype);
+      view['expectedRenderKeys_'].add(renderKey);
+
+      spyOn(view, 'updateRenderKey_');
+
+      const event = Mocks.object('event');
+      event.target = mockTarget;
+      view['onRendered_'](event);
+      assert(view['updateRenderKey_']).toNot.haveBeenCalled();
+      assert(view['fileData_']).to.haveElements([]);
+      assert(view['expectedRenderKeys_']).to.haveElements([renderKey]);
+    });
+
+    it('should do nothing if target is not an element', () => {
+      const renderKey = 'renderKey';
+      const mockTarget = jasmine.createSpyObj('Target', ['getAttribute']);
+      view['expectedRenderKeys_'].add(renderKey);
+
+      spyOn(view, 'updateRenderKey_');
+
+      const event = Mocks.object('event');
+      event.target = mockTarget;
+      view['onRendered_'](event);
+      assert(view['updateRenderKey_']).toNot.haveBeenCalled();
+      assert(view['fileData_']).to.haveElements([]);
+      assert(view['expectedRenderKeys_']).to.haveElements([renderKey]);
     });
   });
 
@@ -470,6 +608,23 @@ describe('asset.RenderView', () => {
       assert(view['onAssetChanged_']).toNot.haveBeenCalled();
       assert(view['assetChangedDeregister_']).to.beNull();
       assert(mockPreviousDeregister.dispose).to.haveBeenCalledWith();
+    });
+  });
+
+  describe('updateRenderKey_', () => {
+    it('should enable the download button if there are no expected render keys', () => {
+      spyOn(view.downloadButtonDisabledHook_, 'set');
+
+      view['updateRenderKey_']();
+      assert(view.downloadButtonDisabledHook_.set).to.haveBeenCalledWith(false);
+    });
+
+    it('should disable the download button if there is an expected render key', () => {
+      view['expectedRenderKeys_'].add('renderKey');
+      spyOn(view.downloadButtonDisabledHook_, 'set');
+
+      view['updateRenderKey_']();
+      assert(view.downloadButtonDisabledHook_.set).to.haveBeenCalledWith(true);
     });
   });
 });

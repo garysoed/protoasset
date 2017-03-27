@@ -1,21 +1,25 @@
 import { atomic } from 'external/gs_tools/src/async';
-import { Arrays } from 'external/gs_tools/src/collection';
+import { InstanceofType } from 'external/gs_tools/src/check';
+import { Arrays, Sets } from 'external/gs_tools/src/collection';
 import { DisposableFunction } from 'external/gs_tools/src/dispose';
-import { DomEvent } from 'external/gs_tools/src/event';
+import { DomEvent, ListenableDom } from 'external/gs_tools/src/event';
 import { inject } from 'external/gs_tools/src/inject';
 import { SimpleIdGenerator } from 'external/gs_tools/src/random';
 import {
   bind,
+  BooleanParser,
   ChildElementDataHelper,
   customElement,
   DomHook,
   handle,
   IntegerParser,
-  StringParser } from 'external/gs_tools/src/webc';
+  StringParser,
+} from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { RouteService, RouteServiceEvents } from 'external/gs_ui/src/routing';
 import { ThemeService } from 'external/gs_ui/src/theming';
+import { DownloadService } from 'external/gs_ui/src/tool';
 
 import { RenderItem } from '../asset/render-item';
 import { Asset } from '../data/asset';
@@ -26,15 +30,21 @@ import { RouteFactoryService } from '../routing/route-factory-service';
 import { Views } from '../routing/views';
 
 
+type FileData = {dataUrl: string, filename: string};
 type RenderData = {assetId: string, filename: string, key: string, projectId: string, row: number};
+
+
+const InstanceOfElementType = InstanceofType(Element);
 
 
 export const RENDER_ITEM_DATA_HELPER: ChildElementDataHelper<RenderData> = {
   /**
    * @override
    */
-  create(document: Document): Element {
-    return document.createElement('pa-asset-render-item');
+  create(document: Document, instance: RenderView): Element {
+    const element = document.createElement('pa-asset-render-item');
+    instance.listenToRenderEvent(element);
+    return element;
   },
 
   /**
@@ -79,6 +89,9 @@ export const RENDER_ITEM_DATA_HELPER: ChildElementDataHelper<RenderData> = {
   templateKey: 'src/asset/render-view',
 })
 export class RenderView extends BaseThemedElement {
+  @bind('#downloadButton').attribute('disabled', BooleanParser)
+  readonly downloadButtonDisabledHook_: DomHook<boolean>;
+
   @bind('#renders').childrenElements(RENDER_ITEM_DATA_HELPER)
   readonly rendersChildrenHook_: DomHook<RenderData[]>;
 
@@ -86,7 +99,10 @@ export class RenderView extends BaseThemedElement {
   readonly filenameInputHook_: DomHook<string>;
 
   private readonly assetCollection_: AssetCollection;
+  private readonly downloadService_: DownloadService;
   private readonly expectedRenderKeys_: Set<string>;
+  private readonly fileData_: Set<FileData>;
+  private readonly jsZip_: new () => JSZip;
   private readonly renderIdGenerator_: SimpleIdGenerator;
   private readonly routeFactoryService_: RouteFactoryService;
   private readonly routeService_: RouteService<Views>;
@@ -96,6 +112,8 @@ export class RenderView extends BaseThemedElement {
 
   constructor(
       @inject('pa.data.AssetCollection') assetCollection: AssetCollection,
+      @inject('gs.tool.DownloadService') downloadService: DownloadService,
+      @inject('x.JsZip') jsZip: new () => JSZip,
       @inject('pa.routing.RouteFactoryService') routeFactoryService: RouteFactoryService,
       @inject('gs.routing.RouteService') routeService: RouteService<Views>,
       @inject('pa.data.TemplateCompilerService') templateCompilerService: TemplateCompilerService,
@@ -103,7 +121,11 @@ export class RenderView extends BaseThemedElement {
     super(themeService);
     this.assetChangedDeregister_ = null;
     this.assetCollection_ = assetCollection;
+    this.downloadButtonDisabledHook_ = DomHook.of<boolean>(true);
+    this.downloadService_ = downloadService;
     this.expectedRenderKeys_ = new Set<string>();
+    this.fileData_ = new Set<FileData>();
+    this.jsZip_ = jsZip;
     this.filenameInputHook_ = DomHook.of<string>();
     this.rendersChildrenHook_ = DomHook.of<RenderData[]>();
     this.renderIdGenerator_ = new SimpleIdGenerator();
@@ -137,6 +159,15 @@ export class RenderView extends BaseThemedElement {
     return this.assetCollection_.get(projectId, assetId);
   }
 
+  /**
+   * @param element Element from which the render event should be dispatched from.
+   */
+  listenToRenderEvent(element: Element): void {
+    const listenableElement = ListenableDom.of(element);
+    this.addDisposable(listenableElement);
+    this.addDisposable(listenableElement.on('render', this.onRendered_, this));
+  }
+
   private async onAssetChanged_(): Promise<void> {
     const asset = await this.getAsset_();
     if (asset === null) {
@@ -157,6 +188,27 @@ export class RenderView extends BaseThemedElement {
             this.onRouteChanged_,
             this));
     this.onRouteChanged_();
+    this.downloadButtonDisabledHook_.set(true);
+  }
+
+  @handle('#downloadButton').event(DomEvent.CLICK)
+  async onDownloadClick_(): Promise<void> {
+    const asset = await this.getAsset_();
+    if (asset === null) {
+      return;
+    }
+
+    const jsZip = new this.jsZip_();
+    Sets
+        .of(this.fileData_)
+        .forEach((fileData: FileData) => {
+          const {dataUrl, filename} = fileData;
+          const imageData = dataUrl.substring(dataUrl.indexOf(',') + 1);
+          jsZip.file(filename, imageData, {base64: true});
+        });
+
+    const content = await jsZip.generateAsync({type: 'blob'});
+    this.downloadService_.download(content, `${asset.getName()}.zip`);
   }
 
   @atomic()
@@ -179,6 +231,7 @@ export class RenderView extends BaseThemedElement {
   @atomic()
   @handle('#renderButton').event(DomEvent.CLICK)
   async onRenderButtonClick_(): Promise<void> {
+    this.rendersChildrenHook_.set([]);
     const asset = await this.getAsset_();
     if (asset === null) {
       return;
@@ -213,11 +266,30 @@ export class RenderView extends BaseThemedElement {
             row: index,
           });
         });
+    this.fileData_.clear();
     this.expectedRenderKeys_.clear();
     renderKeys.forEach((key: string) => {
       this.expectedRenderKeys_.add(key);
     });
+    this.updateRenderKey_();
     this.rendersChildrenHook_.set(renderData);
+  }
+
+  /**
+   * @param event Event dispatched when the render event was dispatched.
+   */
+  onRendered_(event: Event): void {
+    const target = event.target;
+    if (InstanceOfElementType.check(target)) {
+      const renderKey = target.getAttribute('render-key');
+      const dataUrl = target.getAttribute('render-out');
+      const filename = target.getAttribute('file-name');
+      if (renderKey !== null && dataUrl !== null && filename !== null) {
+        this.expectedRenderKeys_.delete(renderKey);
+        this.fileData_.add({dataUrl, filename});
+        this.updateRenderKey_();
+      }
+    }
   }
 
   private async onRouteChanged_(): Promise<void> {
@@ -233,5 +305,9 @@ export class RenderView extends BaseThemedElement {
 
     this.assetChangedDeregister_ = asset.on(DataEvents.CHANGED, this.onAssetChanged_, this);
     this.onAssetChanged_();
+  }
+
+  private updateRenderKey_(): void {
+    this.downloadButtonDisabledHook_.set(this.expectedRenderKeys_.size > 0);
   }
 }

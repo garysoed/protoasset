@@ -13,6 +13,7 @@ import { RouteFactoryService } from '../routing/route-factory-service';
 
 function bootstrap(document: Document): void {
   Injector.bindProvider(() => Handlebars, 'x.Handlebars');
+  Injector.bindProvider(() => JSZip, 'x.JsZip');
   let main = Main.newInstance({
     ace: window['ace'],
     routeFactoryServiceCtor: RouteFactoryService,
