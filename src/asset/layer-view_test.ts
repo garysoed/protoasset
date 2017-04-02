@@ -3,8 +3,8 @@ TestBase.setup();
 
 import { DomEvent, ListenableDom } from 'external/gs_tools/src/event';
 import { Fakes, Mocks } from 'external/gs_tools/src/mock';
+import { BooleanParser, EnumParser } from 'external/gs_tools/src/parse';
 import { TestDispose } from 'external/gs_tools/src/testing';
-import { BooleanParser, EnumParser } from 'external/gs_tools/src/webc';
 
 import { RouteServiceEvents } from 'external/gs_ui/src/routing';
 

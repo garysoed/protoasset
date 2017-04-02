@@ -1,11 +1,11 @@
 import { atomic } from 'external/gs_tools/src/async';
 import { Arrays } from 'external/gs_tools/src/collection';
 import { DisposableFunction } from 'external/gs_tools/src/dispose';
+import { StringParser } from 'external/gs_tools/src/parse';
 import {
   bind,
   DomHook,
-  handle,
-  StringParser } from 'external/gs_tools/src/webc';
+  handle } from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { ThemeService } from 'external/gs_ui/src/theming';

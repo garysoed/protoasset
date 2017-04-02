@@ -1,15 +1,13 @@
 import { ArrayOfType, NonNullType } from 'external/gs_tools/src/check';
 import { Arrays, Maps } from 'external/gs_tools/src/collection';
 import { inject } from 'external/gs_tools/src/inject';
+import { BooleanParser, FloatParser, StringParser } from 'external/gs_tools/src/parse';
 import {
     bind,
-    BooleanParser,
     ChildElementDataHelper,
     customElement,
     DomHook,
-    FloatParser,
-    handle,
-    StringParser } from 'external/gs_tools/src/webc';
+    handle } from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { FileService } from 'external/gs_ui/src/input';

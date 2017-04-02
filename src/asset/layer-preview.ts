@@ -2,14 +2,12 @@ import { atomic } from 'external/gs_tools/src/async';
 import { Arrays } from 'external/gs_tools/src/collection';
 import { DisposableFunction } from 'external/gs_tools/src/dispose';
 import { inject } from 'external/gs_tools/src/inject';
+import { BooleanParser, EnumParser, StringParser } from 'external/gs_tools/src/parse';
 import {
   bind,
-  BooleanParser,
   customElement,
   DomHook,
-  EnumParser,
-  handle,
-  StringParser } from 'external/gs_tools/src/webc';
+  handle } from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { RouteService, RouteServiceEvents } from 'external/gs_ui/src/routing';

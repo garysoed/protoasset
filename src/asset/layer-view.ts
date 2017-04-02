@@ -3,19 +3,20 @@ import { Arrays } from 'external/gs_tools/src/collection';
 import { DisposableFunction } from 'external/gs_tools/src/dispose';
 import { DomEvent, ListenableDom } from 'external/gs_tools/src/event';
 import { inject } from 'external/gs_tools/src/inject';
+import {
+  BooleanParser,
+  EnumParser,
+  IntegerParser,
+  StringParser } from 'external/gs_tools/src/parse';
 import { BaseIdGenerator, SimpleIdGenerator } from 'external/gs_tools/src/random';
 import { Enums } from 'external/gs_tools/src/typescript';
 import { Validate } from 'external/gs_tools/src/valid';
 import {
   bind,
-  BooleanParser,
   ChildElementDataHelper,
   customElement,
   DomHook,
-  EnumParser,
-  handle,
-  IntegerParser,
-  StringParser } from 'external/gs_tools/src/webc';
+  handle } from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { RouteService, RouteServiceEvents } from 'external/gs_ui/src/routing';

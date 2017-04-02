@@ -1,12 +1,12 @@
 import { Arrays } from 'external/gs_tools/src/collection';
 import { inject } from 'external/gs_tools/src/inject';
+import { StringParser } from 'external/gs_tools/src/parse';
 import {
   bind,
   ChildElementDataHelper,
   customElement,
   DomHook,
-  handle,
-  StringParser } from 'external/gs_tools/src/webc';
+  handle } from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { Event } from 'external/gs_ui/src/const';

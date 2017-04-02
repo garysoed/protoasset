@@ -1,15 +1,12 @@
 import { DomEvent, ListenableDom } from 'external/gs_tools/src/event';
 import { inject } from 'external/gs_tools/src/inject';
+import { BooleanParser, EnumParser, FloatParser, StringParser } from 'external/gs_tools/src/parse';
 import {
   bind,
-  BooleanParser,
   ChildElementDataHelper,
   customElement,
   DomHook,
-  EnumParser,
-  FloatParser,
-  handle,
-  StringParser } from 'external/gs_tools/src/webc';
+  handle } from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { ThemeService } from 'external/gs_ui/src/theming';

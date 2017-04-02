@@ -1,14 +1,11 @@
 import { inject } from 'external/gs_tools/src/inject';
+import { BooleanParser, EnumParser, FloatParser, StringParser } from 'external/gs_tools/src/parse';
 import { Validate } from 'external/gs_tools/src/valid';
 import {
     bind,
-    BooleanParser,
     customElement,
     DomHook,
-    EnumParser,
-    FloatParser,
-    handle,
-    StringParser } from 'external/gs_tools/src/webc';
+    handle } from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { Event } from 'external/gs_ui/src/const';

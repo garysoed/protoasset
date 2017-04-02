@@ -2,7 +2,8 @@ import { atomic } from 'external/gs_tools/src/async';
 import { DisposableFunction } from 'external/gs_tools/src/dispose';
 import { DomEvent } from 'external/gs_tools/src/event';
 import { inject } from 'external/gs_tools/src/inject';
-import { bind, customElement, DomHook, handle, StringParser } from 'external/gs_tools/src/webc';
+import { StringParser } from 'external/gs_tools/src/parse';
+import { bind, customElement, DomHook, handle } from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { RouteService } from 'external/gs_ui/src/routing';

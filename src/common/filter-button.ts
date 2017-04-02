@@ -1,12 +1,11 @@
 import { DomEvent } from 'external/gs_tools/src/event';
 import { inject } from 'external/gs_tools/src/inject';
+import { BooleanParser, StringParser } from 'external/gs_tools/src/parse';
 import {
   bind,
-  BooleanParser,
   customElement,
   DomHook,
-  handle,
-  StringParser } from 'external/gs_tools/src/webc';
+  handle } from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { Event } from 'external/gs_ui/src/const';

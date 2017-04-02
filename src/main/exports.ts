@@ -2,8 +2,8 @@ import { Jsons } from 'external/gs_tools/src/collection';
 import { Injector } from 'external/gs_tools/src/inject';
 import { Templates } from 'external/gs_tools/src/webc';
 
-import { DefaultPalettes, Main } from 'external/gs_ui/src/bootstrap';
-import { Theme } from 'external/gs_ui/src/theming';
+import { Main } from 'external/gs_ui/src/bootstrap';
+import { DefaultPalettes, Theme } from 'external/gs_ui/src/theming';
 
 import { CreateProjectView } from '../landing/create-project-view';
 import { LandingView } from '../landing/landing-view';
@@ -19,8 +19,8 @@ function bootstrap(document: Document): void {
     routeFactoryServiceCtor: RouteFactoryService,
   });
   let theme = Theme.newInstance(
-      DefaultPalettes.purpleheart,
-      DefaultPalettes.orange);
+      DefaultPalettes.get('electricviolet'),
+      DefaultPalettes.get('flushorange'));
   main.bootstrap(theme, [CreateProjectView, LandingView, ProjectView]);
   main.applyTheme(document);
 };

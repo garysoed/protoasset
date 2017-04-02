@@ -1,15 +1,13 @@
 import { Arrays } from 'external/gs_tools/src/collection';
 import { DomEvent, ListenableDom } from 'external/gs_tools/src/event';
 import { inject } from 'external/gs_tools/src/inject';
+import { BooleanParser, IntegerParser, StringParser } from 'external/gs_tools/src/parse';
 import {
   bind,
-  BooleanParser,
   ChildElementDataHelper,
   customElement,
   DomHook,
-  handle,
-  IntegerParser,
-  StringParser } from 'external/gs_tools/src/webc';
+  handle } from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { ThemeService } from 'external/gs_ui/src/theming';

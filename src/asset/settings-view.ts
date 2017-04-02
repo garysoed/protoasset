@@ -1,15 +1,13 @@
 import { Serializer } from 'external/gs_tools/src/data';
 import { DomEvent } from 'external/gs_tools/src/event';
 import { inject } from 'external/gs_tools/src/inject';
+import { EnumParser, FloatParser, StringParser } from 'external/gs_tools/src/parse';
 import { Cases } from 'external/gs_tools/src/string';
 import {
   bind,
   customElement,
   DomHook,
-  EnumParser,
-  FloatParser,
-  handle,
-  StringParser } from 'external/gs_tools/src/webc';
+  handle } from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { RouteService, RouteServiceEvents } from 'external/gs_ui/src/routing';

@@ -1,9 +1,9 @@
 import { inject } from 'external/gs_tools/src/inject';
+import { FloatParser } from 'external/gs_tools/src/parse';
 import {
   bind,
   customElement,
   DomHook,
-  FloatParser,
   handle } from 'external/gs_tools/src/webc';
 
 import { ThemeService } from 'external/gs_ui/src/theming';

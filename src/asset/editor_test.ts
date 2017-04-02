@@ -3,8 +3,8 @@ TestBase.setup();
 
 import { DomEvent, ListenableDom } from 'external/gs_tools/src/event';
 import { Mocks } from 'external/gs_tools/src/mock';
+import { EnumParser } from 'external/gs_tools/src/parse';
 import { TestDispose } from 'external/gs_tools/src/testing';
-import { EnumParser } from 'external/gs_tools/src/webc';
 
 import { ASSET_PRESETS, PresetType, Render } from '../asset/asset-presets';
 import {

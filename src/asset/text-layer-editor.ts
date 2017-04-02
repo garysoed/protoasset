@@ -1,11 +1,10 @@
 import { inject } from 'external/gs_tools/src/inject';
+import { EnumParser, StringParser } from 'external/gs_tools/src/parse';
 import {
   bind,
   customElement,
   DomHook,
-  EnumParser,
-  handle,
-  StringParser } from 'external/gs_tools/src/webc';
+  handle } from 'external/gs_tools/src/webc';
 
 import { ThemeService } from 'external/gs_ui/src/theming';
 
