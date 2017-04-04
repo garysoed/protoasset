@@ -20,7 +20,7 @@ function bootstrap(document: Document): void {
   });
   let theme = Theme.newInstance(
       DefaultPalettes.get('electricviolet'),
-      DefaultPalettes.get('flushorange'));
+      DefaultPalettes.get('cerulean'));
   main.bootstrap(theme, [CreateProjectView, LandingView, ProjectView]);
   main.applyTheme(document);
 };
