@@ -129,7 +129,7 @@ describe('project.AssetListView', () => {
   });
 
   describe('onProjectIdChanged_', () => {
-    it('should update the project name corretly if there are matches', async (done: any) => {
+    it('should update the project name corretly if there are matches', async () => {
       const projectId = 'projectId';
       const projectName = 'projectName';
 
@@ -148,7 +148,7 @@ describe('project.AssetListView', () => {
       assert(mockProjectCollection.get).to.haveBeenCalledWith(projectId);
     });
 
-    it('should set the assets', async (done: any) => {
+    it('should set the assets', async () => {
       const projectId = 'projectId';
 
       const assetId1 = 'assetId1';
@@ -179,7 +179,7 @@ describe('project.AssetListView', () => {
     });
 
     it('should not throw error if there are no projects corresponding to the project ID',
-        async (done: any) => {
+        async () => {
           const projectId = 'projectId';
 
           mockAssetCollection.list.and.returnValue(Promise.resolve([]));
@@ -192,7 +192,7 @@ describe('project.AssetListView', () => {
           assert(view['projectNameTextHook_'].set).toNot.haveBeenCalled();
         });
 
-    it('should not throw error if there are no project IDs', async (done: any) => {
+    it('should not throw error if there are no project IDs', async () => {
       spyOn(view, 'getProjectId_').and.returnValue(null);
       spyOn(view['projectNameTextHook_'], 'set');
 

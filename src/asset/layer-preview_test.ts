@@ -199,7 +199,7 @@ describe('asset.LayerPreview', () => {
   });
 
   describe('onLayerIdChanged_', () => {
-    it('should listen to layer change events', async (done: any) => {
+    it('should listen to layer change events', async () => {
       const layerRouteFactory = Mocks.object('layerRouteFactory');
       mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
 
@@ -244,7 +244,7 @@ describe('asset.LayerPreview', () => {
       assert(mockOldDeregister.dispose).to.haveBeenCalledWith();
     });
 
-    it('should not throw error if there are no previous deregisters', async (done: any) => {
+    it('should not throw error if there are no previous deregisters', async () => {
       const layerRouteFactory = Mocks.object('layerRouteFactory');
       mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
 
@@ -269,7 +269,7 @@ describe('asset.LayerPreview', () => {
       await preview['onLayerIdChanged_']();
     });
 
-    it('should do nothing if no row data can be found', async (done: any) => {
+    it('should do nothing if no row data can be found', async () => {
       const layerRouteFactory = Mocks.object('layerRouteFactory');
       mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
 
@@ -300,7 +300,7 @@ describe('asset.LayerPreview', () => {
       assert(preview['cssInnerHtmlHook_'].set).toNot.haveBeenCalled();
     });
 
-    it('should do nothing if layer cannot be found', async (done: any) => {
+    it('should do nothing if layer cannot be found', async () => {
       const layerRouteFactory = Mocks.object('layerRouteFactory');
       mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
 
@@ -332,7 +332,7 @@ describe('asset.LayerPreview', () => {
       assert(preview['cssInnerHtmlHook_'].set).toNot.haveBeenCalled();
     });
 
-    it('should do nothing if there is no asset', async (done: any) => {
+    it('should do nothing if there is no asset', async () => {
       const layerRouteFactory = Mocks.object('layerRouteFactory');
       mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
 
@@ -356,7 +356,7 @@ describe('asset.LayerPreview', () => {
       assert(preview['cssInnerHtmlHook_'].set).toNot.haveBeenCalled();
     });
 
-    it('should do nothing if there is no data', async (done: any) => {
+    it('should do nothing if there is no data', async () => {
       const layerRouteFactory = Mocks.object('layerRouteFactory');
       mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
 
@@ -385,7 +385,7 @@ describe('asset.LayerPreview', () => {
       assert(preview['cssInnerHtmlHook_'].set).toNot.haveBeenCalled();
     });
 
-    it('should do nothing if there is no layer ID', async (done: any) => {
+    it('should do nothing if there is no layer ID', async () => {
       const layerRouteFactory = Mocks.object('layerRouteFactory');
       mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
 
@@ -404,7 +404,7 @@ describe('asset.LayerPreview', () => {
       assert(preview['cssInnerHtmlHook_'].set).toNot.haveBeenCalled();
     });
 
-    it('should do nothing if there are no params', async (done: any) => {
+    it('should do nothing if there are no params', async () => {
       const layerRouteFactory = Mocks.object('layerRouteFactory');
       mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
 

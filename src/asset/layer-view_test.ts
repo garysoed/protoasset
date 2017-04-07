@@ -260,7 +260,7 @@ describe('asset.LayerView', () => {
   });
 
   describe('createLayer_', () => {
-    it('should create the correct layer and update it to the asset', async (done: any) => {
+    it('should create the correct layer and update it to the asset', async () => {
       const layerRouteFactory = Mocks.object('layerRouteFactory');
       mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
 
@@ -293,7 +293,7 @@ describe('asset.LayerView', () => {
       assert(view['layerIdGenerator_'].generate).to.haveBeenCalledWith([oldId]);
     });
 
-    it('should reject the promise if the layer type is not supported', async (done: any) => {
+    it('should reject the promise if the layer type is not supported', async () => {
       const layerRouteFactory = Mocks.object('layerRouteFactory');
       mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
 
@@ -311,7 +311,7 @@ describe('asset.LayerView', () => {
       }
     });
 
-    it('should do nothing if the asset cannot be found', async (done: any) => {
+    it('should do nothing if the asset cannot be found', async () => {
       const layerRouteFactory = Mocks.object('layerRouteFactory');
       mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(null));
@@ -342,7 +342,7 @@ describe('asset.LayerView', () => {
   });
 
   describe('getAsset_', () => {
-    it('should resolve with the correct asset', async (done: any) => {
+    it('should resolve with the correct asset', async () => {
       const layerRouteFactory = Mocks.object('layerRouteFactory');
       mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
 
@@ -358,7 +358,7 @@ describe('asset.LayerView', () => {
       assert(mockRouteService.getParams).to.haveBeenCalledWith(layerRouteFactory);
     });
 
-    it('should resolve with null if the params cannot be found', async (done: any) => {
+    it('should resolve with null if the params cannot be found', async () => {
       const layerRouteFactory = Mocks.object('layerRouteFactory');
       mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
 
@@ -370,7 +370,7 @@ describe('asset.LayerView', () => {
   });
 
   describe('onAssetChanged_', () => {
-    it('should update the UI correctly', async (done: any) => {
+    it('should update the UI correctly', async () => {
       const id = 'id';
       const projectId = 'projectId';
       const mockDataSource = jasmine.createSpyObj('DataSource', ['getData']);
@@ -447,7 +447,7 @@ describe('asset.LayerView', () => {
       assert(view['updateLayerPreviews_']).to.haveBeenCalledWith();
     });
 
-    it('should not throw error if the style object cannot be found', async (done: any) => {
+    it('should not throw error if the style object cannot be found', async () => {
       const id = 'id';
       const projectId = 'projectId';
       const mockDataSource = jasmine.createSpyObj('DataSource', ['getData']);
@@ -484,7 +484,7 @@ describe('asset.LayerView', () => {
     });
 
     it('should select the default layer if the selected layer cannot be found',
-        async (done: any) => {
+        async () => {
           const id = 'id';
           const projectId = 'projectId';
           const mockDataSource = jasmine.createSpyObj('DataSource', ['getData']);
@@ -527,7 +527,7 @@ describe('asset.LayerView', () => {
           assert(view['selectDefaultLayer_']).to.haveBeenCalledWith(mockAsset);
         });
 
-    it('should not set the data row if the data length is 0', async (done: any) => {
+    it('should not set the data row if the data length is 0', async () => {
       const mockDataSource = jasmine.createSpyObj('DataSource', ['getData']);
       mockDataSource.getData.and.returnValue(Promise.resolve([]));
       const mockAsset = jasmine.createSpyObj('Asset', ['getData', 'getId', 'getProjectId']);
@@ -549,7 +549,7 @@ describe('asset.LayerView', () => {
       assert(view.imageEditorDataRowHook_.set).toNot.haveBeenCalled();
     });
 
-    it('should not set the data row if there are no data source', async (done: any) => {
+    it('should not set the data row if there are no data source', async () => {
       const mockAsset = jasmine.createSpyObj('Asset', ['getData', 'getId', 'getProjectId']);
       mockAsset.getData.and.returnValue(null);
       mockAsset.getId.and.returnValue('id');
@@ -612,7 +612,7 @@ describe('asset.LayerView', () => {
   });
 
   describe('onLayerItemClick_', () => {
-    it('should select the layer correctly and hide the overlay', async (done: any) => {
+    it('should select the layer correctly and hide the overlay', async () => {
       const layerId = 'layerId';
       const mockLayer = jasmine.createSpyObj('Layer', ['getId']);
       mockLayer.getId.and.returnValue(layerId);
@@ -632,7 +632,7 @@ describe('asset.LayerView', () => {
       assert(mockOverlayService.hideOverlay).to.haveBeenCalledWith();
     });
 
-    it('should not select any layers if the layer cannot be found', async (done: any) => {
+    it('should not select any layers if the layer cannot be found', async () => {
       const mockAsset = jasmine.createSpyObj('Asset', ['getLayers']);
       mockAsset.getLayers.and.returnValue([
         jasmine.createSpyObj('layer1', ['getId']),
@@ -647,7 +647,7 @@ describe('asset.LayerView', () => {
       assert(mockOverlayService.hideOverlay).to.haveBeenCalledWith();
     });
 
-    it('should not select any layers if the asset cannot be found', async (done: any) => {
+    it('should not select any layers if the asset cannot be found', async () => {
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(null));
 
       spyOn(view, 'selectLayer_');
@@ -657,7 +657,7 @@ describe('asset.LayerView', () => {
       assert(mockOverlayService.hideOverlay).to.haveBeenCalledWith();
     });
 
-    it('should not select any layers if the layerId is null', async (done: any) => {
+    it('should not select any layers if the layerId is null', async () => {
       spyOn(view, 'selectLayer_');
 
       await view['onLayerItemClick_'](null);
@@ -706,7 +706,7 @@ describe('asset.LayerView', () => {
   describe('onRouteChanged_', () => {
     it('should select the correct layer, listen to the new asset, and update the UI base on the'
         + ' asset',
-        async (done: any) => {
+        async () => {
           const mockOldDeregister = jasmine.createSpyObj('OldDeregister', ['dispose']);
           view['assetChangedDeregister_'] = mockOldDeregister;
 
@@ -747,7 +747,7 @@ describe('asset.LayerView', () => {
           assert(mockOldDeregister.dispose).to.haveBeenCalledWith();
         });
 
-    it('should create a new layer if there are no layers to select', async (done: any) => {
+    it('should create a new layer if there are no layers to select', async () => {
       const mockOldDeregister = jasmine.createSpyObj('OldDeregister', ['dispose']);
       view['assetChangedDeregister_'] = mockOldDeregister;
 
@@ -789,7 +789,7 @@ describe('asset.LayerView', () => {
       assert(mockOldDeregister.dispose).to.haveBeenCalledWith();
     });
 
-    it('should do nothing if the asset cannot be found', async (done: any) => {
+    it('should do nothing if the asset cannot be found', async () => {
       const mockOldDeregister = jasmine.createSpyObj('OldDeregister', ['dispose']);
       view['assetChangedDeregister_'] = mockOldDeregister;
 
@@ -811,7 +811,7 @@ describe('asset.LayerView', () => {
       assert(mockOldDeregister.dispose).to.haveBeenCalledWith();
     });
 
-    it('should do nothing if params cannot be determined', async (done: any) => {
+    it('should do nothing if params cannot be determined', async () => {
       const mockOldDeregister = jasmine.createSpyObj('OldDeregister', ['dispose']);
       view['assetChangedDeregister_'] = mockOldDeregister;
 
@@ -829,7 +829,7 @@ describe('asset.LayerView', () => {
     });
 
     it('should not reject if there are no previous asset changed deregisters',
-        async (done: any) => {
+        async () => {
           view['assetChangedDeregister_'] = null;
 
           const layerRouteFactory = Mocks.object('layerRouteFactory');
@@ -936,7 +936,7 @@ describe('asset.LayerView', () => {
   });
 
   describe('updateLayerPreviews_', () => {
-    it('should set the layer preview data correctly', async (done: any) => {
+    it('should set the layer preview data correctly', async () => {
       const layerId1 = 'layerId1';
       const mockLayer1 = jasmine.createSpyObj('Layer1', ['getId']);
       mockLayer1.getId.and.returnValue(layerId1);
@@ -961,7 +961,7 @@ describe('asset.LayerView', () => {
       assert(view.previewSwitchHook_.set).to.haveBeenCalledWith(false);
     });
 
-    it('should update the image render if render was selected', async (done: any) => {
+    it('should update the image render if render was selected', async () => {
       const uri = 'uri';
       mockRenderService.render.and.returnValue(uri);
       spyOn(view.imageRenderSrcHook_, 'set');
@@ -980,7 +980,7 @@ describe('asset.LayerView', () => {
       assert(view.previewSwitchHook_.set).to.haveBeenCalledWith(true);
     });
 
-    it('should do nothing if asset cannot be found', async (done: any) => {
+    it('should do nothing if asset cannot be found', async () => {
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(null));
       spyOn(view.layerPreviewsChildElementHook_, 'set');
 

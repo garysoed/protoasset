@@ -31,7 +31,7 @@ describe('asset.HelperItem', () => {
   });
 
   describe('getAsset_', () => {
-    it('should resolve with the correct asset', async (done: any) => {
+    it('should resolve with the correct asset', async () => {
       const projectId = 'projectId';
       const assetId = 'assetId';
       spyOn(item['assetIdHook_'], 'get').and.returnValue(assetId);
@@ -45,7 +45,7 @@ describe('asset.HelperItem', () => {
       assert(mockAssetCollection.get).to.haveBeenCalledWith(projectId, assetId);
     });
 
-    it('should resolve with null if there are no asset IDs', async (done: any) => {
+    it('should resolve with null if there are no asset IDs', async () => {
       const projectId = 'projectId';
       spyOn(item['assetIdHook_'], 'get').and.returnValue(null);
       spyOn(item['projectIdHook_'], 'get').and.returnValue(projectId);
@@ -54,7 +54,7 @@ describe('asset.HelperItem', () => {
       assert(actualAsset).to.beNull();
     });
 
-    it('should resolve with null if there are no project IDs', async (done: any) => {
+    it('should resolve with null if there are no project IDs', async () => {
       const assetId = 'assetId';
       spyOn(item['assetIdHook_'], 'get').and.returnValue(assetId);
       spyOn(item['projectIdHook_'], 'get').and.returnValue(null);
@@ -65,7 +65,7 @@ describe('asset.HelperItem', () => {
   });
 
   describe('getHelper_', () => {
-    it('should resolve with the correct helper', async (done: any) => {
+    it('should resolve with the correct helper', async () => {
       const helperId = 'helperId';
       spyOn(item['helperIdHook_'], 'get').and.returnValue(helperId);
 
@@ -79,7 +79,7 @@ describe('asset.HelperItem', () => {
       assert(mockAsset.getHelper).to.haveBeenCalledWith(helperId);
     });
 
-    it('should resolve with null if asset cannot be found', async (done: any) => {
+    it('should resolve with null if asset cannot be found', async () => {
       const helperId = 'helperId';
       spyOn(item['helperIdHook_'], 'get').and.returnValue(helperId);
 
@@ -89,7 +89,7 @@ describe('asset.HelperItem', () => {
       assert(actualHelper).to.beNull();
     });
 
-    it('should resolve with null if there are no helper IDs', async (done: any) => {
+    it('should resolve with null if there are no helper IDs', async () => {
       spyOn(item['helperIdHook_'], 'get').and.returnValue(null);
 
       const actualHelper = await item['getHelper_']();
@@ -121,7 +121,7 @@ describe('asset.HelperItem', () => {
   });
 
   describe('onDeleteClick_', () => {
-    it('should delete the helper and update the asset and helper', async (done: any) => {
+    it('should delete the helper and update the asset and helper', async () => {
       const mockAsset = jasmine.createSpyObj('Asset', ['deleteHelper']);
       spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
 
@@ -143,7 +143,7 @@ describe('asset.HelperItem', () => {
       assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
     });
 
-    it('should do nothing if the asset cannot be found', async (done: any) => {
+    it('should do nothing if the asset cannot be found', async () => {
       spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(null));
 
       const helperId = 'helperId';
@@ -162,7 +162,7 @@ describe('asset.HelperItem', () => {
       assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
     });
 
-    it('should do nothing if the helper cannot be found', async (done: any) => {
+    it('should do nothing if the helper cannot be found', async () => {
       const mockAsset = jasmine.createSpyObj('Asset', ['deleteHelper']);
       spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
       spyOn(item, 'getHelper_').and.returnValue(Promise.resolve(null));
@@ -180,7 +180,7 @@ describe('asset.HelperItem', () => {
   });
 
   describe('onEditClick_', () => {
-    it('should update the input name and set the root value to edit', async (done: any) => {
+    it('should update the input name and set the root value to edit', async () => {
       const name = 'name';
       const mockHelper = jasmine.createSpyObj('Helper', ['getName']);
       mockHelper.getName.and.returnValue(name);
@@ -196,7 +196,7 @@ describe('asset.HelperItem', () => {
       assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
     });
 
-    it('should delete the input name if the helper does not exist', async (done: any) => {
+    it('should delete the input name if the helper does not exist', async () => {
       spyOn(item, 'getHelper_').and.returnValue(Promise.resolve(null));
       spyOn(item['rootValueHook_'], 'set');
       spyOn(item['nameInputHook_'], 'delete');
@@ -212,7 +212,7 @@ describe('asset.HelperItem', () => {
 
   describe('onOkClick_', () => {
     it('should update the helper, save the asset, and set the root value to read',
-        async (done: any) => {
+        async () => {
           const helperId = 'helperId';
           spyOn(item['helperIdHook_'], 'get').and.returnValue(helperId);
 
@@ -235,7 +235,7 @@ describe('asset.HelperItem', () => {
           assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
         });
 
-    it('should set the name to "" if null', async (done: any) => {
+    it('should set the name to "" if null', async () => {
       const helperId = 'helperId';
       spyOn(item['helperIdHook_'], 'get').and.returnValue(helperId);
 
@@ -254,7 +254,7 @@ describe('asset.HelperItem', () => {
       assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
     });
 
-    it('should do nothing if the helper does not exist', async (done: any) => {
+    it('should do nothing if the helper does not exist', async () => {
       const helperId = 'helperId';
       spyOn(item['helperIdHook_'], 'get').and.returnValue(helperId);
 
@@ -275,7 +275,7 @@ describe('asset.HelperItem', () => {
       assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
     });
 
-    it('should do nothing if the asset does not exist', async (done: any) => {
+    it('should do nothing if the asset does not exist', async () => {
       const helperId = 'helperId';
       spyOn(item['helperIdHook_'], 'get').and.returnValue(helperId);
 
@@ -293,7 +293,7 @@ describe('asset.HelperItem', () => {
       assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
     });
 
-    it('should do nothing if the helper ID does not exist', async (done: any) => {
+    it('should do nothing if the helper ID does not exist', async () => {
       spyOn(item['helperIdHook_'], 'get').and.returnValue(null);
 
       spyOn(item['rootValueHook_'], 'set');
@@ -308,7 +308,7 @@ describe('asset.HelperItem', () => {
   });
 
   describe('onReadRootClick_', () => {
-    it('should navigate to the correct helper', async (done: any) => {
+    it('should navigate to the correct helper', async () => {
       const assetId = 'assetId';
       const projectId = 'projectId';
       const mockAsset = jasmine.createSpyObj('Asset', ['getId', 'getProjectId']);
@@ -330,7 +330,7 @@ describe('asset.HelperItem', () => {
           {assetId, helperId, projectId});
     });
 
-    it('should do nothing if the asset does not exist', async (done: any) => {
+    it('should do nothing if the asset does not exist', async () => {
       spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(null));
 
       const mockHelper = jasmine.createSpyObj('Helper', ['getId']);
@@ -341,7 +341,7 @@ describe('asset.HelperItem', () => {
       assert(mockRouteService.goTo).toNot.haveBeenCalled();
     });
 
-    it('should do nothing if the helper cannot be found', async (done: any) => {
+    it('should do nothing if the helper cannot be found', async () => {
       const mockAsset = jasmine.createSpyObj('Asset', ['getId', 'getProjectId']);
       mockAsset.getId.and.returnValue('assetId');
       mockAsset.getProjectId.and.returnValue('projectId');
@@ -357,7 +357,7 @@ describe('asset.HelperItem', () => {
   describe('updateHelper_', () => {
     it('should dispose the previous helper deregister, listen to the CHANGED event, and call ' +
         'helperUpdated_',
-        async (done: any) => {
+        async () => {
           const mockPreviousDeregister = jasmine.createSpyObj('PreviousDeregister', ['dispose']);
           item['helperUpdateDeregister_'] = mockPreviousDeregister;
 
@@ -382,7 +382,7 @@ describe('asset.HelperItem', () => {
         });
 
     it('should still dispose the previous helper deregister when the new helper is null',
-        async (done: any) => {
+        async () => {
           const mockPreviousDeregister = jasmine.createSpyObj('PreviousDeregister', ['dispose']);
           item['helperUpdateDeregister_'] = mockPreviousDeregister;
 
@@ -394,7 +394,7 @@ describe('asset.HelperItem', () => {
           assert(mockPreviousDeregister.dispose).to.haveBeenCalledWith();
         });
 
-    it('should not throw error if there are no previous helper deregisters', async (done: any) => {
+    it('should not throw error if there are no previous helper deregisters', async () => {
       const mockHelper = jasmine.createSpyObj('Helper', ['on']);
       mockHelper.on.and.returnValue(jasmine.createSpyObj('Deregister', ['dispose']));
       spyOn(item, 'getHelper_').and.returnValue(Promise.resolve(mockHelper));

@@ -41,7 +41,7 @@ describe('asset.LayerItem', () => {
   });
 
   describe('getAsset_', () => {
-    it('should resolve with the correct asset', async (done: any) => {
+    it('should resolve with the correct asset', async () => {
       const assetId = 'assetId';
       const projectId = 'projectId';
       spyOn(item['assetIdHook_'], 'get').and.returnValue(assetId);
@@ -54,7 +54,7 @@ describe('asset.LayerItem', () => {
       assert(mockAssetCollection.get).to.haveBeenCalledWith(projectId, assetId);
     });
 
-    it('should resolve with null if there are no asset IDs', async (done: any) => {
+    it('should resolve with null if there are no asset IDs', async () => {
       spyOn(item['assetIdHook_'], 'get').and.returnValue(null);
       spyOn(item['projectIdHook_'], 'get').and.returnValue('projectId');
 
@@ -64,7 +64,7 @@ describe('asset.LayerItem', () => {
       assert(await item['getAsset_']()).to.beNull();
     });
 
-    it('should resolve with null if there are no project IDs', async (done: any) => {
+    it('should resolve with null if there are no project IDs', async () => {
       spyOn(item['assetIdHook_'], 'get').and.returnValue('assetId');
       spyOn(item['projectIdHook_'], 'get').and.returnValue(null);
 
@@ -76,7 +76,7 @@ describe('asset.LayerItem', () => {
   });
 
   describe('getLayer_', () => {
-    it('should resolve with the correct layer', async (done: any) => {
+    it('should resolve with the correct layer', async () => {
       const layerId = 'layerId';
       spyOn(item['layerIdHook_'], 'get').and.returnValue(layerId);
 
@@ -93,7 +93,7 @@ describe('asset.LayerItem', () => {
       assert(await item['getLayer_']()).to.equal(mockLayer);
     });
 
-    it('should resolve with null if there are no matching layers', async (done: any) => {
+    it('should resolve with null if there are no matching layers', async () => {
       const layerId = 'layerId';
       spyOn(item['layerIdHook_'], 'get').and.returnValue(layerId);
 
@@ -109,7 +109,7 @@ describe('asset.LayerItem', () => {
       assert(await item['getLayer_']()).to.beNull();
     });
 
-    it('should resolve with null if there are no assets', async (done: any) => {
+    it('should resolve with null if there are no assets', async () => {
       const layerId = 'layerId';
       spyOn(item['layerIdHook_'], 'get').and.returnValue(layerId);
 
@@ -118,7 +118,7 @@ describe('asset.LayerItem', () => {
       assert(await item['getLayer_']()).to.beNull();
     });
 
-    it('should resolve with null if there are no layer IDs', async (done: any) => {
+    it('should resolve with null if there are no layer IDs', async () => {
       spyOn(item['layerIdHook_'], 'get').and.returnValue(null);
       assert(await item['getLayer_']()).to.beNull();
     });
@@ -127,7 +127,7 @@ describe('asset.LayerItem', () => {
   describe('onAssetIdChanged_', () => {
     it('should call layerIdChanged_, update layer position, listen to asset change, and dispose '
         + 'previous asset deregister',
-        async (done: any) => {
+        async () => {
           const mockOldDeregister = jasmine.createSpyObj('OldDeregister', ['dispose']);
           item['assetDeregister_'] = mockOldDeregister;
 
@@ -150,7 +150,7 @@ describe('asset.LayerItem', () => {
         });
 
     it('should only dispose previous asset deregister if the asset cannot be found',
-        async (done: any) => {
+        async () => {
           const mockOldDeregister = jasmine.createSpyObj('OldDeregister', ['dispose']);
           item['assetDeregister_'] = mockOldDeregister;
 
@@ -167,7 +167,7 @@ describe('asset.LayerItem', () => {
           assert(mockOldDeregister.dispose).to.haveBeenCalledWith();
         });
 
-    it('should not reject if there are no previous asset deregisters', async (done: any) => {
+    it('should not reject if there are no previous asset deregisters', async () => {
       const mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
       const mockAsset = jasmine.createSpyObj('Asset', ['on']);
       mockAsset.on.and.returnValue(mockDeregister);
@@ -192,7 +192,7 @@ describe('asset.LayerItem', () => {
   });
 
   describe('onCopyClick_', () => {
-    it('should create the correct copy and update the asset', async (done: any) => {
+    it('should create the correct copy and update the asset', async () => {
       const layerIds = Mocks.object('layerIds');
       const mockAsset = jasmine.createSpyObj('Asset', ['getLayerIds', 'insertLayer']);
       mockAsset.getLayerIds.and.returnValue(layerIds);
@@ -242,7 +242,7 @@ describe('asset.LayerItem', () => {
       assert(item['layerIdGenerator_'].generate).to.haveBeenCalledWith(layerIds);
     });
 
-    it('should do nothing if asset is null', async (done: any) => {
+    it('should do nothing if asset is null', async () => {
       spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(null));
 
       const mockLayer = jasmine.createSpyObj('Layer', ['copy', 'getType']);
@@ -253,7 +253,7 @@ describe('asset.LayerItem', () => {
       assert(mockAssetCollection.update).toNot.haveBeenCalled();
     });
 
-    it('should do nothing if layer is null', async (done: any) => {
+    it('should do nothing if layer is null', async () => {
       const mockAsset = jasmine.createSpyObj('Asset', ['getLayerIds', 'insertLayer']);
       spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
       spyOn(item, 'getLayer_').and.returnValue(Promise.resolve(null));
@@ -265,7 +265,7 @@ describe('asset.LayerItem', () => {
 
   describe('onDeleteClick_', () => {
     it('should remove the layer, update the asset and stop the event propagation',
-        async (done: any) => {
+        async () => {
           const layer = Mocks.object('layer');
           spyOn(item, 'getLayer_').and.returnValue(Promise.resolve(layer));
 
@@ -280,7 +280,7 @@ describe('asset.LayerItem', () => {
           assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
         });
 
-    it('should not update the asset if there are no assets', async (done: any) => {
+    it('should not update the asset if there are no assets', async () => {
       const layer = Mocks.object('layer');
       spyOn(item, 'getLayer_').and.returnValue(Promise.resolve(layer));
       spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(null));
@@ -292,7 +292,7 @@ describe('asset.LayerItem', () => {
       assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
     });
 
-    it('should not update the asset if there are no layers', async (done: any) => {
+    it('should not update the asset if there are no layers', async () => {
       spyOn(item, 'getLayer_').and.returnValue(Promise.resolve(null));
 
       const mockAsset = jasmine.createSpyObj('Asset', ['removeLayer']);
@@ -324,7 +324,7 @@ describe('asset.LayerItem', () => {
   describe('onLayerIdChanged_', () => {
     it('should call layedChanged, listen to layer change, update layer position, and dispose '
         + 'previous layer deregister',
-        async (done: any) => {
+        async () => {
           const mockOldDeregister = jasmine.createSpyObj('OldDeregister', ['dispose']);
           item['layerDeregister_'] = mockOldDeregister;
 
@@ -351,7 +351,7 @@ describe('asset.LayerItem', () => {
         });
 
     it('should only deregister previous layer deregister if layer cannot be found',
-        async (done: any) => {
+        async () => {
           const mockOldDeregister = jasmine.createSpyObj('OldDeregister', ['dispose']);
           item['layerDeregister_'] = mockOldDeregister;
 
@@ -368,7 +368,7 @@ describe('asset.LayerItem', () => {
           assert(mockOldDeregister.dispose).to.haveBeenCalledWith();
         });
 
-    it('should not reject if there are no previous layer deregisters', async (done: any) => {
+    it('should not reject if there are no previous layer deregisters', async () => {
       const mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
       const mockLayer = jasmine.createSpyObj('Layer', ['on']);
       mockLayer.on.and.returnValue(mockDeregister);
@@ -382,7 +382,7 @@ describe('asset.LayerItem', () => {
   });
 
   describe('onOkClick_', () => {
-    it('should update the layer and asset and sets the mode to READ', async (done: any) => {
+    it('should update the layer and asset and sets the mode to READ', async () => {
       const name = 'name';
       spyOn(item['nameInputHook_'], 'get').and.returnValue(name);
 
@@ -403,7 +403,7 @@ describe('asset.LayerItem', () => {
       assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
     });
 
-    it('should do nothing if asset cannot be found', async (done: any) => {
+    it('should do nothing if asset cannot be found', async () => {
       const mockLayer = jasmine.createSpyObj('Layer', ['setName']);
       spyOn(item, 'getLayer_').and.returnValue(Promise.resolve(mockLayer));
 
@@ -419,7 +419,7 @@ describe('asset.LayerItem', () => {
       assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
     });
 
-    it('should do nothing if layer cannot be found', async (done: any) => {
+    it('should do nothing if layer cannot be found', async () => {
       spyOn(item, 'getLayer_').and.returnValue(Promise.resolve(null));
 
       spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(Mocks.object('asset')));
@@ -437,7 +437,7 @@ describe('asset.LayerItem', () => {
 
   describe('onMoveButtonClick_', () => {
     it('should move the layer correctly, update the asset, and stop the event propagation',
-        async (done: any) => {
+        async () => {
           const moveIndex = 123;
           const layer = Mocks.object('layer');
           spyOn(item, 'getLayer_').and.returnValue(Promise.resolve(layer));
@@ -458,7 +458,7 @@ describe('asset.LayerItem', () => {
           assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
         });
 
-    it('should not update the asset if the layer is not in the asset', async (done: any) => {
+    it('should not update the asset if the layer is not in the asset', async () => {
       const moveIndex = 123;
       spyOn(item, 'getLayer_').and.returnValue(Promise.resolve(null));
 
@@ -476,7 +476,7 @@ describe('asset.LayerItem', () => {
       assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
     });
 
-    it('should not update the asset if there are no assets', async (done: any) => {
+    it('should not update the asset if there are no assets', async () => {
       const moveIndex = 123;
       const layer = Mocks.object('layer');
       spyOn(item, 'getLayer_').and.returnValue(Promise.resolve(layer));
@@ -489,7 +489,7 @@ describe('asset.LayerItem', () => {
       assert(mockEvent.stopPropagation).to.haveBeenCalledWith();
     });
 
-    it('should not update the asset if there are no layers', async (done: any) => {
+    it('should not update the asset if there are no layers', async () => {
       const moveIndex = 123;
       spyOn(item, 'getLayer_').and.returnValue(Promise.resolve(null));
 
@@ -523,7 +523,7 @@ describe('asset.LayerItem', () => {
 
   describe('updateLayerPosition_', () => {
     it('should enable the up and down buttons if the layer is in the middle',
-        async (done: any) => {
+        async () => {
           const layer = Mocks.object('layer');
           spyOn(item, 'getLayer_').and.returnValue(Promise.resolve(layer));
 
@@ -544,7 +544,7 @@ describe('asset.LayerItem', () => {
           assert(item.upDisabledHook_.set).to.haveBeenCalledWith(false);
         });
 
-    it('should disable the up arrow if the layer is at the top', async (done: any) => {
+    it('should disable the up arrow if the layer is at the top', async () => {
       const layer = Mocks.object('layer');
       spyOn(item, 'getLayer_').and.returnValue(Promise.resolve(layer));
 
@@ -564,7 +564,7 @@ describe('asset.LayerItem', () => {
       assert(item.upDisabledHook_.set).to.haveBeenCalledWith(true);
     });
 
-    it('should disable the down arrow if the layer is at the bottom', async (done: any) => {
+    it('should disable the down arrow if the layer is at the bottom', async () => {
       const layer = Mocks.object('layer');
       spyOn(item, 'getLayer_').and.returnValue(Promise.resolve(layer));
 
@@ -584,7 +584,7 @@ describe('asset.LayerItem', () => {
       assert(item.upDisabledHook_.set).to.haveBeenCalledWith(false);
     });
 
-    it('should do nothing if the layer cannot be found in the array', async (done: any) => {
+    it('should do nothing if the layer cannot be found in the array', async () => {
       const layer = Mocks.object('layer');
       spyOn(item, 'getLayer_').and.returnValue(Promise.resolve(layer));
 
@@ -603,7 +603,7 @@ describe('asset.LayerItem', () => {
       assert(item.upDisabledHook_.set).toNot.haveBeenCalled();
     });
 
-    it('should do nothing if the asset cannot be found', async (done: any) => {
+    it('should do nothing if the asset cannot be found', async () => {
       const layer = Mocks.object('layer');
       spyOn(item, 'getLayer_').and.returnValue(Promise.resolve(layer));
 
@@ -618,7 +618,7 @@ describe('asset.LayerItem', () => {
       assert(item.upDisabledHook_.set).toNot.haveBeenCalled();
     });
 
-    it('should do nothing if the layer cannot be found', async (done: any) => {
+    it('should do nothing if the layer cannot be found', async () => {
       spyOn(item, 'getLayer_').and.returnValue(Promise.resolve(null));
 
       const mockAsset = jasmine.createSpyObj('Asset', ['getLayers']);

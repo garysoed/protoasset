@@ -283,7 +283,7 @@ describe('asset.HelperView', () => {
   });
 
   describe('createHelper_', () => {
-    it('should create a new helper, update the asset, and navigate to it', async (done: any) => {
+    it('should create a new helper, update the asset, and navigate to it', async () => {
       const helperFactory = Mocks.object('helperFactory');
       mockRouteFactoryService.helper.and.returnValue(helperFactory);
 
@@ -322,7 +322,7 @@ describe('asset.HelperView', () => {
   });
 
   describe('getAsset_', () => {
-    it('should resolve with the asset correctly', async (done: any) => {
+    it('should resolve with the asset correctly', async () => {
       const asset = Mocks.object('asset');
       mockAssetCollection.get.and.returnValue(Promise.resolve(asset));
 
@@ -339,7 +339,7 @@ describe('asset.HelperView', () => {
       assert(mockRouteService.getParams).to.haveBeenCalledWith(helper);
     });
 
-    it('should resolve with null if there are no params', async (done: any) => {
+    it('should resolve with null if there are no params', async () => {
       const asset = Mocks.object('asset');
       mockAssetCollection.get.and.returnValue(Promise.resolve(asset));
 
@@ -354,7 +354,7 @@ describe('asset.HelperView', () => {
   });
 
   describe('getHelper_', () => {
-    it('should resolve with the helper correctly', async (done: any) => {
+    it('should resolve with the helper correctly', async () => {
       const helperRouteFactory = Mocks.object('helperRouteFactory');
       mockRouteFactoryService.helper.and.returnValue(helperRouteFactory);
 
@@ -373,7 +373,7 @@ describe('asset.HelperView', () => {
       assert(mockAsset.getHelper).to.haveBeenCalledWith(helperId);
     });
 
-    it('should resolve with null if the asset cannot be found', async (done: any) => {
+    it('should resolve with null if the asset cannot be found', async () => {
       const helperRouteFactory = Mocks.object('helperRouteFactory');
       mockRouteFactoryService.helper.and.returnValue(helperRouteFactory);
 
@@ -386,7 +386,7 @@ describe('asset.HelperView', () => {
       assert(actualHelper).to.beNull();
     });
 
-    it('should resolve with null if there are no param', async (done: any) => {
+    it('should resolve with null if there are no param', async () => {
       mockRouteFactoryService.helper.and.returnValue(Mocks.object('helperRouteFactory'));
 
       mockRouteService.getParams.and.returnValue(null);
@@ -399,7 +399,7 @@ describe('asset.HelperView', () => {
   });
 
   describe('onActiveChange_', () => {
-    it('should call updateAsset_', async (done: any) => {
+    it('should call updateAsset_', async () => {
       const assetId = 'assetId';
       const projectId = 'projectId';
       const mockAsset = jasmine.createSpyObj('Asset', ['getId', 'getProjectId']);
@@ -418,7 +418,7 @@ describe('asset.HelperView', () => {
       assert(view.sampleDataPickerProjectIdHook_.set).to.haveBeenCalledWith(projectId);
     });
 
-    it('should redirect to landing page if asset cannot be found', async (done: any) => {
+    it('should redirect to landing page if asset cannot be found', async () => {
       const landingRouteFactory = Mocks.object('landingRouteFactory');
       mockRouteFactoryService.landing.and.returnValue(landingRouteFactory);
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(null));
@@ -426,14 +426,14 @@ describe('asset.HelperView', () => {
       assert(mockRouteService.goTo).to.haveBeenCalledWith(landingRouteFactory, {});
     });
 
-    it('should do nothing if not activated', async (done: any) => {
+    it('should do nothing if not activated', async () => {
       spyOn(view, 'getAsset_');
 
       await view['onActiveChange_'](false);
       assert(view['getAsset_']).toNot.haveBeenCalled();
     });
 
-    it('should not throw error if there are no previous deregisters', async (done: any) => {
+    it('should not throw error if there are no previous deregisters', async () => {
       const mockAsset = jasmine.createSpyObj('Asset', ['getId', 'getProjectId']);
 
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
@@ -502,7 +502,7 @@ describe('asset.HelperView', () => {
   });
 
   describe('onAssetChanged_', () => {
-    it('should update the UI elements for asset and helper', async (done: any) => {
+    it('should update the UI elements for asset and helper', async () => {
       const currentHelperId = 'currentHelperId';
 
       const mockHelper = jasmine.createSpyObj('Helper', ['getArgs', 'getBody', 'getId', 'getName']);
@@ -537,7 +537,7 @@ describe('asset.HelperView', () => {
       assert(view['updateHelper_']).to.haveBeenCalledWith(mockHelper);
     });
 
-    it('should pick the first helper if there are no helpers selected', async (done: any) => {
+    it('should pick the first helper if there are no helpers selected', async () => {
       spyOn(view, 'getHelper_').and.returnValue(Promise.resolve(null));
 
       const helperId1 = 'helperId1';
@@ -568,7 +568,7 @@ describe('asset.HelperView', () => {
       assert(view['updateHelper_']).toNot.haveBeenCalled();
     });
 
-    it('should create a new helper if there are no helpers in the asset', async (done: any) => {
+    it('should create a new helper if there are no helpers in the asset', async () => {
       spyOn(view, 'getHelper_').and.returnValue(Promise.resolve(null));
 
       const mockAsset = jasmine.createSpyObj('Asset', ['getAllHelpers']);
@@ -588,7 +588,7 @@ describe('asset.HelperView', () => {
   });
 
   describe('onChanges_', () => {
-    it('should update the helper and the asset correctly', async (done: any) => {
+    it('should update the helper and the asset correctly', async () => {
       const args = Mocks.object('args');
       spyOn(view['argElementsHook_'], 'get').and.returnValue(args);
 
@@ -610,7 +610,7 @@ describe('asset.HelperView', () => {
       assert(mockHelper.setArgs).to.haveBeenCalledWith(args);
     });
 
-    it('should do nothing if the helper cannot be found', async (done: any) => {
+    it('should do nothing if the helper cannot be found', async () => {
       const args = Mocks.object('args');
       spyOn(view['argElementsHook_'], 'get').and.returnValue(args);
 
@@ -624,7 +624,7 @@ describe('asset.HelperView', () => {
       assert(mockAssetCollection.update).toNot.haveBeenCalled();
     });
 
-    it('should do nothing if the asset cannot be found', async (done: any) => {
+    it('should do nothing if the asset cannot be found', async () => {
       const args = Mocks.object('args');
       spyOn(view['argElementsHook_'], 'get').and.returnValue(args);
 
@@ -638,7 +638,7 @@ describe('asset.HelperView', () => {
       assert(mockAssetCollection.update).toNot.haveBeenCalled();
     });
 
-    it('should do nothing if args is null', async (done: any) => {
+    it('should do nothing if args is null', async () => {
       spyOn(view['argElementsHook_'], 'get').and.returnValue(null);
 
       const body = 'body';
@@ -651,7 +651,7 @@ describe('asset.HelperView', () => {
       assert(mockAssetCollection.update).toNot.haveBeenCalled();
     });
 
-    it('should do nothing if body is null', async (done: any) => {
+    it('should do nothing if body is null', async () => {
       const args = Mocks.object('args');
       spyOn(view['argElementsHook_'], 'get').and.returnValue(args);
       spyOn(view['bodyInputHook_'], 'get').and.returnValue(null);
@@ -665,7 +665,7 @@ describe('asset.HelperView', () => {
   });
 
   describe('onCreateButtonClick_', () => {
-    it('should call creaateHelper_ correctly', async (done: any) => {
+    it('should call creaateHelper_ correctly', async () => {
       const asset = Mocks.object('asset');
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(asset));
       spyOn(view, 'createHelper_');
@@ -673,7 +673,7 @@ describe('asset.HelperView', () => {
       assert(view['createHelper_']).to.haveBeenCalledWith(asset);
     });
 
-    it('should do nothing if there are no assets', async (done: any) => {
+    it('should do nothing if there are no assets', async () => {
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(null));
       spyOn(view, 'createHelper_');
       await view['onCreateButtonClick_']();
@@ -683,7 +683,7 @@ describe('asset.HelperView', () => {
 
   describe('onExecuteButtonClick_', () => {
     it('should execute the code, update the console, and scroll to the bottom of the console',
-        async (done: any) => {
+        async () => {
           const asset = Mocks.object('asset');
           spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(asset));
 
@@ -729,7 +729,7 @@ describe('asset.HelperView', () => {
           assert(mockTemplateCompilerService.create).to.haveBeenCalledWith(asset, rowData);
         });
 
-    it('should handle error thrown during compile step correctly', async (done: any) => {
+    it('should handle error thrown during compile step correctly', async () => {
       const asset = Mocks.object('asset');
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(asset));
 
@@ -777,7 +777,7 @@ describe('asset.HelperView', () => {
       assert(mockTemplateCompilerService.create).to.haveBeenCalledWith(asset, rowData);
     });
 
-    it('should not scroll to the bottom if the element cannot be found', async (done: any) => {
+    it('should not scroll to the bottom if the element cannot be found', async () => {
       const asset = Mocks.object('asset');
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(asset));
 
@@ -812,7 +812,7 @@ describe('asset.HelperView', () => {
       assert(mockTemplateCompilerService.create).to.haveBeenCalledWith(asset, rowData);
     });
 
-    it('should do nothing if the compiler cannot be created', async (done: any) => {
+    it('should do nothing if the compiler cannot be created', async () => {
       const asset = Mocks.object('asset');
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(asset));
 
@@ -830,7 +830,7 @@ describe('asset.HelperView', () => {
       assert(mockTemplateCompilerService.create).to.haveBeenCalledWith(asset, rowData);
     });
 
-    it('should do nothing if asset cannot be found', async (done: any) => {
+    it('should do nothing if asset cannot be found', async () => {
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(null));
 
       const command = 'command';
@@ -846,7 +846,7 @@ describe('asset.HelperView', () => {
       assert(mockTemplateCompilerService.create).toNot.haveBeenCalled();
     });
 
-    it('should do nothing if the row data cannot be found', async (done: any) => {
+    it('should do nothing if the row data cannot be found', async () => {
       const asset = Mocks.object('asset');
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(asset));
 
@@ -862,7 +862,7 @@ describe('asset.HelperView', () => {
       assert(mockTemplateCompilerService.create).toNot.haveBeenCalled();
     });
 
-    it('should do nothing if the console has no values', async (done: any) => {
+    it('should do nothing if the console has no values', async () => {
       spyOn(view['consoleInputHook_'], 'get').and.returnValue(null);
       spyOn(view['consoleEntryHook_'], 'set');
 

@@ -35,7 +35,7 @@ describe('data.TsvDataSource', () => {
   });
 
   describe('getData', () => {
-    it('should resolve with the parsed data', async (done: any) => {
+    it('should resolve with the parsed data', async () => {
       let parsedData = Mocks.object('parsedData');
       spyOn(source, 'parseData_').and.returnValue(parsedData);
 
@@ -50,7 +50,7 @@ describe('data.TsvDataSource', () => {
     });
 
     it('should use the cache if available and the inner data has not changed',
-        async (done: any) => {
+        async () => {
           let cachedData = Mocks.object('cachedData');
           source['cache_'] = cachedData;
 
@@ -65,7 +65,7 @@ describe('data.TsvDataSource', () => {
           assert(source['parseData_']).toNot.haveBeenCalled();
         });
 
-    it('should not use the cache if inner data has been changed', async (done: any) => {
+    it('should not use the cache if inner data has been changed', async () => {
       let cachedData = Mocks.object('cachedData');
       source['cache_'] = cachedData;
 

@@ -27,7 +27,7 @@ describe('asset.BaseLayerEditor', () => {
   });
 
   describe('onDataChanged_', () => {
-    it('should update the layer and save it', async (done: any) => {
+    it('should update the layer and save it', async () => {
       const bottom = 12;
       const left = 34;
       const right = 56;
@@ -54,7 +54,7 @@ describe('asset.BaseLayerEditor', () => {
       assert(mockLayer.setBottom).to.haveBeenCalledWith(bottom);
     });
 
-    it('should do nothing if the layer cannot be found', async (done: any) => {
+    it('should do nothing if the layer cannot be found', async () => {
       spyOn(editor, 'getLayer_').and.returnValue(Promise.resolve(null));
 
       const asset = Mocks.object('asset');
@@ -64,7 +64,7 @@ describe('asset.BaseLayerEditor', () => {
       assert(mockAssetCollection.update).toNot.haveBeenCalled();
     });
 
-    it('should do nothing if the asset cannot be found', async (done: any) => {
+    it('should do nothing if the asset cannot be found', async () => {
       const layer = Mocks.object('layer');
       spyOn(editor, 'getLayer_').and.returnValue(Promise.resolve(layer));
 

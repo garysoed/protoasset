@@ -56,7 +56,7 @@ describe('namespace.ImageLayerEditor', () => {
   });
 
   describe('onDataChanged_', () => {
-    it('should update the layer and save it', async (done: any) => {
+    it('should update the layer and save it', async () => {
       const imageUrl = 'imageUrl';
 
       spyOn(editor.imageUrlHook_, 'get').and.returnValue(imageUrl);
@@ -72,7 +72,7 @@ describe('namespace.ImageLayerEditor', () => {
       assert(mockLayer.setImageUrl).to.haveBeenCalledWith(imageUrl);
     });
 
-    it('should do nothing if the layer cannot be found', async (done: any) => {
+    it('should do nothing if the layer cannot be found', async () => {
       spyOn(editor, 'getLayer_').and.returnValue(Promise.resolve(null));
 
       const asset = Mocks.object('asset');
@@ -82,7 +82,7 @@ describe('namespace.ImageLayerEditor', () => {
       assert(mockAssetCollection.update).toNot.haveBeenCalled();
     });
 
-    it('should do nothing if the asset cannot be found', async (done: any) => {
+    it('should do nothing if the asset cannot be found', async () => {
       const layer = Mocks.object('layer');
       spyOn(editor, 'getLayer_').and.returnValue(Promise.resolve(layer));
 
@@ -94,7 +94,7 @@ describe('namespace.ImageLayerEditor', () => {
   });
 
   describe('onFieldChange_', () => {
-    it('should update the image preview correctly', async (done: any) => {
+    it('should update the image preview correctly', async () => {
       const imageUrl = 'imageUrl';
       spyOn(editor.imageUrlHook_, 'get').and.returnValue(imageUrl);
 
@@ -119,7 +119,7 @@ describe('namespace.ImageLayerEditor', () => {
     });
 
     it('should skip updating the image preview if the style element cannot be found',
-        async (done: any) => {
+        async () => {
           const imageUrl = 'imageUrl';
 
           spyOn(editor.imageUrlHook_, 'get').and.returnValue(imageUrl);
@@ -134,7 +134,7 @@ describe('namespace.ImageLayerEditor', () => {
           await editor['onFieldChange_']();
         });
 
-    it('should not reject if the asset cannot be found', async (done: any) => {
+    it('should not reject if the asset cannot be found', async () => {
       spyOn(editor, 'getAsset_').and.returnValue(Promise.resolve(null));
 
       const rowData = Mocks.object('rowData');
@@ -143,7 +143,7 @@ describe('namespace.ImageLayerEditor', () => {
       await editor['onFieldChange_']();
     });
 
-    it('should not reject if the row data cannot be found', async (done: any) => {
+    it('should not reject if the row data cannot be found', async () => {
       const asset = Mocks.object('asset');
       spyOn(editor, 'getAsset_').and.returnValue(Promise.resolve(asset));
       mockSampleDataService.getRowData.and.returnValue(Promise.resolve(null));

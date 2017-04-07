@@ -81,7 +81,7 @@ describe('landing.LandingView', () => {
 
   describe('onFilterButtonTextAttrChange_', () => {
     it('should set the project collection to the search results if there is filter text',
-        async (done: any) => {
+        async () => {
           const newValue = 'newValue';
           const projectId1 = 'projectId1';
           const mockProject1 = jasmine.createSpyObj('Project1', ['getId']);
@@ -99,7 +99,7 @@ describe('landing.LandingView', () => {
         });
 
     it('should set the project collection to all projects if the filter text is null',
-        async (done: any) => {
+        async () => {
           const newValue = null;
           const projectId1 = 'projectId1';
           const mockProject1 = jasmine.createSpyObj('Project1', ['getId']);
@@ -115,7 +115,7 @@ describe('landing.LandingView', () => {
         });
 
     it('should set the project collection to all projects if the filter text is empty string',
-        async (done: any) => {
+        async () => {
           const newValue = '';
           const projectId1 = 'projectId1';
           const mockProject1 = jasmine.createSpyObj('Project1', ['getId']);
@@ -161,7 +161,7 @@ describe('landing.LandingView', () => {
 
   describe('onRouteChanged_', () => {
     it('should redirect to create page if the new location is landing but there are no projects',
-        async (done: any) => {
+        async () => {
           const mockRoute = jasmine.createSpyObj('Route', ['getType']);
           mockRoute.getType.and.returnValue(Views.LANDING);
           mockRouteService.getRoute.and.returnValue(mockRoute);
@@ -176,7 +176,7 @@ describe('landing.LandingView', () => {
         });
 
     it('should not redirect if the new location is landing but there are projects',
-        async (done: any) => {
+        async () => {
           const mockRoute = jasmine.createSpyObj('Route', ['getType']);
           mockRoute.getType.and.returnValue(Views.LANDING);
           mockRouteService.getRoute.and.returnValue(mockRoute);
@@ -187,7 +187,7 @@ describe('landing.LandingView', () => {
           assert(mockRouteService.goTo).toNot.haveBeenCalled();
         });
 
-    it('should redirect to landing page if there are no valid routes', async (done: any) => {
+    it('should redirect to landing page if there are no valid routes', async () => {
       mockRouteService.getRoute.and.returnValue(null);
 
       const routeFactory = Mocks.object('routeFactory');
@@ -197,7 +197,7 @@ describe('landing.LandingView', () => {
       assert(mockRouteService.goTo).to.haveBeenCalledWith(routeFactory, {});
     });
 
-    it('should not redirect if the new location is not landing', async (done: any) => {
+    it('should not redirect if the new location is not landing', async () => {
       const mockRoute = jasmine.createSpyObj('Route', ['getType']);
       mockRoute.getType.and.returnValue(Views.CREATE_ASSET);
       mockRouteService.getRoute.and.returnValue(mockRoute);
@@ -231,7 +231,7 @@ describe('landing.LandingView', () => {
   });
 
   describe('onInserted', () => {
-    it('should populate the project collection bridge correctly', async (done: any) => {
+    it('should populate the project collection bridge correctly', async () => {
       const projectId1 = 'projectId1';
       const projectName1 = 'projectName1';
       const mockProject1 = jasmine.createSpyObj('Project1', ['getId', 'getName']);

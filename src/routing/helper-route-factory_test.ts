@@ -18,7 +18,7 @@ describe('routing.HelperRouteFactory', () => {
   });
 
   describe('getName', () => {
-    it('should resolve with the correct name', async (done: any) => {
+    it('should resolve with the correct name', async () => {
       let assetId = 'assetId';
       let helperId = 'helperId';
       let projectId = 'projectId';
@@ -38,7 +38,7 @@ describe('routing.HelperRouteFactory', () => {
       assert(mockAsset.getHelper).to.haveBeenCalledWith(helperId);
     });
 
-    it('should resolve with "Unknown helper" if the helper cannot be found', async (done: any) => {
+    it('should resolve with "Unknown helper" if the helper cannot be found', async () => {
       let mockAsset = jasmine.createSpyObj('Asset', ['getHelper']);
       mockAsset.getHelper.and.returnValue(null);
       mockAssetCollection.get.and.returnValue(Promise.resolve(mockAsset));
@@ -52,7 +52,7 @@ describe('routing.HelperRouteFactory', () => {
     });
 
     it('should resolve with "Unknown helper for asset" if the asset cannot be found',
-        async (done: any) => {
+        async () => {
           mockAssetCollection.get.and.returnValue(Promise.resolve(null));
 
           let actualName = await factory

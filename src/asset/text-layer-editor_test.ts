@@ -32,7 +32,7 @@ describe('namespace.TextLayerEditor', () => {
   });
 
   describe('onFieldsChanged_', () => {
-    it('should update the layer correctly', async (done: any) => {
+    it('should update the layer correctly', async () => {
       const mockLayer = jasmine.createSpyObj(
           'Layer',
           [
@@ -82,7 +82,7 @@ describe('namespace.TextLayerEditor', () => {
       assert(mockLayer.setColor).to.haveBeenCalledWith(color);
     });
 
-    it('should not update the size, font family, or color if they are null', async (done: any) => {
+    it('should not update the size, font family, or color if they are null', async () => {
       const mockLayer = jasmine.createSpyObj(
           'Layer',
           [
@@ -123,7 +123,7 @@ describe('namespace.TextLayerEditor', () => {
       assert(mockLayer.setColor).toNot.haveBeenCalled();
     });
 
-    it('should not reject if there are no layers found', async (done: any) => {
+    it('should not reject if there are no layers found', async () => {
       spyOn(editor, 'getLayer_').and.returnValue(Promise.resolve(null));
 
       await editor.onFieldsChanged_();

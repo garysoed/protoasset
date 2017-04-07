@@ -18,7 +18,7 @@ describe('routing.AssetSettingsRouteFactory', () => {
   });
 
   describe('getName', () => {
-    it('should resolve with the correct name', async (done: any) => {
+    it('should resolve with the correct name', async () => {
       const assetId = 'assetId';
       const projectId = 'projectId';
       const assetName = 'assetName';
@@ -29,7 +29,7 @@ describe('routing.AssetSettingsRouteFactory', () => {
       assert(mockAssetCollection.get).to.haveBeenCalledWith(projectId, assetId);
     });
 
-    it('should resolve with the correct name if asset cannot be found', async (done: any) => {
+    it('should resolve with the correct name if asset cannot be found', async () => {
       const assetId = 'assetId';
       const projectId = 'projectId';
       mockAssetCollection.get.and.returnValue(Promise.resolve(null));

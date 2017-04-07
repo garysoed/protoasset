@@ -208,7 +208,7 @@ describe('common.SampleDataPicker', () => {
   });
 
   describe('updateResults_', () => {
-    it('should set the results children correctly', async (done: any) => {
+    it('should set the results children correctly', async () => {
       const searchText = 'searchText';
       spyOn(picker.searchTextValueHook_, 'get').and.returnValue(searchText);
 
@@ -247,7 +247,7 @@ describe('common.SampleDataPicker', () => {
       assert(mockFuse.search).to.haveBeenCalledWith(searchText);
     });
 
-    it('should do nothing if the fuse object is null', async (done: any) => {
+    it('should do nothing if the fuse object is null', async () => {
       const searchText = 'searchText';
       spyOn(picker.searchTextValueHook_, 'get').and.returnValue(searchText);
       spyOn(picker, 'getFuse_').and.returnValue(Promise.resolve(null));
@@ -258,7 +258,7 @@ describe('common.SampleDataPicker', () => {
       assert(picker.resultsChildrenHook_.set).toNot.haveBeenCalled();
     });
 
-    it('should do nothing if search text is null', async (done: any) => {
+    it('should do nothing if search text is null', async () => {
       spyOn(picker.searchTextValueHook_, 'get').and.returnValue(null);
       spyOn(picker.resultsChildrenHook_, 'set');
 

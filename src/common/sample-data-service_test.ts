@@ -26,7 +26,7 @@ describe('common.SampleDataService', () => {
   });
 
   describe('getData_', () => {
-    it('should resolve with the correct data', async (done: any) => {
+    it('should resolve with the correct data', async () => {
       const layerRouteFactory = Mocks.object('layerRouteFactory');
       mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
 
@@ -47,7 +47,7 @@ describe('common.SampleDataService', () => {
       assert(mockRouteService.getParams).to.haveBeenCalledWith(layerRouteFactory);
     });
 
-    it('should resolve with null if there are no data source', async (done: any) => {
+    it('should resolve with null if there are no data source', async () => {
       const layerRouteFactory = Mocks.object('layerRouteFactory');
       mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
 
@@ -64,7 +64,7 @@ describe('common.SampleDataService', () => {
       assert(mockRouteService.getParams).to.haveBeenCalledWith(layerRouteFactory);
     });
 
-    it('should resolve with null if there are no assets', async (done: any) => {
+    it('should resolve with null if there are no assets', async () => {
       const layerRouteFactory = Mocks.object('layerRouteFactory');
       mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
 
@@ -79,7 +79,7 @@ describe('common.SampleDataService', () => {
       assert(mockRouteService.getParams).to.haveBeenCalledWith(layerRouteFactory);
     });
 
-    it('should resolve with null if no params can be found', async (done: any) => {
+    it('should resolve with null if no params can be found', async () => {
       const layerRouteFactory = Mocks.object('layerRouteFactory');
       mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
       mockRouteService.getParams.and.returnValue(null);
@@ -92,7 +92,7 @@ describe('common.SampleDataService', () => {
   });
 
   describe('getFuse', () => {
-    it('should return with the correct Fuse', async (done: any) => {
+    it('should return with the correct Fuse', async () => {
       const entry00 = 'entry00';
       const entry01 = 'entry01';
       const entry10 = 'entry10';
@@ -112,14 +112,14 @@ describe('common.SampleDataService', () => {
       ]);
     });
 
-    it('should return null if there are no data', async (done: any) => {
+    it('should return null if there are no data', async () => {
       spyOn(service, 'getData_').and.returnValue(Promise.resolve(null));
       assert(await service.getFuse()).to.beNull();
     });
   });
 
   describe('getRowData', () => {
-    it('should resolve with the correct data', async (done: any) => {
+    it('should resolve with the correct data', async () => {
       const rowData = Mocks.object('rowData');
       spyOn(service, 'getData_').and
           .returnValue(Promise.resolve(['otherRowData', rowData, 'other']));
@@ -128,7 +128,7 @@ describe('common.SampleDataService', () => {
       assert(await service.getRowData()).to.equal(rowData);
     });
 
-    it('should resolve with null if there are no data at the data row', async (done: any) => {
+    it('should resolve with null if there are no data at the data row', async () => {
       const rowData = Mocks.object('rowData');
       spyOn(service, 'getData_').and
           .returnValue(Promise.resolve(['otherRowData', rowData, 'other']));
@@ -137,14 +137,14 @@ describe('common.SampleDataService', () => {
       assert(await service.getRowData()).to.beNull();
     });
 
-    it('should resolve with null if there are no data', async (done: any) => {
+    it('should resolve with null if there are no data', async () => {
       spyOn(service, 'getData_').and.returnValue(Promise.resolve(null));
 
       service.setDataRow(3);
       assert(await service.getRowData()).to.beNull();
     });
 
-    it('should resolve with null if data row is null', async (done: any) => {
+    it('should resolve with null if data row is null', async () => {
       service.setDataRow(null);
       assert(await service.getRowData()).to.beNull();
     });

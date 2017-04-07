@@ -71,7 +71,7 @@ describe('landing.CreateProjectView', () => {
 
   describe('onSubmitAction_', () => {
     it('should create the project correctly, reset, and redirect to project page',
-    async (done: any) => {
+    async () => {
       let projectId = 'projectId';
       mockProjectCollection.reserveId.and.returnValue(Promise.resolve(projectId));
 

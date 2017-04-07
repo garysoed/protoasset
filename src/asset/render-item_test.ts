@@ -34,7 +34,7 @@ describe('asset.RenderItem', () => {
   });
 
   describe('onRenderDataChanged_', () => {
-    it('should render correctly', async (done: any) => {
+    it('should render correctly', async () => {
       spyOn(item.loadingHiddenHook_, 'set');
 
       const projectId = 'projectId';
@@ -67,7 +67,7 @@ describe('asset.RenderItem', () => {
       assert(item.loadingHiddenHook_.set).to.haveBeenCalledWith(false);
     });
 
-    it('should do nothing if the data cannot be found', async (done: any) => {
+    it('should do nothing if the data cannot be found', async () => {
       spyOn(item.loadingHiddenHook_, 'set');
 
       const projectId = 'projectId';
@@ -97,7 +97,7 @@ describe('asset.RenderItem', () => {
       assert(item.loadingHiddenHook_.set).to.haveBeenCalledWith(false);
     });
 
-    it('should do nothing if there are no data source', async (done: any) => {
+    it('should do nothing if there are no data source', async () => {
       spyOn(item.loadingHiddenHook_, 'set');
 
       const projectId = 'projectId';
@@ -123,7 +123,7 @@ describe('asset.RenderItem', () => {
       assert(item.loadingHiddenHook_.set).to.haveBeenCalledWith(false);
     });
 
-    it('should do nothing if there are no assets', async (done: any) => {
+    it('should do nothing if there are no assets', async () => {
       spyOn(item.loadingHiddenHook_, 'set');
 
       const projectId = 'projectId';
@@ -147,7 +147,7 @@ describe('asset.RenderItem', () => {
       assert(item.loadingHiddenHook_.set).to.haveBeenCalledWith(false);
     });
 
-    it('should do nothing if assetId cannot be found', async (done: any) => {
+    it('should do nothing if assetId cannot be found', async () => {
       spyOn(item.loadingHiddenHook_, 'set');
 
       const projectId = 'projectId';
@@ -168,7 +168,7 @@ describe('asset.RenderItem', () => {
       assert(item.loadingHiddenHook_.set).to.haveBeenCalledWith(false);
     });
 
-    it('should do nothing if projectId cannot be found', async (done: any) => {
+    it('should do nothing if projectId cannot be found', async () => {
       spyOn(item.loadingHiddenHook_, 'set');
 
       spyOn(item.projectIdHook_, 'get').and.returnValue(null);
@@ -189,7 +189,7 @@ describe('asset.RenderItem', () => {
       assert(item.loadingHiddenHook_.set).to.haveBeenCalledWith(false);
     });
 
-    it('should do nothing if renderKey cannot be found', async (done: any) => {
+    it('should do nothing if renderKey cannot be found', async () => {
       spyOn(item.loadingHiddenHook_, 'set');
 
       const projectId = 'projectId';
@@ -210,7 +210,7 @@ describe('asset.RenderItem', () => {
       assert(item.loadingHiddenHook_.set).to.haveBeenCalledWith(false);
     });
 
-    it('should do nothing if row cannot be found', async (done: any) => {
+    it('should do nothing if row cannot be found', async () => {
       spyOn(item.loadingHiddenHook_, 'set');
 
       const projectId = 'projectId';
@@ -233,7 +233,7 @@ describe('asset.RenderItem', () => {
   });
 
   describe('render_', () => {
-    it('should set the background image and output attribute correctly', async (done: any) => {
+    it('should set the background image and output attribute correctly', async () => {
       const asset = Mocks.object('asset');
       const data = Mocks.object('data');
 
@@ -265,7 +265,7 @@ describe('asset.RenderItem', () => {
       assert(mockElement.dispatchAsync).to.haveBeenCalledWith('render', Matchers.any(Function));
     });
 
-    it('should just hide the loading indicator if dataUri cannot be found', async (done: any) => {
+    it('should just hide the loading indicator if dataUri cannot be found', async () => {
       const asset = Mocks.object('asset');
       const data = Mocks.object('data');
 
@@ -296,7 +296,7 @@ describe('asset.RenderItem', () => {
     });
 
     it('should just hide the loading indicator if the style of display element cannot be found',
-        async (done: any) => {
+        async () => {
           const asset = Mocks.object('asset');
           const data = Mocks.object('data');
 
@@ -325,7 +325,7 @@ describe('asset.RenderItem', () => {
         });
 
     it('should not hide the loading indicator if the render key has changed',
-        async (done: any) => {
+        async () => {
           const asset = Mocks.object('asset');
           const data = Mocks.object('data');
 
@@ -351,7 +351,7 @@ describe('asset.RenderItem', () => {
           assert(mockRenderService.render).to.haveBeenCalledWith(asset, data);
         });
 
-    it('should do nothing if loading indicator is not displayed', async (done: any) => {
+    it('should do nothing if loading indicator is not displayed', async () => {
       const asset = Mocks.object('asset');
       const data = Mocks.object('data');
 
@@ -364,7 +364,7 @@ describe('asset.RenderItem', () => {
       assert(mockRenderService.render).toNot.haveBeenCalled();
     });
 
-    it('should do nothing if element is null', async (done: any) => {
+    it('should do nothing if element is null', async () => {
       const asset = Mocks.object('asset');
       const data = Mocks.object('data');
 

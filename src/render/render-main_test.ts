@@ -34,7 +34,7 @@ describe('render.RenderMain', () => {
   });
 
   describe('processRequest_', () => {
-    it('should resolve with the response when rendering is complete', async (done: any) => {
+    it('should resolve with the response when rendering is complete', async () => {
       const styleEl = Mocks.object('styleEl');
       const mockHead = jasmine.createSpyObj('Head', ['querySelector']);
       mockHead.querySelector.and.returnValue(styleEl);
@@ -131,7 +131,7 @@ describe('render.RenderMain', () => {
   });
 
   describe('run', () => {
-    it('should create the server and run it correctly', async (done: any) => {
+    it('should create the server and run it correctly', async () => {
       const channel = Mocks.object('channel');
       spyOn(PostMessageChannel, 'listen').and.returnValue(Promise.resolve(channel));
 

@@ -45,7 +45,7 @@ describe('asset.AbstractLayerEditor', () => {
   });
 
   describe('getAsset_', () => {
-    it('should resolve with the correct asset', async (done: any) => {
+    it('should resolve with the correct asset', async () => {
       const assetId = 'assetId';
       spyOn(editor.assetIdHook_, 'get').and.returnValue(assetId);
 
@@ -59,7 +59,7 @@ describe('asset.AbstractLayerEditor', () => {
       assert(mockAssetCollection.get).to.haveBeenCalledWith(projectId, assetId);
     });
 
-    it('should resolve with null if asset ID cannot be found', async (done: any) => {
+    it('should resolve with null if asset ID cannot be found', async () => {
       spyOn(editor.assetIdHook_, 'get').and.returnValue(null);
 
       const projectId = 'projectId';
@@ -71,7 +71,7 @@ describe('asset.AbstractLayerEditor', () => {
       assert(await editor['getAsset_']()).to.beNull();
     });
 
-    it('should resolve with null if project ID cannot be found', async (done: any) => {
+    it('should resolve with null if project ID cannot be found', async () => {
       const assetId = 'assetId';
       spyOn(editor.assetIdHook_, 'get').and.returnValue(assetId);
 
@@ -85,7 +85,7 @@ describe('asset.AbstractLayerEditor', () => {
   });
 
   describe('getLayer_', () => {
-    it('should resolve with the correct layer', async (done: any) => {
+    it('should resolve with the correct layer', async () => {
       const layerId = 'layerId';
       spyOn(editor.layerIdHook_, 'get').and.returnValue(layerId);
 
@@ -103,7 +103,7 @@ describe('asset.AbstractLayerEditor', () => {
       assert(editor['checkLayer_']).to.haveBeenCalledWith(mockLayer);
     });
 
-    it('should resolve with null if the layer cannot be found', async (done: any) => {
+    it('should resolve with null if the layer cannot be found', async () => {
       const layerId = 'layerId';
       spyOn(editor.layerIdHook_, 'get').and.returnValue(layerId);
 
@@ -117,7 +117,7 @@ describe('asset.AbstractLayerEditor', () => {
       assert(await editor['getLayer_']()).to.beNull();
     });
 
-    it('should resolve with null if the asset cannot be found', async (done: any) => {
+    it('should resolve with null if the asset cannot be found', async () => {
       const layerId = 'layerId';
       spyOn(editor.layerIdHook_, 'get').and.returnValue(layerId);
 
@@ -126,7 +126,7 @@ describe('asset.AbstractLayerEditor', () => {
       assert(await editor['getLayer_']()).to.beNull();
     });
 
-    it('should resolve with null if there are no layer IDs', async (done: any) => {
+    it('should resolve with null if there are no layer IDs', async () => {
       spyOn(editor.layerIdHook_, 'get').and.returnValue(null);
 
       assert(await editor['getLayer_']()).to.beNull();
@@ -135,7 +135,7 @@ describe('asset.AbstractLayerEditor', () => {
 
   describe('onLayerIdChange_', () => {
     it('should listen to changes to the new layer and dispose the old deregister',
-        async (done: any) => {
+        async () => {
           const mockOldDeregister = jasmine.createSpyObj('OldDeregister', ['dispose']);
           editor['layerDeregister_'] = mockOldDeregister;
 
@@ -160,7 +160,7 @@ describe('asset.AbstractLayerEditor', () => {
         });
 
     it('should only dispose the old deregister if the layer cannot be found',
-        async (done: any) => {
+        async () => {
           const mockOldDeregister = jasmine.createSpyObj('OldDeregister', ['dispose']);
           editor['layerDeregister_'] = mockOldDeregister;
 
@@ -173,7 +173,7 @@ describe('asset.AbstractLayerEditor', () => {
         });
 
     it('should not reject if there are no old deregisters',
-        async (done: any) => {
+        async () => {
           spyOn(editor, 'getLayer_').and.returnValue(Promise.resolve(null));
 
           await editor['onLayerIdChange_']();

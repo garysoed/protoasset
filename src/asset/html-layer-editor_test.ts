@@ -34,7 +34,7 @@ describe('asset.HtmlLayerEditoror', () => {
   });
 
   describe('onDataChanged_', () => {
-    it('should update the layer correctly', async (done: any) => {
+    it('should update the layer correctly', async () => {
       const asset = Mocks.object('asset');
       spyOn(editor, 'getAsset_').and.returnValue(Promise.resolve(asset));
 
@@ -52,7 +52,7 @@ describe('asset.HtmlLayerEditoror', () => {
       assert(mockLayer.setCss).to.haveBeenCalledWith(css);
     });
 
-    it('should not update the layer if css and html are null', async (done: any) => {
+    it('should not update the layer if css and html are null', async () => {
       const asset = Mocks.object('asset');
       spyOn(editor, 'getAsset_').and.returnValue(Promise.resolve(asset));
 
@@ -68,7 +68,7 @@ describe('asset.HtmlLayerEditoror', () => {
       assert(mockLayer.setCss).toNot.haveBeenCalled();
     });
 
-    it('should do nothing if layer cannot be found', async (done: any) => {
+    it('should do nothing if layer cannot be found', async () => {
       const asset = Mocks.object('asset');
       spyOn(editor, 'getAsset_').and.returnValue(Promise.resolve(asset));
 
@@ -81,7 +81,7 @@ describe('asset.HtmlLayerEditoror', () => {
       assert(mockAssetCollection.update).toNot.haveBeenCalled();
     });
 
-    it('should do nothing if asset cannot be found', async (done: any) => {
+    it('should do nothing if asset cannot be found', async () => {
       spyOn(editor, 'getAsset_').and.returnValue(Promise.resolve(null));
 
       const mockLayer = jasmine.createSpyObj('Layer', ['setCss', 'setHtml']);

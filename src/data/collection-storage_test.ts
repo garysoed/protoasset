@@ -18,7 +18,7 @@ describe('project.CollectionStorage', () => {
   });
 
   describe('getFusePromise_', () => {
-    it('should return the correct fuse object', async (done: any) => {
+    it('should return the correct fuse object', async () => {
       let item1 = Mocks.object('item1');
       let searchIndex1 = Mocks.object('searchIndex1');
 
@@ -45,7 +45,7 @@ describe('project.CollectionStorage', () => {
       assert(mockGetSearchIndex).to.haveBeenCalledWith(item2);
     });
 
-    it('should return the cached fuse object', async (done: any) => {
+    it('should return the cached fuse object', async () => {
       let fuse = Mocks.object('fuse');
       storage['fusePromise_'] = Promise.resolve(fuse);
 
@@ -87,7 +87,7 @@ describe('project.CollectionStorage', () => {
   });
 
   describe('search', () => {
-    it('should return the correct result from fuse', async (done: any) => {
+    it('should return the correct result from fuse', async () => {
       let item1 = Mocks.object('item1');
       let item2 = Mocks.object('item2');
       let mockFuse = jasmine.createSpyObj('Fuse', ['search']);
@@ -106,7 +106,7 @@ describe('project.CollectionStorage', () => {
 
   describe('update', () => {
     it('should update the storage, resolve true if the item is new, and clear the fuse cache',
-        async (done: any) => {
+        async () => {
           let item = Mocks.object('item');
           let itemId = 'itemId';
 
@@ -120,7 +120,7 @@ describe('project.CollectionStorage', () => {
           assert(mockStorage.read).to.haveBeenCalledWith(itemId);
         });
 
-    it('should resolve false if the item is not new', async (done: any) => {
+    it('should resolve false if the item is not new', async () => {
       mockStorage.update.and.returnValue(Promise.resolve());
       mockStorage.read.and.returnValue(Promise.resolve(Mocks.object('existingItem')));
 

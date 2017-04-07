@@ -174,7 +174,7 @@ describe('project.CreateAssetView', () => {
 
   describe('onSubmitAction_', () => {
     it('should create the asset correctly and navigate to the project main view',
-    async (done: any) => {
+    async () => {
       let routeFactory = Mocks.object('routeFactory');
       mockRouteFactoryService.assetList.and.returnValue(routeFactory);
 
@@ -216,7 +216,7 @@ describe('project.CreateAssetView', () => {
       assert(mockAssetCollection.reserveId).to.haveBeenCalledWith(projectId);
     });
 
-    it('should do nothing if there are no project IDs', async (done: any) => {
+    it('should do nothing if there are no project IDs', async () => {
       spyOn(view, 'getProjectId_').and.returnValue(null);
 
       spyOn(view, 'reset_');

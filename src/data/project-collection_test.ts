@@ -28,7 +28,7 @@ describe('data.ProjectCollection', () => {
   });
 
   describe('list', () => {
-    it('should return the correct projects', async (done: any) => {
+    it('should return the correct projects', async () => {
       let projects = Mocks.object('projects');
 
       spyOn(collection['storage_'], 'list').and.returnValue(Promise.resolve(projects));
@@ -41,7 +41,7 @@ describe('data.ProjectCollection', () => {
 
   describe('reserveId', () => {
     it('should return a promise that is resolved with the correct project ID',
-        async (done: any) => {
+        async () => {
           let projectId = 'projectId';
 
           spyOn(collection['storage_'], 'reserveId').and.returnValue(Promise.resolve(projectId));
@@ -53,7 +53,7 @@ describe('data.ProjectCollection', () => {
   });
 
   describe('search', () => {
-    it('should return the correct projects', async (done: any) => {
+    it('should return the correct projects', async () => {
       let projects = Mocks.object('projects');
 
       spyOn(collection['storage_'], 'search').and.returnValue(Promise.resolve(projects));
@@ -66,7 +66,7 @@ describe('data.ProjectCollection', () => {
   });
 
   describe('update', () => {
-    it('should update the project correctly', async (done: any) => {
+    it('should update the project correctly', async () => {
       let projectId = 'projectId';
       let mockProject = jasmine.createSpyObj('Project', ['getId']);
       mockProject.getId.and.returnValue(projectId);
@@ -82,7 +82,7 @@ describe('data.ProjectCollection', () => {
           mockProject);
     });
 
-    it('should not dispatch the ADDED event if not a new project', async (done: any) => {
+    it('should not dispatch the ADDED event if not a new project', async () => {
       let projectId = 'projectId';
       let mockProject = jasmine.createSpyObj('Project', ['getId']);
       mockProject.getId.and.returnValue(projectId);

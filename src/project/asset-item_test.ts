@@ -69,7 +69,7 @@ describe('project.AssetItem', () => {
   });
 
   describe('onGsAssetIdChanged_', () => {
-    it('should set the asset name correctly', async (done: any) => {
+    it('should set the asset name correctly', async () => {
       let assetId = 'assetId';
       spyOn(item['gsAssetIdHook_'], 'get').and.returnValue(assetId);
 
@@ -88,7 +88,7 @@ describe('project.AssetItem', () => {
       assert(mockAssetCollection.get).to.haveBeenCalledWith(projectId, assetId);
     });
 
-    it('should not set the name if the asset is not found', async (done: any) => {
+    it('should not set the name if the asset is not found', async () => {
       let assetId = 'assetId';
       spyOn(item['gsAssetIdHook_'], 'get').and.returnValue(assetId);
 
@@ -103,7 +103,7 @@ describe('project.AssetItem', () => {
       assert(item['assetNameHook_'].set).toNot.haveBeenCalled();
     });
 
-    it('should delete the name if the asset ID is null', async (done: any) => {
+    it('should delete the name if the asset ID is null', async () => {
       spyOn(item['gsAssetIdHook_'], 'get').and.returnValue(null);
 
       let projectId = 'projectId';
@@ -119,7 +119,7 @@ describe('project.AssetItem', () => {
       assert(item['assetNameHook_'].delete).to.haveBeenCalledWith();
     });
 
-    it('should delete the name if the project ID is null', async (done: any) => {
+    it('should delete the name if the project ID is null', async () => {
       let assetId = 'assetId';
       spyOn(item['gsAssetIdHook_'], 'get').and.returnValue(assetId);
 

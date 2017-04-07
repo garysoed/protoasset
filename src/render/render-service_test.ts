@@ -45,7 +45,7 @@ describe('render.RenderService', () => {
 
   describe('getIframeElPromise_', () => {
     it('should return a promise that resolves when the iframe element has been loaded',
-        async (done: any) => {
+        async () => {
           const mockIframeEl = jasmine.createSpyObj('IframeEl', ['addEventListener']);
           mockIframeEl.style = {};
           mockIframeEl.addEventListener.and.callFake((event: string, callback: Function) => {
@@ -82,7 +82,7 @@ describe('render.RenderService', () => {
   });
 
   describe('getRenderClientPromise_', () => {
-    it('should return a promise that resolves with the API client', async (done: any) => {
+    it('should return a promise that resolves with the API client', async () => {
       const client = Mocks.object('client');
       spyOn(ApiClient, 'of').and.returnValue(client);
 
@@ -112,7 +112,7 @@ describe('render.RenderService', () => {
   });
 
   describe('render', () => {
-    it('should post the correct request and return the correct URI', async (done: any) => {
+    it('should post the correct request and return the correct URI', async () => {
       const uri = 'uri';
       const mockClient = jasmine.createSpyObj('Client', ['post']);
       mockClient.post.and.returnValue(Promise.resolve({uri}));

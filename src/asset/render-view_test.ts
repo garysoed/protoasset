@@ -221,7 +221,7 @@ describe('asset.RenderView', () => {
   });
 
   describe('getAsset_', () => {
-    it('should resolve with the correct asset', async (done: any) => {
+    it('should resolve with the correct asset', async () => {
       const asset = Mocks.object('asset');
       mockAssetCollection.get.and.returnValue(asset);
 
@@ -237,7 +237,7 @@ describe('asset.RenderView', () => {
       assert(mockRouteService.getParams).to.haveBeenCalledWith(renderRouteFactory);
     });
 
-    it('should resolve null if there are no asset IDs', async (done: any) => {
+    it('should resolve null if there are no asset IDs', async () => {
       const projectId = 'projectId';
       mockRouteService.getParams.and.returnValue({assetId: null, projectId});
 
@@ -247,7 +247,7 @@ describe('asset.RenderView', () => {
       assert(await view['getAsset_']()).to.beNull();
     });
 
-    it('should resolve null if there are no project IDs', async (done: any) => {
+    it('should resolve null if there are no project IDs', async () => {
       const assetId = 'assetId';
       mockRouteService.getParams.and.returnValue({assetId, projectId: null});
 
@@ -257,7 +257,7 @@ describe('asset.RenderView', () => {
       assert(await view['getAsset_']()).to.beNull();
     });
 
-    it('should resolve null if there are no params', async (done: any) => {
+    it('should resolve null if there are no params', async () => {
       mockRouteService.getParams.and.returnValue(null);
 
       const renderRouteFactory = Mocks.object('renderRouteFactory');
@@ -284,7 +284,7 @@ describe('asset.RenderView', () => {
   });
 
   describe('onAssetChanged_', () => {
-    it('should update the filename input correctly', async (done: any) => {
+    it('should update the filename input correctly', async () => {
       const filename = 'filename';
       const mockAsset = jasmine.createSpyObj('Asset', ['getFilename']);
       mockAsset.getFilename.and.returnValue(filename);
@@ -296,7 +296,7 @@ describe('asset.RenderView', () => {
       assert(view.filenameInputHook_.set).to.haveBeenCalledWith(filename);
     });
 
-    it('should do nothing if asset is null', async (done: any) => {
+    it('should do nothing if asset is null', async () => {
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(null));
       spyOn(view.filenameInputHook_, 'set');
 
@@ -320,7 +320,7 @@ describe('asset.RenderView', () => {
   });
 
   describe('onFilenameChanged_', () => {
-    it('should update the asset correctly', async (done: any) => {
+    it('should update the asset correctly', async () => {
       const mockAsset = jasmine.createSpyObj('Asset', ['setFilename']);
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
 
@@ -332,7 +332,7 @@ describe('asset.RenderView', () => {
       assert(mockAsset.setFilename).to.haveBeenCalledWith(filename);
     });
 
-    it('should do nothing if filename is null', async (done: any) => {
+    it('should do nothing if filename is null', async () => {
       const mockAsset = jasmine.createSpyObj('Asset', ['setFilename']);
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
 
@@ -343,7 +343,7 @@ describe('asset.RenderView', () => {
       assert(mockAsset.setFilename).toNot.haveBeenCalled();
     });
 
-    it('should do nothing if asset is null', async (done: any) => {
+    it('should do nothing if asset is null', async () => {
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(null));
 
       await view['onFilenameChanged_']();
@@ -352,7 +352,7 @@ describe('asset.RenderView', () => {
   });
 
   describe('onRenderButtonClick_', () => {
-    it('should update the render items correctly', async (done: any) => {
+    it('should update the render items correctly', async () => {
       const key1 = 'key1';
       const key2 = 'key2';
       spyOn(view['renderIdGenerator_'], 'generate').and.returnValues(key1, key2);
@@ -409,7 +409,7 @@ describe('asset.RenderView', () => {
       assert(view.rendersChildrenHook_.set).to.haveBeenCalledWith([]);
     });
 
-    it('should do nothing if there are no filename templates', async (done: any) => {
+    it('should do nothing if there are no filename templates', async () => {
       const renderRouteFactory = Mocks.object('renderRouteFactory');
       mockRouteFactoryService.render.and.returnValue(renderRouteFactory);
 
@@ -432,7 +432,7 @@ describe('asset.RenderView', () => {
       assert(view['expectedRenderKeys_']).to.haveElements([]);
     });
 
-    it('should do nothing if there are no data source', async (done: any) => {
+    it('should do nothing if there are no data source', async () => {
       const renderRouteFactory = Mocks.object('renderRouteFactory');
       mockRouteFactoryService.render.and.returnValue(renderRouteFactory);
 
@@ -453,7 +453,7 @@ describe('asset.RenderView', () => {
       assert(view['expectedRenderKeys_']).to.haveElements([]);
     });
 
-    it('should do nothing if there are no assets', async (done: any) => {
+    it('should do nothing if there are no assets', async () => {
       const renderRouteFactory = Mocks.object('renderRouteFactory');
       mockRouteFactoryService.render.and.returnValue(renderRouteFactory);
 
@@ -580,7 +580,7 @@ describe('asset.RenderView', () => {
   });
 
   describe('onRouteChanged_', () => {
-    it('should listen to asset changed event', async (done: any) => {
+    it('should listen to asset changed event', async () => {
       const mockPreviousDeregister = jasmine.createSpyObj('PreviousDeregister', ['dispose']);
       view['assetChangedDeregister_'] = mockPreviousDeregister;
 
@@ -597,7 +597,7 @@ describe('asset.RenderView', () => {
       assert(mockPreviousDeregister.dispose).to.haveBeenCalledWith();
     });
 
-    it('should only dispose the previous deregister if asset is null', async (done: any) => {
+    it('should only dispose the previous deregister if asset is null', async () => {
       const mockPreviousDeregister = jasmine.createSpyObj('PreviousDeregister', ['dispose']);
       view['assetChangedDeregister_'] = mockPreviousDeregister;
 

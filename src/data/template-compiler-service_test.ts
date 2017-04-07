@@ -18,7 +18,7 @@ describe('data.TemplateCompilerService', () => {
   });
 
   describe('create', () => {
-    it('should create the compiler correctly', async (done: any) => {
+    it('should create the compiler correctly', async () => {
       let mockHandlebarsInstance = jasmine.createSpyObj('HandlebarsInstance', ['registerHelper']);
       mockHandlebars.create.and.returnValue(mockHandlebarsInstance);
 

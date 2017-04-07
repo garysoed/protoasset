@@ -34,7 +34,7 @@ describe('asset.SettingsView', () => {
   });
 
   describe('getAsset_', () => {
-    it('should resolve with the asset correctly', async (done: any) => {
+    it('should resolve with the asset correctly', async () => {
       const assetSettingsRouteFactory = Mocks.object('assetSettingsRouteFactory');
       mockRouteFactoryService.assetSettings.and.returnValue(assetSettingsRouteFactory);
       const projectId = 'projectId';
@@ -49,7 +49,7 @@ describe('asset.SettingsView', () => {
       assert(mockRouteService.getParams).to.haveBeenCalledWith(assetSettingsRouteFactory);
     });
 
-    it('should resolve with null if the route params cannot be determined', async (done: any) => {
+    it('should resolve with null if the route params cannot be determined', async () => {
       const assetSettingsRouteFactory = Mocks.object('assetSettingsRouteFactory');
       mockRouteFactoryService.assetSettings.and.returnValue(assetSettingsRouteFactory);
       mockRouteService.getParams.and.returnValue(null);
@@ -59,7 +59,7 @@ describe('asset.SettingsView', () => {
   });
 
   describe('onAssetChanged_', () => {
-    it('should update the name, type, height, and weight correctly', async (done: any) => {
+    it('should update the name, type, height, and weight correctly', async () => {
       const height = 456;
       spyOn(view.heightHook_, 'get').and.returnValue(height);
 
@@ -86,7 +86,7 @@ describe('asset.SettingsView', () => {
       assert(mockAsset.setWidth).to.haveBeenCalledWith(width);
     });
 
-    it('should do nothing if the values are null', async (done: any) => {
+    it('should do nothing if the values are null', async () => {
       spyOn(view.heightHook_, 'get').and.returnValue(null);
       spyOn(view.widthHook_, 'get').and.returnValue(null);
       spyOn(view.nameHook_, 'get').and.returnValue(null);
@@ -106,7 +106,7 @@ describe('asset.SettingsView', () => {
       assert(mockAsset.setWidth).toNot.haveBeenCalled();
     });
 
-    it('should do nothing if asset cannot be found', async (done: any) => {
+    it('should do nothing if asset cannot be found', async () => {
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(null));
       spyOn(view.assetDisplayNameHook_, 'set');
 
@@ -128,7 +128,7 @@ describe('asset.SettingsView', () => {
   });
 
   describe('onDownloadClicked_', () => {
-    it('should call the download service correctly', async (done: any) => {
+    it('should call the download service correctly', async () => {
       const mockAsset = jasmine.createSpyObj('Asset', ['getName']);
       mockAsset.getName.and.returnValue('assetName');
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
@@ -142,7 +142,7 @@ describe('asset.SettingsView', () => {
       assert(Serializer.toJSON).to.haveBeenCalledWith(mockAsset);
     });
 
-    it('should do nothing if asset cannot be found', async (done: any) => {
+    it('should do nothing if asset cannot be found', async () => {
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(null));
       await view.onDownloadClicked_();
       assert(mockDownloadService.downloadJson).toNot.haveBeenCalled();
@@ -150,7 +150,7 @@ describe('asset.SettingsView', () => {
   });
 
   describe('onRouteChanged_', () => {
-    it('should update the UI correctly', async (done: any) => {
+    it('should update the UI correctly', async () => {
       const assetName = 'assetName';
       const assetType = AssetType.CARD;
       const height = 123;
@@ -177,7 +177,7 @@ describe('asset.SettingsView', () => {
       assert(view.widthHook_.set).to.haveBeenCalledWith(width);
     });
 
-    it('should do nothing if asset cannot be found', async (done: any) => {
+    it('should do nothing if asset cannot be found', async () => {
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(null));
 
       spyOn(view.assetDisplayNameHook_, 'set');

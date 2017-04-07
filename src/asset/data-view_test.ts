@@ -119,7 +119,7 @@ describe('asset.DataView', () => {
   });
 
   describe('getAsset_', () => {
-    it('should return the asset', async (done: any) => {
+    it('should return the asset', async () => {
       let assetId = 'assetId';
       let projectId = 'projectId';
       mockRouteService.getParams.and.returnValue({assetId, projectId});
@@ -136,7 +136,7 @@ describe('asset.DataView', () => {
       assert(mockRouteService.getParams).to.haveBeenCalledWith(assetDataFactory);
     });
 
-    it('should return null if route params cannot be resolved', async (done: any) => {
+    it('should return null if route params cannot be resolved', async () => {
       mockRouteService.getParams.and.returnValue(null);
       mockRouteFactoryService.assetData.and.returnValue(Mocks.object('assetDataFactory'));
 
@@ -160,7 +160,7 @@ describe('asset.DataView', () => {
   });
 
   describe('updateAsset_', () => {
-    it('should update the asset correctly with the given data source', async (done: any) => {
+    it('should update the asset correctly with the given data source', async () => {
       let dataSource = Mocks.object('dataSource');
       let projectId = 'projectId';
       let mockAsset = jasmine.createSpyObj('Asset', ['getProjectId', 'setData']);
@@ -171,14 +171,14 @@ describe('asset.DataView', () => {
       assert(mockAsset.setData).to.haveBeenCalledWith(dataSource);
     });
 
-    it('should not reject if asset cannot be found', async (done: any) => {
+    it('should not reject if asset cannot be found', async () => {
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(null));
       await view['updateAsset_'](Mocks.object('dataSource'));
     });
   });
 
   describe('updateDataSource_', () => {
-    it('should update the asset and preview correctly', async (done: any) => {
+    it('should update the asset and preview correctly', async () => {
       let bundleId = 'bundleId';
       spyOn(view['dataSourceBundleIdHook_'], 'get').and.returnValue(bundleId);
 
@@ -211,7 +211,7 @@ describe('asset.DataView', () => {
 
     it('should not update the asset, but still update the preview, if there are no files in the '
         + 'bundle',
-        async (done: any) => {
+        async () => {
           let bundleId = 'bundleId';
           spyOn(view['dataSourceBundleIdHook_'], 'get').and.returnValue(bundleId);
 
@@ -239,7 +239,7 @@ describe('asset.DataView', () => {
 
     it('should not update the asset, but still update the preview, if the bundle cannot be '
         + 'processed',
-        async (done: any) => {
+        async () => {
           let bundleId = 'bundleId';
           spyOn(view['dataSourceBundleIdHook_'], 'get').and.returnValue(bundleId);
           spyOn(view['startRowValueHook_'], 'get').and.returnValue(123);
@@ -260,7 +260,7 @@ describe('asset.DataView', () => {
           assert(view['updatePreview_']).to.haveBeenCalledWith();
         });
 
-    it('should do nothing if the start row is NaN', async (done: any) => {
+    it('should do nothing if the start row is NaN', async () => {
       spyOn(view['dataSourceBundleIdHook_'], 'get').and.returnValue('bundleId');
       spyOn(view['startRowValueHook_'], 'get').and.returnValue(NaN);
       spyOn(view['endRowValueHook_'], 'get').and.returnValue(456);
@@ -272,7 +272,7 @@ describe('asset.DataView', () => {
       assert(view['updatePreview_']).toNot.haveBeenCalled();
     });
 
-    it('should do nothing if the start row is null', async (done: any) => {
+    it('should do nothing if the start row is null', async () => {
       spyOn(view['dataSourceBundleIdHook_'], 'get').and.returnValue('bundleId');
       spyOn(view['startRowValueHook_'], 'get').and.returnValue(null);
       spyOn(view['endRowValueHook_'], 'get').and.returnValue(456);
@@ -284,7 +284,7 @@ describe('asset.DataView', () => {
       assert(view['updatePreview_']).toNot.haveBeenCalled();
     });
 
-    it('should do nothing if the end row is NaN', async (done: any) => {
+    it('should do nothing if the end row is NaN', async () => {
       spyOn(view['dataSourceBundleIdHook_'], 'get').and.returnValue('bundleId');
       spyOn(view['startRowValueHook_'], 'get').and.returnValue(123);
       spyOn(view['endRowValueHook_'], 'get').and.returnValue(NaN);
@@ -296,7 +296,7 @@ describe('asset.DataView', () => {
       assert(view['updatePreview_']).toNot.haveBeenCalled();
     });
 
-    it('should do nothing if the end row is null', async (done: any) => {
+    it('should do nothing if the end row is null', async () => {
       spyOn(view['dataSourceBundleIdHook_'], 'get').and.returnValue('bundleId');
       spyOn(view['startRowValueHook_'], 'get').and.returnValue(123);
       spyOn(view['endRowValueHook_'], 'get').and.returnValue(null);
@@ -308,7 +308,7 @@ describe('asset.DataView', () => {
       assert(view['updatePreview_']).toNot.haveBeenCalled();
     });
 
-    it('should do nothing if the bundle ID cannot be found', async (done: any) => {
+    it('should do nothing if the bundle ID cannot be found', async () => {
       spyOn(view['dataSourceBundleIdHook_'], 'get').and.returnValue(null);
       spyOn(view['startRowValueHook_'], 'get').and.returnValue(123);
       spyOn(view['endRowValueHook_'], 'get').and.returnValue(456);
@@ -322,7 +322,7 @@ describe('asset.DataView', () => {
   });
 
   describe('updatePreview_', () => {
-    it('should update the preview correctly', async (done: any) => {
+    it('should update the preview correctly', async () => {
       let data = Mocks.object('data');
       let mockDataSource = jasmine.createSpyObj('DataSource', ['getData']);
       mockDataSource.getData.and.returnValue(data);
@@ -339,7 +339,7 @@ describe('asset.DataView', () => {
       assert(view['previewChildrenHook_'].set).to.haveBeenCalledWith(data);
     });
 
-    it('should clear the preview if the data cannot be loaded', async (done: any) => {
+    it('should clear the preview if the data cannot be loaded', async () => {
       let mockDataSource = jasmine.createSpyObj('DataSource', ['getData']);
       mockDataSource.getData.and.returnValue(null);
 
@@ -355,7 +355,7 @@ describe('asset.DataView', () => {
       assert(view['previewChildrenHook_'].set).toNot.haveBeenCalled();
     });
 
-    it('should clear the preview if the asset has no data source', async (done: any) => {
+    it('should clear the preview if the asset has no data source', async () => {
       let mockAsset = jasmine.createSpyObj('Asset', ['getData']);
       mockAsset.getData.and.returnValue(null);
 
@@ -368,7 +368,7 @@ describe('asset.DataView', () => {
       assert(view['previewChildrenHook_'].set).toNot.haveBeenCalled();
     });
 
-    it('should clear the preview if asset cannot be found', async (done: any) => {
+    it('should clear the preview if asset cannot be found', async () => {
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(null));
       spyOn(view['previewChildrenHook_'], 'delete');
       spyOn(view['previewChildrenHook_'], 'set');

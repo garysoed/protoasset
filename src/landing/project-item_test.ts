@@ -48,7 +48,7 @@ describe('landing.ProjectItem', () => {
   });
 
   describe('onProjectIdChanged_', () => {
-    it('should set the project name correctly if found', async (done: any) => {
+    it('should set the project name correctly if found', async () => {
       let projectId = 'projectId';
       let name = 'name';
       let mockProject = jasmine.createSpyObj('Project', ['getName']);
@@ -63,7 +63,7 @@ describe('landing.ProjectItem', () => {
       assert(item['projectNameHook_'].set).to.haveBeenCalledWith(name);
     });
 
-    it('should delete the project name if not found', async (done: any) => {
+    it('should delete the project name if not found', async () => {
       let projectId = 'projectId';
 
       mockProjectCollection.get.and.returnValue(Promise.resolve(null));
