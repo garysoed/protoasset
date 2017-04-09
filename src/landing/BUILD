@@ -8,5 +8,6 @@ proto_asset(
         "@gs_ui//src",
         "//src/common",
         "//src/data",
+        "//src/project",
         "//src/routing",
     ])

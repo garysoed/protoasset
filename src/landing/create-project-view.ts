@@ -15,6 +15,7 @@ import { Validate } from 'external/gs_tools/src/valid';
 
 import { Project } from '../data/project';
 import { ProjectCollection } from '../data/project-collection';
+import { Editor } from '../project/editor';
 import { RouteFactoryService } from '../routing/route-factory-service';
 import { Views } from '../routing/views';
 
@@ -23,11 +24,12 @@ import { Views } from '../routing/views';
  * The main landing view of the app.
  */
 @customElement({
+  dependencies: [Editor],
   tag: 'pa-create-project-view',
   templateKey: 'src/landing/create-project-view',
 })
 export class CreateProjectView extends BaseThemedElement {
-  @bind('gs-text-input').attribute('gs-value', StringParser)
+  @bind('#editor').attribute('project-name', StringParser)
   private readonly nameValueHook_: DomHook<string>;
 
   @bind('gs-basic-button#createButton').attribute('disabled', BooleanParser)
@@ -73,7 +75,7 @@ export class CreateProjectView extends BaseThemedElement {
   /**
    * Handles event when the name field has changed.
    */
-  @handle('gs-text-input').attributeChange('gs-value', StringParser)
+  @handle('#editor').attributeChange('project-name')
   protected onNameChange_(): void {
     this.createButtonDisabledHook_.set(!this.nameValueHook_.get());
   }

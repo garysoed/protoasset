@@ -37,7 +37,7 @@ describe('landing.CreateProjectView', () => {
 
   describe('onCancelAction_', () => {
     it('should navigate to the landing page', () => {
-      let routeFactory = Mocks.object('routeFactory');
+      const routeFactory = Mocks.object('routeFactory');
       mockRouteFactoryService.landing.and.returnValue(routeFactory);
 
       spyOn(view, 'reset_');
@@ -72,12 +72,12 @@ describe('landing.CreateProjectView', () => {
   describe('onSubmitAction_', () => {
     it('should create the project correctly, reset, and redirect to project page',
     async () => {
-      let projectId = 'projectId';
+      const projectId = 'projectId';
       mockProjectCollection.reserveId.and.returnValue(Promise.resolve(projectId));
 
-      let projectName = 'projectName';
+      const projectName = 'projectName';
 
-      let routeFactory = Mocks.object('routeFactory');
+      const routeFactory = Mocks.object('routeFactory');
       mockRouteFactoryService.assetList.and.returnValue(routeFactory);
 
       spyOn(Project.prototype, 'setName');
@@ -87,7 +87,7 @@ describe('landing.CreateProjectView', () => {
       await view['onSubmitAction_']();
       assert(mockProjectCollection.update).to.haveBeenCalledWith(Matchers.any(Project));
 
-      let project = mockProjectCollection.update.calls.argsFor(0)[0];
+      const project = mockProjectCollection.update.calls.argsFor(0)[0];
       assert(project.setName).to.haveBeenCalledWith(projectName);
       assert(project.getId()).to.equal(projectId);
 
