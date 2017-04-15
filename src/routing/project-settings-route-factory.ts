@@ -1,33 +1,30 @@
 import { AbstractRouteFactory } from 'external/gs_ui/src/routing';
 
-import { AssetCollection } from '../data/asset-collection';
+import { ProjectCollection } from '../data/project-collection';
 import { Views } from '../routing/views';
 
-
 type CP = {};
-type PR = {assetId: string, projectId: string};
+type PR = {projectId: string};
 type CR = CP & PR;
 
-export class AssetSettingsRouteFactory extends AbstractRouteFactory<Views, CP, CR, PR> {
-  private readonly assetCollection_: AssetCollection;
+export class ProjectSettingsRouteFactory extends AbstractRouteFactory<Views, CP, CR, PR> {
 
   constructor(
-      assetCollection: AssetCollection,
+      private readonly projectCollection_: ProjectCollection,
       parent: AbstractRouteFactory<Views, any, PR, any>) {
-    super(Views.ASSET_SETTINGS, parent);
-    this.assetCollection_ = assetCollection;
+    super(Views.PROJECT_SETTINGS, parent);
   }
 
   /**
    * @override
    */
   async getName(params: CR): Promise<string> {
-    const asset = await this.assetCollection_.get(params.projectId, params.assetId);
-    if (asset === null) {
+    const project = await this.projectCollection_.get(params.projectId);
+    if (project === null) {
       return 'Settings';
     }
 
-    return `Settings for ${asset.getName()}`;
+    return `Settings for ${project.getName()}`;
   }
 
   /**
@@ -47,7 +44,7 @@ export class AssetSettingsRouteFactory extends AbstractRouteFactory<Views, CP, C
   /**
    * @override
    */
-  getRelativePath_(params: CP): string {
+  protected getRelativePath_(params: CP): string {
     return '/settings';
   }
 }

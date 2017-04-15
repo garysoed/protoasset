@@ -126,7 +126,7 @@ export class AssetListView extends BaseThemedElement {
   }
 
   @handle('#createButton').event(Event.ACTION)
-  protected onCreateButtonClicked_(): void {
+  onCreateButtonClicked_(): void {
     const projectId = this.getProjectId_();
     if (projectId !== null) {
       this.routeService_.goTo(
@@ -144,5 +144,14 @@ export class AssetListView extends BaseThemedElement {
         RouteServiceEvents.CHANGED,
         this.onProjectIdChanged_,
         this));
+  }
+
+  @handle('#settingsButton').event(Event.ACTION)
+  onSettingsButtonClicked_(): void {
+    const projectId = this.getProjectId_();
+    if (projectId !== null) {
+      this.routeService_.goTo(
+          this.routeFactoryService_.projectSettings(), {projectId: projectId});
+    }
   }
 }

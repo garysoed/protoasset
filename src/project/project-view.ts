@@ -6,15 +6,16 @@ import { ThemeService } from 'external/gs_ui/src/theming';
 
 import { AssetView } from '../asset/asset-view';
 
-import { AssetListView } from './asset-list-view';
-import { CreateAssetView } from './create-asset-view';
+import { AssetListView } from '../project/asset-list-view';
+import { CreateAssetView } from '../project/create-asset-view';
+import { SettingsView } from '../project/settings-view';
 
 
 /**
  * The main landing view of the app.
  */
 @customElement({
-  dependencies: [AssetListView, AssetView, CreateAssetView],
+  dependencies: [AssetListView, AssetView, CreateAssetView, SettingsView],
   tag: 'pa-project-view',
   templateKey: 'src/project/project-view',
 })

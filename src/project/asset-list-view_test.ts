@@ -88,8 +88,9 @@ describe('project.AssetListView', () => {
   beforeEach(() => {
     mockAssetCollection = jasmine.createSpyObj('AssetCollection', ['list']);
     mockProjectCollection = jasmine.createSpyObj('ProjectCollection', ['get']);
-    mockRouteFactoryService =
-        jasmine.createSpyObj('RouteFactoryService', ['assetList', 'createAsset']);
+    mockRouteFactoryService = jasmine.createSpyObj(
+        'RouteFactoryService',
+        ['assetList', 'createAsset', 'projectSettings']);
     mockRouteService = Mocks.listenable('RouteService');
     mockRouteService.getParams = jasmine.createSpy('RouteService.getParams');
     mockRouteService.goTo = jasmine.createSpy('RouteService.goTo');
@@ -209,7 +210,7 @@ describe('project.AssetListView', () => {
       const routeFactory = Mocks.object('routeFactory');
       mockRouteFactoryService.createAsset.and.returnValue(routeFactory);
 
-      view['onCreateButtonClicked_']();
+      view.onCreateButtonClicked_();
 
       assert(mockRouteService.goTo).to.haveBeenCalledWith(routeFactory, {projectId: projectId});
     });
@@ -217,7 +218,7 @@ describe('project.AssetListView', () => {
     it('should not throw error if there are no project IDs', () => {
       spyOn(view, 'getProjectId_').and.returnValue(null);
       assert(() => {
-        view['onCreateButtonClicked_']();
+        view.onCreateButtonClicked_();
       }).toNot.throw();
     });
   });
@@ -234,6 +235,27 @@ describe('project.AssetListView', () => {
           RouteServiceEvents.CHANGED,
           view['onProjectIdChanged_'],
           view);
+    });
+  });
+
+  describe('onSettingsButtonClicked_', () => {
+    it('should navigate to project settings view', () => {
+      const projectId = 'projectId';
+      spyOn(view, 'getProjectId_').and.returnValue(projectId);
+
+      const routeFactory = Mocks.object('routeFactory');
+      mockRouteFactoryService.projectSettings.and.returnValue(routeFactory);
+
+      view.onSettingsButtonClicked_();
+
+      assert(mockRouteService.goTo).to.haveBeenCalledWith(routeFactory, {projectId: projectId});
+    });
+
+    it('should not throw error if there are no project IDs', () => {
+      spyOn(view, 'getProjectId_').and.returnValue(null);
+      assert(() => {
+        view.onSettingsButtonClicked_();
+      }).toNot.throw();
     });
   });
 });
