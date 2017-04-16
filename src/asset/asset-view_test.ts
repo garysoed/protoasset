@@ -57,10 +57,11 @@ describe('asset.AssetView', () => {
 
   describe('[Reflect.__initialize]', () => {
     it('should listen to route changed event', () => {
+      spyOn(view, 'listenTo');
       view[Reflect.__initialize]();
 
-      assert(mockRouteService.on).to
-          .haveBeenCalledWith(RouteServiceEvents.CHANGED, view['onRouteChanged_'], view);
+      assert(view.listenTo).to.haveBeenCalledWith(
+          mockRouteService, RouteServiceEvents.CHANGED, view['onRouteChanged_']);
     });
   });
 });

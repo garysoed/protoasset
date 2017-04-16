@@ -132,19 +132,16 @@ describe('asset.NavBar', () => {
           const renderRouteFactory = Mocks.object('renderRouteFactory');
           mockRouteFactoryService.render.and.returnValue(renderRouteFactory);
 
-          const mockDisposable = jasmine.createSpyObj('Disposable', ['dispose']);
-          mockRouteService.on.and.returnValue(mockDisposable);
-
           spyOn(navbar, 'onRouteChanged_');
+          spyOn(navbar, 'listenTo');
           spyOn(navbar, 'addDisposable').and.callThrough();
 
           navbar.onCreated(Mocks.object('element'));
           assert(navbar['onRouteChanged_']).to.haveBeenCalledWith();
-          assert(navbar['addDisposable']).to.haveBeenCalledWith(mockDisposable);
-          assert(mockRouteService.on).to.haveBeenCalledWith(
+          assert(navbar.listenTo).to.haveBeenCalledWith(
+              mockRouteService,
               RouteServiceEvents.CHANGED,
-              navbar['onRouteChanged_'],
-              navbar);
+              navbar['onRouteChanged_']);
           assert(navbar['routeMap_']).to.haveEntries([
             ['data', assetDataRouteFactory],
             ['helper', helperRouteFactory],

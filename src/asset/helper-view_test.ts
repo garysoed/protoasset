@@ -25,16 +25,17 @@ describe('ARG_DATA_HELPER', () => {
       const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
       mockDocument.createElement.and.returnValue(element);
 
-      const mockListenable = jasmine.createSpyObj('Listenable', ['on']);
-      spyOn(ListenableDom, 'of').and.returnValue(mockListenable);
+      const listenable = Mocks.object('listenable');
+      spyOn(ListenableDom, 'of').and.returnValue(listenable);
 
-      const mockInstance = jasmine.createSpyObj('Instance', ['addDisposable', 'onArgClick']);
+      const mockInstance =
+          jasmine.createSpyObj('Instance', ['addDisposable', 'listenTo', 'onArgClick']);
 
       const actualElement = ARG_DATA_HELPER.create(mockDocument, mockInstance);
       assert(actualElement).to.equal(element);
-      assert(mockListenable.on).to
-          .haveBeenCalledWith(DomEvent.CLICK, mockInstance.onArgClick, mockInstance);
-      assert(mockInstance.addDisposable).to.haveBeenCalledWith(mockListenable);
+      assert(mockInstance.listenTo).to.haveBeenCalledWith(
+          listenable, DomEvent.CLICK, mockInstance.onArgClick);
+      assert(mockInstance.addDisposable).to.haveBeenCalledWith(listenable);
       assert(ListenableDom.of).to.haveBeenCalledWith(element);
       assert(mockDocument.createElement).to.haveBeenCalledWith('div');
     });
@@ -930,18 +931,18 @@ describe('asset.HelperView', () => {
       view['assetUpdateDeregister_'] = mockDeregister;
 
       const mockNewDeregister = jasmine.createSpyObj('NewDeregister', ['dispose']);
-      const mockAsset = jasmine.createSpyObj('Asset', ['on']);
-      mockAsset.on.and.returnValue(mockNewDeregister);
+      const listenToSpy = spyOn(view, 'listenTo').and.returnValue(mockNewDeregister);
+      const asset = Mocks.object('asset');
 
       const assetChangedSpy = spyOn(view, 'onAssetChanged_');
 
-      view['updateAsset_'](mockAsset);
-      assert(mockAsset.on).to
-          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function), view);
+      view['updateAsset_'](asset);
+      assert(view.listenTo).to
+          .haveBeenCalledWith(asset, DataEvents.CHANGED, Matchers.any(Function) as any);
 
       assetChangedSpy.calls.reset();
-      mockAsset.on.calls.argsFor(0)[1]();
-      assert(view['onAssetChanged_']).to.haveBeenCalledWith(mockAsset);
+      listenToSpy.calls.argsFor(0)[2]();
+      assert(view['onAssetChanged_']).to.haveBeenCalledWith(asset);
 
       assert(view['assetUpdateDeregister_']).to.equal(mockNewDeregister);
       assert(mockDeregister.dispose).to.haveBeenCalledWith();
@@ -951,18 +952,18 @@ describe('asset.HelperView', () => {
       view['assetUpdateDeregister_'] = null;
 
       const mockNewDeregister = jasmine.createSpyObj('NewDeregister', ['dispose']);
-      const mockAsset = jasmine.createSpyObj('Asset', ['on']);
-      mockAsset.on.and.returnValue(mockNewDeregister);
+      spyOn(view, 'listenTo').and.returnValue(mockNewDeregister);
+      const asset = Mocks.object('asset');
 
       spyOn(view, 'onAssetChanged_');
 
       assert(() => {
-        view['updateAsset_'](mockAsset);
+        view['updateAsset_'](asset);
       }).toNot.throw();
 
-      assert(mockAsset.on).to
-          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function), view);
-      assert(view['onAssetChanged_']).to.haveBeenCalledWith(mockAsset);
+      assert(view.listenTo).to
+          .haveBeenCalledWith(asset, DataEvents.CHANGED, Matchers.any(Function) as any);
+      assert(view['onAssetChanged_']).to.haveBeenCalledWith(asset);
     });
   });
 
@@ -972,39 +973,39 @@ describe('asset.HelperView', () => {
       view['helperUpdateDeregister_'] = mockDeregister;
 
       const mockNewDeregister = jasmine.createSpyObj('NewDeregister', ['dispose']);
-      const mockHelper = jasmine.createSpyObj('Helper', ['on']);
-      mockHelper.on.and.returnValue(mockNewDeregister);
+      const listenToSpy = spyOn(view, 'listenTo').and.returnValue(mockNewDeregister);
+      const helper = Mocks.object('helper');
 
       const helperChangedSpy = spyOn(view, 'onHelperChanged_');
 
-      view['updateHelper_'](mockHelper);
-      assert(mockHelper.on).to
-          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function), view);
+      view['updateHelper_'](helper);
+      assert(view.listenTo).to
+          .haveBeenCalledWith(helper, DataEvents.CHANGED, Matchers.any(Function) as any);
 
       helperChangedSpy.calls.reset();
-      mockHelper.on.calls.argsFor(0)[1]();
-      assert(view['onHelperChanged_']).to.haveBeenCalledWith(mockHelper);
+      listenToSpy.calls.argsFor(0)[2]();
+      assert(view['onHelperChanged_']).to.haveBeenCalledWith(helper);
 
       assert(view['helperUpdateDeregister_']).to.equal(mockNewDeregister);
       assert(mockDeregister.dispose).to.haveBeenCalledWith();
-  });
+    });
 
     it('should not throw errors if there are no previous deregisters', () => {
       view['helperUpdateDeregister_'] = null;
 
       const mockNewDeregister = jasmine.createSpyObj('NewDeregister', ['dispose']);
-      const mockHelper = jasmine.createSpyObj('Helper', ['on']);
-      mockHelper.on.and.returnValue(mockNewDeregister);
+      spyOn(view, 'listenTo').and.returnValue(mockNewDeregister);
+      const helper = Mocks.object('helper');
 
       spyOn(view, 'onHelperChanged_');
 
       assert(() => {
-        view['updateHelper_'](mockHelper);
+        view['updateHelper_'](helper);
       }).toNot.throw();
 
-      assert(mockHelper.on).to
-          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function), view);
-      assert(view['onHelperChanged_']).to.haveBeenCalledWith(mockHelper);
+      assert(view.listenTo).to
+          .haveBeenCalledWith(helper, DataEvents.CHANGED, Matchers.any(Function) as any);
+      assert(view['onHelperChanged_']).to.haveBeenCalledWith(helper);
     });
   });
 
@@ -1071,16 +1072,15 @@ describe('asset.HelperView', () => {
   describe('onCreated', () => {
     it('should listen to route service changed event', () => {
       const mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
-      mockRouteService.on.and.returnValue(mockDeregister);
+      spyOn(view, 'listenTo').and.returnValue(mockDeregister);
 
       spyOn(view, 'addDisposable').and.callThrough();
       spyOn(view, 'onRouteChanged_');
 
       const element = Mocks.object('element');
       view.onCreated(element);
-      assert(view.addDisposable).to.haveBeenCalledWith(mockDeregister);
-      assert(mockRouteService.on).to
-          .haveBeenCalledWith(RouteServiceEvents.CHANGED, view['onRouteChanged_'], view);
+      assert(view.listenTo).to.haveBeenCalledWith(
+          mockRouteService, RouteServiceEvents.CHANGED, view['onRouteChanged_']);
       assert(view['onRouteChanged_']).to.haveBeenCalledWith();
     });
   });

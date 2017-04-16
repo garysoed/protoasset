@@ -15,21 +15,19 @@ describe('RESULTS_DATA_HELPER', () => {
       const element = Mocks.object('element');
       element.classList = mockClassList;
 
-      const disposableFunction = Mocks.object('disposableFunction');
-      const mockListenableElement = jasmine.createSpyObj('ListenableElement', ['on']);
-      mockListenableElement.on.and.returnValue(disposableFunction);
-      spyOn(ListenableDom, 'of').and.returnValue(mockListenableElement);
+      const listenableElement = Mocks.object('listenableElement');
+      spyOn(ListenableDom, 'of').and.returnValue(listenableElement);
 
       const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
       mockDocument.createElement.and.returnValue(element);
 
-      const mockInstance = jasmine.createSpyObj('Instance', ['addDisposable', 'onResultClick_']);
+      const mockInstance =
+          jasmine.createSpyObj('Instance', ['addDisposable', 'listenTo', 'onResultClick_']);
 
       assert(RESULTS_DATA_HELPER.create(mockDocument, mockInstance)).to.equal(element);
-      assert(mockInstance.addDisposable).to.haveBeenCalledWith(mockListenableElement);
-      assert(mockInstance.addDisposable).to.haveBeenCalledWith(disposableFunction);
-      assert(mockListenableElement.on).to
-          .haveBeenCalledWith(DomEvent.CLICK, mockInstance.onResultClick_, mockInstance);
+      assert(mockInstance.addDisposable).to.haveBeenCalledWith(listenableElement);
+      assert(mockInstance.listenTo).to
+          .haveBeenCalledWith(listenableElement, DomEvent.CLICK, mockInstance.onResultClick_);
       assert(ListenableDom.of).to.haveBeenCalledWith(element);
       assert(mockClassList.add).to.haveBeenCalledWith('result');
       assert(mockDocument.createElement).to.haveBeenCalledWith('div');

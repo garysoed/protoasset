@@ -1,7 +1,6 @@
 import { assert, TestBase } from '../test-base';
 TestBase.setup();
 
-import { DisposableFunction } from 'external/gs_tools/src/dispose';
 import { Mocks } from 'external/gs_tools/src/mock';
 import { TestDispose } from 'external/gs_tools/src/testing';
 import { LocationServiceEvents } from 'external/gs_tools/src/ui';
@@ -212,21 +211,21 @@ describe('landing.LandingView', () => {
   describe('onCreated', () => {
     it('should initialize correctly', () => {
       spyOn(view, 'onRouteChanged_');
-      mockRouteService.on.and.returnValue(DisposableFunction.of(() => {}));
+      spyOn(view, 'listenTo');
 
       spyOn(mockProjectCollection, 'on').and.callThrough();
 
       view.onCreated(Mocks.object('element'));
       assert(view['onRouteChanged_']).to.haveBeenCalledWith();
 
-      assert(mockRouteService.on).to.haveBeenCalledWith(
+      assert(view.listenTo).to.haveBeenCalledWith(
+          mockRouteService,
           LocationServiceEvents.CHANGED,
-          view['onRouteChanged_'],
-          view);
-      assert(mockProjectCollection.on).to.haveBeenCalledWith(
+          view['onRouteChanged_']);
+      assert(view.listenTo).to.haveBeenCalledWith(
+          mockProjectCollection,
           CollectionEvents.ADDED,
-          view['onProjectAdded_'],
-          view);
+          view['onProjectAdded_']);
     });
   });
 

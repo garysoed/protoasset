@@ -226,15 +226,15 @@ describe('project.AssetListView', () => {
   describe('onCreated', () => {
     it('should update the project name and listen to changes to route', () => {
       spyOn(view, 'onProjectIdChanged_');
-      spyOn(mockRouteService, 'on').and.callThrough();
+      spyOn(view, 'listenTo');
 
       view.onCreated(Mocks.object('element'));
 
       assert(view['onProjectIdChanged_']).to.haveBeenCalledWith();
-      assert(mockRouteService.on).to.haveBeenCalledWith(
+      assert(view.listenTo).to.haveBeenCalledWith(
+          mockRouteService,
           RouteServiceEvents.CHANGED,
-          view['onProjectIdChanged_'],
-          view);
+          view['onProjectIdChanged_']);
     });
   });
 

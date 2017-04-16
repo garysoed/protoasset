@@ -140,21 +140,21 @@ describe('asset.AbstractLayerEditor', () => {
           editor['layerDeregister_'] = mockOldDeregister;
 
           const mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
-          const mockLayer = jasmine.createSpyObj('Layer', ['on']);
-          mockLayer.on.and.returnValue(mockDeregister);
-          spyOn(editor, 'getLayer_').and.returnValue(Promise.resolve(mockLayer));
+          const layer = Mocks.object('layer');
+          const listenToSpy = spyOn(editor, 'listenTo').and.returnValue(mockDeregister);
+          spyOn(editor, 'getLayer_').and.returnValue(Promise.resolve(layer));
 
           const spyOnLayerChange = spyOn(editor, 'onLayerChange_');
 
           await editor['onLayerIdChange_']();
 
-          assert(editor['onLayerChange_']).to.haveBeenCalledWith(mockLayer);
+          assert(editor['onLayerChange_']).to.haveBeenCalledWith(layer);
 
           spyOnLayerChange.calls.reset();
-          assert(mockLayer.on).to
-              .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function), editor);
-          mockLayer.on.calls.argsFor(0)[1]();
-          assert(editor['onLayerChange_']).to.haveBeenCalledWith(mockLayer);
+          assert(editor.listenTo).to
+              .haveBeenCalledWith(layer, DataEvents.CHANGED, Matchers.any(Function) as any);
+          listenToSpy.calls.argsFor(0)[2]();
+          assert(editor['onLayerChange_']).to.haveBeenCalledWith(layer);
           assert(editor['layerDeregister_']).to.equal(mockDeregister);
           assert(mockOldDeregister.dispose).to.haveBeenCalledWith();
         });

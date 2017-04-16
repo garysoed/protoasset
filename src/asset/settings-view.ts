@@ -118,7 +118,7 @@ export class SettingsView extends BaseThemedElement {
    */
   onCreated(element: HTMLElement): void {
     super.onCreated(element);
-    this.routeService_.on(RouteServiceEvents.CHANGED, this.onRouteChanged_, this);
+    this.listenTo(this.routeService_, RouteServiceEvents.CHANGED, this.onRouteChanged_);
     this.onRouteChanged_();
   }
 

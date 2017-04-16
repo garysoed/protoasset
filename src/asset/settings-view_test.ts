@@ -118,11 +118,12 @@ describe('asset.SettingsView', () => {
   describe('onCreated', () => {
     it('should listen to route changed event', () => {
       spyOn(view, 'onRouteChanged_');
+      spyOn(view, 'listenTo');
       view.onCreated(Mocks.object('element'));
-      assert(mockRouteService.on).to.haveBeenCalledWith(
+      assert(view.listenTo).to.haveBeenCalledWith(
+          mockRouteService,
           RouteServiceEvents.CHANGED,
-          view['onRouteChanged_'],
-          view);
+          view['onRouteChanged_']);
       assert(view['onRouteChanged_']).to.haveBeenCalledWith();
     });
   });

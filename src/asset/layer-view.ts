@@ -56,13 +56,12 @@ export const LAYER_ITEM_DATA_HELPER: ChildElementDataHelper<LayerItemData> = {
   create(document: Document, instance: LayerView): Element {
     const element = document.createElement('pa-asset-layer-item');
     const listenableDom = ListenableDom.of(element);
-    instance.addDisposable(
-        listenableDom.on(
-            DomEvent.CLICK,
-            () => {
-              instance.onLayerItemClick_(element.getAttribute('layer-id'));
-            },
-            instance));
+    instance.listenTo(
+        listenableDom,
+        DomEvent.CLICK,
+        () => {
+          instance.onLayerItemClick_(element.getAttribute('layer-id'));
+        });
     instance.addDisposable(listenableDom);
     return element;
   },
@@ -135,8 +134,7 @@ export const LAYER_PREVIEW_MODE_DATA_HELPER: ChildElementDataHelper<LayerPreview
   create(document: Document, instance: LayerView): Element {
     const element = document.createElement('gs-menu-item');
     const listenableDom = ListenableDom.of(element);
-    instance.addDisposable(
-        listenableDom.on(DomEvent.CLICK, instance.onLayerPreviewModeSelected_, instance));
+    instance.listenTo(listenableDom, DomEvent.CLICK, instance.onLayerPreviewModeSelected_);
     instance.addDisposable(listenableDom);
     return element;
   },
@@ -426,10 +424,10 @@ export class LayerView extends BaseThemedElement {
   onCreated(element: HTMLElement): void {
     super.onCreated(element);
 
-    this.addDisposable(this.routeService_.on(
+    this.listenTo(
+        this.routeService_,
         RouteServiceEvents.CHANGED,
-        this.onRouteChanged_,
-        this));
+        this.onRouteChanged_);
     this.onRouteChanged_();
 
     this.onSelectedLayerPreviewModeChanged_();
@@ -513,10 +511,10 @@ export class LayerView extends BaseThemedElement {
       return;
     }
 
-    this.assetChangedDeregister_ = asset.on(
+    this.assetChangedDeregister_ = this.listenTo(
+        asset,
         DataEvents.CHANGED,
-        this.onAssetChanged_.bind(this, asset),
-        this);
+        this.onAssetChanged_.bind(this, asset));
     this.onAssetChanged_(asset);
     this.selectDefaultLayer_(asset);
   }
@@ -557,10 +555,10 @@ export class LayerView extends BaseThemedElement {
       this.layerChangedDeregister_.dispose();
       this.layerChangedDeregister_ = null;
     }
-    this.layerChangedDeregister_ = layer.on(
+    this.layerChangedDeregister_ = this.listenTo(
+        layer,
         DataEvents.CHANGED,
-        this.onLayerChanged_.bind(this, layer),
-        this);
+        this.onLayerChanged_.bind(this, layer));
 
     this.selectedLayerId_ = layer.getId();
     this.onLayerChanged_(layer);

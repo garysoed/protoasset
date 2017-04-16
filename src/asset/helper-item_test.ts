@@ -362,20 +362,20 @@ describe('asset.HelperItem', () => {
           item['helperUpdateDeregister_'] = mockPreviousDeregister;
 
           const mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
-          const mockHelper = jasmine.createSpyObj('Helper', ['on']);
-          mockHelper.on.and.returnValue(mockDeregister);
-          spyOn(item, 'getHelper_').and.returnValue(Promise.resolve(mockHelper));
+          const helper = Mocks.object('helper');
+          const listenToSpy = spyOn(item, 'listenTo').and.returnValue(mockDeregister);
+          spyOn(item, 'getHelper_').and.returnValue(Promise.resolve(helper));
 
           const onHelperUpdatedSpy = spyOn(item, 'onHelperUpdated_');
 
           await item['updateHelper_']();
-          assert(item['onHelperUpdated_']).to.haveBeenCalledWith(mockHelper);
+          assert(item['onHelperUpdated_']).to.haveBeenCalledWith(helper);
 
-          assert(mockHelper.on).to
-              .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function), item);
+          assert(item.listenTo).to
+              .haveBeenCalledWith(helper, DataEvents.CHANGED, Matchers.any(Function) as any);
           onHelperUpdatedSpy.calls.reset();
-          mockHelper.on.calls.argsFor(0)[1]();
-          assert(item['onHelperUpdated_']).to.haveBeenCalledWith(mockHelper);
+          listenToSpy.calls.argsFor(0)[2]();
+          assert(item['onHelperUpdated_']).to.haveBeenCalledWith(helper);
           assert(item['helperUpdateDeregister_']).to.equal(mockDeregister);
 
           assert(mockPreviousDeregister.dispose).to.haveBeenCalledWith();

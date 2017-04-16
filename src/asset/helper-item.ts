@@ -198,8 +198,8 @@ export class HelperItem extends BaseThemedElement {
       return;
     }
 
-    this.helperUpdateDeregister_ = helper
-        .on(DataEvents.CHANGED, this.onHelperUpdated_.bind(this, helper), this);
+    this.helperUpdateDeregister_ = this.listenTo(
+        helper, DataEvents.CHANGED, this.onHelperUpdated_.bind(this, helper));
     this.onHelperUpdated_(helper);
   }
 

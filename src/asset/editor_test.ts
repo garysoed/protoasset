@@ -19,22 +19,20 @@ import { Asset, AssetType } from '../data/asset';
 describe('ASSET_TYPE_MENU_DATA_HELPER', () => {
   describe('create', () => {
     it('should create the element correctly and listen to the click event', () => {
-      const mockView = Mocks.disposable('View');
-      mockView.onTypeClicked = jasmine.createSpy('View.onTypeClicked');
-      TestDispose.add(mockView);
+      const mockInstance = jasmine.createSpyObj(
+          'Instance', ['addDisposable', 'listenTo', 'onTypeClicked']);
 
-      const mockListenableElement = Mocks.listenable('ListenableElement');
-      spyOn(mockListenableElement, 'on').and.callThrough();
-      TestDispose.add(mockListenableElement);
-      spyOn(ListenableDom, 'of').and.returnValue(mockListenableElement);
+      const listenableElement = Mocks.object('listenableElement');
+      spyOn(ListenableDom, 'of').and.returnValue(listenableElement);
 
       const element = Mocks.object('element');
       const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
       mockDocument.createElement.and.returnValue(element);
 
-      assert(ASSET_TYPE_MENU_DATA_HELPER.create(mockDocument, mockView)).to.equal(element);
-      assert(mockListenableElement.on).to
-          .haveBeenCalledWith(DomEvent.CLICK, mockView.onTypeClicked, mockView);
+      assert(ASSET_TYPE_MENU_DATA_HELPER.create(mockDocument, mockInstance)).to.equal(element);
+      assert(mockInstance.listenTo).to
+          .haveBeenCalledWith(listenableElement, DomEvent.CLICK, mockInstance.onTypeClicked);
+      assert(mockInstance.addDisposable).to.haveBeenCalledWith(listenableElement);
       assert(ListenableDom.of).to.haveBeenCalledWith(element);
       assert(mockDocument.createElement).to.haveBeenCalledWith('gs-menu-item');
     });
@@ -76,22 +74,20 @@ describe('ASSET_TYPE_MENU_DATA_HELPER', () => {
 describe('PRESET_TYPE_MENU_DATA_HELPER', () => {
   describe('create', () => {
     it('should create the element correctly and listen to the click event', () => {
-      const mockView = Mocks.disposable('View');
-      mockView.onPresetClicked = jasmine.createSpy('View.onPresetClicked');
-      TestDispose.add(mockView);
+      const mockInstance = jasmine.createSpyObj(
+          'Instance', ['addDisposable', 'listenTo', 'onPresetClicked']);
 
-      const mockListenableElement = Mocks.listenable('ListenableElement');
-      spyOn(mockListenableElement, 'on').and.callThrough();
-      TestDispose.add(mockListenableElement);
-      spyOn(ListenableDom, 'of').and.returnValue(mockListenableElement);
+      const listenableElement = Mocks.object('listenableElement');
+      spyOn(ListenableDom, 'of').and.returnValue(listenableElement);
 
       const element = Mocks.object('element');
       const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
       mockDocument.createElement.and.returnValue(element);
 
-      assert(PRESET_TYPE_MENU_DATA_HELPER.create(mockDocument, mockView)).to.equal(element);
-      assert(mockListenableElement.on).to
-          .haveBeenCalledWith(DomEvent.CLICK, mockView.onPresetClicked, mockView);
+      assert(PRESET_TYPE_MENU_DATA_HELPER.create(mockDocument, mockInstance)).to.equal(element);
+      assert(mockInstance.listenTo).to
+          .haveBeenCalledWith(listenableElement, DomEvent.CLICK, mockInstance.onPresetClicked);
+      assert(mockInstance.addDisposable).to.haveBeenCalledWith(listenableElement);
       assert(ListenableDom.of).to.haveBeenCalledWith(element);
       assert(mockDocument.createElement).to.haveBeenCalledWith('gs-menu-item');
     });

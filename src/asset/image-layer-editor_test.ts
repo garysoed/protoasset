@@ -4,13 +4,12 @@ TestBase.setup();
 import { Mocks } from 'external/gs_tools/src/mock';
 import { TestDispose } from 'external/gs_tools/src/testing';
 
+import { ImageLayerEditor } from '../asset/image-layer-editor';
 import { SampleDataServiceEvent } from '../common/sample-data-service-event';
 import { ImageLayer } from '../data/image-layer';
 
-import { ImageLayerEditor } from './image-layer-editor';
 
-
-describe('namespace.ImageLayerEditor', () => {
+describe('asset.ImageLayerEditor', () => {
   let mockAssetCollection;
   let mockSampleDataService;
   let mockTemplateCompilerService;
@@ -44,14 +43,13 @@ describe('namespace.ImageLayerEditor', () => {
   describe('onCreated', () => {
     it('should listen to sample data row changed event', () => {
       const mockDisposable = jasmine.createSpyObj('Disposable', ['dispose']);
-      mockSampleDataService.on.and.returnValue(mockDisposable);
+      spyOn(editor, 'listenTo').and.returnValue(mockDisposable);
       spyOn(editor, 'addDisposable').and.callThrough();
       editor.onCreated(Mocks.object('element'));
-      assert(editor.addDisposable).to.haveBeenCalledWith(mockDisposable);
-      assert(mockSampleDataService.on).to.haveBeenCalledWith(
+      assert(editor.listenTo).to.haveBeenCalledWith(
+          mockSampleDataService,
           SampleDataServiceEvent.ROW_CHANGED,
-          editor['onSampleDataRowChanged_'],
-          editor);
+          editor['onSampleDataRowChanged_']);
     });
   });
 

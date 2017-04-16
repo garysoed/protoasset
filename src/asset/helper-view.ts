@@ -40,7 +40,7 @@ export const ARG_DATA_HELPER: ChildElementDataHelper<string> = {
     const element = document.createElement('div');
     const listenable = ListenableDom.of(element);
     instance.addDisposable(listenable);
-    listenable.on(DomEvent.CLICK, instance.onArgClick, instance);
+    instance.listenTo(listenable, DomEvent.CLICK, instance.onArgClick);
     return element;
   },
 
@@ -472,10 +472,10 @@ export class HelperView extends BaseThemedElement {
       this.assetUpdateDeregister_ = null;
     }
 
-    this.assetUpdateDeregister_ = asset.on(
+    this.assetUpdateDeregister_ = this.listenTo(
+        asset,
         DataEvents.CHANGED,
-        this.onAssetChanged_.bind(this, asset),
-        this);
+        this.onAssetChanged_.bind(this, asset));
     this.onAssetChanged_(asset);
   };
 
@@ -489,10 +489,10 @@ export class HelperView extends BaseThemedElement {
       this.helperUpdateDeregister_ = null;
     }
 
-    this.helperUpdateDeregister_ = helper.on(
+    this.helperUpdateDeregister_ = this.listenTo(
+        helper,
         DataEvents.CHANGED,
-        this.onHelperChanged_.bind(this, helper),
-        this);
+        this.onHelperChanged_.bind(this, helper));
     this.onHelperChanged_(helper);
   };
 
@@ -545,10 +545,7 @@ export class HelperView extends BaseThemedElement {
    */
   onCreated(element: HTMLElement): void {
     super.onCreated(element);
-    this.addDisposable(this.routeService_.on(
-        RouteServiceEvents.CHANGED,
-        this.onRouteChanged_,
-        this));
+    this.listenTo(this.routeService_, RouteServiceEvents.CHANGED, this.onRouteChanged_);
     this.onRouteChanged_();
   };
 }

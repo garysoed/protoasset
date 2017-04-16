@@ -110,8 +110,8 @@ export abstract class AbstractLayerEditor<T extends BaseLayer> extends BaseTheme
       return;
     }
 
-    this.layerDeregister_ = layer
-        .on(DataEvents.CHANGED, this.onLayerChange_.bind(this, layer), this);
+    this.layerDeregister_ = this.listenTo(
+        layer, DataEvents.CHANGED, this.onLayerChange_.bind(this, layer));
     this.onLayerChange_(layer);
   }
 

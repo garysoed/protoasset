@@ -88,12 +88,11 @@ export class LayerPreview extends BaseThemedElement {
    */
   onCreated(element: HTMLElement): void {
     super.onCreated(element);
-    this.addDisposable(this.sampleDataService_.on(
+    this.listenTo(
+        this.sampleDataService_,
         SampleDataServiceEvent.ROW_CHANGED,
-        this.onDataChanged_,
-        this));
-    this.addDisposable(
-        this.routeService_.on(RouteServiceEvents.CHANGED, this.onLayerIdChanged_, this));
+        this.onDataChanged_);
+    this.listenTo(this.routeService_, RouteServiceEvents.CHANGED, this.onLayerIdChanged_);
     this.onLayerIdChanged_();
   }
 
@@ -163,8 +162,8 @@ export class LayerPreview extends BaseThemedElement {
       return;
     }
 
-    this.layerDeregister_ = layer
-        .on(DataEvents.CHANGED, this.onLayerChange_.bind(this, asset, rowData, layer), this);
+    this.layerDeregister_ = this
+        .listenTo(layer, DataEvents.CHANGED, this.onLayerChange_.bind(this, asset, rowData, layer));
     this.onLayerChange_(asset, rowData, layer);
   }
 }

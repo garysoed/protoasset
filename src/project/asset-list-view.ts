@@ -140,10 +140,10 @@ export class AssetListView extends BaseThemedElement {
   onCreated(element: HTMLElement): void {
     super.onCreated(element);
     this.onProjectIdChanged_();
-    this.addDisposable(this.routeService_.on(
+    this.listenTo(
+        this.routeService_,
         RouteServiceEvents.CHANGED,
-        this.onProjectIdChanged_,
-        this));
+        this.onProjectIdChanged_);
   }
 
   @handle('#settingsButton').event(Event.ACTION)

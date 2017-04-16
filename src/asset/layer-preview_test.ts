@@ -42,23 +42,20 @@ describe('asset.LayerPreview', () => {
 
   describe('onCreated', () => {
     it('should initialize correctly', () => {
-      const mockDisposable = jasmine.createSpyObj('Disposable', ['dispose']);
-      mockSampleDataService.on.and.returnValue(mockDisposable);
-      mockRouteService.on.and.returnValue(mockDisposable);
-
       spyOn(preview, 'onLayerIdChanged_');
+      spyOn(preview, 'listenTo');
 
       const element = Mocks.object('element');
       preview.onCreated(element);
       assert(preview['onLayerIdChanged_']).to.haveBeenCalledWith();
-      assert(mockRouteService.on).to.haveBeenCalledWith(
+      assert(preview.listenTo).to.haveBeenCalledWith(
+          mockRouteService,
           RouteServiceEvents.CHANGED,
-          preview['onLayerIdChanged_'],
-          preview);
-      assert(mockSampleDataService.on).to.haveBeenCalledWith(
+          preview['onLayerIdChanged_']);
+      assert(preview.listenTo).to.haveBeenCalledWith(
+          mockSampleDataService,
           SampleDataServiceEvent.ROW_CHANGED,
-          preview['onDataChanged_'],
-          preview);
+          preview['onDataChanged_']);
     });
   });
 
@@ -214,9 +211,9 @@ describe('asset.LayerPreview', () => {
       preview['layerDeregister_'] = mockOldDeregister;
 
       const mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
-      const mockLayer = jasmine.createSpyObj('Layer', ['getId', 'on']);
+      const listenToSpy = spyOn(preview, 'listenTo').and.returnValue(mockDeregister);
+      const mockLayer = jasmine.createSpyObj('Layer', ['getId']);
       mockLayer.getId.and.returnValue(layerId);
-      mockLayer.on.and.returnValue(mockDeregister);
 
       const mockAsset = jasmine.createSpyObj('Asset', ['getLayers']);
       mockAsset.getLayers.and.returnValue([mockLayer]);
@@ -230,13 +227,13 @@ describe('asset.LayerPreview', () => {
       await preview['onLayerIdChanged_']();
 
       assert(preview['onLayerChange_']).to.haveBeenCalledWith(mockAsset, rowData, mockLayer);
-      assert(mockLayer.on).to.haveBeenCalledWith(
+      assert(preview.listenTo).to.haveBeenCalledWith(
+          mockLayer,
           DataEvents.CHANGED,
-          Matchers.any(Function),
-          preview);
+          Matchers.any(Function) as any);
 
       spyLayerChange.calls.reset();
-      mockLayer.on.calls.argsFor(0)[1]();
+      listenToSpy.calls.argsFor(0)[2]();
       assert(preview['onLayerChange_']).to.haveBeenCalledWith(mockAsset, rowData, mockLayer);
       assert(mockAssetCollection.get).to.haveBeenCalledWith(projectId, assetId);
       assert(mockRouteService.getParams).to.haveBeenCalledWith(layerRouteFactory);

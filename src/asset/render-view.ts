@@ -162,7 +162,7 @@ export class RenderView extends BaseThemedElement {
   listenToRenderEvent(element: Element): void {
     const listenableElement = ListenableDom.of(element);
     this.addDisposable(listenableElement);
-    this.addDisposable(listenableElement.on('render', this.onRendered_, this));
+    this.listenTo(listenableElement, 'render', this.onRendered_);
   }
 
   private async onAssetChanged_(): Promise<void> {
@@ -179,11 +179,10 @@ export class RenderView extends BaseThemedElement {
    */
   onCreated(element: HTMLElement): void {
     super.onCreated(element);
-    this.addDisposable(
-        this.routeService_.on(
-            RouteServiceEvents.CHANGED,
-            this.onRouteChanged_,
-            this));
+    this.listenTo(
+        this.routeService_,
+        RouteServiceEvents.CHANGED,
+        this.onRouteChanged_);
     this.onRouteChanged_();
     this.downloadButtonDisabledHook_.set(true);
   }
@@ -300,7 +299,7 @@ export class RenderView extends BaseThemedElement {
       return;
     }
 
-    this.assetChangedDeregister_ = asset.on(DataEvents.CHANGED, this.onAssetChanged_, this);
+    this.assetChangedDeregister_ = this.listenTo(asset, DataEvents.CHANGED, this.onAssetChanged_);
     this.onAssetChanged_();
   }
 

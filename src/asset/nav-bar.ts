@@ -113,10 +113,10 @@ export class NavBar extends BaseThemedElement {
     this.routeMap_.set('settings', this.routeFactoryService_.assetSettings());
     this.routeMap_.set('render', this.routeFactoryService_.render());
 
-    this.addDisposable(this.routeService_.on(
+    this.listenTo(
+        this.routeService_,
         RouteServiceEvents.CHANGED,
-        this.onRouteChanged_,
-        this));
+        this.onRouteChanged_);
     this.onRouteChanged_();
   }
 }

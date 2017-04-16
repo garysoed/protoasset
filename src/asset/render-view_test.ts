@@ -269,16 +269,16 @@ describe('asset.RenderView', () => {
 
   describe('listenToRenderEvent', () => {
     it('should listen to the element correctly', () => {
-      const mockListenableElement = jasmine.createSpyObj('ListenableElement', ['dispose', 'on']);
-      mockListenableElement.on.and.returnValue(Mocks.disposable('onDeregister'));
+      const mockListenableElement = jasmine.createSpyObj('ListenableElement', ['dispose']);
       spyOn(ListenableDom, 'of').and.returnValue(mockListenableElement);
+      spyOn(view, 'listenTo');
 
       const element = Mocks.object('element');
       view.listenToRenderEvent(element);
-      assert(mockListenableElement.on).to.haveBeenCalledWith(
+      assert(view.listenTo).to.haveBeenCalledWith(
+          mockListenableElement,
           'render',
-          view['onRendered_'],
-          view);
+          view['onRendered_']);
       assert(ListenableDom.of).to.haveBeenCalledWith(element);
     });
   });
@@ -308,12 +308,12 @@ describe('asset.RenderView', () => {
   describe('onCreated', () => {
     it('should listen to route changed event', () => {
       const element = Mocks.object('element');
-      mockRouteService.on.and.returnValue(Mocks.disposable('RouteChangedDisposable'));
       spyOn(view, 'onRouteChanged_');
+      spyOn(view, 'listenTo');
       spyOn(view.downloadButtonDisabledHook_, 'set');
       view.onCreated(element);
-      assert(mockRouteService.on).to
-          .haveBeenCalledWith(RouteServiceEvents.CHANGED, view['onRouteChanged_'], view);
+      assert(view.listenTo).to.haveBeenCalledWith(
+          mockRouteService, RouteServiceEvents.CHANGED, view['onRouteChanged_']);
       assert(view['onRouteChanged_']).to.haveBeenCalledWith();
       assert(view.downloadButtonDisabledHook_.set).to.haveBeenCalledWith(true);
     });
@@ -585,14 +585,15 @@ describe('asset.RenderView', () => {
       view['assetChangedDeregister_'] = mockPreviousDeregister;
 
       const mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
-      const mockAsset = jasmine.createSpyObj('Asset', ['on']);
-      mockAsset.on.and.returnValue(mockDeregister);
-      spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
+      const asset = Mocks.object('asset');
+      spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(asset));
       spyOn(view, 'onAssetChanged_');
+      spyOn(view, 'listenTo').and.returnValue(mockDeregister);
 
       await view['onRouteChanged_']();
       assert(view['onAssetChanged_']).to.haveBeenCalledWith();
-      assert(mockAsset.on).to.haveBeenCalledWith(DataEvents.CHANGED, view['onAssetChanged_'], view);
+      assert(view.listenTo).to
+          .haveBeenCalledWith(asset, DataEvents.CHANGED, view['onAssetChanged_']);
       assert(view['assetChangedDeregister_']).to.equal(mockDeregister);
       assert(mockPreviousDeregister.dispose).to.haveBeenCalledWith();
     });
@@ -603,6 +604,7 @@ describe('asset.RenderView', () => {
 
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(null));
       spyOn(view, 'onAssetChanged_');
+      spyOn(view, 'listenTo').and.returnValue(jasmine.createSpyObj('Deregister', ['dispose']));
 
       await view['onRouteChanged_']();
       assert(view['onAssetChanged_']).toNot.haveBeenCalled();

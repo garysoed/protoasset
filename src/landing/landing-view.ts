@@ -130,14 +130,8 @@ export class LandingView extends BaseThemedElement {
    */
   onCreated(element: HTMLElement): void {
     super.onCreated(element);
-    this.addDisposable(this.routeService_.on(
-        RouteServiceEvents.CHANGED,
-        this.onRouteChanged_,
-        this));
-    this.addDisposable(this.projectCollection_.on(
-        CollectionEvents.ADDED,
-        this.onProjectAdded_,
-        this));
+    this.listenTo(this.routeService_, RouteServiceEvents.CHANGED, this.onRouteChanged_);
+    this.listenTo(this.projectCollection_, CollectionEvents.ADDED, this.onProjectAdded_);
     this.onRouteChanged_();
   }
 

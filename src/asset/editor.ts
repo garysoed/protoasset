@@ -22,9 +22,8 @@ export const ASSET_TYPE_MENU_DATA_HELPER: ChildElementDataHelper<AssetType> = {
   create(document: Document, instance: Editor): Element {
     const element = document.createElement('gs-menu-item');
     const listenable = ListenableDom.of(element);
-    instance.addDisposable(
-        listenable,
-        listenable.on(DomEvent.CLICK, instance.onTypeClicked, instance));
+    instance.addDisposable(listenable);
+    instance.listenTo(listenable, DomEvent.CLICK, instance.onTypeClicked);
     return element;
   },
 
@@ -53,9 +52,8 @@ export const PRESET_TYPE_MENU_DATA_HELPER: ChildElementDataHelper<PresetType> = 
   create(document: Document, instance: Editor): Element {
     const element = document.createElement('gs-menu-item');
     const listenable = ListenableDom.of(element);
-    instance.addDisposable(
-        listenable,
-        listenable.on(DomEvent.CLICK, instance.onPresetClicked, instance));
+    instance.addDisposable(listenable);
+    instance.listenTo(listenable, DomEvent.CLICK, instance.onPresetClicked);
     return element;
   },
 

@@ -59,10 +59,10 @@ export class ImageLayerEditor extends AbstractLayerEditor<ImageLayer> {
    */
   onCreated(element: HTMLElement): void {
     super.onCreated(element);
-    this.addDisposable(this.sampleDataService_.on(
+    this.listenTo(
+        this.sampleDataService_,
         SampleDataServiceEvent.ROW_CHANGED,
-        this.onSampleDataRowChanged_,
-        this));
+        this.onSampleDataRowChanged_);
   }
 
   @handle('#imageUrl').attributeChange('gs-value')

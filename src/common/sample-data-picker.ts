@@ -27,8 +27,7 @@ export const RESULTS_DATA_HELPER: ChildElementDataHelper<SampleItemData> = {
     const element = document.createElement('div');
     element.classList.add('result');
     const listenableElement = ListenableDom.of(element);
-    instance.addDisposable(
-        listenableElement.on(DomEvent.CLICK, instance.onResultClick_, instance));
+    instance.listenTo(listenableElement, DomEvent.CLICK, instance.onResultClick_);
     instance.addDisposable(listenableElement);
     return element;
   },

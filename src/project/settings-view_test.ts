@@ -55,18 +55,16 @@ describe('project.SettingsView', () => {
 
   describe('onCreated', () => {
     it('should initialize correctly', () => {
-      const mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
-      mockRouteService.on.and.returnValue(mockDeregister);
       spyOn(view, 'onRouteChanged_');
+      spyOn(view, 'listenTo');
       spyOn(view, 'addDisposable').and.callThrough();
 
       view.onCreated(Mocks.object('element'));
       assert(view['onRouteChanged_']).to.haveBeenCalledWith();
-      assert(view.addDisposable).to.haveBeenCalledWith(mockDeregister as any);
-      assert(mockRouteService.on).to.haveBeenCalledWith(
+      assert(view.listenTo).to.haveBeenCalledWith(
+          mockRouteService,
           RouteServiceEvents.CHANGED,
-          view['onRouteChanged_'],
-          view);
+          view['onRouteChanged_']);
     });
   });
 

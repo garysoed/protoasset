@@ -149,7 +149,7 @@ export class LayerItem extends BaseThemedElement {
       return;
     }
 
-    this.assetDeregister_ = asset.on(DataEvents.CHANGED, this.updateLayerPosition_, this);
+    this.assetDeregister_ = this.listenTo(asset, DataEvents.CHANGED, this.updateLayerPosition_);
     this.updateLayerPosition_();
     this.onLayerIdChanged_();
   }
@@ -219,8 +219,8 @@ export class LayerItem extends BaseThemedElement {
       return;
     }
 
-    this.layerDeregister_ = layer.on(
-        DataEvents.CHANGED, this.onLayerChanged_.bind(this, layer), this);
+    this.layerDeregister_ = this.listenTo(
+        layer, DataEvents.CHANGED, this.onLayerChanged_.bind(this, layer));
     this.onLayerChanged_(layer);
     this.updateLayerPosition_();
   }

@@ -132,9 +132,9 @@ describe('asset.LayerItem', () => {
           item['assetDeregister_'] = mockOldDeregister;
 
           const mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
-          const mockAsset = jasmine.createSpyObj('Asset', ['on']);
-          mockAsset.on.and.returnValue(mockDeregister);
-          spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
+          spyOn(item, 'listenTo').and.returnValue(mockDeregister);
+          const asset = Mocks.object('asset');
+          spyOn(item, 'getAsset_').and.returnValue(Promise.resolve(asset));
 
           spyOn(item, 'updateLayerPosition_');
           spyOn(item, 'onLayerIdChanged_');
@@ -144,8 +144,8 @@ describe('asset.LayerItem', () => {
           assert(item['onLayerIdChanged_']).to.haveBeenCalledWith();
           assert(item['updateLayerPosition_']).to.haveBeenCalledWith();
           assert(item['assetDeregister_']).to.equal(mockDeregister);
-          assert(mockAsset.on).to
-              .haveBeenCalledWith(DataEvents.CHANGED, item['updateLayerPosition_'], item);
+          assert(item.listenTo).to
+              .haveBeenCalledWith(asset, DataEvents.CHANGED, item['updateLayerPosition_']);
           assert(mockOldDeregister.dispose).to.haveBeenCalledWith();
         });
 
@@ -322,30 +322,30 @@ describe('asset.LayerItem', () => {
   });
 
   describe('onLayerIdChanged_', () => {
-    it('should call layedChanged, listen to layer change, update layer position, and dispose '
+    it('should call layerChanged, listen to layer change, update layer position, and dispose '
         + 'previous layer deregister',
         async () => {
           const mockOldDeregister = jasmine.createSpyObj('OldDeregister', ['dispose']);
           item['layerDeregister_'] = mockOldDeregister;
 
           const mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
-          const mockLayer = jasmine.createSpyObj('Layer', ['on']);
-          mockLayer.on.and.returnValue(mockDeregister);
-          spyOn(item, 'getLayer_').and.returnValue(Promise.resolve(mockLayer));
+          const listenToSpy = spyOn(item, 'listenTo').and.returnValue(mockDeregister);
+          const layer = Mocks.object('layer');
+          spyOn(item, 'getLayer_').and.returnValue(Promise.resolve(layer));
 
           let spyLayerChanged = spyOn(item, 'onLayerChanged_');
           spyOn(item, 'updateLayerPosition_');
 
           await item['onLayerIdChanged_']();
           assert(item['updateLayerPosition_']).to.haveBeenCalledWith();
-          assert(item['onLayerChanged_']).to.haveBeenCalledWith(mockLayer);
+          assert(item['onLayerChanged_']).to.haveBeenCalledWith(layer);
           assert(item['layerDeregister_']).to.equal(mockDeregister);
 
-          assert(mockLayer.on).to
-              .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function), item);
+          assert(item.listenTo).to
+              .haveBeenCalledWith(layer, DataEvents.CHANGED, Matchers.any(Function) as any);
           spyLayerChanged.calls.reset();
-          mockLayer.on.calls.argsFor(0)[1]();
-          assert(item['onLayerChanged_']).to.haveBeenCalledWith(mockLayer);
+          listenToSpy.calls.argsFor(0)[2]();
+          assert(item['onLayerChanged_']).to.haveBeenCalledWith(layer);
 
           assert(mockOldDeregister.dispose).to.haveBeenCalledWith();
         });

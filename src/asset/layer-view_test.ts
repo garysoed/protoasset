@@ -26,23 +26,20 @@ describe('LAYER_ITEM_DATA_HELPER', () => {
       const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
       mockElement.getAttribute.and.returnValue(layerId);
 
-      const disposableFunction = Mocks.object('disposableFunction');
-      const mockListenableDom = jasmine.createSpyObj('ListenableDom', ['on']);
-      mockListenableDom.on.and.returnValue(disposableFunction);
-      spyOn(ListenableDom, 'of').and.returnValue(mockListenableDom);
+      const listenableDom = Mocks.object('listenableDom');
+      spyOn(ListenableDom, 'of').and.returnValue(listenableDom);
 
       const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
       mockDocument.createElement.and.returnValue(mockElement);
       const mockInstance =
-          jasmine.createSpyObj('Instance', ['addDisposable', 'onLayerItemClick_']);
+          jasmine.createSpyObj('Instance', ['addDisposable', 'listenTo', 'onLayerItemClick_']);
       assert(LAYER_ITEM_DATA_HELPER.create(mockDocument, mockInstance)).to.equal(mockElement);
       assert(mockDocument.createElement).to.haveBeenCalledWith('pa-asset-layer-item');
-      assert(mockInstance.addDisposable).to.haveBeenCalledWith(mockListenableDom);
-      assert(mockInstance.addDisposable).to.haveBeenCalledWith(disposableFunction);
+      assert(mockInstance.addDisposable).to.haveBeenCalledWith(listenableDom);
 
-      assert(mockListenableDom.on).to
-          .haveBeenCalledWith(DomEvent.CLICK, Matchers.any(Function), mockInstance);
-      mockListenableDom.on.calls.argsFor(0)[1]();
+      assert(mockInstance.listenTo).to.haveBeenCalledWith(
+          listenableDom, DomEvent.CLICK, Matchers.any(Function));
+      mockInstance.listenTo.calls.argsFor(0)[2]();
       assert(mockInstance.onLayerItemClick_).to.haveBeenCalledWith(layerId);
       assert(mockElement.getAttribute).to.haveBeenCalledWith('layer-id');
 
@@ -187,24 +184,21 @@ describe('LAYER_PREVIEW_DATA_HELPER', () => {
 describe('LAYER_PREVIEW_MODE_DATA_HELPER', () => {
   describe('create', () => {
     it('should create the correct element', () => {
-      const mockInstance = jasmine.createSpyObj('Instance', ['addDisposable']);
+      const mockInstance = jasmine.createSpyObj('Instance', ['addDisposable', 'listenTo']);
 
-      const disposable = Mocks.object('disposable');
-      const mockListenableDom = jasmine.createSpyObj('ListenableDom', ['on']);
-      mockListenableDom.on.and.returnValue(disposable);
-      spyOn(ListenableDom, 'of').and.returnValue(mockListenableDom);
+      const listenableDom = Mocks.object('listenableDom');
+      spyOn(ListenableDom, 'of').and.returnValue(listenableDom);
 
       const element = Mocks.object('element');
       const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
       mockDocument.createElement.and.returnValue(element);
 
       assert(LAYER_PREVIEW_MODE_DATA_HELPER.create(mockDocument, mockInstance)).to.equal(element);
-      assert(mockInstance.addDisposable).to.haveBeenCalledWith(mockListenableDom);
-      assert(mockInstance.addDisposable).to.haveBeenCalledWith(disposable);
-      assert(mockListenableDom.on).to.haveBeenCalledWith(
+      assert(mockInstance.addDisposable).to.haveBeenCalledWith(listenableDom);
+      assert(mockInstance.listenTo).to.haveBeenCalledWith(
+          listenableDom,
           DomEvent.CLICK,
-          mockInstance.onLayerPreviewModeSelected_,
-          mockInstance);
+          mockInstance.onLayerPreviewModeSelected_);
       assert(ListenableDom.of).to.haveBeenCalledWith(element);
       assert(mockDocument.createElement).to.haveBeenCalledWith('gs-menu-item');
     });
@@ -573,13 +567,13 @@ describe('asset.LayerView', () => {
   describe('onCreated', () => {
     it('should listen to route changed event', () => {
       const element = Mocks.object('element');
-      mockRouteService.on.and.returnValue({dispose(): void {}});
       spyOn(view, 'onRouteChanged_');
+      spyOn(view, 'listenTo');
       spyOn(view, 'onSelectedLayerPreviewModeChanged_');
       view.onCreated(element);
       assert(view['onRouteChanged_']).to.haveBeenCalledWith();
-      assert(mockRouteService.on).to
-          .haveBeenCalledWith(RouteServiceEvents.CHANGED, view['onRouteChanged_'], view);
+      assert(view.listenTo).to.haveBeenCalledWith(
+          mockRouteService, RouteServiceEvents.CHANGED, view['onRouteChanged_']);
       assert(view['onSelectedLayerPreviewModeChanged_']).to.haveBeenCalledWith();
     });
   });
@@ -719,9 +713,10 @@ describe('asset.LayerView', () => {
 
           const layer = Mocks.object('layer');
           const mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
+          const listenToSpy = spyOn(view, 'listenTo').and.returnValue(mockDeregister);
+
           const mockAsset = jasmine.createSpyObj('Asset', ['getLayers', 'on']);
           mockAsset.getLayers.and.returnValue([layer]);
-          mockAsset.on.and.returnValue(mockDeregister);
           mockAssetCollection.get.and.returnValue(Promise.resolve(mockAsset));
 
           const assetChangedSpy = spyOn(view, 'onAssetChanged_');
@@ -733,13 +728,13 @@ describe('asset.LayerView', () => {
           assert(view['onAssetChanged_']).to.haveBeenCalledWith(mockAsset);
 
           assert(view['assetChangedDeregister_']).to.equal(mockDeregister);
-          assert(mockAsset.on).to.haveBeenCalledWith(
+          assert(view.listenTo).to.haveBeenCalledWith(
+              mockAsset,
               DataEvents.CHANGED,
-              Matchers.any(Function),
-              view);
+              Matchers.any(Function) as any);
 
           assetChangedSpy.calls.reset();
-          mockAsset.on.calls.argsFor(0)[1]();
+          listenToSpy.calls.argsFor(0)[2]();
           assert(view['onAssetChanged_']).to.haveBeenCalledWith(mockAsset);
 
           assert(mockAssetCollection.get).to.haveBeenCalledWith(projectId, assetId);
@@ -759,9 +754,9 @@ describe('asset.LayerView', () => {
       mockRouteService.getParams.and.returnValue({assetId, projectId});
 
       const mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
-      const mockAsset = jasmine.createSpyObj('Asset', ['getLayers', 'on']);
+      const listenToSpy = spyOn(view, 'listenTo').and.returnValue(mockDeregister);
+      const mockAsset = jasmine.createSpyObj('Asset', ['getLayers']);
       mockAsset.getLayers.and.returnValue([]);
-      mockAsset.on.and.returnValue(mockDeregister);
       mockAssetCollection.get.and.returnValue(Promise.resolve(mockAsset));
 
       const assetChangedSpy = spyOn(view, 'onAssetChanged_');
@@ -775,13 +770,13 @@ describe('asset.LayerView', () => {
       assert(view['onAssetChanged_']).to.haveBeenCalledWith(mockAsset);
 
       assert(view['assetChangedDeregister_']).to.equal(mockDeregister);
-      assert(mockAsset.on).to.haveBeenCalledWith(
+      assert(view.listenTo).to.haveBeenCalledWith(
+          mockAsset,
           DataEvents.CHANGED,
-          Matchers.any(Function),
-          view);
+          Matchers.any(Function) as any);
 
       assetChangedSpy.calls.reset();
-      mockAsset.on.calls.argsFor(0)[1]();
+      listenToSpy.calls.argsFor(0)[2]();
       assert(view['onAssetChanged_']).to.haveBeenCalledWith(mockAsset);
 
       assert(mockAssetCollection.get).to.haveBeenCalledWith(projectId, assetId);
@@ -898,10 +893,11 @@ describe('asset.LayerView', () => {
       view['layerChangedDeregister_'] = mockOldDeregister;
 
       const mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
+      const listenToSpy = spyOn(view, 'listenTo').and.returnValue(mockDeregister);
+
       const layerId = 'layerId';
-      const mockLayer = jasmine.createSpyObj('Layer', ['getId', 'on']);
+      const mockLayer = jasmine.createSpyObj('Layer', ['getId']);
       mockLayer.getId.and.returnValue(layerId);
-      mockLayer.on.and.returnValue(mockDeregister);
 
       const spyOnLayerChanged = spyOn(view, 'onLayerChanged_');
       spyOn(view, 'updateLayerPreviews_');
@@ -911,10 +907,11 @@ describe('asset.LayerView', () => {
       assert(view['updateLayerPreviews_']).to.haveBeenCalledWith();
       assert(view['onLayerChanged_']).to.haveBeenCalledWith(mockLayer);
       assert(view['selectedLayerId_']).to.equal(layerId);
-      assert(mockLayer.on).to.haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function), view);
+      assert(view.listenTo).to
+          .haveBeenCalledWith(mockLayer, DataEvents.CHANGED, Matchers.any(Function) as any);
       spyOnLayerChanged.calls.reset();
 
-      mockLayer.on.calls.argsFor(0)[1]();
+      listenToSpy.calls.argsFor(0)[2]();
       assert(view['onLayerChanged_']).to.haveBeenCalledWith(mockLayer);
       assert(view['layerChangedDeregister_']).to.equal(mockDeregister);
     });
@@ -923,9 +920,10 @@ describe('asset.LayerView', () => {
       view['layerChangedDeregister_'] = null;
 
       const mockDeregister = jasmine.createSpyObj('Deregister', ['dispose']);
-      const mockLayer = jasmine.createSpyObj('Layer', ['getId', 'on']);
+      spyOn(view, 'listenTo').and.returnValue(mockDeregister);
+
+      const mockLayer = jasmine.createSpyObj('Layer', ['getId']);
       mockLayer.getId.and.returnValue('layerId');
-      mockLayer.on.and.returnValue(mockDeregister);
 
       spyOn(view, 'onLayerChanged_');
 
