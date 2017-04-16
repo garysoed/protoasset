@@ -12,8 +12,8 @@ import { AssetListRouteFactory } from '../routing/asset-list-route-factory';
 import { AssetMainRouteFactory } from '../routing/asset-main-route-factory';
 import { AssetSettingsRouteFactory } from '../routing/asset-settings-route-factory';
 import { HelperRouteFactory } from '../routing/helper-route-factory';
+import { ProjectSettingsRouteFactory } from '../routing/project-settings-route-factory';
 import { Views } from '../routing/views';
-import { ProjectSettingsRouteFactory } from 'src/routing/project-settings-route-factory';
 
 
 @bind('pa.routing.RouteFactoryService', [

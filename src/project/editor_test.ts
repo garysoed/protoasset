@@ -1,9 +1,10 @@
 import { assert, TestBase } from '../test-base';
 TestBase.setup();
 
-import { Editor } from '../project/editor';
 import { Mocks } from 'external/gs_tools/src/mock';
 import { TestDispose } from 'external/gs_tools/src/testing';
+
+import { Editor } from '../project/editor';
 
 
 describe('project.Editor', () => {
