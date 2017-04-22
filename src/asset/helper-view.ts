@@ -6,11 +6,11 @@ import { inject } from 'external/gs_tools/src/inject';
 import { BooleanParser, StringParser } from 'external/gs_tools/src/parse';
 import { BaseIdGenerator, SimpleIdGenerator } from 'external/gs_tools/src/random';
 import {
-  bind,
   ChildElementDataHelper,
   customElement,
   DomHook,
-  handle } from 'external/gs_tools/src/webc';
+  handle,
+  hook } from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { RouteService, RouteServiceEvents } from 'external/gs_ui/src/routing';
@@ -159,31 +159,31 @@ export const HELPER_ITEM_DATA_HELPER: ChildElementDataHelper<HelperIdParams> = {
   templateKey: 'src/asset/helper-view',
 })
 export class HelperView extends BaseThemedElement {
-  @bind('#args').childrenElements<string>(ARG_DATA_HELPER, 0, 1)
+  @hook('#args').childrenElements<string>(ARG_DATA_HELPER, 0, 1)
   readonly argElementsHook_: DomHook<string[]>;
 
-  @bind('#argInput').attribute('gs-value', StringParser)
+  @hook('#argInput').attribute('gs-value', StringParser)
   readonly argInputHook_: DomHook<string>;
 
-  @bind('#bodyInput').attribute('gs-value', StringParser)
+  @hook('#bodyInput').attribute('gs-value', StringParser)
   readonly bodyInputHook_: DomHook<string>;
 
-  @bind('#console').childrenElements<ConsoleEntry>(CONSOLE_ENTRY_DATA_HELPER)
+  @hook('#console').childrenElements<ConsoleEntry>(CONSOLE_ENTRY_DATA_HELPER)
   readonly consoleEntryHook_: DomHook<ConsoleEntry[]>;
 
-  @bind('#consoleInput').attribute('gs-value', StringParser)
+  @hook('#consoleInput').attribute('gs-value', StringParser)
   readonly consoleInputHook_: DomHook<string>;
 
-  @bind('#helpers').childrenElements<HelperIdParams>(HELPER_ITEM_DATA_HELPER)
+  @hook('#helpers').childrenElements<HelperIdParams>(HELPER_ITEM_DATA_HELPER)
   readonly helperItemsHook_: DomHook<HelperIdParams[]>;
 
-  @bind('#name').innerText()
+  @hook('#name').innerText()
   readonly nameHook_: DomHook<string>;
 
-  @bind('#sampleDataPicker').attribute('asset-id', StringParser)
+  @hook('#sampleDataPicker').attribute('asset-id', StringParser)
   readonly sampleDataPickerAssetIdHook_: DomHook<string>;
 
-  @bind('#sampleDataPicker').attribute('project-id', StringParser)
+  @hook('#sampleDataPicker').attribute('project-id', StringParser)
   readonly sampleDataPickerProjectIdHook_: DomHook<string>;
 
   private readonly assetCollection_: AssetCollection;

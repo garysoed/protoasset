@@ -3,11 +3,11 @@ import { DomEvent, ListenableDom } from 'external/gs_tools/src/event';
 import { inject } from 'external/gs_tools/src/inject';
 import { BooleanParser, IntegerParser, StringParser } from 'external/gs_tools/src/parse';
 import {
-  bind,
   ChildElementDataHelper,
   customElement,
   DomHook,
-  handle } from 'external/gs_tools/src/webc';
+  handle,
+  hook } from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { ThemeService } from 'external/gs_ui/src/theming';
@@ -66,13 +66,13 @@ export const RESULTS_DATA_HELPER: ChildElementDataHelper<SampleItemData> = {
   templateKey: 'src/common/sample-data-picker',
 })
 export class SampleDataPicker extends BaseThemedElement {
-  @bind('#drawer').attribute('gs-is-expanded', BooleanParser)
+  @hook('#drawer').attribute('gs-is-expanded', BooleanParser)
   readonly drawerExpandedHook_: DomHook<boolean>;
 
-  @bind('#results').childrenElements(RESULTS_DATA_HELPER)
+  @hook('#results').childrenElements(RESULTS_DATA_HELPER)
   readonly resultsChildrenHook_: DomHook<SampleItemData[]>;
 
-  @bind('#searchText').attribute('gs-value', StringParser)
+  @hook('#searchText').attribute('gs-value', StringParser)
   readonly searchTextValueHook_: DomHook<string>;
 
   private readonly sampleDataService_: SampleDataService;

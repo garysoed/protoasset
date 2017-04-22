@@ -1,10 +1,10 @@
 import { inject } from 'external/gs_tools/src/inject';
 import { BooleanParser, StringParser } from 'external/gs_tools/src/parse';
 import {
-    bind,
     customElement,
     DomHook,
-    handle } from 'external/gs_tools/src/webc';
+    handle,
+    hook } from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { Event } from 'external/gs_ui/src/const';
@@ -29,10 +29,10 @@ import { Views } from '../routing/views';
   templateKey: 'src/landing/create-project-view',
 })
 export class CreateProjectView extends BaseThemedElement {
-  @bind('#editor').attribute('project-name', StringParser)
+  @hook('#editor').attribute('project-name', StringParser)
   private readonly nameValueHook_: DomHook<string>;
 
-  @bind('gs-basic-button#createButton').attribute('disabled', BooleanParser)
+  @hook('gs-basic-button#createButton').attribute('disabled', BooleanParser)
   private readonly createButtonDisabledHook_: DomHook<boolean>;
 
   private readonly projectCollection_: ProjectCollection;

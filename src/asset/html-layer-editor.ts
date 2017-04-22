@@ -1,10 +1,10 @@
 import { inject } from 'external/gs_tools/src/inject';
 import { StringParser } from 'external/gs_tools/src/parse';
 import {
-  bind,
   customElement,
   DomHook,
-  handle } from 'external/gs_tools/src/webc';
+  handle,
+  hook } from 'external/gs_tools/src/webc';
 
 import { ThemeService } from 'external/gs_ui/src/theming';
 
@@ -24,10 +24,10 @@ import { TemplateCompilerService } from '../data/template-compiler-service';
   templateKey: 'src/asset/html-layer-editor',
 })
 export class HtmlLayerEditor extends AbstractLayerEditor<HtmlLayer> {
-  @bind('#cssInput').attribute('gs-value', StringParser)
+  @hook('#cssInput').attribute('gs-value', StringParser)
   readonly cssValueHook_: DomHook<string>;
 
-  @bind('#htmlInput').attribute('gs-value', StringParser)
+  @hook('#htmlInput').attribute('gs-value', StringParser)
   readonly htmlValueHook_: DomHook<string>;
 
   constructor(

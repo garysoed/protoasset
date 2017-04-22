@@ -12,11 +12,11 @@ import { BaseIdGenerator, SimpleIdGenerator } from 'external/gs_tools/src/random
 import { Enums } from 'external/gs_tools/src/typescript';
 import { Validate } from 'external/gs_tools/src/valid';
 import {
-  bind,
   ChildElementDataHelper,
   customElement,
   DomHook,
-  handle } from 'external/gs_tools/src/webc';
+  handle,
+  hook } from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { RouteService, RouteServiceEvents } from 'external/gs_ui/src/routing';
@@ -175,71 +175,71 @@ export const LAYER_PREVIEW_MODE_DATA_HELPER: ChildElementDataHelper<LayerPreview
   templateKey: 'src/asset/layer-view',
 })
 export class LayerView extends BaseThemedElement {
-  @bind('#baseEditor').attribute('asset-id', StringParser)
+  @hook('#baseEditor').attribute('asset-id', StringParser)
   readonly baseEditorAssetIdHook_: DomHook<string>;
 
-  @bind('#baseEditor').attribute('layer-id', StringParser)
+  @hook('#baseEditor').attribute('layer-id', StringParser)
   readonly baseEditorLayerIdHook_: DomHook<string>;
 
-  @bind('#baseEditor').attribute('project-id', StringParser)
+  @hook('#baseEditor').attribute('project-id', StringParser)
   readonly baseEditorProjectIdHook_: DomHook<string>;
 
-  @bind('#htmlEditor').attribute('asset-id', StringParser)
+  @hook('#htmlEditor').attribute('asset-id', StringParser)
   readonly htmlEditorAssetIdHook_: DomHook<string>;
 
-  @bind('#htmlEditor').attribute('layer-id', StringParser)
+  @hook('#htmlEditor').attribute('layer-id', StringParser)
   readonly htmlEditorLayerIdHook_: DomHook<string>;
 
-  @bind('#htmlEditor').attribute('project-id', StringParser)
+  @hook('#htmlEditor').attribute('project-id', StringParser)
   readonly htmlEditorProjectIdHook_: DomHook<string>;
 
-  @bind('#imageEditor').attribute('asset-id', StringParser)
+  @hook('#imageEditor').attribute('asset-id', StringParser)
   readonly imageEditorAssetIdHook_: DomHook<string>;
 
-  @bind('#imageEditor').attribute('data-row', IntegerParser)
+  @hook('#imageEditor').attribute('data-row', IntegerParser)
   readonly imageEditorDataRowHook_: DomHook<number>;
 
-  @bind('#imageEditor').attribute('layer-id', StringParser)
+  @hook('#imageEditor').attribute('layer-id', StringParser)
   readonly imageEditorLayerIdHook_: DomHook<string>;
 
-  @bind('#imageEditor').attribute('project-id', StringParser)
+  @hook('#imageEditor').attribute('project-id', StringParser)
   readonly imageEditorProjectIdHook_: DomHook<string>;
 
-  @bind('#imageRender').attribute('src', StringParser)
+  @hook('#imageRender').attribute('src', StringParser)
   readonly imageRenderSrcHook_: DomHook<string>;
 
-  @bind('#selectedLayerName').innerText()
+  @hook('#selectedLayerName').innerText()
   readonly layerNameHook_: DomHook<string>;
 
-  @bind('#previews').childrenElements(LAYER_PREVIEW_DATA_HELPER)
+  @hook('#previews').childrenElements(LAYER_PREVIEW_DATA_HELPER)
   readonly layerPreviewsChildElementHook_: DomHook<LayerPreviewData[]>;
 
-  @bind('#previews').property('style')
+  @hook('#previews').property('style')
   readonly layerPreviewsStyleHook_: DomHook<CSSStyleDeclaration>;
 
-  @bind('#layerTypeSwitch').attribute('gs-value', EnumParser(LayerType))
+  @hook('#layerTypeSwitch').attribute('gs-value', EnumParser(LayerType))
   readonly layerTypeSwitchHook_: DomHook<LayerType>;
 
-  @bind('#layers').childrenElements<LayerItemData>(LAYER_ITEM_DATA_HELPER)
+  @hook('#layers').childrenElements<LayerItemData>(LAYER_ITEM_DATA_HELPER)
   readonly layersChildElementHook_: DomHook<LayerItemData[]>;
 
-  @bind('#previewModes').childrenElements(LAYER_PREVIEW_MODE_DATA_HELPER)
+  @hook('#previewModes').childrenElements(LAYER_PREVIEW_MODE_DATA_HELPER)
   readonly previewModeChildElementHook_: DomHook<LayerPreviewMode[]>;
 
-  @bind('#previewSwitch').attribute('gs-value', BooleanParser)
+  @hook('#previewSwitch').attribute('gs-value', BooleanParser)
   readonly previewSwitchHook_: DomHook<boolean>;
 
   // TODO: Add parser to innerText.
-  @bind('#selectedPreviewMode').innerText()
+  @hook('#selectedPreviewMode').innerText()
   readonly selectedPreviewModeHook_: DomHook<string>;
 
-  @bind('#textEditor').attribute('asset-id', StringParser)
+  @hook('#textEditor').attribute('asset-id', StringParser)
   readonly textEditorAssetIdHook_: DomHook<string>;
 
-  @bind('#textEditor').attribute('layer-id', StringParser)
+  @hook('#textEditor').attribute('layer-id', StringParser)
   readonly textEditorLayerIdHook_: DomHook<string>;
 
-  @bind('#textEditor').attribute('project-id', StringParser)
+  @hook('#textEditor').attribute('project-id', StringParser)
   readonly textEditorProjectIdHook_: DomHook<string>;
 
   private readonly assetCollection_: AssetCollection;

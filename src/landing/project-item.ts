@@ -1,7 +1,7 @@
 import { DomEvent } from 'external/gs_tools/src/event';
 import { inject } from 'external/gs_tools/src/inject';
 import { StringParser } from 'external/gs_tools/src/parse';
-import { bind, customElement, DomHook, handle } from 'external/gs_tools/src/webc';
+import { customElement, DomHook, handle, hook } from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { RouteService } from 'external/gs_ui/src/routing';
@@ -21,10 +21,10 @@ export class ProjectItem extends BaseThemedElement {
   private readonly routeFactoryService_: RouteFactoryService;
   private readonly routeService_: RouteService<Views>;
 
-  @bind(null).attribute('project-id', StringParser)
+  @hook(null).attribute('project-id', StringParser)
   private readonly projectIdHook_: DomHook<string>;
 
-  @bind('#projectName').innerText()
+  @hook('#projectName').innerText()
   private readonly projectNameHook_: DomHook<string>;
 
 

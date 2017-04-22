@@ -2,11 +2,11 @@ import { Arrays } from 'external/gs_tools/src/collection';
 import { inject } from 'external/gs_tools/src/inject';
 import { StringParser } from 'external/gs_tools/src/parse';
 import {
-  bind,
   ChildElementDataHelper,
   customElement,
   DomHook,
-  handle } from 'external/gs_tools/src/webc';
+  handle,
+  hook } from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { Event } from 'external/gs_ui/src/const';
@@ -55,7 +55,7 @@ export const PROJECT_ITEM_DATA_HELPER: ChildElementDataHelper<string> = {
   templateKey: 'src/landing/landing-view',
 })
 export class LandingView extends BaseThemedElement {
-  @bind('#projects').childrenElements(PROJECT_ITEM_DATA_HELPER)
+  @hook('#projects').childrenElements(PROJECT_ITEM_DATA_HELPER)
   private readonly projectCollectionHook_: DomHook<string[]>;
 
   private readonly routeFactoryService_: RouteFactoryService;

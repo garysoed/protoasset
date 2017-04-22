@@ -2,11 +2,11 @@ import { DomEvent, ListenableDom } from 'external/gs_tools/src/event';
 import { inject } from 'external/gs_tools/src/inject';
 import { BooleanParser, EnumParser, FloatParser, StringParser } from 'external/gs_tools/src/parse';
 import {
-  bind,
   ChildElementDataHelper,
   customElement,
   DomHook,
-  handle } from 'external/gs_tools/src/webc';
+  handle,
+  hook } from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { ThemeService } from 'external/gs_ui/src/theming';
@@ -91,40 +91,40 @@ export const ASSET_MAP_: Map<AssetType, PresetType[]> = new Map([
   templateKey: 'src/asset/editor',
 })
 export class Editor extends BaseThemedElement {
-  @bind(null).attribute('asset-type', EnumParser(AssetType))
+  @hook(null).attribute('asset-type', EnumParser(AssetType))
   readonly assetTypeExportHook_: DomHook<AssetType>;
 
-  @bind('#assetType').innerText()
+  @hook('#assetType').innerText()
   readonly assetTypeHook_: DomHook<string>;
 
-  @bind('#assetTypeMenu').childrenElements<AssetType>(ASSET_TYPE_MENU_DATA_HELPER)
+  @hook('#assetTypeMenu').childrenElements<AssetType>(ASSET_TYPE_MENU_DATA_HELPER)
   readonly assetTypeMenuHook_: DomHook<AssetType[]>;
 
-  @bind(null).attribute('asset-name', StringParser)
+  @hook(null).attribute('asset-name', StringParser)
   readonly nameExportHook_: DomHook<string>;
 
-  @bind('#nameInput').attribute('gs-value', StringParser)
+  @hook('#nameInput').attribute('gs-value', StringParser)
   readonly nameValueHook_: DomHook<string>;
 
-  @bind('#presetType').innerText()
+  @hook('#presetType').innerText()
   readonly presetTypeHook_: DomHook<string>;
 
-  @bind('#presetTypeMenu').childrenElements<PresetType>(PRESET_TYPE_MENU_DATA_HELPER)
+  @hook('#presetTypeMenu').childrenElements<PresetType>(PRESET_TYPE_MENU_DATA_HELPER)
   readonly presetTypeMenuHook_: DomHook<PresetType[]>;
 
-  @bind(null).attribute('asset-height', FloatParser)
+  @hook(null).attribute('asset-height', FloatParser)
   readonly templateHeightExportHook_: DomHook<number>;
 
-  @bind('#heightInput').attribute('gs-value', FloatParser)
+  @hook('#heightInput').attribute('gs-value', FloatParser)
   readonly templateHeightHook_: DomHook<number>;
 
-  @bind('#templateSection').attribute('hidden', BooleanParser)
+  @hook('#templateSection').attribute('hidden', BooleanParser)
   readonly templateSectionHiddenHook_: DomHook<boolean>;
 
-  @bind(null).attribute('asset-width', FloatParser)
+  @hook(null).attribute('asset-width', FloatParser)
   readonly templateWidthExportHook_: DomHook<number>;
 
-  @bind('#widthInput').attribute('gs-value', FloatParser)
+  @hook('#widthInput').attribute('gs-value', FloatParser)
   readonly templateWidthHook_: DomHook<number>;
 
   private assetType_: AssetType | null;

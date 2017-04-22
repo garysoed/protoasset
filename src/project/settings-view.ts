@@ -1,6 +1,6 @@
 import { inject } from 'external/gs_tools/src/inject';
 import { StringParser } from 'external/gs_tools/src/parse';
-import { bind, customElement, DomHook, handle } from 'external/gs_tools/src/webc';
+import { customElement, DomHook, handle, hook } from 'external/gs_tools/src/webc';
 import { RouteService, RouteServiceEvents } from 'external/gs_ui/src/routing';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
@@ -22,10 +22,10 @@ import { Views } from '../routing/views';
   templateKey: 'src/project/settings-view',
 })
 export class SettingsView extends BaseThemedElement {
-  @bind('#editor').attribute('project-name', StringParser)
+  @hook('#editor').attribute('project-name', StringParser)
   readonly editorProjectNameHook_: DomHook<string> = DomHook.of<string>();
 
-  @bind('#name').innerText()
+  @hook('#name').innerText()
   readonly nameInnerTextHook_: DomHook<string> = DomHook.of<string>();
 
   constructor(

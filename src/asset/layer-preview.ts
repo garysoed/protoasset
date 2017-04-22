@@ -4,10 +4,10 @@ import { DisposableFunction } from 'external/gs_tools/src/dispose';
 import { inject } from 'external/gs_tools/src/inject';
 import { BooleanParser, EnumParser, StringParser } from 'external/gs_tools/src/parse';
 import {
-  bind,
   customElement,
   DomHook,
-  handle } from 'external/gs_tools/src/webc';
+  handle,
+  hook } from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { RouteService, RouteServiceEvents } from 'external/gs_ui/src/routing';
@@ -36,19 +36,19 @@ import { Views } from '../routing/views';
   templateKey: 'src/asset/layer-preview',
 })
 export class LayerPreview extends BaseThemedElement {
-  @bind('#css').property('innerHTML')
+  @hook('#css').property('innerHTML')
   readonly cssInnerHtmlHook_: DomHook<string>;
 
-  @bind(null).attribute('is-selected', BooleanParser)
+  @hook(null).attribute('is-selected', BooleanParser)
   readonly isSelectedHook_: DomHook<boolean>;
 
-  @bind(null).attribute('layer-id', StringParser)
+  @hook(null).attribute('layer-id', StringParser)
   readonly layerIdHook_: DomHook<string>;
 
-  @bind(null).attribute('preview-mode', EnumParser(LayerPreviewMode))
+  @hook(null).attribute('preview-mode', EnumParser(LayerPreviewMode))
   readonly previewModeHook_: DomHook<LayerPreviewMode>;
 
-  @bind('#root').property('innerHTML')
+  @hook('#root').property('innerHTML')
   readonly rootInnerHtmlHook_: DomHook<string>;
 
   private readonly assetCollection_: AssetCollection;

@@ -1,7 +1,7 @@
 import { DomEvent } from 'external/gs_tools/src/event';
 import { inject } from 'external/gs_tools/src/inject';
 import { StringParser } from 'external/gs_tools/src/parse';
-import { bind, customElement, DomHook, handle } from 'external/gs_tools/src/webc';
+import { customElement, DomHook, handle, hook } from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { RouteService } from 'external/gs_ui/src/routing';
@@ -20,13 +20,13 @@ import { Views } from '../routing/views';
   templateKey: 'src/project/asset-item',
 })
 export class AssetItem extends BaseThemedElement {
-  @bind('#assetName').innerText()
+  @hook('#assetName').innerText()
   private readonly assetNameHook_: DomHook<string>;
 
-  @bind(null).attribute('gs-asset-id', StringParser)
+  @hook(null).attribute('gs-asset-id', StringParser)
   private readonly gsAssetIdHook_: DomHook<string>;
 
-  @bind(null).attribute('gs-project-id', StringParser)
+  @hook(null).attribute('gs-project-id', StringParser)
   private readonly gsProjectIdHook_: DomHook<string>;
 
   private readonly assetCollection_: AssetCollection;

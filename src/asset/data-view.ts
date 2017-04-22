@@ -3,11 +3,11 @@ import { Arrays, Maps } from 'external/gs_tools/src/collection';
 import { inject } from 'external/gs_tools/src/inject';
 import { BooleanParser, FloatParser, StringParser } from 'external/gs_tools/src/parse';
 import {
-    bind,
     ChildElementDataHelper,
     customElement,
     DomHook,
-    handle } from 'external/gs_tools/src/webc';
+    handle,
+    hook } from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { FileService } from 'external/gs_ui/src/input';
@@ -73,16 +73,16 @@ export const PREVIEW_ROW_DATA_HELPER: ChildElementDataHelper<string[]> = {
 })
 export class DataView extends BaseThemedElement {
 
-  @bind('#dataSourceInput').attribute('gs-bundle-id', StringParser)
+  @hook('#dataSourceInput').attribute('gs-bundle-id', StringParser)
   private readonly dataSourceBundleIdHook_: DomHook<string>;
 
-  @bind('#endRowInput').attribute('gs-value', FloatParser)
+  @hook('#endRowInput').attribute('gs-value', FloatParser)
   private readonly endRowValueHook_: DomHook<number>;
 
-  @bind('#preview').childrenElements(PREVIEW_ROW_DATA_HELPER)
+  @hook('#preview').childrenElements(PREVIEW_ROW_DATA_HELPER)
   private readonly previewChildrenHook_: DomHook<string[][]>;
 
-  @bind('#startRowInput').attribute('gs-value', FloatParser)
+  @hook('#startRowInput').attribute('gs-value', FloatParser)
   private readonly startRowValueHook_: DomHook<number>;
 
   private readonly assetCollection_: AssetCollection;

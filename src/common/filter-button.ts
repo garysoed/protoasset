@@ -2,10 +2,10 @@ import { DomEvent } from 'external/gs_tools/src/event';
 import { inject } from 'external/gs_tools/src/inject';
 import { BooleanParser, StringParser } from 'external/gs_tools/src/parse';
 import {
-  bind,
   customElement,
   DomHook,
-  handle } from 'external/gs_tools/src/webc';
+  handle,
+  hook } from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { Event } from 'external/gs_ui/src/const';
@@ -17,13 +17,13 @@ import { ThemeService } from 'external/gs_ui/src/theming';
   templateKey: 'src/common/filter-button',
 })
 export class FilterButton extends BaseThemedElement {
-  @bind('#drawer').attribute('gs-is-expanded', BooleanParser)
+  @hook('#drawer').attribute('gs-is-expanded', BooleanParser)
   private readonly drawerExpandedHook_: DomHook<boolean>;
 
-  @bind(null).attribute('filter-text', StringParser)
+  @hook(null).attribute('filter-text', StringParser)
   private readonly filterTextAttrHook_: DomHook<string>;
 
-  @bind('#searchText').attribute('gs-value', StringParser)
+  @hook('#searchText').attribute('gs-value', StringParser)
   private readonly searchTextValueHook_: DomHook<string>;
 
   constructor(

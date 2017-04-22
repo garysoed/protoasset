@@ -1,10 +1,10 @@
 import { inject } from 'external/gs_tools/src/inject';
 import { FloatParser } from 'external/gs_tools/src/parse';
 import {
-  bind,
   customElement,
   DomHook,
-  handle } from 'external/gs_tools/src/webc';
+  handle,
+  hook } from 'external/gs_tools/src/webc';
 
 import { ThemeService } from 'external/gs_ui/src/theming';
 
@@ -21,16 +21,16 @@ import { BaseLayer } from '../data/base-layer';
   templateKey: 'src/asset/base-layer-editor',
 })
 export class BaseLayerEditor extends AbstractLayerEditor<BaseLayer> {
-  @bind('#bottom').attribute('gs-value', FloatParser)
+  @hook('#bottom').attribute('gs-value', FloatParser)
   readonly bottomHook_: DomHook<number | null>;
 
-  @bind('#left').attribute('gs-value', FloatParser)
+  @hook('#left').attribute('gs-value', FloatParser)
   readonly leftHook_: DomHook<number | null>;
 
-  @bind('#right').attribute('gs-value', FloatParser)
+  @hook('#right').attribute('gs-value', FloatParser)
   readonly rightHook_: DomHook<number | null>;
 
-  @bind('#top').attribute('gs-value', FloatParser)
+  @hook('#top').attribute('gs-value', FloatParser)
   readonly topHook_: DomHook<number | null>;
 
   constructor(

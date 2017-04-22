@@ -7,10 +7,10 @@ import { BooleanParser, EnumParser, StringParser } from 'external/gs_tools/src/p
 import { BaseIdGenerator, SimpleIdGenerator } from 'external/gs_tools/src/random';
 import { Validate } from 'external/gs_tools/src/valid';
 import {
-  bind,
   customElement,
   DomHook,
-  handle } from 'external/gs_tools/src/webc';
+  handle,
+  hook } from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { ThemeService } from 'external/gs_ui/src/theming';
@@ -38,28 +38,28 @@ export enum Mode {
   templateKey: 'src/asset/layer-item',
 })
 export class LayerItem extends BaseThemedElement {
-  @bind(null).attribute('asset-id', StringParser)
+  @hook(null).attribute('asset-id', StringParser)
   readonly assetIdHook_: DomHook<string>;
 
-  @bind('#down').attribute('disabled', BooleanParser)
+  @hook('#down').attribute('disabled', BooleanParser)
   readonly downDisabledHook_: DomHook<boolean>;
 
-  @bind(null).attribute('layer-id', StringParser)
+  @hook(null).attribute('layer-id', StringParser)
   readonly layerIdHook_: DomHook<string>;
 
-  @bind('#name').innerText()
+  @hook('#name').innerText()
   readonly nameHook_: DomHook<string>;
 
-  @bind('#nameInput').attribute('gs-value', StringParser)
+  @hook('#nameInput').attribute('gs-value', StringParser)
   readonly nameInputHook_: DomHook<string>;
 
-  @bind(null).attribute('project-id', StringParser)
+  @hook(null).attribute('project-id', StringParser)
   readonly projectIdHook_: DomHook<string>;
 
-  @bind('#switch').attribute('gs-value', EnumParser(Mode))
+  @hook('#switch').attribute('gs-value', EnumParser(Mode))
   readonly switchModeHook_: DomHook<Mode>;
 
-  @bind('#up').attribute('disabled', BooleanParser)
+  @hook('#up').attribute('disabled', BooleanParser)
   readonly upDisabledHook_: DomHook<boolean>;
 
   private readonly assetCollection_: AssetCollection;

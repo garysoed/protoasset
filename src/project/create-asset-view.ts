@@ -2,10 +2,10 @@ import { inject } from 'external/gs_tools/src/inject';
 import { BooleanParser, EnumParser, FloatParser, StringParser } from 'external/gs_tools/src/parse';
 import { Validate } from 'external/gs_tools/src/valid';
 import {
-    bind,
     customElement,
     DomHook,
-    handle } from 'external/gs_tools/src/webc';
+    handle,
+    hook } from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { Event } from 'external/gs_ui/src/const';
@@ -28,19 +28,19 @@ import { Views } from '../routing/views';
   templateKey: 'src/project/create-asset-view',
 })
 export class CreateAssetView extends BaseThemedElement {
-  @bind('#assetEditor').attribute('asset-type', EnumParser(AssetType))
+  @hook('#assetEditor').attribute('asset-type', EnumParser(AssetType))
   readonly assetTypeHook_: DomHook<AssetType>;
 
-  @bind('#createButton').attribute('disabled', BooleanParser)
+  @hook('#createButton').attribute('disabled', BooleanParser)
   readonly createButtonDisabledHook_: DomHook<boolean>;
 
-  @bind('#assetEditor').attribute('asset-name', StringParser)
+  @hook('#assetEditor').attribute('asset-name', StringParser)
   readonly nameHook_: DomHook<string>;
 
-  @bind('#assetEditor').attribute('asset-height', FloatParser)
+  @hook('#assetEditor').attribute('asset-height', FloatParser)
   readonly heightHook_: DomHook<number>;
 
-  @bind('#assetEditor').attribute('asset-width', FloatParser)
+  @hook('#assetEditor').attribute('asset-width', FloatParser)
   readonly widthHook_: DomHook<number>;
 
   private readonly assetCollection_: AssetCollection;

@@ -1,6 +1,6 @@
 import { inject } from 'external/gs_tools/src/inject';
 import { StringParser } from 'external/gs_tools/src/parse';
-import { bind, customElement, DomHook, handle } from 'external/gs_tools/src/webc';
+import { customElement, DomHook, handle, hook } from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { ThemeService } from 'external/gs_ui/src/theming';
@@ -14,10 +14,10 @@ import { ThemeService } from 'external/gs_ui/src/theming';
   templateKey: 'src/project/editor',
 })
 export class Editor extends BaseThemedElement {
-  @bind('#editor').attribute('gs-value', StringParser)
+  @hook('#editor').attribute('gs-value', StringParser)
   readonly editorValueHook_: DomHook<string>;
 
-  @bind(null).attribute('project-name', StringParser)
+  @hook(null).attribute('project-name', StringParser)
   readonly projectNameHook_: DomHook<string>;
 
   constructor(

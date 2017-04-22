@@ -3,9 +3,9 @@ import { Arrays } from 'external/gs_tools/src/collection';
 import { DisposableFunction } from 'external/gs_tools/src/dispose';
 import { StringParser } from 'external/gs_tools/src/parse';
 import {
-  bind,
   DomHook,
-  handle } from 'external/gs_tools/src/webc';
+  handle,
+  hook } from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { ThemeService } from 'external/gs_ui/src/theming';
@@ -17,13 +17,13 @@ import { DataEvents } from '../data/data-events';
 
 
 export abstract class AbstractLayerEditor<T extends BaseLayer> extends BaseThemedElement {
-  @bind(null).attribute('asset-id', StringParser)
+  @hook(null).attribute('asset-id', StringParser)
   readonly assetIdHook_: DomHook<string>;
 
-  @bind(null).attribute('layer-id', StringParser)
+  @hook(null).attribute('layer-id', StringParser)
   readonly layerIdHook_: DomHook<string>;
 
-  @bind(null).attribute('project-id', StringParser)
+  @hook(null).attribute('project-id', StringParser)
   readonly projectIdHook_: DomHook<string>;
 
   protected readonly assetCollection_: AssetCollection;

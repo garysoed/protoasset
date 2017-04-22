@@ -1,10 +1,10 @@
 import { inject } from 'external/gs_tools/src/inject';
 import { EnumParser, StringParser } from 'external/gs_tools/src/parse';
 import {
-  bind,
   customElement,
   DomHook,
-  handle } from 'external/gs_tools/src/webc';
+  handle,
+  hook } from 'external/gs_tools/src/webc';
 
 import { ThemeService } from 'external/gs_ui/src/theming';
 
@@ -23,28 +23,28 @@ import { HorizontalAlign, TextLayer, VerticalAlign } from '../data/text-layer';
 })
 export class TextLayerEditor extends AbstractLayerEditor<TextLayer> {
 
-  @bind('#color').attribute('gs-value', StringParser)
+  @hook('#color').attribute('gs-value', StringParser)
   readonly colorHook_: DomHook<string>;
 
-  @bind('#fontFamily').attribute('gs-value', StringParser)
+  @hook('#fontFamily').attribute('gs-value', StringParser)
   readonly fontFamilyHook_: DomHook<string>;
 
-  @bind('#fontWeight').attribute('gs-value', StringParser)
+  @hook('#fontWeight').attribute('gs-value', StringParser)
   readonly fontWeightHook_: DomHook<string>;
 
-  @bind('#fontUrl').attribute('gs-value', StringParser)
+  @hook('#fontUrl').attribute('gs-value', StringParser)
   readonly fontUrlHook_: DomHook<string>;
 
-  @bind('#horizontalAlign').attribute('gs-selected-tab', EnumParser(HorizontalAlign))
+  @hook('#horizontalAlign').attribute('gs-selected-tab', EnumParser(HorizontalAlign))
   readonly horizontalAlignHook_: DomHook<HorizontalAlign>;
 
-  @bind('#size').attribute('gs-value', StringParser)
+  @hook('#size').attribute('gs-value', StringParser)
   readonly sizeHook_: DomHook<string>;
 
-  @bind('#text').attribute('gs-value', StringParser)
+  @hook('#text').attribute('gs-value', StringParser)
   readonly textHook_: DomHook<string>;
 
-  @bind('#verticalAlign').attribute('gs-selected-tab', EnumParser(VerticalAlign))
+  @hook('#verticalAlign').attribute('gs-selected-tab', EnumParser(VerticalAlign))
   readonly verticalAlignHook_: DomHook<VerticalAlign>;
 
   constructor(

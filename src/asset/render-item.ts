@@ -2,10 +2,10 @@ import { atomic } from 'external/gs_tools/src/async';
 import { inject } from 'external/gs_tools/src/inject';
 import { BooleanParser, IntegerParser, StringParser } from 'external/gs_tools/src/parse';
 import {
-  bind,
   customElement,
   DomHook,
-  handle } from 'external/gs_tools/src/webc';
+  handle,
+  hook } from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { ThemeService } from 'external/gs_ui/src/theming';
@@ -23,31 +23,31 @@ import { RenderService } from '../render/render-service';
   templateKey: 'src/asset/render-item',
 })
 export class RenderItem extends BaseThemedElement {
-  @bind(null).attribute('asset-id', StringParser)
+  @hook(null).attribute('asset-id', StringParser)
   readonly assetIdHook_: DomHook<string>;
 
-  @bind('#display').property('style')
+  @hook('#display').property('style')
   readonly displayStyleHook_: DomHook<CSSStyleDeclaration>;
 
-  @bind(null).attribute('file-name', StringParser)
+  @hook(null).attribute('file-name', StringParser)
   readonly filenameHook_: DomHook<string>;
 
-  @bind('#label').innerText()
+  @hook('#label').innerText()
   readonly labelTextHook_: DomHook<string>;
 
-  @bind('#loading').attribute('hidden', BooleanParser)
+  @hook('#loading').attribute('hidden', BooleanParser)
   readonly loadingHiddenHook_: DomHook<boolean>;
 
-  @bind(null).attribute('project-id', StringParser)
+  @hook(null).attribute('project-id', StringParser)
   readonly projectIdHook_: DomHook<string>;
 
-  @bind(null).attribute('render-key', StringParser)
+  @hook(null).attribute('render-key', StringParser)
   readonly renderKeyHook_: DomHook<string>;
 
-  @bind(null).attribute('render-out', StringParser)
+  @hook(null).attribute('render-out', StringParser)
   readonly renderOutHook_: DomHook<string>;
 
-  @bind(null).attribute('render-row', IntegerParser)
+  @hook(null).attribute('render-row', IntegerParser)
   readonly rowHook_: DomHook<number>;
 
   private readonly assetCollection_: AssetCollection;

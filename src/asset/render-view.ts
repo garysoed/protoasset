@@ -7,11 +7,11 @@ import { inject } from 'external/gs_tools/src/inject';
 import { BooleanParser, IntegerParser, StringParser } from 'external/gs_tools/src/parse';
 import { SimpleIdGenerator } from 'external/gs_tools/src/random';
 import {
-  bind,
   ChildElementDataHelper,
   customElement,
   DomHook,
-  handle } from 'external/gs_tools/src/webc';
+  handle,
+  hook } from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { RouteService, RouteServiceEvents } from 'external/gs_ui/src/routing';
@@ -86,13 +86,13 @@ export const RENDER_ITEM_DATA_HELPER: ChildElementDataHelper<RenderData> = {
   templateKey: 'src/asset/render-view',
 })
 export class RenderView extends BaseThemedElement {
-  @bind('#downloadButton').attribute('disabled', BooleanParser)
+  @hook('#downloadButton').attribute('disabled', BooleanParser)
   readonly downloadButtonDisabledHook_: DomHook<boolean>;
 
-  @bind('#renders').childrenElements(RENDER_ITEM_DATA_HELPER)
+  @hook('#renders').childrenElements(RENDER_ITEM_DATA_HELPER)
   readonly rendersChildrenHook_: DomHook<RenderData[]>;
 
-  @bind('#filenameInput').attribute('gs-value', StringParser)
+  @hook('#filenameInput').attribute('gs-value', StringParser)
   readonly filenameInputHook_: DomHook<string>;
 
   private readonly assetCollection_: AssetCollection;

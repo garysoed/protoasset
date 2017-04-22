@@ -1,10 +1,10 @@
 import { inject } from 'external/gs_tools/src/inject';
 import { StringParser } from 'external/gs_tools/src/parse';
 import {
-  bind,
   customElement,
   DomHook,
-  handle } from 'external/gs_tools/src/webc';
+  handle,
+  hook } from 'external/gs_tools/src/webc';
 
 import { ThemeService } from 'external/gs_ui/src/theming';
 
@@ -26,10 +26,10 @@ import { TemplateCompilerService } from '../data/template-compiler-service';
   templateKey: 'src/asset/image-layer-editor',
 })
 export class ImageLayerEditor extends AbstractLayerEditor<ImageLayer> {
-  @bind('#imagePreview').property('style')
+  @hook('#imagePreview').property('style')
   readonly imagePreviewStyleHook_: DomHook<CSSStyleDeclaration>;
 
-  @bind('#imageUrl').attribute('gs-value', StringParser)
+  @hook('#imageUrl').attribute('gs-value', StringParser)
   readonly imageUrlHook_: DomHook<string>;
 
   private readonly sampleDataService_: SampleDataService;

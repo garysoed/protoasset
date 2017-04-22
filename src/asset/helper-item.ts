@@ -3,7 +3,7 @@ import { DisposableFunction } from 'external/gs_tools/src/dispose';
 import { DomEvent } from 'external/gs_tools/src/event';
 import { inject } from 'external/gs_tools/src/inject';
 import { StringParser } from 'external/gs_tools/src/parse';
-import { bind, customElement, DomHook, handle } from 'external/gs_tools/src/webc';
+import { customElement, DomHook, handle, hook } from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { RouteService } from 'external/gs_ui/src/routing';
@@ -26,22 +26,22 @@ import { Views } from '../routing/views';
   templateKey: 'src/asset/helper-item',
 })
 export class HelperItem extends BaseThemedElement {
-  @bind(null).attribute('asset-id', StringParser)
+  @hook(null).attribute('asset-id', StringParser)
   readonly assetIdHook_: DomHook<string>;
 
-  @bind(null).attribute('helper-id', StringParser)
+  @hook(null).attribute('helper-id', StringParser)
   readonly helperIdHook_: DomHook<string>;
 
-  @bind('#name').innerText()
+  @hook('#name').innerText()
   readonly nameHook_: DomHook<string>;
 
-  @bind('#nameInput').attribute('gs-value', StringParser)
+  @hook('#nameInput').attribute('gs-value', StringParser)
   readonly nameInputHook_: DomHook<string>;
 
-  @bind(null).attribute('project-id', StringParser)
+  @hook(null).attribute('project-id', StringParser)
   readonly projectIdHook_: DomHook<string>;
 
-  @bind('#root').attribute('gs-value', StringParser)
+  @hook('#root').attribute('gs-value', StringParser)
   readonly rootValueHook_: DomHook<string>;
 
   private readonly assetCollection_: AssetCollection;

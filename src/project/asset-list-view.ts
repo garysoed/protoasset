@@ -1,11 +1,11 @@
 import { Arrays } from 'external/gs_tools/src/collection';
 import { inject } from 'external/gs_tools/src/inject';
 import {
-  bind,
   ChildElementDataHelper,
   customElement,
   DomHook,
-  handle } from 'external/gs_tools/src/webc';
+  handle,
+  hook } from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { Event } from 'external/gs_ui/src/const';
@@ -64,10 +64,10 @@ export const ASSET_DATA_HELPER: ChildElementDataHelper<AssetItemData> = {
   templateKey: 'src/project/asset-list-view',
 })
 export class AssetListView extends BaseThemedElement {
-  @bind('#assets').childrenElements<AssetItemData>(ASSET_DATA_HELPER)
+  @hook('#assets').childrenElements<AssetItemData>(ASSET_DATA_HELPER)
   private readonly assetsHook_: DomHook<AssetItemData[]>;
 
-  @bind('#projectName').innerText()
+  @hook('#projectName').innerText()
   private readonly projectNameTextHook_: DomHook<string>;
 
   private readonly assetCollection_: AssetCollection;

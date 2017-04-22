@@ -3,10 +3,10 @@ import { DomEvent } from 'external/gs_tools/src/event';
 import { inject } from 'external/gs_tools/src/inject';
 import { BooleanParser, StringParser } from 'external/gs_tools/src/parse';
 import {
-  bind,
   customElement,
   DomHook,
-  handle } from 'external/gs_tools/src/webc';
+  handle,
+  hook } from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { AbstractRouteFactory, RouteService, RouteServiceEvents } from 'external/gs_ui/src/routing';
@@ -24,10 +24,10 @@ import { Views } from '../routing/views';
   templateKey: 'src/asset/nav-bar',
 })
 export class NavBar extends BaseThemedElement {
-  @bind('#drawer').attribute('gs-is-expanded', BooleanParser)
+  @hook('#drawer').attribute('gs-is-expanded', BooleanParser)
   private readonly drawerHook_: DomHook<boolean>;
 
-  @bind('#tab').attribute('gs-selected-tab', StringParser)
+  @hook('#tab').attribute('gs-selected-tab', StringParser)
   private readonly selectedTabHook_: DomHook<string>;
 
   private readonly routeFactoryService_: RouteFactoryService;
