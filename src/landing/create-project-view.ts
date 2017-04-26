@@ -11,8 +11,6 @@ import { Event } from 'external/gs_ui/src/const';
 import { RouteService } from 'external/gs_ui/src/routing';
 import { ThemeService } from 'external/gs_ui/src/theming';
 
-import { Validate } from 'external/gs_tools/src/valid';
-
 import { Project } from '../data/project';
 import { ProjectCollection } from '../data/project-collection';
 import { Editor } from '../project/editor';
@@ -89,7 +87,7 @@ export class CreateProjectView extends BaseThemedElement {
   protected async onSubmitAction_(): Promise<void> {
     let projectName = this.nameValueHook_.get();
     if (projectName === null) {
-      Validate.fail('Project name is not set');
+      throw new Error('Project name is not set');
     }
 
     let id = await this.projectCollection_.reserveId();

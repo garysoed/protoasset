@@ -1,6 +1,5 @@
 import { inject } from 'external/gs_tools/src/inject';
 import { BooleanParser, EnumParser, FloatParser, StringParser } from 'external/gs_tools/src/parse';
-import { Validate } from 'external/gs_tools/src/valid';
 import {
     customElement,
     DomHook,
@@ -121,22 +120,22 @@ export class CreateAssetView extends BaseThemedElement {
   async onSubmitAction_(): Promise<void> {
     const assetName = this.nameHook_.get();
     if (!assetName) {
-      throw Validate.fail('Project name is not set');
+      throw new Error('Project name is not set');
     }
 
     const assetType = this.assetTypeHook_.get();
     if (assetType === null) {
-      throw Validate.fail('Asset type is not set');
+      throw new Error('Asset type is not set');
     }
 
     const height = this.heightHook_.get();
     if (height === null || Number.isNaN(height)) {
-      throw Validate.fail('Asset height is not set');
+      throw new Error('Asset height is not set');
     }
 
     const width = this.widthHook_.get();
     if (width === null || Number.isNaN(width)) {
-      throw Validate.fail('Asset width is not set');
+      throw new Error('Asset width is not set');
     }
 
     const projectId = this.getProjectId_();

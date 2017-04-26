@@ -1,5 +1,4 @@
 import { Cases } from 'external/gs_tools/src/string';
-import { Validate } from 'external/gs_tools/src/valid';
 
 
 export const BuiltInHelpers = {
@@ -22,7 +21,7 @@ export const BuiltInHelpers = {
         return cases.toUpperCase();
     }
 
-    throw Validate.fail(`Unsupported string case: ${caseString}`);
+    throw new Error(`Unsupported string case: ${caseString}`);
   },
 
   /**

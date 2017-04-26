@@ -10,7 +10,6 @@ import {
   StringParser } from 'external/gs_tools/src/parse';
 import { BaseIdGenerator, SimpleIdGenerator } from 'external/gs_tools/src/random';
 import { Enums } from 'external/gs_tools/src/typescript';
-import { Validate } from 'external/gs_tools/src/valid';
 import {
   ChildElementDataHelper,
   customElement,
@@ -322,7 +321,7 @@ export class LayerView extends BaseThemedElement {
         layer = new TextLayer(id, name);
         break;
       default:
-        throw Validate.fail(`Unsupported layer type: ${layerType}`);
+        throw new Error(`Unsupported layer type: ${layerType}`);
     }
 
     asset.insertLayer(layer);

@@ -1,6 +1,5 @@
 import { Field } from 'external/gs_tools/src/data';
 import { BaseListenable } from 'external/gs_tools/src/event';
-import { Validate } from 'external/gs_tools/src/valid';
 
 import { DataEvents } from '../data/data-events';
 import { LayerPreviewMode } from '../data/layer-preview-mode';
@@ -74,7 +73,7 @@ export abstract class BaseLayer extends BaseListenable<DataEvents> {
       case LayerPreviewMode.NORMAL:
         return isActive ? this.asHtml() : this.asInactiveNormalPreviewHtml_();
       default:
-        throw Validate.fail(`Unsuppored layer preview mode: ${mode}`);
+        throw new Error(`Unsuppored layer preview mode: ${mode}`);
     }
   }
 

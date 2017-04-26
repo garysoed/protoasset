@@ -5,7 +5,6 @@ import { DomEvent } from 'external/gs_tools/src/event';
 import { inject } from 'external/gs_tools/src/inject';
 import { BooleanParser, EnumParser, StringParser } from 'external/gs_tools/src/parse';
 import { BaseIdGenerator, SimpleIdGenerator } from 'external/gs_tools/src/random';
-import { Validate } from 'external/gs_tools/src/valid';
 import {
   customElement,
   DomHook,
@@ -176,7 +175,7 @@ export class LayerItem extends BaseThemedElement {
         || layer instanceof TextLayer) {
       newLayer = layer.copy(id);
     } else {
-      throw Validate.fail(`Unsupported layer type: ${layer.getType()}`);
+      throw new Error(`Unsupported layer type: ${layer.getType()}`);
     }
     newLayer.setName(`Copy of layer ${layer.getName()}`);
 
