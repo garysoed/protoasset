@@ -30,7 +30,6 @@ def proto_asset(deps = [], test_deps = []):
     """
 
     lib_name = PACKAGE_NAME.split("/")[-1]
-    bin_name = lib_name + "_bin"
 
     testlib_name = lib_name + "_test"
     testbin_name = testlib_name + "_bin"
@@ -40,11 +39,6 @@ def proto_asset(deps = [], test_deps = []):
         name = lib_name,
         srcs = native.glob(["*.ts"], exclude = ["*_test.ts"]),
         deps = ["@gs_tools//declarations", "//typings"] + deps
-    )
-
-    ts_binary(
-        name = bin_name,
-        deps = [":" + lib_name],
     )
 
     # Generate a template file for every html file.
