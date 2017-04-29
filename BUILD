@@ -1,7 +1,7 @@
 package(default_visibility = ["//:internal"])
 
 load("@gs_tools//bazel/karma:defs.bzl", "karma_run")
-load("@gs_tools//bazel/ts:defs.bzl", "ts_binary", "ts_library")
+load("@gs_tools//bazel/typescript:defs.bzl", "ts_binary", "ts_library")
 load("@gs_tools//bazel/webpack:defs.bzl", "webpack_binary")
 
 package_group(

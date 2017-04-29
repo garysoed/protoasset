@@ -23,7 +23,7 @@ new_local_repository(
 new_local_repository(
     name = "typescript",
     path = "./node_modules/typescript",
-    build_file = "external/gs_tools/bazel/ts/typescript.BUILD",
+    build_file = "external/gs_tools/bazel/typescript/typescript.BUILD",
 )
 
 new_local_repository(

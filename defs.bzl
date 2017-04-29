@@ -1,5 +1,5 @@
 load("@gs_tools//bazel/karma:defs.bzl", "karma_run")
-load("@gs_tools//bazel/ts:defs.bzl", "ts_binary", "ts_library")
+load("@gs_tools//bazel/typescript:defs.bzl", "ts_binary", "ts_library")
 load("@gs_tools//bazel/tslint:defs.bzl", "tslint_test")
 load("@gs_tools//bazel/webc:defs.bzl", "webc_gen_template")
 load("@gs_tools//bazel/webpack:defs.bzl", "webpack_binary")
@@ -24,7 +24,6 @@ def proto_asset(deps = [], test_deps = []):
             `.tar` file.
         {test}_pack: A `webpack_binary` target that packs `test.js` and all its dependencies into a
             single `.js` file.
-        {test}: A `karma_test` target that runs the tests in `test.ts`.
         {test}_run: A `karma_run` target that runs a continuously running server on tests defined by
             `test.ts`.
     """
