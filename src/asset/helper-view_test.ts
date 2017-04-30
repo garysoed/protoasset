@@ -693,8 +693,8 @@ describe('asset.HelperView', () => {
 
           const entry1 = Mocks.object('entry1');
           const entry2 = Mocks.object('entry2');
-          spyOn(view['consoleEntryHook_'], 'get').and.returnValue([entry1, entry2]);
-          spyOn(view['consoleEntryHook_'], 'set');
+          spyOn(view.consoleEntryHook_, 'get').and.returnValue([entry1, entry2]);
+          spyOn(view.consoleEntryHook_, 'set');
 
           const result = 'result';
 
@@ -705,23 +705,14 @@ describe('asset.HelperView', () => {
           const scrollHeight = 123;
           const containerEl = Mocks.object('containerEl');
           containerEl.scrollHeight = scrollHeight;
-
-          const mockShadowRoot = jasmine.createSpyObj('ShadowRoot', ['querySelector']);
-          mockShadowRoot.querySelector.and.returnValue(containerEl);
-
-          const element = Mocks.object('element');
-          element.shadowRoot = mockShadowRoot;
-          const mockListenable = jasmine.createSpyObj('Listenable', ['getEventTarget']);
-          mockListenable.getEventTarget.and.returnValue(element);
-          spyOn(view, 'getElement').and.returnValue(mockListenable);
+          spyOn(view.consoleContainerHook_, 'get').and.returnValue(containerEl);
 
           const rowData = Mocks.object('rowData');
           mockSampleDataService.getRowData.and.returnValue(Promise.resolve(rowData));
 
           await view['onExecuteButtonClick_']();
           assert(containerEl.scrollTop).to.equal(scrollHeight);
-          assert(mockShadowRoot.querySelector).to.haveBeenCalledWith('#consoleContainer');
-          assert(view['consoleEntryHook_'].set).to.haveBeenCalledWith([
+          assert(view.consoleEntryHook_.set).to.haveBeenCalledWith([
             entry1,
             entry2,
             {command, isError: false, result},
@@ -739,8 +730,8 @@ describe('asset.HelperView', () => {
 
       const entry1 = Mocks.object('entry1');
       const entry2 = Mocks.object('entry2');
-      spyOn(view['consoleEntryHook_'], 'get').and.returnValue([entry1, entry2]);
-      spyOn(view['consoleEntryHook_'], 'set');
+      spyOn(view.consoleEntryHook_, 'get').and.returnValue([entry1, entry2]);
+      spyOn(view.consoleEntryHook_, 'set');
 
       const message = 'message';
       const stack = 'stack';
@@ -753,23 +744,14 @@ describe('asset.HelperView', () => {
       const scrollHeight = 123;
       const containerEl = Mocks.object('containerEl');
       containerEl.scrollHeight = scrollHeight;
-
-      const mockShadowRoot = jasmine.createSpyObj('ShadowRoot', ['querySelector']);
-      mockShadowRoot.querySelector.and.returnValue(containerEl);
-
-      const element = Mocks.object('element');
-      element.shadowRoot = mockShadowRoot;
-      const mockListenable = jasmine.createSpyObj('Listenable', ['getEventTarget']);
-      mockListenable.getEventTarget.and.returnValue(element);
-      spyOn(view, 'getElement').and.returnValue(mockListenable);
+      spyOn(view.consoleContainerHook_, 'get').and.returnValue(containerEl);
 
       const rowData = Mocks.object('rowData');
       mockSampleDataService.getRowData.and.returnValue(Promise.resolve(rowData));
 
       await view['onExecuteButtonClick_']();
       assert(containerEl.scrollTop).to.equal(scrollHeight);
-      assert(mockShadowRoot.querySelector).to.haveBeenCalledWith('#consoleContainer');
-      assert(view['consoleEntryHook_'].set).to.haveBeenCalledWith([
+      assert(view.consoleEntryHook_.set).to.haveBeenCalledWith([
         entry1,
         entry2,
         {command, isError: true, result: `${message}\n\n${stack}`},
@@ -778,7 +760,7 @@ describe('asset.HelperView', () => {
       assert(mockTemplateCompilerService.create).to.haveBeenCalledWith(asset, rowData);
     });
 
-    it('should not scroll to the bottom if the element cannot be found', async () => {
+    it('should reject if container element cannot be found', async () => {
       const asset = Mocks.object('asset');
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(asset));
 
@@ -787,30 +769,21 @@ describe('asset.HelperView', () => {
 
       const entry1 = Mocks.object('entry1');
       const entry2 = Mocks.object('entry2');
-      spyOn(view['consoleEntryHook_'], 'get').and.returnValue([entry1, entry2]);
-      spyOn(view['consoleEntryHook_'], 'set');
+      spyOn(view.consoleEntryHook_, 'get').and.returnValue([entry1, entry2]);
+      spyOn(view.consoleEntryHook_, 'set');
 
-      const message = 'message';
-      const stack = 'stack';
-      const error = {message, stack};
-      Object.setPrototypeOf(error, Error.prototype);
+      const result = 'result';
+
       const mockCompiler = jasmine.createSpyObj('Compiler', ['compile']);
-      mockCompiler.compile.and.throwError(error);
+      mockCompiler.compile.and.returnValue(result);
       mockTemplateCompilerService.create.and.returnValue(mockCompiler);
 
-      spyOn(view, 'getElement').and.returnValue(null);
+      spyOn(view.consoleContainerHook_, 'get').and.returnValue(null);
 
       const rowData = Mocks.object('rowData');
       mockSampleDataService.getRowData.and.returnValue(Promise.resolve(rowData));
 
-      await view['onExecuteButtonClick_']();
-      assert(view['consoleEntryHook_'].set).to.haveBeenCalledWith([
-        entry1,
-        entry2,
-        {command, isError: true, result: `${message}\n\n${stack}`},
-      ]);
-      assert(mockCompiler.compile).to.haveBeenCalledWith(command);
-      assert(mockTemplateCompilerService.create).to.haveBeenCalledWith(asset, rowData);
+      await assert(view['onExecuteButtonClick_']()).to.rejectWithError(/container element cannot/);
     });
 
     it('should do nothing if the compiler cannot be created', async () => {
@@ -819,7 +792,7 @@ describe('asset.HelperView', () => {
 
       const command = 'command';
       spyOn(view['consoleInputHook_'], 'get').and.returnValue(command);
-      spyOn(view['consoleEntryHook_'], 'set');
+      spyOn(view.consoleEntryHook_, 'set');
 
       const rowData = Mocks.object('rowData');
       mockSampleDataService.getRowData.and.returnValue(Promise.resolve(rowData));
@@ -827,7 +800,7 @@ describe('asset.HelperView', () => {
       mockTemplateCompilerService.create.and.returnValue(null);
 
       await view['onExecuteButtonClick_']();
-      assert(view['consoleEntryHook_'].set).toNot.haveBeenCalled();
+      assert(view.consoleEntryHook_.set).toNot.haveBeenCalled();
       assert(mockTemplateCompilerService.create).to.haveBeenCalledWith(asset, rowData);
     });
 
@@ -836,14 +809,14 @@ describe('asset.HelperView', () => {
 
       const command = 'command';
       spyOn(view['consoleInputHook_'], 'get').and.returnValue(command);
-      spyOn(view['consoleEntryHook_'], 'set');
+      spyOn(view.consoleEntryHook_, 'set');
       mockTemplateCompilerService.create.and.returnValue(null);
 
       const rowData = Mocks.object('rowData');
       mockSampleDataService.getRowData.and.returnValue(Promise.resolve(rowData));
 
       await view['onExecuteButtonClick_']();
-      assert(view['consoleEntryHook_'].set).toNot.haveBeenCalled();
+      assert(view.consoleEntryHook_.set).toNot.haveBeenCalled();
       assert(mockTemplateCompilerService.create).toNot.haveBeenCalled();
     });
 
@@ -853,24 +826,24 @@ describe('asset.HelperView', () => {
 
       const command = 'command';
       spyOn(view['consoleInputHook_'], 'get').and.returnValue(command);
-      spyOn(view['consoleEntryHook_'], 'set');
+      spyOn(view.consoleEntryHook_, 'set');
       mockTemplateCompilerService.create.and.returnValue(null);
 
       mockSampleDataService.getRowData.and.returnValue(Promise.resolve(null));
 
       await view['onExecuteButtonClick_']();
-      assert(view['consoleEntryHook_'].set).toNot.haveBeenCalled();
+      assert(view.consoleEntryHook_.set).toNot.haveBeenCalled();
       assert(mockTemplateCompilerService.create).toNot.haveBeenCalled();
     });
 
     it('should do nothing if the console has no values', async () => {
       spyOn(view['consoleInputHook_'], 'get').and.returnValue(null);
-      spyOn(view['consoleEntryHook_'], 'set');
+      spyOn(view.consoleEntryHook_, 'set');
 
       mockTemplateCompilerService.create.and.returnValue(null);
 
       await view['onExecuteButtonClick_']();
-      assert(view['consoleEntryHook_'].set).toNot.haveBeenCalled();
+      assert(view.consoleEntryHook_.set).toNot.haveBeenCalled();
       assert(mockTemplateCompilerService.create).toNot.haveBeenCalled();
     });
   });
@@ -1051,11 +1024,30 @@ describe('asset.HelperView', () => {
       assert(view['argElementsHook_'].set).to.haveBeenCalledWith([arg1, arg3]);
     });
 
+    it('should do nothing if parent element cannot be found', () => {
+      const arg1 = 'arg1';
+      const arg2 = 'arg2';
+      const arg3 = 'arg3';
+      spyOn(view['argElementsHook_'], 'get').and.returnValue([arg1, arg2, arg3]);
+      spyOn(view['argElementsHook_'], 'set');
+
+      const child1 = document.createElement('child1');
+      const child2 = document.createElement('child2');
+      const child3 = document.createElement('child3');
+      const rootEl = document.createElement('root');
+      rootEl.appendChild(child1);
+      rootEl.appendChild(child3);
+
+      view.onArgClick({target: child2} as any);
+
+      assert(view['argElementsHook_'].set).toNot.haveBeenCalled();
+    });
+
     it('should do nothing if there are no args', () => {
       spyOn(view['argElementsHook_'], 'get').and.returnValue(null);
       spyOn(view['argElementsHook_'], 'set');
 
-      view.onArgClick(<Event> <any> {target: document.createElement('child')});
+      view.onArgClick({target: document.createElement('child')} as any);
 
       assert(view['argElementsHook_'].set).toNot.haveBeenCalled();
     });
@@ -1063,7 +1055,7 @@ describe('asset.HelperView', () => {
     it('should do nothing if the event target is not an element', () => {
       spyOn(view['argElementsHook_'], 'set');
 
-      view.onArgClick(<Event> <any> {target: {}});
+      view.onArgClick({target: {}} as any);
 
       assert(view['argElementsHook_'].set).toNot.haveBeenCalled();
     });

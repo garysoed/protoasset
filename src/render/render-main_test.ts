@@ -31,6 +31,17 @@ describe('render.RenderMain', () => {
       assert(main['getCanvasEl_']()).to.equal(canvasEl);
       assert(mockBody.querySelector).to.haveBeenCalledWith('canvas');
     });
+
+    it('should throw error if canvas cannot be found', () => {
+      const mockBody = jasmine.createSpyObj('Body', ['querySelector']);
+      mockBody.querySelector.and.returnValue(null);
+      mockWindow.document = {body: mockBody};
+
+      assert(() => {
+        main['getCanvasEl_']();
+      }).to.throwError(/not found/);
+      assert(mockBody.querySelector).to.haveBeenCalledWith('canvas');
+    });
   });
 
   describe('processRequest_', () => {
@@ -79,6 +90,43 @@ describe('render.RenderMain', () => {
       assert(rootStyle.width).to.equal(`${width}px`);
       assert(mockBody.querySelector).to.haveBeenCalledWith('div');
       assert(styleEl.innerHTML).to.equal(css);
+      assert(mockHead.querySelector).to.haveBeenCalledWith('style');
+    });
+
+    it('should reject if root element cannot be found', async () => {
+      const styleEl = Mocks.object('styleEl');
+      const mockHead = jasmine.createSpyObj('Head', ['querySelector']);
+      mockHead.querySelector.and.returnValue(styleEl);
+
+      const mockBody = jasmine.createSpyObj('Body', ['querySelector']);
+      mockBody.querySelector.and.returnValue(null);
+
+      mockWindow.document = {body: mockBody, head: mockHead};
+
+      const css = 'css';
+      const height = 123;
+      const html = 'html';
+      const width = 456;
+      const request = {css, height, html, id: 'id', width};
+
+      await assert(main['processRequest_'](request)).to.rejectWithError(/Root element/);
+      assert(mockBody.querySelector).to.haveBeenCalledWith('div');
+      assert(mockHead.querySelector).to.haveBeenCalledWith('style');
+    });
+
+    it('should reject if style element cannot be found', async () => {
+      const mockHead = jasmine.createSpyObj('Head', ['querySelector']);
+      mockHead.querySelector.and.returnValue(null);
+
+      mockWindow.document = {head: mockHead};
+
+      const css = 'css';
+      const height = 123;
+      const html = 'html';
+      const width = 456;
+      const request = {css, height, html, id: 'id', width};
+
+      await assert(main['processRequest_'](request)).to.rejectWithError(/Style element/);
       assert(mockHead.querySelector).to.haveBeenCalledWith('style');
     });
   });

@@ -19,7 +19,11 @@ export class RenderMain extends BaseDisposable {
    * @return The canvas element on the page.
    */
   private getCanvasEl_(): HTMLCanvasElement {
-    return this.window_.document.body.querySelector('canvas');
+    const canvasEl = this.window_.document.body.querySelector('canvas');
+    if (canvasEl === null) {
+      throw new Error('Canvas element not found');
+    }
+    return canvasEl;
   }
 
   /**
@@ -29,9 +33,16 @@ export class RenderMain extends BaseDisposable {
    */
   private processRequest_(request: RenderRequest): Promise<RenderResponse> {
     const styleEl = this.window_.document.head.querySelector('style');
+    if (styleEl === null) {
+      return Promise.reject(new Error('Style element not found'));
+    }
     styleEl.innerHTML = request.css;
 
     const rootEl = this.window_.document.body.querySelector('div');
+    if (rootEl === null) {
+      return Promise.reject(new Error('Root element not found'));
+    }
+
     rootEl.style.height = `${request.height}px`;
     rootEl.style.width = `${request.width}px`;
     rootEl.innerHTML = request.html;

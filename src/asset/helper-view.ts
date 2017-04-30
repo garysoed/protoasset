@@ -174,6 +174,9 @@ export class HelperView extends BaseThemedElement {
   @hook('#consoleInput').attribute('gs-value', StringParser)
   readonly consoleInputHook_: DomHook<string>;
 
+  @hook('#consoleContainer').element(HTMLElement)
+  readonly consoleContainerHook_: DomHook<HTMLElement>;
+
   @hook('#helpers').childrenElements<HelperIdParams>(HELPER_ITEM_DATA_HELPER)
   readonly helperItemsHook_: DomHook<HelperIdParams[]>;
 
@@ -209,6 +212,7 @@ export class HelperView extends BaseThemedElement {
     this.assetCollection_ = assetCollection;
     this.assetUpdateDeregister_ = null;
     this.bodyInputHook_ = DomHook.of<string>();
+    this.consoleContainerHook_ = DomHook.of<HTMLElement>();
     this.consoleEntryHook_ = DomHook.of<ConsoleEntry[]>();
     this.consoleInputHook_ = DomHook.of<string>();
     this.helperIdGenerator_ = new SimpleIdGenerator();
@@ -436,11 +440,10 @@ export class HelperView extends BaseThemedElement {
     consoleEntries.push({command: consoleValue, isError: isError, result: result});
     this.consoleEntryHook_.set(consoleEntries);
 
-    const element = this.getElement();
-    if (element === null) {
-      return;
+    const containerEl = this.consoleContainerHook_.get();
+    if (containerEl === null) {
+      throw new Error('Console container element cannot be found');
     }
-    const containerEl = element.getEventTarget().shadowRoot.querySelector('#consoleContainer');
     containerEl.scrollTop = containerEl.scrollHeight;
   };
 
@@ -526,8 +529,13 @@ export class HelperView extends BaseThemedElement {
       return;
     }
 
+    const parentEl = target.parentElement;
+    if (parentEl === null) {
+      return;
+    }
+
     const removedIndex = Arrays
-        .fromItemList(target.parentElement.children)
+        .fromItemList(parentEl.children)
         .findIndex((value: Element) => {
           return value === target;
         });
