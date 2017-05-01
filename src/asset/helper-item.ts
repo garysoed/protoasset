@@ -94,7 +94,7 @@ export class HelperItem extends BaseThemedElement {
       return null;
     }
 
-    let asset = await this.getAsset_();
+    const asset = await this.getAsset_();
     if (asset === null) {
       return null;
     }
@@ -119,7 +119,7 @@ export class HelperItem extends BaseThemedElement {
   @handle('#delete').event(DomEvent.CLICK)
   async onDeleteClick_(event: Event): Promise<void> {
     event.stopPropagation();
-    let [asset, helper] = await Promise.all([this.getAsset_(), this.getHelper_()]);
+    const [asset, helper] = await Promise.all([this.getAsset_(), this.getHelper_()]);
     if (asset === null || helper === null) {
       return;
     }
@@ -133,7 +133,7 @@ export class HelperItem extends BaseThemedElement {
   @handle('#edit').event(DomEvent.CLICK)
   async onEditClick_(event: Event): Promise<void> {
     event.stopPropagation();
-    let helper = await this.getHelper_();
+    const helper = await this.getHelper_();
     if (helper !== null) {
       this.nameInputHook_.set(helper.getName());
     } else {
@@ -151,12 +151,12 @@ export class HelperItem extends BaseThemedElement {
       return Promise.resolve();
     }
 
-    let asset = await this.getAsset_();
+    const asset = await this.getAsset_();
     if (asset === null) {
       return;
     }
 
-    let helper = asset.getHelper(helperId);
+    const helper = asset.getHelper(helperId);
     if (helper === null) {
       return;
     }
@@ -170,7 +170,7 @@ export class HelperItem extends BaseThemedElement {
 
   @handle('#readRoot').event(DomEvent.CLICK)
   async onReadRootClick_(): Promise<void> {
-    let [asset, helper] = await Promise.all([this.getAsset_(), this.getHelper_()]);
+    const [asset, helper] = await Promise.all([this.getAsset_(), this.getHelper_()]);
     if (asset === null || helper === null) {
       return;
     }
@@ -188,7 +188,7 @@ export class HelperItem extends BaseThemedElement {
   @handle(null).attributeChange('project-id', StringParser)
   @atomic()
   async updateHelper_(): Promise<void> {
-    let helper = await this.getHelper_();
+    const helper = await this.getHelper_();
     if (this.helperUpdateDeregister_ !== null) {
       this.helperUpdateDeregister_.dispose();
       this.helperUpdateDeregister_ = null;

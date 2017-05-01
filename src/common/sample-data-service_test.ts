@@ -158,7 +158,7 @@ describe('common.SampleDataService', () => {
       service.setDataRow(dataRow);
 
       assert(service.dispatch).to.haveBeenCalledWith(
-          SampleDataServiceEvent.ROW_CHANGED, <() => void> Matchers.any(Function));
+          SampleDataServiceEvent.ROW_CHANGED, Matchers.any(Function) as () => void);
       dispatchSpy.calls.argsFor(0)[1]();
       assert(service.getDataRow()).to.equal(dataRow);
     });

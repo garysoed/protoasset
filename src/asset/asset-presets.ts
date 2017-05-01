@@ -51,13 +51,13 @@ export const Render = {
    * @return The rendered preset.
    */
   preset(preset: PresetType): string {
-    let presetObj = ASSET_PRESETS.get(preset);
+    const presetObj = ASSET_PRESETS.get(preset);
 
     if (presetObj === undefined) {
       return 'Custom';
     }
 
-    let size = `${presetObj.width} × ${presetObj.height}`;
+    const size = `${presetObj.width} × ${presetObj.height}`;
     return `${Render.source(presetObj.source)}: ${presetObj.name} (${size})`;
   },
 

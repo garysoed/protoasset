@@ -333,7 +333,7 @@ describe('asset.LayerItem', () => {
           const layer = Mocks.object('layer');
           spyOn(item, 'getLayer_').and.returnValue(Promise.resolve(layer));
 
-          let spyLayerChanged = spyOn(item, 'onLayerChanged_');
+          const spyLayerChanged = spyOn(item, 'onLayerChanged_');
           spyOn(item, 'updateLayerPosition_');
 
           await item['onLayerIdChanged_']();

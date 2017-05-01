@@ -292,7 +292,7 @@ describe('asset.Editor', () => {
 
       spyOn(editor, 'setPresetType_');
 
-      editor.onPresetClicked(<any> {target: mockTarget});
+      editor.onPresetClicked({target: mockTarget} as any);
 
       assert(editor['setPresetType_']).to.haveBeenCalledWith(PresetType.GAME_CRAFTER_DECK_POKER);
       assert(mockTarget.getAttribute).to.haveBeenCalledWith('gs-value');
@@ -307,7 +307,7 @@ describe('asset.Editor', () => {
 
       spyOn(editor, 'setAssetType_');
 
-      editor.onTypeClicked(<any> {target: mockTarget});
+      editor.onTypeClicked({target: mockTarget} as any);
 
       assert(editor['setAssetType_']).to.haveBeenCalledWith(AssetType.CARD);
       assert(mockTarget.getAttribute).to.haveBeenCalledWith('gs-value');

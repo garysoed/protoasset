@@ -19,11 +19,11 @@ describe('project.CollectionStorage', () => {
 
   describe('getFusePromise_', () => {
     it('should return the correct fuse object', async () => {
-      let item1 = Mocks.object('item1');
-      let searchIndex1 = Mocks.object('searchIndex1');
+      const item1 = Mocks.object('item1');
+      const searchIndex1 = Mocks.object('searchIndex1');
 
-      let item2 = Mocks.object('item2');
-      let searchIndex2 = Mocks.object('searchIndex2');
+      const item2 = Mocks.object('item2');
+      const searchIndex2 = Mocks.object('searchIndex2');
 
       mockGetSearchIndex.and.callFake((item: any) => {
         switch (item) {
@@ -35,10 +35,10 @@ describe('project.CollectionStorage', () => {
       });
       spyOn(storage, 'list').and.returnValue(Promise.resolve([item1, item2]));
 
-      let fuse = Mocks.object('fuse');
+      const fuse = Mocks.object('fuse');
       spyOn(storage, 'createFuse_').and.returnValue(fuse);
 
-      let actualFuse = await storage['getFusePromise_']();
+      const actualFuse = await storage['getFusePromise_']();
       assert(actualFuse).to.equal(fuse);
       assert(storage['createFuse_']).to.haveBeenCalledWith([searchIndex1, searchIndex2]);
       assert(mockGetSearchIndex).to.haveBeenCalledWith(item1);
@@ -46,12 +46,12 @@ describe('project.CollectionStorage', () => {
     });
 
     it('should return the cached fuse object', async () => {
-      let fuse = Mocks.object('fuse');
+      const fuse = Mocks.object('fuse');
       storage['fusePromise_'] = Promise.resolve(fuse);
 
       spyOn(storage, 'createFuse_');
 
-      let actualFuse = await storage['getFusePromise_']();
+      const actualFuse = await storage['getFusePromise_']();
       assert(actualFuse).to.equal(fuse);
       assert(storage['createFuse_']).toNot.haveBeenCalled();
       assert(mockGetSearchIndex).toNot.haveBeenCalled();
@@ -60,8 +60,8 @@ describe('project.CollectionStorage', () => {
 
   describe('get', () => {
     it('should return the correct item', () => {
-      let itemId = 'itemId';
-      let promise = Mocks.object('promise');
+      const itemId = 'itemId';
+      const promise = Mocks.object('promise');
       mockStorage.read.and.returnValue(promise);
       assert(storage.get(itemId)).to.equal(promise);
       assert(mockStorage.read).to.haveBeenCalledWith(itemId);
@@ -70,7 +70,7 @@ describe('project.CollectionStorage', () => {
 
   describe('list', () => {
     it('should return the correct items', () => {
-      let promise = Mocks.object('promise');
+      const promise = Mocks.object('promise');
       mockStorage.list.and.returnValue(promise);
       assert(storage.list()).to.equal(promise);
       assert(mockStorage.list).to.haveBeenCalledWith();
@@ -79,7 +79,7 @@ describe('project.CollectionStorage', () => {
 
   describe('reserveId', () => {
     it('should return the correct generated ID', () => {
-      let promise = Mocks.object('promise');
+      const promise = Mocks.object('promise');
       mockStorage.generateId.and.returnValue(promise);
       assert(storage.reserveId()).to.equal(promise);
       assert(mockStorage.generateId).to.haveBeenCalledWith();
@@ -88,17 +88,17 @@ describe('project.CollectionStorage', () => {
 
   describe('search', () => {
     it('should return the correct result from fuse', async () => {
-      let item1 = Mocks.object('item1');
-      let item2 = Mocks.object('item2');
-      let mockFuse = jasmine.createSpyObj('Fuse', ['search']);
+      const item1 = Mocks.object('item1');
+      const item2 = Mocks.object('item2');
+      const mockFuse = jasmine.createSpyObj('Fuse', ['search']);
       mockFuse.search.and.returnValue([
         {this: item1},
         {this: item2},
       ]);
       spyOn(storage, 'getFusePromise_').and.returnValue(Promise.resolve(mockFuse));
 
-      let token = 'token';
-      let results = await storage.search(token);
+      const token = 'token';
+      const results = await storage.search(token);
       assert(results).to.equal([item1, item2]);
       assert(mockFuse.search).to.haveBeenCalledWith(token);
     });
@@ -107,13 +107,13 @@ describe('project.CollectionStorage', () => {
   describe('update', () => {
     it('should update the storage, resolve true if the item is new, and clear the fuse cache',
         async () => {
-          let item = Mocks.object('item');
-          let itemId = 'itemId';
+          const item = Mocks.object('item');
+          const itemId = 'itemId';
 
           mockStorage.update.and.returnValue(Promise.resolve());
           mockStorage.read.and.returnValue(Promise.resolve(null));
 
-          let isNewItem = await storage.update(itemId, item);
+          const isNewItem = await storage.update(itemId, item);
           assert(isNewItem).to.beTrue();
           assert(storage['fusePromise_']).to.beNull();
           assert(mockStorage.update).to.haveBeenCalledWith(itemId, item);
@@ -124,7 +124,7 @@ describe('project.CollectionStorage', () => {
       mockStorage.update.and.returnValue(Promise.resolve());
       mockStorage.read.and.returnValue(Promise.resolve(Mocks.object('existingItem')));
 
-      let isNewItem = await storage.update('itemId', Mocks.object('item'));
+      const isNewItem = await storage.update('itemId', Mocks.object('item'));
       assert(isNewItem).to.beFalse();
     });
   });

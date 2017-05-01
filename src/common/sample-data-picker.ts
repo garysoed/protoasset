@@ -106,7 +106,7 @@ export class SampleDataPicker extends BaseThemedElement {
    * Handles event when a result item is clicked.
    */
   onResultClick_(event: Event): void {
-    const target: HTMLElement = <HTMLElement> event.target;
+    const target: HTMLElement = event.target as HTMLElement;
     const dataRow = IntegerParser.parse(target.getAttribute('gs-row'));
     if (dataRow === null) {
       return;

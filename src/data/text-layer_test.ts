@@ -258,7 +258,7 @@ describe('data.TextLayer', () => {
       layer.setBottom(bottom);
 
       assert(layer.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function) as () => void);
       assert(layer.getBottom()).to.equal(bottom);
     });
 
@@ -287,7 +287,7 @@ describe('data.TextLayer', () => {
       layer.setColor(color);
 
       assert(layer.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function) as () => void);
       assert(layer.getColor()).to.equal(color);
     });
 
@@ -316,7 +316,7 @@ describe('data.TextLayer', () => {
       layer.setFontFamily(fontFamily);
 
       assert(layer.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function) as () => void);
       assert(layer.getFontFamily()).to.equal(fontFamily);
     });
 
@@ -345,7 +345,7 @@ describe('data.TextLayer', () => {
       layer.setFontUrl(fontUrl);
 
       assert(layer.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function) as () => void);
       assert(layer.getFontUrl()).to.equal(fontUrl);
     });
 
@@ -374,7 +374,7 @@ describe('data.TextLayer', () => {
       layer.setFontWeight(fontWeight);
 
       assert(layer.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function) as () => void);
       assert(layer.getFontWeight()).to.equal(fontWeight);
     });
 
@@ -403,7 +403,7 @@ describe('data.TextLayer', () => {
       layer.setHorizontalAlign(horizontalAlign);
 
       assert(layer.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function) as () => void);
       assert(layer.getHorizontalAlign()).to.equal(horizontalAlign);
     });
 
@@ -432,7 +432,7 @@ describe('data.TextLayer', () => {
       layer.setLeft(left);
 
       assert(layer.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function) as () => void);
       assert(layer.getLeft()).to.equal(left);
     });
 
@@ -461,7 +461,7 @@ describe('data.TextLayer', () => {
       layer.setRight(right);
 
       assert(layer.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function) as () => void);
       assert(layer.getRight()).to.equal(right);
     });
 
@@ -490,7 +490,7 @@ describe('data.TextLayer', () => {
       layer.setSize(size);
 
       assert(layer.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function) as () => void);
       assert(layer.getSize()).to.equal(size);
     });
 
@@ -519,7 +519,7 @@ describe('data.TextLayer', () => {
       layer.setText(text);
 
       assert(layer.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function) as () => void);
       assert(layer.getText()).to.equal(text);
     });
 
@@ -548,7 +548,7 @@ describe('data.TextLayer', () => {
       layer.setTop(top);
 
       assert(layer.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function) as () => void);
       assert(layer.getTop()).to.equal(top);
     });
 
@@ -577,7 +577,7 @@ describe('data.TextLayer', () => {
       layer.setVerticalAlign(verticalAlign);
 
       assert(layer.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function) as () => void);
       assert(layer.getVerticalAlign()).to.equal(verticalAlign);
     });
 

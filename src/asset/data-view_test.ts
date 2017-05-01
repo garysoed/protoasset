@@ -13,8 +13,8 @@ import { DataView, PREVIEW_ROW_DATA_HELPER } from './data-view';
 describe('PREVIEW_ROW_DATA_HELPER', () => {
   describe('create', () => {
     it('should return the correct element', () => {
-      let element = Mocks.object('element');
-      let mockDocument = jasmine.createSpyObj('Document', ['createElement']);
+      const element = Mocks.object('element');
+      const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
       mockDocument.createElement.and.returnValue(element);
       assert(PREVIEW_ROW_DATA_HELPER.create(mockDocument, Mocks.object('instance')))
           .to.equal(element);
@@ -47,15 +47,15 @@ describe('PREVIEW_ROW_DATA_HELPER', () => {
 
   describe('set', () => {
     it('should generate additional cell elements if the are not enough elements', () => {
-      let data1 = 'data1';
-      let data2 = 'data2';
+      const data1 = 'data1';
+      const data2 = 'data2';
 
-      let cell1 = Mocks.object('cell1');
-      let cell2 = Mocks.object('cell2');
-      let mockDocument = jasmine.createSpyObj('Document', ['createElement']);
+      const cell1 = Mocks.object('cell1');
+      const cell2 = Mocks.object('cell2');
+      const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
       mockDocument.createElement.and.returnValues(cell1, cell2);
 
-      let mockRoot = jasmine.createSpyObj('Root', ['appendChild']);
+      const mockRoot = jasmine.createSpyObj('Root', ['appendChild']);
       mockRoot.ownerDocument = mockDocument;
       mockRoot.childElementCount = 0;
 
@@ -69,16 +69,16 @@ describe('PREVIEW_ROW_DATA_HELPER', () => {
     });
 
     it('should reuse existing cell elements if there are enough elements', () => {
-      let data1 = 'data1';
-      let data2 = 'data2';
+      const data1 = 'data1';
+      const data2 = 'data2';
 
-      let cell1 = Mocks.object('cell1');
-      let cell2 = Mocks.object('cell2');
+      const cell1 = Mocks.object('cell1');
+      const cell2 = Mocks.object('cell2');
 
-      let mockRoot = jasmine.createSpyObj('Root', ['appendChild']);
+      const mockRoot = jasmine.createSpyObj('Root', ['appendChild']);
       mockRoot.childElementCount = 2;
 
-      let mockChildrenList = jasmine.createSpyObj('ChildrenList', ['item']);
+      const mockChildrenList = jasmine.createSpyObj('ChildrenList', ['item']);
       Fakes.build(mockChildrenList.item)
           .when(0).return(cell1)
           .when(1).return(cell2);
@@ -120,17 +120,17 @@ describe('asset.DataView', () => {
 
   describe('getAsset_', () => {
     it('should return the asset', async () => {
-      let assetId = 'assetId';
-      let projectId = 'projectId';
+      const assetId = 'assetId';
+      const projectId = 'projectId';
       mockRouteService.getParams.and.returnValue({assetId, projectId});
 
-      let assetDataFactory = Mocks.object('assetDataFactory');
+      const assetDataFactory = Mocks.object('assetDataFactory');
       mockRouteFactoryService.assetData.and.returnValue(assetDataFactory);
 
-      let asset = Mocks.object('asset');
+      const asset = Mocks.object('asset');
       mockAssetCollection.get.and.returnValue(Promise.resolve(asset));
 
-      let actualAsset = await view['getAsset_']();
+      const actualAsset = await view['getAsset_']();
       assert(actualAsset).to.equal(asset);
       assert(mockAssetCollection.get).to.haveBeenCalledWith(projectId, assetId);
       assert(mockRouteService.getParams).to.haveBeenCalledWith(assetDataFactory);
@@ -140,7 +140,7 @@ describe('asset.DataView', () => {
       mockRouteService.getParams.and.returnValue(null);
       mockRouteFactoryService.assetData.and.returnValue(Mocks.object('assetDataFactory'));
 
-      let actualAsset = await view['getAsset_']();
+      const actualAsset = await view['getAsset_']();
       assert(actualAsset).to.beNull();
     });
   });
@@ -161,9 +161,9 @@ describe('asset.DataView', () => {
 
   describe('updateAsset_', () => {
     it('should update the asset correctly with the given data source', async () => {
-      let dataSource = Mocks.object('dataSource');
-      let projectId = 'projectId';
-      let mockAsset = jasmine.createSpyObj('Asset', ['getProjectId', 'setData']);
+      const dataSource = Mocks.object('dataSource');
+      const projectId = 'projectId';
+      const mockAsset = jasmine.createSpyObj('Asset', ['getProjectId', 'setData']);
       mockAsset.getProjectId.and.returnValue(projectId);
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
       await view['updateAsset_'](dataSource);
@@ -179,23 +179,23 @@ describe('asset.DataView', () => {
 
   describe('updateDataSource_', () => {
     it('should update the asset and preview correctly', async () => {
-      let bundleId = 'bundleId';
+      const bundleId = 'bundleId';
       spyOn(view['dataSourceBundleIdHook_'], 'get').and.returnValue(bundleId);
 
-      let startRow = 123;
+      const startRow = 123;
       spyOn(view['startRowValueHook_'], 'get').and.returnValue(startRow);
 
-      let endRow = 456;
+      const endRow = 456;
       spyOn(view['endRowValueHook_'], 'get').and.returnValue(endRow);
 
-      let content = 'content';
+      const content = 'content';
       mockFileService.processBundle.and
           .returnValue(Promise.resolve(new Map([[Mocks.object('File'), content]])));
 
-      let inMemoryDataSource = Mocks.object('inMemoryDataSource');
+      const inMemoryDataSource = Mocks.object('inMemoryDataSource');
       spyOn(InMemoryDataSource, 'of').and.returnValue(inMemoryDataSource);
 
-      let dataSource = Mocks.object('dataSource');
+      const dataSource = Mocks.object('dataSource');
       spyOn(TsvDataSource, 'of').and.returnValue(dataSource);
 
       spyOn(view, 'updateAsset_').and.returnValue(Promise.resolve());
@@ -212,21 +212,21 @@ describe('asset.DataView', () => {
     it('should not update the asset, but still update the preview, if there are no files in the '
         + 'bundle',
         async () => {
-          let bundleId = 'bundleId';
+          const bundleId = 'bundleId';
           spyOn(view['dataSourceBundleIdHook_'], 'get').and.returnValue(bundleId);
 
-          let startRow = 123;
+          const startRow = 123;
           spyOn(view['startRowValueHook_'], 'get').and.returnValue(startRow);
 
-          let endRow = 456;
+          const endRow = 456;
           spyOn(view['endRowValueHook_'], 'get').and.returnValue(endRow);
 
           mockFileService.processBundle.and.returnValue(Promise.resolve(new Map()));
 
-          let inMemoryDataSource = Mocks.object('inMemoryDataSource');
+          const inMemoryDataSource = Mocks.object('inMemoryDataSource');
           spyOn(InMemoryDataSource, 'of').and.returnValue(inMemoryDataSource);
 
-          let dataSource = Mocks.object('dataSource');
+          const dataSource = Mocks.object('dataSource');
           spyOn(TsvDataSource, 'of').and.returnValue(dataSource);
 
           spyOn(view, 'updateAsset_').and.returnValue(Promise.resolve());
@@ -240,17 +240,17 @@ describe('asset.DataView', () => {
     it('should not update the asset, but still update the preview, if the bundle cannot be '
         + 'processed',
         async () => {
-          let bundleId = 'bundleId';
+          const bundleId = 'bundleId';
           spyOn(view['dataSourceBundleIdHook_'], 'get').and.returnValue(bundleId);
           spyOn(view['startRowValueHook_'], 'get').and.returnValue(123);
           spyOn(view['endRowValueHook_'], 'get').and.returnValue(456);
 
           mockFileService.processBundle.and.returnValue(Promise.resolve(null));
 
-          let inMemoryDataSource = Mocks.object('inMemoryDataSource');
+          const inMemoryDataSource = Mocks.object('inMemoryDataSource');
           spyOn(InMemoryDataSource, 'of').and.returnValue(inMemoryDataSource);
 
-          let dataSource = Mocks.object('dataSource');
+          const dataSource = Mocks.object('dataSource');
           spyOn(TsvDataSource, 'of').and.returnValue(dataSource);
           spyOn(view, 'updateAsset_');
           spyOn(view, 'updatePreview_');
@@ -323,11 +323,11 @@ describe('asset.DataView', () => {
 
   describe('updatePreview_', () => {
     it('should update the preview correctly', async () => {
-      let data = Mocks.object('data');
-      let mockDataSource = jasmine.createSpyObj('DataSource', ['getData']);
+      const data = Mocks.object('data');
+      const mockDataSource = jasmine.createSpyObj('DataSource', ['getData']);
       mockDataSource.getData.and.returnValue(data);
 
-      let mockAsset = jasmine.createSpyObj('Asset', ['getData']);
+      const mockAsset = jasmine.createSpyObj('Asset', ['getData']);
       mockAsset.getData.and.returnValue(mockDataSource);
 
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
@@ -340,10 +340,10 @@ describe('asset.DataView', () => {
     });
 
     it('should clear the preview if the data cannot be loaded', async () => {
-      let mockDataSource = jasmine.createSpyObj('DataSource', ['getData']);
+      const mockDataSource = jasmine.createSpyObj('DataSource', ['getData']);
       mockDataSource.getData.and.returnValue(null);
 
-      let mockAsset = jasmine.createSpyObj('Asset', ['getData']);
+      const mockAsset = jasmine.createSpyObj('Asset', ['getData']);
       mockAsset.getData.and.returnValue(mockDataSource);
 
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
@@ -356,7 +356,7 @@ describe('asset.DataView', () => {
     });
 
     it('should clear the preview if the asset has no data source', async () => {
-      let mockAsset = jasmine.createSpyObj('Asset', ['getData']);
+      const mockAsset = jasmine.createSpyObj('Asset', ['getData']);
       mockAsset.getData.and.returnValue(null);
 
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(mockAsset));
@@ -378,4 +378,4 @@ describe('asset.DataView', () => {
       assert(view['previewChildrenHook_'].set).toNot.haveBeenCalled();
     });
   });
-}); ;
+});

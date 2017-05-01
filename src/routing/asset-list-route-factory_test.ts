@@ -19,7 +19,7 @@ describe('routing.AssetListRouteFactory', () => {
 
   describe('getRelativePath_', () => {
     it('should return the correct path', () => {
-      let projectId = 'projectId';
+      const projectId = 'projectId';
       assert(factory['getRelativePath_']({projectId: projectId})).to
           .equal(`/project/${projectId}`);
     });
@@ -27,7 +27,7 @@ describe('routing.AssetListRouteFactory', () => {
 
   describe('getRelativeMatchParams_', () => {
     it('should return the correct params', () => {
-      let projectId = 'projectId';
+      const projectId = 'projectId';
       assert(factory['getRelativeMatchParams_']({'projectId': projectId})).to.equal({
         projectId: projectId,
       });
@@ -36,14 +36,14 @@ describe('routing.AssetListRouteFactory', () => {
 
   describe('getName', () => {
     it('should return the correct name', async () => {
-      let name = 'name';
-      let mockProject = jasmine.createSpyObj('Project', ['getName']);
+      const name = 'name';
+      const mockProject = jasmine.createSpyObj('Project', ['getName']);
       mockProject.getName.and.returnValue(name);
       mockProjectCollection.get.and.returnValue(Promise.resolve(mockProject));
 
-      let projectId = 'projectId';
+      const projectId = 'projectId';
 
-      let actualName = await factory.getName({projectId: projectId});
+      const actualName = await factory.getName({projectId: projectId});
       assert(actualName).to.equal(name);
       assert(mockProjectCollection.get).to.haveBeenCalledWith(projectId);
     });
@@ -51,8 +51,8 @@ describe('routing.AssetListRouteFactory', () => {
     it('should return the project ID if the project is unknown', async () => {
       mockProjectCollection.get.and.returnValue(Promise.resolve(null));
 
-      let projectId = 'projectId';
-      let actualName = await factory.getName({projectId: projectId});
+      const projectId = 'projectId';
+      const actualName = await factory.getName({projectId: projectId});
       assert(actualName).to.equal(`Unknown project ${projectId}`);
     });
   });

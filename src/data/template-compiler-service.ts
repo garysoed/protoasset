@@ -28,7 +28,7 @@ export class TemplateCompilerService {
    *    cannot be created.
    */
   create(asset: Asset, data: string[]): TemplateCompiler {
-    let handlebars = this.handlebars_.create();
+    const handlebars = this.handlebars_.create();
     Arrays
         .of(asset.getAllHelpers())
         .forEach((helper: Helper) => {

@@ -31,7 +31,7 @@ export class InMemoryDataSource<T> implements IDataSource<T> {
    * @return The newly created data source.
    */
   static of<T>(data: T): InMemoryDataSource<T> {
-    let source = new InMemoryDataSource<T>();
+    const source = new InMemoryDataSource<T>();
     source.data_ = data;
     return source;
   }

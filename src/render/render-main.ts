@@ -76,7 +76,7 @@ export class RenderMain extends BaseDisposable {
     }
 
     ctx.drawImage(canvas, 0, 0, request.width, request.height);
-    let dataUri = targetCanvasEl.toDataURL('image/png');
+    const dataUri = targetCanvasEl.toDataURL('image/png');
     resolve({id: request.id, uri: dataUri});
   }
 
@@ -91,4 +91,4 @@ export class RenderMain extends BaseDisposable {
     server.run();
     this.addDisposable(channel);
   }
-};
+}

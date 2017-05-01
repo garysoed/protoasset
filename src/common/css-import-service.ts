@@ -20,7 +20,7 @@ export class CssImportService {
       return;
     }
 
-    let styleEl = this.document_.createElement('style');
+    const styleEl = this.document_.createElement('style');
     styleEl.innerHTML = `@import url('${cssUrl}');`;
     this.document_.head.appendChild(styleEl);
     this.importedCss_.add(cssUrl);

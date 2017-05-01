@@ -167,7 +167,7 @@ export class LayerItem extends BaseThemedElement {
       return;
     }
 
-    let id = this.layerIdGenerator_.generate(asset.getLayerIds());
+    const id = this.layerIdGenerator_.generate(asset.getLayerIds());
     let newLayer: BaseLayer;
 
     if (layer instanceof HtmlLayer

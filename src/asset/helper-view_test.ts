@@ -1019,7 +1019,7 @@ describe('asset.HelperView', () => {
       rootEl.appendChild(child2);
       rootEl.appendChild(child3);
 
-      view.onArgClick(<Event> <any> {target: child2});
+      view.onArgClick({target: child2} as any);
 
       assert(view['argElementsHook_'].set).to.haveBeenCalledWith([arg1, arg3]);
     });

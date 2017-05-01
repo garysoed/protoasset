@@ -111,7 +111,7 @@ export class DataView extends BaseThemedElement {
    * @return Promise that will be resolved with the asset, or null if the asset cannot be found.
    */
   private getAsset_(): Promise<Asset | null> {
-    let params = this.routeService_.getParams(this.routeFactoryService_.assetData());
+    const params = this.routeService_.getParams(this.routeFactoryService_.assetData());
     if (params === null) {
       return Promise.resolve(null);
     }
@@ -133,7 +133,7 @@ export class DataView extends BaseThemedElement {
    * @return Promise that will be resolved when the update process is done.
    */
   private async updateAsset_(dataSource: TsvDataSource): Promise<void> {
-    let asset = await this.getAsset_();
+    const asset = await this.getAsset_();
     if (asset === null) {
       return;
     }
@@ -156,11 +156,11 @@ export class DataView extends BaseThemedElement {
       return Promise.resolve();
     }
 
-    let files = await this.fileService_.processBundle(bundleId);
+    const files = await this.fileService_.processBundle(bundleId);
     if (files !== null) {
-      let entry = Maps.of(files).anyEntry();
+      const entry = Maps.of(files).anyEntry();
       if (entry !== null) {
-        let dataSource = TsvDataSource.of(
+        const dataSource = TsvDataSource.of(
             InMemoryDataSource.of(entry[1]),
             startRow,
             endRow);
@@ -178,7 +178,7 @@ export class DataView extends BaseThemedElement {
    */
   private async updatePreview_(): Promise<void> {
     this.previewChildrenHook_.delete();
-    let asset = await this.getAsset_();
+    const asset = await this.getAsset_();
     if (asset === null) {
       return;
     }
@@ -188,7 +188,7 @@ export class DataView extends BaseThemedElement {
       return;
     }
 
-    let data = await dataSource.getData();
+    const data = await dataSource.getData();
     if (data === null) {
       return;
     }

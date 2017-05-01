@@ -27,10 +27,10 @@ describe('landing.ProjectItem', () => {
 
   describe('onElementClicked_', () => {
     it('should go to the correct project view', () => {
-      let projectId = 'projectId';
+      const projectId = 'projectId';
       spyOn(item['projectIdHook_'], 'get').and.returnValue(projectId);
 
-      let routeFactory = Mocks.object('routeFactory');
+      const routeFactory = Mocks.object('routeFactory');
       mockRouteFactoryService.assetList.and.returnValue(routeFactory);
 
       item['onElementClicked_']();
@@ -49,9 +49,9 @@ describe('landing.ProjectItem', () => {
 
   describe('onProjectIdChanged_', () => {
     it('should set the project name correctly if found', async () => {
-      let projectId = 'projectId';
-      let name = 'name';
-      let mockProject = jasmine.createSpyObj('Project', ['getName']);
+      const projectId = 'projectId';
+      const name = 'name';
+      const mockProject = jasmine.createSpyObj('Project', ['getName']);
       mockProject.getName.and.returnValue(name);
 
       mockProjectCollection.get.and.returnValue(Promise.resolve(mockProject));
@@ -64,7 +64,7 @@ describe('landing.ProjectItem', () => {
     });
 
     it('should delete the project name if not found', async () => {
-      let projectId = 'projectId';
+      const projectId = 'projectId';
 
       mockProjectCollection.get.and.returnValue(Promise.resolve(null));
 

@@ -18,8 +18,8 @@ describe('data.ProjectCollection', () => {
 
   describe('get', () => {
     it('should return the value returned by the storage', () => {
-      let projectId = 'projectId';
-      let promise = Mocks.object('promise');
+      const projectId = 'projectId';
+      const promise = Mocks.object('promise');
       spyOn(collection['storage_'], 'get').and.returnValue(promise);
 
       assert(collection.get(projectId)).to.equal(promise);
@@ -29,11 +29,11 @@ describe('data.ProjectCollection', () => {
 
   describe('list', () => {
     it('should return the correct projects', async () => {
-      let projects = Mocks.object('projects');
+      const projects = Mocks.object('projects');
 
       spyOn(collection['storage_'], 'list').and.returnValue(Promise.resolve(projects));
 
-      let actualProjects = await collection.list();
+      const actualProjects = await collection.list();
       assert(actualProjects).to.equal(projects);
       assert(collection['storage_'].list).to.haveBeenCalledWith();
     });
@@ -42,11 +42,11 @@ describe('data.ProjectCollection', () => {
   describe('reserveId', () => {
     it('should return a promise that is resolved with the correct project ID',
         async () => {
-          let projectId = 'projectId';
+          const projectId = 'projectId';
 
           spyOn(collection['storage_'], 'reserveId').and.returnValue(Promise.resolve(projectId));
 
-          let actualId = await collection.reserveId();
+          const actualId = await collection.reserveId();
           assert(actualId).to.equal(projectId);
           assert(collection['storage_'].reserveId).to.haveBeenCalledWith();
         });
@@ -54,12 +54,12 @@ describe('data.ProjectCollection', () => {
 
   describe('search', () => {
     it('should return the correct projects', async () => {
-      let projects = Mocks.object('projects');
+      const projects = Mocks.object('projects');
 
       spyOn(collection['storage_'], 'search').and.returnValue(Promise.resolve(projects));
 
-      let token = 'token';
-      let actualProjects = await collection.search(token);
+      const token = 'token';
+      const actualProjects = await collection.search(token);
       assert(actualProjects).to.equal(projects);
       assert(collection['storage_'].search).to.haveBeenCalledWith(token);
     });
@@ -67,8 +67,8 @@ describe('data.ProjectCollection', () => {
 
   describe('update', () => {
     it('should update the project correctly', async () => {
-      let projectId = 'projectId';
-      let mockProject = jasmine.createSpyObj('Project', ['getId']);
+      const projectId = 'projectId';
+      const mockProject = jasmine.createSpyObj('Project', ['getId']);
       mockProject.getId.and.returnValue(projectId);
 
       spyOn(collection, 'dispatch');
@@ -78,13 +78,13 @@ describe('data.ProjectCollection', () => {
       assert(collection['storage_'].update).to.haveBeenCalledWith(projectId, mockProject);
       assert(collection.dispatch).to.haveBeenCalledWith(
           CollectionEvents.ADDED,
-          <any> Matchers.any(Function),
+          Matchers.any(Function) as any,
           mockProject);
     });
 
     it('should not dispatch the ADDED event if not a new project', async () => {
-      let projectId = 'projectId';
-      let mockProject = jasmine.createSpyObj('Project', ['getId']);
+      const projectId = 'projectId';
+      const mockProject = jasmine.createSpyObj('Project', ['getId']);
       mockProject.getId.and.returnValue(projectId);
 
       spyOn(collection, 'dispatch');
@@ -97,8 +97,8 @@ describe('data.ProjectCollection', () => {
 
   describe('getSearchIndex_', () => {
     it('should return the correct search index', () => {
-      let searchIndex = Mocks.object('searchIndex');
-      let mockProject = jasmine.createSpyObj('Project', ['getSearchIndex']);
+      const searchIndex = Mocks.object('searchIndex');
+      const mockProject = jasmine.createSpyObj('Project', ['getSearchIndex']);
       mockProject.getSearchIndex.and.returnValue(searchIndex);
       assert(ProjectCollection['getSearchIndex_'](mockProject)).to.equal(searchIndex);
     });

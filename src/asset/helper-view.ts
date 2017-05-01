@@ -392,7 +392,7 @@ export class HelperView extends BaseThemedElement {
 
     asset.setHelper(helper.getId(), helper);
     await this.assetCollection_.update(asset);
-  };
+  }
 
   @handle('#createButton').event(DomEvent.CLICK)
   protected async onCreateButtonClick_(): Promise<void> {
@@ -402,7 +402,7 @@ export class HelperView extends BaseThemedElement {
     }
 
     await this.createHelper_(asset);
-  };
+  }
 
   @handle('#executeButton').event(DomEvent.CLICK)
   protected async onExecuteButtonClick_(): Promise<void> {
@@ -445,7 +445,7 @@ export class HelperView extends BaseThemedElement {
       throw new Error('Console container element cannot be found');
     }
     containerEl.scrollTop = containerEl.scrollHeight;
-  };
+  }
 
   /**
    * Handles when the helper was updated.
@@ -455,14 +455,14 @@ export class HelperView extends BaseThemedElement {
     this.nameHook_.set(helper.getName());
     this.argElementsHook_.set(helper.getArgs());
     this.bodyInputHook_.set(helper.getBody());
-  };
+  }
 
   /**
    * Handles event when the route is changed.
    */
   private onRouteChanged_(): void {
     this.onActiveChange_(this.routeService_.getParams(this.routeFactoryService_.helper()) !== null);
-  };
+  }
 
   /**
    * Updates using the given asset.
@@ -480,7 +480,7 @@ export class HelperView extends BaseThemedElement {
         DataEvents.CHANGED,
         this.onAssetChanged_.bind(this, asset));
     this.onAssetChanged_(asset);
-  };
+  }
 
   /**
    * Updates using the given helper.
@@ -497,7 +497,7 @@ export class HelperView extends BaseThemedElement {
         DataEvents.CHANGED,
         this.onHelperChanged_.bind(this, helper));
     this.onHelperChanged_(helper);
-  };
+  }
 
   /**
    * @override
@@ -512,7 +512,7 @@ export class HelperView extends BaseThemedElement {
     }
 
     super.disposeInternal();
-  };
+  }
 
   /**
    * Handles event when the arg element is clicked.
@@ -555,5 +555,5 @@ export class HelperView extends BaseThemedElement {
     super.onCreated(element);
     this.listenTo(this.routeService_, RouteServiceEvents.CHANGED, this.onRouteChanged_);
     this.onRouteChanged_();
-  };
+  }
 }

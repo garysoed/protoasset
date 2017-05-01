@@ -137,7 +137,7 @@ describe('data.ImageLayer', () => {
       layer.setImageUrl(imageUrl);
 
       assert(layer.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function) as () => void);
       assert(layer.getImageUrl()).to.equal(imageUrl);
     });
 

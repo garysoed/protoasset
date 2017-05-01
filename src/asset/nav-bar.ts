@@ -50,7 +50,7 @@ export class NavBar extends BaseThemedElement {
    * Handles when the route is changed.
    */
   private onRouteChanged_(): void {
-    let tabId = Maps
+    const tabId = Maps
         .of(this.routeMap_)
         .findKey((factory: AbstractRouteFactory<any, any, any, any>) => {
           return this.routeService_.getParams(factory) !== null;
@@ -71,7 +71,7 @@ export class NavBar extends BaseThemedElement {
   @handle('#render').event(DomEvent.CLICK, ['render'])
   @handle('#settings').event(DomEvent.CLICK, ['settings'])
   protected onButtonClick_(tabId: string): void {
-    let routeFactory = this.routeMap_.get(tabId);
+    const routeFactory = this.routeMap_.get(tabId);
     if (routeFactory === undefined) {
       return;
     }
@@ -83,7 +83,7 @@ export class NavBar extends BaseThemedElement {
             factory: AbstractRouteFactory<any, any, any, any>,
             tabId: string,
             breakFn: () => void) => {
-          let params = this.routeService_.getParams(factory);
+          const params = this.routeService_.getParams(factory);
           if (params !== null) {
             currentParams = params;
             breakFn();

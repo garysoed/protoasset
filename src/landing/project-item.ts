@@ -44,7 +44,7 @@ export class ProjectItem extends BaseThemedElement {
 
   @handle(null).event(DomEvent.CLICK)
   protected onElementClicked_(): void {
-    let projectId = this.projectIdHook_.get();
+    const projectId = this.projectIdHook_.get();
     if (projectId !== null) {
       this.routeService_.goTo(this.routeFactoryService_.assetList(), {projectId: projectId});
     }
@@ -52,7 +52,7 @@ export class ProjectItem extends BaseThemedElement {
 
   @handle(null).attributeChange('project-id', StringParser)
   protected async onProjectIdChanged_(newId: string): Promise<void> {
-    let project = await this.projectCollection_.get(newId);
+    const project = await this.projectCollection_.get(newId);
     if (project !== null) {
       this.projectNameHook_.set(project.getName());
     } else {

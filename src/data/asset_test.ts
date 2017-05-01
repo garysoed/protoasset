@@ -28,7 +28,7 @@ describe('data.Asset', () => {
       asset.deleteHelper(helperId);
 
       assert(asset.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function) as () => void);
       assert(asset.getAllHelpers()).to.equal([]);
     });
 
@@ -110,7 +110,7 @@ describe('data.Asset', () => {
       asset.insertLayer(layer, 2);
 
       assert(asset.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function) as () => void);
       assert(asset.getLayers()).to.equal([layer1, layer2, layer]);
     });
 
@@ -128,7 +128,7 @@ describe('data.Asset', () => {
       asset.insertLayer(layer, 0);
 
       assert(asset.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function) as () => void);
       assert(asset.getLayers()).to.equal([layer, layer1, layer2]);
     });
 
@@ -146,7 +146,7 @@ describe('data.Asset', () => {
       asset.insertLayer(layer, 1);
 
       assert(asset.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function) as () => void);
       assert(asset.getLayers()).to.equal([layer1, layer, layer2]);
     });
 
@@ -183,7 +183,7 @@ describe('data.Asset', () => {
       asset.removeLayer(layer);
 
       assert(asset.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function) as () => void);
       assert(asset.getLayers()).to.equal([layer1, layer2]);
       assert(layer.dispose).to.haveBeenCalledWith();
     });
@@ -218,7 +218,7 @@ describe('data.Asset', () => {
       asset.setData(data);
 
       assert(asset.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function) as () => void);
       assert(asset.getData()).to.equal(data);
     });
 
@@ -244,7 +244,7 @@ describe('data.Asset', () => {
       asset.setFilename(filename);
 
       assert(asset.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function) as () => void);
       assert(asset.getFilename()).to.equal(filename);
     });
 
@@ -271,7 +271,7 @@ describe('data.Asset', () => {
       asset.setHeight(height);
 
       assert(asset.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function) as () => void);
       assert(asset.getHeight()).to.equal(height);
     });
 
@@ -302,7 +302,7 @@ describe('data.Asset', () => {
       asset.setHelper(helperId, helper);
 
       assert(asset.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function) as () => void);
       assert(asset.getHelper(helperId)).to.equal(helper);
     });
 
@@ -332,7 +332,7 @@ describe('data.Asset', () => {
       asset.setLayers(layers);
 
       assert(asset.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function) as () => void);
       assert(asset.getLayers()).to.equal(layers);
     });
 
@@ -362,7 +362,7 @@ describe('data.Asset', () => {
       asset.setName(name);
 
       assert(asset.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function) as () => void);
       assert(asset.getName()).to.equal(name);
     });
 
@@ -391,7 +391,7 @@ describe('data.Asset', () => {
       asset.setType(type);
 
       assert(asset.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function) as () => void);
       assert(asset.getType()).to.equal(type);
     });
 
@@ -420,7 +420,7 @@ describe('data.Asset', () => {
       asset.setWidth(width);
 
       assert(asset.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function) as () => void);
       assert(asset.getWidth()).to.equal(width);
     });
 

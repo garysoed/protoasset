@@ -51,7 +51,7 @@ describe('common.FilterButton', () => {
 
   describe('onSearchTextChange_', () => {
     it('should set the filter text attribute to the value of the search text', () => {
-      let searchText = 'searchText';
+      const searchText = 'searchText';
       spyOn(button['searchTextValueHook_'], 'get').and.returnValue(searchText);
       spyOn(button['filterTextAttrHook_'], 'set');
 

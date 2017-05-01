@@ -27,12 +27,12 @@ describe('project.AssetItem', () => {
 
   describe('onElementclicked_', () => {
     it('should navigate to asset main view', () => {
-      let assetId = 'assetId';
-      let projectId = 'projectId';
+      const assetId = 'assetId';
+      const projectId = 'projectId';
       spyOn(item['gsAssetIdHook_'], 'get').and.returnValue(assetId);
       spyOn(item['gsProjectIdHook_'], 'get').and.returnValue(projectId);
 
-      let assetMainFactory = Mocks.object('assetMainFactory');
+      const assetMainFactory = Mocks.object('assetMainFactory');
       mockRouteFactoryService.assetMain.and.returnValue(assetMainFactory);
 
       item['onElementClicked_']();
@@ -42,11 +42,11 @@ describe('project.AssetItem', () => {
     });
 
     it('should not navigate if there are no asset IDs', () => {
-      let projectId = 'projectId';
+      const projectId = 'projectId';
       spyOn(item['gsAssetIdHook_'], 'get').and.returnValue(null);
       spyOn(item['gsProjectIdHook_'], 'get').and.returnValue(projectId);
 
-      let assetMainFactory = Mocks.object('assetMainFactory');
+      const assetMainFactory = Mocks.object('assetMainFactory');
       mockRouteFactoryService.assetMain.and.returnValue(assetMainFactory);
 
       item['onElementClicked_']();
@@ -55,11 +55,11 @@ describe('project.AssetItem', () => {
     });
 
     it('should not navigate if there are no project IDs', () => {
-      let assetId = 'assetId';
+      const assetId = 'assetId';
       spyOn(item['gsAssetIdHook_'], 'get').and.returnValue(assetId);
       spyOn(item['gsProjectIdHook_'], 'get').and.returnValue(null);
 
-      let assetMainFactory = Mocks.object('assetMainFactory');
+      const assetMainFactory = Mocks.object('assetMainFactory');
       mockRouteFactoryService.assetMain.and.returnValue(assetMainFactory);
 
       item['onElementClicked_']();
@@ -70,14 +70,14 @@ describe('project.AssetItem', () => {
 
   describe('onGsAssetIdChanged_', () => {
     it('should set the asset name correctly', async () => {
-      let assetId = 'assetId';
+      const assetId = 'assetId';
       spyOn(item['gsAssetIdHook_'], 'get').and.returnValue(assetId);
 
-      let projectId = 'projectId';
+      const projectId = 'projectId';
       spyOn(item['gsProjectIdHook_'], 'get').and.returnValue(projectId);
 
-      let name = 'name';
-      let mockAsset = jasmine.createSpyObj('Asset', ['getName']);
+      const name = 'name';
+      const mockAsset = jasmine.createSpyObj('Asset', ['getName']);
       mockAssetCollection.get.and.returnValue(Promise.resolve(mockAsset));
       mockAsset.getName.and.returnValue(name);
 
@@ -89,10 +89,10 @@ describe('project.AssetItem', () => {
     });
 
     it('should not set the name if the asset is not found', async () => {
-      let assetId = 'assetId';
+      const assetId = 'assetId';
       spyOn(item['gsAssetIdHook_'], 'get').and.returnValue(assetId);
 
-      let projectId = 'projectId';
+      const projectId = 'projectId';
       spyOn(item['gsProjectIdHook_'], 'get').and.returnValue(projectId);
 
       mockAssetCollection.get.and.returnValue(Promise.resolve(null));
@@ -106,7 +106,7 @@ describe('project.AssetItem', () => {
     it('should delete the name if the asset ID is null', async () => {
       spyOn(item['gsAssetIdHook_'], 'get').and.returnValue(null);
 
-      let projectId = 'projectId';
+      const projectId = 'projectId';
       spyOn(item['gsProjectIdHook_'], 'get').and.returnValue(projectId);
 
       mockAssetCollection.get.and.returnValue(Promise.resolve(null));
@@ -120,7 +120,7 @@ describe('project.AssetItem', () => {
     });
 
     it('should delete the name if the project ID is null', async () => {
-      let assetId = 'assetId';
+      const assetId = 'assetId';
       spyOn(item['gsAssetIdHook_'], 'get').and.returnValue(assetId);
 
       spyOn(item['gsProjectIdHook_'], 'get').and.returnValue(null);

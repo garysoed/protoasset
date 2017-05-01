@@ -24,6 +24,7 @@
     "karma-chrome-launcher": "^2.0.0",
     "karma-jasmine": "^1.0.2",
     "tslint": "^3.15.1",
+    "typescript": "^2.3.2",
     "x-tag": "^1.5.11"
   },
   "devDependencies": {

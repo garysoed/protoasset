@@ -43,9 +43,9 @@ export class TsvDataSource implements IDataSource<string[][]> {
    * @override
    */
   async getData(): Promise<string[][]> {
-    let data = await this.innerSource_.getData();
+    const data = await this.innerSource_.getData();
     if (this.cache_ === null || data !== this.cachedInnerSourceData_) {
-      let tsvData = this.parseData_(data);
+      const tsvData = this.parseData_(data);
       this.cache_ = tsvData;
       this.cachedInnerSourceData_ = data;
       return tsvData;

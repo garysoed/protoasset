@@ -44,12 +44,12 @@ export class HelperRouteFactory extends AbstractRouteFactory<Views, CP, CR, PR> 
    * @override
    */
   async getName(params: CR): Promise<string> {
-    let asset = await this.assetCollection_.get(params.projectId, params.assetId);
+    const asset = await this.assetCollection_.get(params.projectId, params.assetId);
     if (asset === null) {
       return `Unknown helper for asset ${params.assetId}`;
     }
 
-    let helper = asset.getHelper(params.helperId);
+    const helper = asset.getHelper(params.helperId);
     if (helper === null) {
       return `Unknown helper ${params.helperId}`;
     }

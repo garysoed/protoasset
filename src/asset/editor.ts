@@ -226,7 +226,7 @@ export class Editor extends BaseThemedElement {
    * @param event The click event.
    */
   onPresetClicked(event: Event): void {
-    const target: Element = <Element> event.target;
+    const target: Element = event.target as Element;
     const type = EnumParser<PresetType>(PresetType).parse(target.getAttribute('gs-value'));
     this.setPresetType_(type);
   }
@@ -236,7 +236,7 @@ export class Editor extends BaseThemedElement {
    * @param event The click event.
    */
   onTypeClicked(event: Event): void {
-    const target: Element = <Element> event.target;
+    const target: Element = event.target as Element;
     const type = EnumParser<AssetType>(AssetType).parse(target.getAttribute('gs-value'));
     this.setAssetType_(type);
   }

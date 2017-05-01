@@ -70,7 +70,7 @@ export class CreateAssetView extends BaseThemedElement {
    * @return Project ID of the view, or null if there is none.
    */
   private getProjectId_(): string | null {
-    let params = this.routeService_.getParams(this.routeFactoryService_.createAsset());
+    const params = this.routeService_.getParams(this.routeFactoryService_.createAsset());
     return params === null ? null : params.projectId;
   }
 
@@ -104,7 +104,7 @@ export class CreateAssetView extends BaseThemedElement {
    */
   @handle('#cancelButton').event(Event.ACTION)
   protected onCancelAction_(): void {
-    let projectId = this.getProjectId_();
+    const projectId = this.getProjectId_();
     if (projectId !== null) {
       this.reset_();
       this.routeService_.goTo(this.routeFactoryService_.assetList(), {projectId: projectId});
@@ -143,8 +143,8 @@ export class CreateAssetView extends BaseThemedElement {
       return Promise.resolve();
     }
 
-    let id = await this.assetCollection_.reserveId(projectId);
-    let asset = new Asset(id, projectId);
+    const id = await this.assetCollection_.reserveId(projectId);
+    const asset = new Asset(id, projectId);
     asset.setName(assetName);
     asset.setType(assetType);
     asset.setHeight(height);

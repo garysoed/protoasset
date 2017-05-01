@@ -22,16 +22,16 @@ describe('data.AssetCollection', () => {
 
   describe('getStorage_', () => {
     it('should create a new storage if one does not exist', () => {
-      let collectionStorage = Mocks.object('collectionStorage');
+      const collectionStorage = Mocks.object('collectionStorage');
       spyOn(CollectionStorage, 'of').and.returnValue(collectionStorage);
 
-      let localStorage = Mocks.object('storage');
+      const localStorage = Mocks.object('storage');
       spyOn(LocalStorage, 'of').and.returnValue(localStorage);
 
-      let mockCachedStorage = jasmine.createSpyObj('CachedStorage', ['dispose']);
+      const mockCachedStorage = jasmine.createSpyObj('CachedStorage', ['dispose']);
       spyOn(CachedStorage, 'of').and.returnValue(mockCachedStorage);
 
-      let projectId = 'projectId';
+      const projectId = 'projectId';
       assert(collection['getStorage_'](projectId)).to.equal(collectionStorage);
       assert(collection['storageMap_']).to.haveEntries([[projectId, collectionStorage]]);
       assert(LocalStorage.of).to.haveBeenCalledWith(window, `pa.assets.${projectId}`);
@@ -41,8 +41,8 @@ describe('data.AssetCollection', () => {
     });
 
     it('should return an existing storage if one exists', () => {
-      let storage = Mocks.object('storage');
-      let projectId = 'projectId';
+      const storage = Mocks.object('storage');
+      const projectId = 'projectId';
       collection['storageMap_'].set(projectId, storage);
 
       spyOn(LocalStorage, 'of');
@@ -54,15 +54,15 @@ describe('data.AssetCollection', () => {
 
   describe('get', () => {
     it('should return the correct asset', async () => {
-      let asset = Mocks.object('asset');
-      let mockStorage = jasmine.createSpyObj('Storage', ['get']);
+      const asset = Mocks.object('asset');
+      const mockStorage = jasmine.createSpyObj('Storage', ['get']);
       mockStorage.get.and.returnValue(Promise.resolve(asset));
       spyOn(collection, 'getStorage_').and.returnValue(mockStorage);
 
-      let projectId = 'projectId';
-      let assetId = 'assetId';
+      const projectId = 'projectId';
+      const assetId = 'assetId';
 
-      let actualAsset = await collection.get(projectId, assetId);
+      const actualAsset = await collection.get(projectId, assetId);
       assert(actualAsset).to.equal(asset);
       assert(mockStorage.get).to.haveBeenCalledWith(assetId);
       assert(collection['getStorage_']).to.haveBeenCalledWith(projectId);
@@ -71,14 +71,14 @@ describe('data.AssetCollection', () => {
 
   describe('list', () => {
     it('should return the correct assets', async () => {
-      let assets = Mocks.object('assets');
-      let mockStorage = jasmine.createSpyObj('Storage', ['list']);
+      const assets = Mocks.object('assets');
+      const mockStorage = jasmine.createSpyObj('Storage', ['list']);
       mockStorage.list.and.returnValue(Promise.resolve(assets));
       spyOn(collection, 'getStorage_').and.returnValue(mockStorage);
 
-      let projectId = 'projectId';
+      const projectId = 'projectId';
 
-      let actualAssets = await collection.list(projectId);
+      const actualAssets = await collection.list(projectId);
       assert(actualAssets).to.equal(assets);
       assert(collection['getStorage_']).to.haveBeenCalledWith(projectId);
     });
@@ -86,15 +86,15 @@ describe('data.AssetCollection', () => {
 
   describe('search', () => {
     it('should return the correct assets', async () => {
-      let assets = Mocks.object('assets');
-      let mockStorage = jasmine.createSpyObj('Storage', ['search']);
+      const assets = Mocks.object('assets');
+      const mockStorage = jasmine.createSpyObj('Storage', ['search']);
       mockStorage.search.and.returnValue(Promise.resolve(assets));
       spyOn(collection, 'getStorage_').and.returnValue(mockStorage);
 
-      let projectId = 'projectId';
-      let token = 'token';
+      const projectId = 'projectId';
+      const token = 'token';
 
-      let actualAssets = await collection.search(projectId, token);
+      const actualAssets = await collection.search(projectId, token);
       assert(actualAssets).to.equal(assets);
       assert(mockStorage.search).to.haveBeenCalledWith(token);
       assert(collection['getStorage_']).to.haveBeenCalledWith(projectId);
@@ -103,13 +103,13 @@ describe('data.AssetCollection', () => {
 
   describe('reserveId', () => {
     it('should return the correct asset ID', async () => {
-      let projectId = 'projectId';
-      let assetId = 'assetId';
-      let mockStorage = jasmine.createSpyObj('Storage', ['reserveId']);
+      const projectId = 'projectId';
+      const assetId = 'assetId';
+      const mockStorage = jasmine.createSpyObj('Storage', ['reserveId']);
       mockStorage.reserveId.and.returnValue(Promise.resolve(assetId));
       spyOn(collection, 'getStorage_').and.returnValue(mockStorage);
 
-      let id = await collection.reserveId(projectId);
+      const id = await collection.reserveId(projectId);
       assert(id).to.equal(assetId);
       assert(collection['getStorage_']).to.haveBeenCalledWith(projectId);
     });
@@ -118,13 +118,13 @@ describe('data.AssetCollection', () => {
   describe('update', () => {
     it('should persist the asset correctly and dispatch the ADDED event if the asset is new',
         async () => {
-          let projectId = 'projectId';
-          let assetId = 'assetId';
-          let mockAsset = jasmine.createSpyObj('Asset', ['getId', 'getProjectId']);
+          const projectId = 'projectId';
+          const assetId = 'assetId';
+          const mockAsset = jasmine.createSpyObj('Asset', ['getId', 'getProjectId']);
           mockAsset.getId.and.returnValue(assetId);
           mockAsset.getProjectId.and.returnValue(projectId);
 
-          let mockStorage = jasmine.createSpyObj('Storage', ['read', 'update']);
+          const mockStorage = jasmine.createSpyObj('Storage', ['read', 'update']);
           mockStorage.update.and.returnValue(Promise.resolve(true));
           spyOn(collection, 'getStorage_').and.returnValue(mockStorage);
           spyOn(collection, 'dispatch');
@@ -139,11 +139,11 @@ describe('data.AssetCollection', () => {
         });
 
     it('should not dispatch the ADDED event if the asset is not new', async () => {
-      let mockAsset = jasmine.createSpyObj('Asset', ['getId', 'getProjectId']);
+      const mockAsset = jasmine.createSpyObj('Asset', ['getId', 'getProjectId']);
       mockAsset.getProjectId.and.returnValue('projectId');
       mockAsset.getId.and.returnValue('assetId');
 
-      let mockStorage = jasmine.createSpyObj('Storage', ['update']);
+      const mockStorage = jasmine.createSpyObj('Storage', ['update']);
       mockStorage.update.and.returnValue(Promise.resolve(false));
       spyOn(collection, 'getStorage_').and.returnValue(mockStorage);
       spyOn(collection, 'dispatch');
@@ -155,8 +155,8 @@ describe('data.AssetCollection', () => {
 
   describe('getSearchIndex_', () => {
     it('should return the correct search index', () => {
-      let searchIndex = Mocks.object('searchIndex');
-      let mockAsset = jasmine.createSpyObj('Asset', ['getSearchIndex']);
+      const searchIndex = Mocks.object('searchIndex');
+      const mockAsset = jasmine.createSpyObj('Asset', ['getSearchIndex']);
       mockAsset.getSearchIndex.and.returnValue(searchIndex);
       assert(AssetCollection['getSearchIndex_'](mockAsset)).to.equal(searchIndex);
     });

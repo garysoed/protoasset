@@ -16,7 +16,7 @@ export class ProjectCollection extends BaseListenable<CollectionEvents> {
 
   constructor(@inject('x.dom.window') window: Window) {
     super();
-    let cachedStorage = CachedStorage.of(LocalStorage.of<Project>(window, 'pa.projects'));
+    const cachedStorage = CachedStorage.of(LocalStorage.of<Project>(window, 'pa.projects'));
     this.addDisposable(cachedStorage);
     this.storage_ = new CollectionStorage<Project, ProjectSearchIndex>(
         ProjectCollection.getSearchIndex_,
@@ -62,7 +62,7 @@ export class ProjectCollection extends BaseListenable<CollectionEvents> {
    * @param project
    */
   async update(project: Project): Promise<void> {
-    let isNewProject = await this.storage_.update(project.getId(), project);
+    const isNewProject = await this.storage_.update(project.getId(), project);
     if (isNewProject) {
       this.dispatch(CollectionEvents.ADDED, () => undefined, project);
     }

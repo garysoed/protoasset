@@ -13,7 +13,7 @@ describe('data.Project', () => {
 
   describe('getSearchIndex', () => {
     it('should return the correct index', () => {
-      let name = 'name';
+      const name = 'name';
       project.setName(name);
       assert(project.getSearchIndex()).to.equal({
         name: name,

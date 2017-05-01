@@ -49,8 +49,8 @@ export class AssetItem extends BaseThemedElement {
 
   @handle(null).event(DomEvent.CLICK)
   protected onElementClicked_(): void {
-    let assetId = this.gsAssetIdHook_.get();
-    let projectId = this.gsProjectIdHook_.get();
+    const assetId = this.gsAssetIdHook_.get();
+    const projectId = this.gsProjectIdHook_.get();
     if (assetId !== null && projectId !== null) {
       this.routeService_.goTo(
           this.routeFactoryService_.assetMain(),
@@ -60,14 +60,14 @@ export class AssetItem extends BaseThemedElement {
 
   @handle(null).attributeChange('gs-asset-id', StringParser)
   protected async onGsAssetIdChanged_(): Promise<any> {
-    let assetId = this.gsAssetIdHook_.get();
-    let projectId = this.gsProjectIdHook_.get();
+    const assetId = this.gsAssetIdHook_.get();
+    const projectId = this.gsProjectIdHook_.get();
     if (assetId === null || projectId === null) {
       this.assetNameHook_.delete();
       return;
     }
 
-    let asset = await this.assetCollection_.get(projectId, assetId);
+    const asset = await this.assetCollection_.get(projectId, assetId);
     if (asset !== null) {
       this.assetNameHook_.set(asset.getName());
     }

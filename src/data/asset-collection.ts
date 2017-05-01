@@ -29,7 +29,7 @@ export class AssetCollection extends BaseListenable<CollectionEvents> {
    */
   private getStorage_(projectId: ProjectId): CollectionStorage<Asset, AssetSearchIndex> {
     if (!this.storageMap_.has(projectId)) {
-      let cachedStorage =
+      const cachedStorage =
           CachedStorage.of(LocalStorage.of<Asset>(this.window_, `pa.assets.${projectId}`));
       this.addDisposable(cachedStorage);
       this.storageMap_.set(
@@ -85,7 +85,7 @@ export class AssetCollection extends BaseListenable<CollectionEvents> {
    * @return Promise that will be resolved when the update operation is completed.
    */
   async update(asset: Asset): Promise<void> {
-    let isNewProject = await this.getStorage_(asset.getProjectId()).update(asset.getId(), asset);
+    const isNewProject = await this.getStorage_(asset.getProjectId()).update(asset.getId(), asset);
     if (isNewProject) {
       this.dispatch(CollectionEvents.ADDED, () => undefined, asset);
     }

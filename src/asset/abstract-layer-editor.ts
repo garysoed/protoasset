@@ -105,7 +105,7 @@ export abstract class AbstractLayerEditor<T extends BaseLayer> extends BaseTheme
       this.layerDeregister_ = null;
     }
 
-    let layer = await this.getLayer_();
+    const layer = await this.getLayer_();
     if (layer === null) {
       return;
     }

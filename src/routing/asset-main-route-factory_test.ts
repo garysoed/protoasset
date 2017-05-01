@@ -17,16 +17,16 @@ describe('routing.AssetMainRouteFactory', () => {
 
   describe('getName', () => {
     it('should return a promise that resolves with the correct name', async () => {
-      let assetId = 'assetId';
-      let projectId = 'projectId';
+      const assetId = 'assetId';
+      const projectId = 'projectId';
 
-      let assetName = 'assetName';
-      let mockAsset = jasmine.createSpyObj('Asset', ['getName']);
+      const assetName = 'assetName';
+      const mockAsset = jasmine.createSpyObj('Asset', ['getName']);
       mockAsset.getName.and.returnValue(assetName);
 
       mockAssetCollection.get.and.returnValue(Promise.resolve(mockAsset));
 
-      let name = await factory.getName({assetId: assetId, projectId: projectId});
+      const name = await factory.getName({assetId: assetId, projectId: projectId});
       assert(name).to.equal(assetName);
       assert(mockAssetCollection.get).to.haveBeenCalledWith(projectId, assetId);
     });
@@ -34,7 +34,7 @@ describe('routing.AssetMainRouteFactory', () => {
     it('should return "Unknown asset" if the asset cannot be found', async () => {
       mockAssetCollection.get.and.returnValue(Promise.resolve(null));
 
-      let name = await factory.getName({assetId: 'assetId', projectId: 'projectId'});
+      const name = await factory.getName({assetId: 'assetId', projectId: 'projectId'});
       assert(name).to.equal('Unknown asset');
     });
   });

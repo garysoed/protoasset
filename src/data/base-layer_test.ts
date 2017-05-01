@@ -108,7 +108,7 @@ describe('data.BaseLayer', () => {
       layer.setBottom(bottom);
 
       assert(layer.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function) as () => void);
       assert(layer.getBottom()).to.equal(bottom);
     });
 
@@ -133,12 +133,12 @@ describe('data.BaseLayer', () => {
         callback();
       });
 
-      let name = 'name';
+      const name = 'name';
       layer['name_'] = 'otherName';
       layer.setName(name);
 
       assert(layer.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function) as () => void);
       assert(layer.getName()).to.equal(name);
     });
 
@@ -147,7 +147,7 @@ describe('data.BaseLayer', () => {
         callback();
       });
 
-      let name = 'name';
+      const name = 'name';
       layer['name_'] = name;
 
       layer.setName(name);
@@ -168,7 +168,7 @@ describe('data.BaseLayer', () => {
       layer.setLeft(left);
 
       assert(layer.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function) as () => void);
       assert(layer.getLeft()).to.equal(left);
     });
 
@@ -198,7 +198,7 @@ describe('data.BaseLayer', () => {
       layer.setRight(right);
 
       assert(layer.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function) as () => void);
       assert(layer.getRight()).to.equal(right);
     });
 
@@ -228,7 +228,7 @@ describe('data.BaseLayer', () => {
       layer.setTop(top);
 
       assert(layer.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function) as () => void);
       assert(layer.getTop()).to.equal(top);
     });
 

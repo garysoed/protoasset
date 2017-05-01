@@ -19,19 +19,19 @@ describe('routing.HelperRouteFactory', () => {
 
   describe('getName', () => {
     it('should resolve with the correct name', async () => {
-      let assetId = 'assetId';
-      let helperId = 'helperId';
-      let projectId = 'projectId';
+      const assetId = 'assetId';
+      const helperId = 'helperId';
+      const projectId = 'projectId';
 
-      let name = 'name';
-      let mockHelper = jasmine.createSpyObj('Helper', ['getName']);
+      const name = 'name';
+      const mockHelper = jasmine.createSpyObj('Helper', ['getName']);
       mockHelper.getName.and.returnValue(name);
 
-      let mockAsset = jasmine.createSpyObj('Asset', ['getHelper']);
+      const mockAsset = jasmine.createSpyObj('Asset', ['getHelper']);
       mockAsset.getHelper.and.returnValue(mockHelper);
       mockAssetCollection.get.and.returnValue(Promise.resolve(mockAsset));
 
-      let actualName = await factory
+      const actualName = await factory
           .getName({assetId: assetId, helperId: helperId, projectId: projectId});
       assert(actualName).to.equal(name);
       assert(mockAssetCollection.get).to.haveBeenCalledWith(projectId, assetId);
@@ -39,13 +39,13 @@ describe('routing.HelperRouteFactory', () => {
     });
 
     it('should resolve with "Unknown helper" if the helper cannot be found', async () => {
-      let mockAsset = jasmine.createSpyObj('Asset', ['getHelper']);
+      const mockAsset = jasmine.createSpyObj('Asset', ['getHelper']);
       mockAsset.getHelper.and.returnValue(null);
       mockAssetCollection.get.and.returnValue(Promise.resolve(mockAsset));
 
-      let helperId = 'helperId';
+      const helperId = 'helperId';
 
-      let actualName = await factory
+      const actualName = await factory
           .getName({assetId: 'assetId', helperId: helperId, projectId: 'projectId'});
       assert(actualName).to.match(/Unknown helper/);
       assert(mockAsset.getHelper).to.haveBeenCalledWith(helperId);
@@ -55,7 +55,7 @@ describe('routing.HelperRouteFactory', () => {
         async () => {
           mockAssetCollection.get.and.returnValue(Promise.resolve(null));
 
-          let actualName = await factory
+          const actualName = await factory
               .getName({assetId: 'assetId', helperId: 'helperId', projectId: 'projectId'});
           assert(actualName).to.match(/Unknown helper for asset/);
         });

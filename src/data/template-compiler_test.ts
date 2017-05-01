@@ -19,20 +19,20 @@ describe('data.TemplateCompiler', () => {
 
   describe('compile', () => {
     it('should return a function that produces the correct string', () => {
-      let extraKey1 = 'extraKey1';
-      let extraData1 = Mocks.object('extraData1');
+      const extraKey1 = 'extraKey1';
+      const extraData1 = Mocks.object('extraData1');
 
-      let extraKey2 = 'extraKey2';
-      let extraData2 = Mocks.object('extraData2');
+      const extraKey2 = 'extraKey2';
+      const extraData2 = Mocks.object('extraData2');
 
-      let additionalData = {[extraKey1]: extraData1, [extraKey2]: extraData2};
+      const additionalData = {[extraKey1]: extraData1, [extraKey2]: extraData2};
 
-      let result = 'result';
-      let mockDelegate = jasmine.createSpy('Delegate');
+      const result = 'result';
+      const mockDelegate = jasmine.createSpy('Delegate');
       mockDelegate.and.returnValue(result);
       mockHandlebars.compile.and.returnValue(mockDelegate);
 
-      let template = 'template';
+      const template = 'template';
 
       assert(compiler.compile(template, additionalData)).to.equal(result);
       assert(mockHandlebars.compile).to.haveBeenCalledWith(template);

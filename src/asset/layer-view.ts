@@ -476,7 +476,7 @@ export class LayerView extends BaseThemedElement {
    * @param event Event triggered.
    */
   onLayerPreviewModeSelected_(event: Event): void {
-    const target = <HTMLElement> event.target;
+    const target = event.target as HTMLElement;
     const previewMode = EnumParser<LayerPreviewMode>(LayerPreviewMode)
         .parse(target.getAttribute('gs-value'));
     if (previewMode === null) {
@@ -500,12 +500,12 @@ export class LayerView extends BaseThemedElement {
       this.assetChangedDeregister_ = null;
     }
 
-    let params = this.routeService_.getParams(this.routeFactoryService_.layer());
+    const params = this.routeService_.getParams(this.routeFactoryService_.layer());
     if (params === null) {
       return;
     }
 
-    let asset = await this.assetCollection_.get(params.projectId, params.assetId);
+    const asset = await this.assetCollection_.get(params.projectId, params.assetId);
     if (asset === null) {
       return;
     }
@@ -537,7 +537,7 @@ export class LayerView extends BaseThemedElement {
    * @param asset The asset to select the default layer in.
    */
   private selectDefaultLayer_(asset: Asset): void {
-    let layers = asset.getLayers();
+    const layers = asset.getLayers();
     if (layers.length <= 0) {
       this.createLayer_(LayerType.IMAGE);
     } else {

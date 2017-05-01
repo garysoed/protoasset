@@ -41,7 +41,7 @@ export class CollectionStorage<T, I extends {this: T}> {
     this.fusePromise_ = this
         .list()
         .then((items: T[]) => {
-          let searchIndexes = Arrays
+          const searchIndexes = Arrays
               .of(items)
               .map((item: T) => {
                 return this.getSearchIndex_(item);
@@ -82,8 +82,8 @@ export class CollectionStorage<T, I extends {this: T}> {
    * @return Promise that will be resolved with the items.
    */
   async search(token: string): Promise<T[]> {
-    let fuse = await this.getFusePromise_();
-    let results = fuse.search(token);
+    const fuse = await this.getFusePromise_();
+    const results = fuse.search(token);
     return Arrays
         .of(results)
         .map((result: I) => {
@@ -100,8 +100,8 @@ export class CollectionStorage<T, I extends {this: T}> {
    * @return Promise that will be resolved with true iff the item is new.
    */
   async update(itemId: string, item: T): Promise<boolean> {
-    let existingItem = await this.storage_.read(itemId);
-    let [isNewItem] = await Promise.all([
+    const existingItem = await this.storage_.read(itemId);
+    const [isNewItem] = await Promise.all([
       existingItem === null,
       this.storage_.update(itemId, item),
     ]);

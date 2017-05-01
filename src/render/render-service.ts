@@ -16,7 +16,7 @@ type HtmlComponents = {css: string, html: string};
 
 export function checkResponse(request: RenderRequest, response: RenderResponse): boolean {
   return response.id === request.id;
-};
+}
 
 
 @bind('pa.render.RenderService')
@@ -46,7 +46,7 @@ export class RenderService extends BaseDisposable {
 
     const promise = new Promise(
         (resolve: (data: any) => void, reject: (data: any) => void) => {
-          let iframeEl = this.window_.document.createElement('iframe');
+          const iframeEl = this.window_.document.createElement('iframe');
           iframeEl.style.visibility = 'hidden';
           iframeEl.style.position = 'fixed';
           iframeEl.style.top = '0';

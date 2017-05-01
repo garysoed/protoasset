@@ -79,7 +79,7 @@ describe('render.RenderMain', () => {
 
       assert(await main['processRequest_'](request)).to.equal(response);
       assert(main['onRendered_']).to
-          .haveBeenCalledWith(<any> Matchers.any(Function), request, canvas);
+          .haveBeenCalledWith(Matchers.any(Function) as any, request, canvas);
       assert(mockHtml2Canvas).to.haveBeenCalledWith(rootEl, {
         onrendered: Matchers.any(Function),
         useCORS: true,
@@ -196,7 +196,7 @@ describe('render.RenderMain', () => {
       assert(mockServer.run).to.haveBeenCalledWith();
 
       assert(ApiServer.of).to
-          .haveBeenCalledWith(channel, <any> Matchers.any(Function), RenderRequestType);
+          .haveBeenCalledWith(channel, Matchers.any(Function) as any, RenderRequestType);
       const request = Mocks.object('request');
       apiServerSpy.calls.argsFor(0)[1](request);
       assert(main['processRequest_']).to.haveBeenCalledWith(request);

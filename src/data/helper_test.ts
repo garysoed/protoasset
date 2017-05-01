@@ -19,7 +19,7 @@ describe('data.Helper', () => {
     it('should return the correct function', () => {
       helper.setBody('return a * 2');
       helper.setArgs(['a']);
-      let fn = helper.asFunction();
+      const fn = helper.asFunction();
       assert(fn(1)).to.equal(2);
     });
   });
@@ -30,12 +30,12 @@ describe('data.Helper', () => {
         callback();
       });
 
-      let args = ['arg1', 'arg2'];
+      const args = ['arg1', 'arg2'];
 
       helper.setArgs(args);
 
       assert(helper.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function) as () => void);
       assert(helper.getArgs()).to.equal(args);
     });
 
@@ -44,7 +44,7 @@ describe('data.Helper', () => {
         callback();
       });
 
-      let newArgs = ['arg1', 'arg2'];
+      const newArgs = ['arg1', 'arg2'];
       helper['args_'] = newArgs;
 
       helper.setArgs(newArgs);
@@ -60,14 +60,14 @@ describe('data.Helper', () => {
         callback();
       });
 
-      let oldBody = 'oldBody';
-      let newBody = 'newBody';
+      const oldBody = 'oldBody';
+      const newBody = 'newBody';
       helper['body_'] = oldBody;
 
       helper.setBody(newBody);
 
       assert(helper.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function) as () => void);
       assert(helper.getBody()).to.equal(newBody);
     });
 
@@ -76,7 +76,7 @@ describe('data.Helper', () => {
         callback();
       });
 
-      let newBody = 'newBody';
+      const newBody = 'newBody';
       helper['body_'] = newBody;
 
       helper.setBody(newBody);
@@ -92,14 +92,14 @@ describe('data.Helper', () => {
         callback();
       });
 
-      let oldName = 'oldName';
-      let newName = 'newName';
+      const oldName = 'oldName';
+      const newName = 'newName';
       helper['name_'] = oldName;
 
       helper.setName(newName);
 
       assert(helper.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function) as () => void);
       assert(helper.getName()).to.equal(newName);
     });
 
@@ -108,7 +108,7 @@ describe('data.Helper', () => {
         callback();
       });
 
-      let newName = 'newName';
+      const newName = 'newName';
       helper['name_'] = newName;
 
       helper.setName(newName);

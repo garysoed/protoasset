@@ -98,7 +98,7 @@ describe('data.HtmlLayer', () => {
       layer.setCss(css);
 
       assert(layer.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function) as () => void);
       assert(layer.getCss()).to.equal(css);
     });
 
@@ -127,7 +127,7 @@ describe('data.HtmlLayer', () => {
       layer.setHtml(html);
 
       assert(layer.dispatch).to
-          .haveBeenCalledWith(DataEvents.CHANGED, <() => void> Matchers.any(Function));
+          .haveBeenCalledWith(DataEvents.CHANGED, Matchers.any(Function) as () => void);
       assert(layer.getHtml()).to.equal(html);
     });
 

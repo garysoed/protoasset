@@ -28,14 +28,14 @@ describe('asset.AssetView', () => {
 
   describe('onRouteChanged_', () => {
     it('should navigate to asset data if the destination was asset main', () => {
-      let assetMain = Mocks.object('assetMain');
+      const assetMain = Mocks.object('assetMain');
       mockRouteFactoryService.assetMain.and.returnValue(assetMain);
 
-      let assetData = Mocks.object('assetData');
+      const assetData = Mocks.object('assetData');
       mockRouteFactoryService.assetData.and.returnValue(assetData);
 
-      let assetId = 'assetId';
-      let projectId = 'projectId';
+      const assetId = 'assetId';
+      const projectId = 'projectId';
       mockRouteService.getParams.and.returnValue({assetId, projectId});
 
       view['onRouteChanged_']();

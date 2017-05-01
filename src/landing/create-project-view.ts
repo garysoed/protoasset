@@ -85,13 +85,13 @@ export class CreateProjectView extends BaseThemedElement {
    */
   @handle('#createButton').event(Event.ACTION)
   protected async onSubmitAction_(): Promise<void> {
-    let projectName = this.nameValueHook_.get();
+    const projectName = this.nameValueHook_.get();
     if (projectName === null) {
       throw new Error('Project name is not set');
     }
 
-    let id = await this.projectCollection_.reserveId();
-    let project = new Project(id);
+    const id = await this.projectCollection_.reserveId();
+    const project = new Project(id);
     project.setName(projectName!);
     await this.projectCollection_.update(project),
 
