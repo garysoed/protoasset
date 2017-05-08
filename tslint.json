@@ -1,4 +1,5 @@
 {
+  "defaultSeverity": "error",
   "rules": {
     "class-name": true,
     "comment-format": [
@@ -19,8 +20,8 @@
     "member-access": false,
     "member-ordering": [
       true,
-      "alphabetize",
       {
+        "alphabetize": true,
         "order": [
           "public-static-field",
           "protected-static-field",
@@ -31,12 +32,22 @@
           "public-constructor",
           "protected-constructor",
           "private-constructor",
-          "public-instance-method",
-          "protected-instance-method",
-          "private-instance-method",
-          "private-static-method",
-          "protected-static-method",
-          "public-static-method"
+          {
+            "name": "instance-methods",
+            "kinds": [
+              "private-instance-method",
+              "protected-instance-method",
+              "public-instance-method"
+            ]
+          },
+          {
+            "name": "static-methods",
+            "kinds": [
+              "private-static-method",
+              "protected-static-method",
+              "public-static-method"
+            ]
+          }
         ]
       }
     ],
@@ -44,7 +55,7 @@
     "no-any": false,
     "no-arg": true,
     "no-bitwise": true,
-    "no-boolean-literal-compare": true,
+    //"no-boolean-literal-compare": true,
     "no-conditional-assignment": true,
     "no-consecutive-blank-lines": false,
     "no-console": true,

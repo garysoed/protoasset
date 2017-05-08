@@ -24,6 +24,17 @@ export class AssetCollection extends BaseListenable<CollectionEvents> {
   }
 
   /**
+   * Gets the asset from the storage.
+   *
+   * @param projectId ID of the project that the asset belongs to.
+   * @param assetId ID of the asset.
+   * @return Promise that will be resolved with the asset, or null if the asset cannot be found.
+   */
+  get(projectId: ProjectId, assetId: string): Promise<Asset | null> {
+    return this.getStorage_(projectId).get(assetId);
+  }
+
+  /**
    * @param projectId
    * @return The storage for the given project ID
    */
@@ -40,32 +51,11 @@ export class AssetCollection extends BaseListenable<CollectionEvents> {
   }
 
   /**
-   * Gets the asset from the storage.
-   *
-   * @param projectId ID of the project that the asset belongs to.
-   * @param assetId ID of the asset.
-   * @return Promise that will be resolved with the asset, or null if the asset cannot be found.
-   */
-  get(projectId: ProjectId, assetId: string): Promise<Asset | null> {
-    return this.getStorage_(projectId).get(assetId);
-  }
-
-  /**
    * @param projectId ID of the project whose assets should be returned.
    * @return Promise that will be resolved with the assets belonging to the given project.
    */
   list(projectId: ProjectId): Promise<Asset[]> {
     return this.getStorage_(projectId).list();
-  }
-
-  /**
-   * @param projectId ID of the project whose assets should be searched in.
-   * @param token Search query for the asset.
-   * @return Promise that will be resolved with assets in the given project that matches the given
-   *     search query.
-   */
-  search(projectId: ProjectId, token: string): Promise<Asset[]> {
-    return this.getStorage_(projectId).search(token);
   }
 
   /**
@@ -76,6 +66,16 @@ export class AssetCollection extends BaseListenable<CollectionEvents> {
    */
   reserveId(projectId: ProjectId): Promise<string> {
     return this.getStorage_(projectId).reserveId();
+  }
+
+  /**
+   * @param projectId ID of the project whose assets should be searched in.
+   * @param token Search query for the asset.
+   * @return Promise that will be resolved with assets in the given project that matches the given
+   *     search query.
+   */
+  search(projectId: ProjectId, token: string): Promise<Asset[]> {
+    return this.getStorage_(projectId).search(token);
   }
 
   /**

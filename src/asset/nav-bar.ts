@@ -27,12 +27,13 @@ export class NavBar extends BaseThemedElement {
   @hook('#drawer').attribute('gs-is-expanded', BooleanParser)
   private readonly drawerHook_: DomHook<boolean>;
 
+  private readonly routeFactoryService_: RouteFactoryService;
+  private readonly routeMap_: Map<string, AbstractRouteFactory<any, any, any, any>>;
+  private readonly routeService_: RouteService<Views>;
+
   @hook('#tab').attribute('gs-selected-tab', StringParser)
   private readonly selectedTabHook_: DomHook<string>;
 
-  private readonly routeFactoryService_: RouteFactoryService;
-  private readonly routeService_: RouteService<Views>;
-  private readonly routeMap_: Map<string, AbstractRouteFactory<any, any, any, any>>;
 
   constructor(
       @inject('pa.routing.RouteFactoryService') routeFactoryService: RouteFactoryService,
@@ -44,21 +45,6 @@ export class NavBar extends BaseThemedElement {
     this.routeMap_ = new Map<string, AbstractRouteFactory<any, any, any, any>>();
     this.routeService_ = routeService;
     this.selectedTabHook_ = DomHook.of<string>();
-  }
-
-  /**
-   * Handles when the route is changed.
-   */
-  private onRouteChanged_(): void {
-    const tabId = Maps
-        .of(this.routeMap_)
-        .findKey((factory: AbstractRouteFactory<any, any, any, any>) => {
-          return this.routeService_.getParams(factory) !== null;
-        });
-
-    if (tabId !== null) {
-      this.selectedTabHook_.set(tabId);
-    }
   }
 
   /**
@@ -92,16 +78,6 @@ export class NavBar extends BaseThemedElement {
     this.routeService_.goTo(routeFactory, currentParams);
   }
 
-  @handle(null).event(DomEvent.MOUSEENTER)
-  protected onMouseEnter_(): void {
-    this.drawerHook_.set(true);
-  }
-
-  @handle(null).event(DomEvent.MOUSELEAVE)
-  protected onMouseLeave_(): void {
-    this.drawerHook_.set(false);
-  }
-
   /**
    * @override
    */
@@ -118,5 +94,30 @@ export class NavBar extends BaseThemedElement {
         RouteServiceEvents.CHANGED,
         this.onRouteChanged_);
     this.onRouteChanged_();
+  }
+
+  @handle(null).event(DomEvent.MOUSEENTER)
+  protected onMouseEnter_(): void {
+    this.drawerHook_.set(true);
+  }
+
+  @handle(null).event(DomEvent.MOUSELEAVE)
+  protected onMouseLeave_(): void {
+    this.drawerHook_.set(false);
+  }
+
+  /**
+   * Handles when the route is changed.
+   */
+  private onRouteChanged_(): void {
+    const tabId = Maps
+        .of(this.routeMap_)
+        .findKey((factory: AbstractRouteFactory<any, any, any, any>) => {
+          return this.routeService_.getParams(factory) !== null;
+        });
+
+    if (tabId !== null) {
+      this.selectedTabHook_.set(tabId);
+    }
   }
 }

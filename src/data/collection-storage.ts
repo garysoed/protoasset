@@ -3,9 +3,9 @@ import { Storage as GsStorage } from 'external/gs_tools/src/store';
 
 
 export class CollectionStorage<T, I extends {this: T}> {
+  private fusePromise_: Promise<Fuse<I>> | null = null;
   private readonly getSearchIndex_: (item: T) => I;
   private readonly storage_: GsStorage<T>;
-  private fusePromise_: Promise<Fuse<I>> | null = null;
 
   constructor(getSearchIndex: (item: T) => I, storage: GsStorage<T>) {
     this.getSearchIndex_ = getSearchIndex;
@@ -26,6 +26,14 @@ export class CollectionStorage<T, I extends {this: T}> {
           shouldSort: true,
           threshold: 0.5,
         });
+  }
+
+  /**
+   * @return The promise that will be resolved with the requested item, or null if it does not
+   *    exist.
+   */
+  get(itemId: string): Promise<T | null> {
+    return this.storage_.read(itemId);
   }
 
   /**
@@ -50,14 +58,6 @@ export class CollectionStorage<T, I extends {this: T}> {
           return this.createFuse_(searchIndexes);
         });
     return this.fusePromise_;
-  }
-
-  /**
-   * @return The promise that will be resolved with the requested item, or null if it does not
-   *    exist.
-   */
-  get(itemId: string): Promise<T | null> {
-    return this.storage_.read(itemId);
   }
 
   /**

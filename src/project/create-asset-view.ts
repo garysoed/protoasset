@@ -33,11 +33,11 @@ export class CreateAssetView extends BaseThemedElement {
   @hook('#createButton').attribute('disabled', BooleanParser)
   readonly createButtonDisabledHook_: DomHook<boolean>;
 
-  @hook('#assetEditor').attribute('asset-name', StringParser)
-  readonly nameHook_: DomHook<string>;
-
   @hook('#assetEditor').attribute('asset-height', FloatParser)
   readonly heightHook_: DomHook<number>;
+
+  @hook('#assetEditor').attribute('asset-name', StringParser)
+  readonly nameHook_: DomHook<string>;
 
   @hook('#assetEditor').attribute('asset-width', FloatParser)
   readonly widthHook_: DomHook<number>;
@@ -75,31 +75,6 @@ export class CreateAssetView extends BaseThemedElement {
   }
 
   /**
-   * Resets the form.
-   */
-  private reset_(): void {
-    this.assetTypeHook_.delete();
-    this.nameHook_.delete();
-    this.heightHook_.delete();
-    this.widthHook_.delete();
-  }
-
-  /**
-   * Verifies the input values.
-   */
-  @handle('#assetEditor').attributeChange('asset-type')
-  @handle('#assetEditor').attributeChange('asset-name')
-  @handle('#assetEditor').attributeChange('asset-height')
-  @handle('#assetEditor').attributeChange('asset-width')
-  verifyInput_(): void {
-    this.createButtonDisabledHook_.set(
-        !this.nameHook_.get()
-        || this.assetTypeHook_.get() === null
-        || Number.isNaN(this.widthHook_.get() || NaN)
-        || Number.isNaN(this.heightHook_.get() || NaN));
-  }
-
-  /**
    * Handles event when the cancel button is clicked.
    */
   @handle('#cancelButton').event(Event.ACTION)
@@ -109,6 +84,14 @@ export class CreateAssetView extends BaseThemedElement {
       this.reset_();
       this.routeService_.goTo(this.routeFactoryService_.assetList(), {projectId: projectId});
     }
+  }
+
+  /**
+   * @override
+   */
+  onCreated(element: HTMLElement): void {
+    super.onCreated(element);
+    this.reset_();
   }
 
   /**
@@ -155,10 +138,27 @@ export class CreateAssetView extends BaseThemedElement {
   }
 
   /**
-   * @override
+   * Resets the form.
    */
-  onCreated(element: HTMLElement): void {
-    super.onCreated(element);
-    this.reset_();
+  private reset_(): void {
+    this.assetTypeHook_.delete();
+    this.nameHook_.delete();
+    this.heightHook_.delete();
+    this.widthHook_.delete();
+  }
+
+  /**
+   * Verifies the input values.
+   */
+  @handle('#assetEditor').attributeChange('asset-type')
+  @handle('#assetEditor').attributeChange('asset-name')
+  @handle('#assetEditor').attributeChange('asset-height')
+  @handle('#assetEditor').attributeChange('asset-width')
+  verifyInput_(): void {
+    this.createButtonDisabledHook_.set(
+        !this.nameHook_.get()
+        || this.assetTypeHook_.get() === null
+        || Number.isNaN(this.widthHook_.get() || NaN)
+        || Number.isNaN(this.heightHook_.get() || NaN));
   }
 }

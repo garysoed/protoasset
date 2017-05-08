@@ -36,11 +36,11 @@ export class SettingsView extends BaseThemedElement {
   @hook('#assetEditor').attribute('asset-type', EnumParser(AssetType))
   readonly assetTypeHook_: DomHook<AssetType>;
 
-  @hook('#assetEditor').attribute('asset-name', StringParser)
-  readonly nameHook_: DomHook<string>;
-
   @hook('#assetEditor').attribute('asset-height', FloatParser)
   readonly heightHook_: DomHook<number>;
+
+  @hook('#assetEditor').attribute('asset-name', StringParser)
+  readonly nameHook_: DomHook<string>;
 
   @hook('#assetEditor').attribute('asset-width', FloatParser)
   readonly widthHook_: DomHook<number>;

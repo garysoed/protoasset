@@ -18,15 +18,14 @@ import { Views } from '../routing/views';
 })
 export class ProjectItem extends BaseThemedElement {
   private readonly projectCollection_: ProjectCollection;
-  private readonly routeFactoryService_: RouteFactoryService;
-  private readonly routeService_: RouteService<Views>;
 
   @hook(null).attribute('project-id', StringParser)
   private readonly projectIdHook_: DomHook<string>;
 
   @hook('#projectName').innerText()
   private readonly projectNameHook_: DomHook<string>;
-
+  private readonly routeFactoryService_: RouteFactoryService;
+  private readonly routeService_: RouteService<Views>;
 
   constructor(
       @inject('pa.data.ProjectCollection') projectCollection: ProjectCollection,

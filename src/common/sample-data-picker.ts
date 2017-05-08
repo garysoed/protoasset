@@ -75,8 +75,8 @@ export class SampleDataPicker extends BaseThemedElement {
   @hook('#searchText').attribute('gs-value', StringParser)
   readonly searchTextValueHook_: DomHook<string>;
 
-  private readonly sampleDataService_: SampleDataService;
   private fusePromise_: Promise<Fuse<SampleDataSearchIndex> | null> | null;
+  private readonly sampleDataService_: SampleDataService;
 
   constructor(
       @inject('pa.common.SampleDataService') sampleDataService: SampleDataService,

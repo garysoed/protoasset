@@ -22,27 +22,6 @@ export class HelperRouteFactory extends AbstractRouteFactory<Views, CP, CR, PR> 
   /**
    * @override
    */
-  protected getRelativeMatcher_(): string {
-    return `/edit/:helperId`;
-  }
-
-  /**
-   * @override
-   */
-  protected getRelativePath_(params: CP): string {
-    return `/edit/${params.helperId}`;
-  }
-
-  /**
-   * @override
-   */
-  getRelativeMatchParams_(matches: {[key: string]: string}): CP {
-    return {helperId: matches['helperId']};
-  }
-
-  /**
-   * @override
-   */
   async getName(params: CR): Promise<string> {
     const asset = await this.assetCollection_.get(params.projectId, params.assetId);
     if (asset === null) {
@@ -55,5 +34,26 @@ export class HelperRouteFactory extends AbstractRouteFactory<Views, CP, CR, PR> 
     }
 
     return helper.getName();
+  }
+
+  /**
+   * @override
+   */
+  protected getRelativeMatcher_(): string {
+    return `/edit/:helperId`;
+  }
+
+  /**
+   * @override
+   */
+  getRelativeMatchParams_(matches: {[key: string]: string}): CP {
+    return {helperId: matches['helperId']};
+  }
+
+  /**
+   * @override
+   */
+  protected getRelativePath_(params: CP): string {
+    return `/edit/${params.helperId}`;
   }
 }

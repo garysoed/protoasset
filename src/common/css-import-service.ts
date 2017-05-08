@@ -3,8 +3,8 @@ import { bind, inject } from 'external/gs_tools/src/inject';
 
 @bind('pa.common.CssImportService')
 export class CssImportService {
-  private readonly importedCss_: Set<string>;
   private readonly document_: Document;
+  private readonly importedCss_: Set<string>;
 
   constructor(@inject('x.dom.document') document: Document) {
     this.importedCss_ = new Set<string>();

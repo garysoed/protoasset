@@ -73,22 +73,23 @@ export const PREVIEW_ROW_DATA_HELPER: ChildElementDataHelper<string[]> = {
 })
 export class DataView extends BaseThemedElement {
 
+  private readonly assetCollection_: AssetCollection;
+
   @hook('#dataSourceInput').attribute('gs-bundle-id', StringParser)
   private readonly dataSourceBundleIdHook_: DomHook<string>;
 
   @hook('#endRowInput').attribute('gs-value', FloatParser)
   private readonly endRowValueHook_: DomHook<number>;
+  private readonly fileService_: FileService;
 
   @hook('#preview').childrenElements(PREVIEW_ROW_DATA_HELPER)
   private readonly previewChildrenHook_: DomHook<string[][]>;
+  private readonly routeFactoryService_: RouteFactoryService;
+  private readonly routeService_: RouteService<Views>;
 
   @hook('#startRowInput').attribute('gs-value', FloatParser)
   private readonly startRowValueHook_: DomHook<number>;
 
-  private readonly assetCollection_: AssetCollection;
-  private readonly fileService_: FileService;
-  private readonly routeFactoryService_: RouteFactoryService;
-  private readonly routeService_: RouteService<Views>;
 
   constructor(
       @inject('pa.data.AssetCollection') assetCollection: AssetCollection,

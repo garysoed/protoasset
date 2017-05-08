@@ -11,9 +11,9 @@ import { DataEvents } from './data-events';
 @Serializable('helper')
 export class Helper extends BaseListenable<DataEvents> {
   @Field('args') private args_: string[];
+  @Field('fnString') private body_: string;
   @Field('id') private id_: string;
   @Field('name') private name_: string;
-  @Field('fnString') private body_: string;
 
   constructor(id: string, name: string) {
     super();

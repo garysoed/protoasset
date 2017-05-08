@@ -22,8 +22,20 @@ export class AssetMainRouteFactory extends AbstractRouteFactory<Views, CP, CR, P
   /**
    * @override
    */
-  protected getRelativePath_(params: CP): string {
-    return `/asset/${params.assetId}`;
+  async getName(params: CR): Promise<string> {
+    const asset = await this.assetCollection_.get(params.projectId, params.assetId);
+    if (asset === null) {
+      return 'Unknown asset';
+    } else {
+      return asset.getName();
+    }
+  }
+
+  /**
+   * @override
+   */
+  getRelativeMatcher_(): string {
+    return `/asset/:assetId`;
   }
 
   /**
@@ -38,19 +50,7 @@ export class AssetMainRouteFactory extends AbstractRouteFactory<Views, CP, CR, P
   /**
    * @override
    */
-  getRelativeMatcher_(): string {
-    return `/asset/:assetId`;
-  }
-
-  /**
-   * @override
-   */
-  async getName(params: CR): Promise<string> {
-    const asset = await this.assetCollection_.get(params.projectId, params.assetId);
-    if (asset === null) {
-      return 'Unknown asset';
-    } else {
-      return asset.getName();
-    }
+  protected getRelativePath_(params: CP): string {
+    return `/asset/${params.assetId}`;
   }
 }

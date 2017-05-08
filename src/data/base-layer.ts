@@ -13,10 +13,10 @@ type HtmlRender = {css: string, html: string};
  * Base class of all layers.
  */
 export abstract class BaseLayer extends BaseListenable<DataEvents> {
-  @Field('id') private id_: string;
-  @Field('name') private name_: string;
   @Field('bottom') private bottom_: number;
+  @Field('id') private id_: string;
   @Field('left') private left_: number;
+  @Field('name') private name_: string;
   @Field('right') private right_: number;
   @Field('top') private top_: number;
 

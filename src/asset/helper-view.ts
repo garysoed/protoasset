@@ -168,14 +168,14 @@ export class HelperView extends BaseThemedElement {
   @hook('#bodyInput').attribute('gs-value', StringParser)
   readonly bodyInputHook_: DomHook<string>;
 
+  @hook('#consoleContainer').element(HTMLElement)
+  readonly consoleContainerHook_: DomHook<HTMLElement>;
+
   @hook('#console').childrenElements<ConsoleEntry>(CONSOLE_ENTRY_DATA_HELPER)
   readonly consoleEntryHook_: DomHook<ConsoleEntry[]>;
 
   @hook('#consoleInput').attribute('gs-value', StringParser)
   readonly consoleInputHook_: DomHook<string>;
-
-  @hook('#consoleContainer').element(HTMLElement)
-  readonly consoleContainerHook_: DomHook<HTMLElement>;
 
   @hook('#helpers').childrenElements<HelperIdParams>(HELPER_ITEM_DATA_HELPER)
   readonly helperItemsHook_: DomHook<HelperIdParams[]>;
@@ -190,14 +190,13 @@ export class HelperView extends BaseThemedElement {
   readonly sampleDataPickerProjectIdHook_: DomHook<string>;
 
   private readonly assetCollection_: AssetCollection;
+  private assetUpdateDeregister_: DisposableFunction | null;
   private readonly helperIdGenerator_: BaseIdGenerator;
+  private helperUpdateDeregister_: DisposableFunction | null;
   private readonly routeFactoryService_: RouteFactoryService;
   private readonly routeService_: RouteService<Views>;
   private readonly sampleDataService_: SampleDataService;
   private readonly templateCompilerService_: TemplateCompilerService;
-
-  private assetUpdateDeregister_: DisposableFunction | null;
-  private helperUpdateDeregister_: DisposableFunction | null;
 
   constructor(
       @inject('pa.data.AssetCollection') assetCollection: AssetCollection,
@@ -252,6 +251,21 @@ export class HelperView extends BaseThemedElement {
   }
 
   /**
+   * @override
+   */
+  disposeInternal(): void {
+    if (this.assetUpdateDeregister_ !== null) {
+      this.assetUpdateDeregister_.dispose();
+    }
+
+    if (this.helperUpdateDeregister_ !== null) {
+      this.helperUpdateDeregister_.dispose();
+    }
+
+    super.disposeInternal();
+  }
+
+  /**
    * @return Promise that will be resolved with the asset for the current view, or null if it cannot
    *     be determined.
    */
@@ -303,6 +317,40 @@ export class HelperView extends BaseThemedElement {
     this.sampleDataPickerAssetIdHook_.set(asset.getId());
     this.sampleDataPickerProjectIdHook_.set(asset.getProjectId());
     this.updateAsset_(asset);
+  }
+
+  /**
+   * Handles event when the arg element is clicked.
+   * @param event The event object.
+   */
+  onArgClick(event: Event): void {
+    const target = event.target;
+    if (!(target instanceof Element)) {
+      return;
+    }
+
+    const args = this.argElementsHook_.get();
+    if (args === null) {
+      return;
+    }
+
+    const parentEl = target.parentElement;
+    if (parentEl === null) {
+      return;
+    }
+
+    const removedIndex = Arrays
+        .fromItemList(parentEl.children)
+        .findIndex((value: Element) => {
+          return value === target;
+        });
+
+    if (removedIndex === null) {
+      return;
+    }
+
+    args.splice(removedIndex, 1);
+    this.argElementsHook_.set(args);
   }
 
   @handle('#argInput').attributeChange('gs-value', StringParser)
@@ -404,6 +452,15 @@ export class HelperView extends BaseThemedElement {
     await this.createHelper_(asset);
   }
 
+  /**
+   * @override
+   */
+  onCreated(element: HTMLElement): void {
+    super.onCreated(element);
+    this.listenTo(this.routeService_, RouteServiceEvents.CHANGED, this.onRouteChanged_);
+    this.onRouteChanged_();
+  }
+
   @handle('#executeButton').event(DomEvent.CLICK)
   protected async onExecuteButtonClick_(): Promise<void> {
     const consoleValue = this.consoleInputHook_.get();
@@ -456,7 +513,6 @@ export class HelperView extends BaseThemedElement {
     this.argElementsHook_.set(helper.getArgs());
     this.bodyInputHook_.set(helper.getBody());
   }
-
   /**
    * Handles event when the route is changed.
    */
@@ -497,63 +553,5 @@ export class HelperView extends BaseThemedElement {
         DataEvents.CHANGED,
         this.onHelperChanged_.bind(this, helper));
     this.onHelperChanged_(helper);
-  }
-
-  /**
-   * @override
-   */
-  disposeInternal(): void {
-    if (this.assetUpdateDeregister_ !== null) {
-      this.assetUpdateDeregister_.dispose();
-    }
-
-    if (this.helperUpdateDeregister_ !== null) {
-      this.helperUpdateDeregister_.dispose();
-    }
-
-    super.disposeInternal();
-  }
-
-  /**
-   * Handles event when the arg element is clicked.
-   * @param event The event object.
-   */
-  onArgClick(event: Event): void {
-    const target = event.target;
-    if (!(target instanceof Element)) {
-      return;
-    }
-
-    const args = this.argElementsHook_.get();
-    if (args === null) {
-      return;
-    }
-
-    const parentEl = target.parentElement;
-    if (parentEl === null) {
-      return;
-    }
-
-    const removedIndex = Arrays
-        .fromItemList(parentEl.children)
-        .findIndex((value: Element) => {
-          return value === target;
-        });
-
-    if (removedIndex === null) {
-      return;
-    }
-
-    args.splice(removedIndex, 1);
-    this.argElementsHook_.set(args);
-  }
-
-  /**
-   * @override
-   */
-  onCreated(element: HTMLElement): void {
-    super.onCreated(element);
-    this.listenTo(this.routeService_, RouteServiceEvents.CHANGED, this.onRouteChanged_);
-    this.onRouteChanged_();
   }
 }

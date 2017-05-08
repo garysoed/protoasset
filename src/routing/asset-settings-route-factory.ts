@@ -33,15 +33,15 @@ export class AssetSettingsRouteFactory extends AbstractRouteFactory<Views, CP, C
   /**
    * @override
    */
-  getRelativeMatchParams_(matches: {[key: string]: string}): CP {
-    return {};
+  getRelativeMatcher_(): string {
+    return '/settings';
   }
 
   /**
    * @override
    */
-  getRelativeMatcher_(): string {
-    return '/settings';
+  getRelativeMatchParams_(matches: {[key: string]: string}): CP {
+    return {};
   }
 
   /**

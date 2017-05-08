@@ -95,6 +95,8 @@ export abstract class AbstractLayerEditor<T extends BaseLayer> extends BaseTheme
     return this.checkLayer_(layer);
   }
 
+  protected abstract onLayerChange_(layer: T): void;
+
   @handle(null).attributeChange('asset-id')
   @handle(null).attributeChange('project-id')
   @handle(null).attributeChange('layer-id')
@@ -114,6 +116,4 @@ export abstract class AbstractLayerEditor<T extends BaseLayer> extends BaseTheme
         layer, DataEvents.CHANGED, this.onLayerChange_.bind(this, layer));
     this.onLayerChange_(layer);
   }
-
-  protected abstract onLayerChange_(layer: T): void;
 }

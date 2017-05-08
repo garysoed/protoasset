@@ -29,11 +29,11 @@ export class TextLayerEditor extends AbstractLayerEditor<TextLayer> {
   @hook('#fontFamily').attribute('gs-value', StringParser)
   readonly fontFamilyHook_: DomHook<string>;
 
-  @hook('#fontWeight').attribute('gs-value', StringParser)
-  readonly fontWeightHook_: DomHook<string>;
-
   @hook('#fontUrl').attribute('gs-value', StringParser)
   readonly fontUrlHook_: DomHook<string>;
+
+  @hook('#fontWeight').attribute('gs-value', StringParser)
+  readonly fontWeightHook_: DomHook<string>;
 
   @hook('#horizontalAlign').attribute('gs-selected-tab', EnumParser(HorizontalAlign))
   readonly horizontalAlignHook_: DomHook<HorizontalAlign>;

@@ -22,7 +22,6 @@ import { Views } from '../routing/views';
 ])
 export class RouteFactoryService implements IRouteFactoryService<Views> {
   private readonly assetCollection_: AssetCollection;
-  private readonly projectCollection_: ProjectCollection;
   private assetData_: SimpleRouteFactory<Views, {assetId: string, projectId: string}>;
   private assetList_: AssetListRouteFactory;
   private assetMain_: AssetMainRouteFactory;
@@ -33,6 +32,7 @@ export class RouteFactoryService implements IRouteFactoryService<Views> {
   private helperList_: SimpleRouteFactory<Views, {assetId: string, projectId: string}>;
   private landing_: SimpleRouteFactory<Views, {}>;
   private layer_: SimpleRouteFactory<Views, {assetId: string, projectId: string}>;
+  private readonly projectCollection_: ProjectCollection;
   private projectSettings_: ProjectSettingsRouteFactory;
   private render_: SimpleRouteFactory<Views, {assetId: string, projectId: string}>;
 

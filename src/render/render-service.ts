@@ -22,11 +22,10 @@ export function checkResponse(request: RenderRequest, response: RenderResponse):
 @bind('pa.render.RenderService')
 export class RenderService extends BaseDisposable {
   private readonly idGenerator_: BaseIdGenerator;
-  private readonly templateCompilerService_: TemplateCompilerService;
-  private readonly window_: Window;
-
   private iframeElPromise_: Promise<HTMLIFrameElement> | null;
   private renderClientPromise_: Promise<ApiClient<RenderRequest, RenderResponse>> | null;
+  private readonly templateCompilerService_: TemplateCompilerService;
+  private readonly window_: Window;
 
   constructor(
       @inject('pa.data.TemplateCompilerService') templateCompilerService: TemplateCompilerService,

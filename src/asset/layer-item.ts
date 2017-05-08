@@ -62,10 +62,9 @@ export class LayerItem extends BaseThemedElement {
   readonly upDisabledHook_: DomHook<boolean>;
 
   private readonly assetCollection_: AssetCollection;
-  private readonly layerIdGenerator_: BaseIdGenerator;
-
   private assetDeregister_: DisposableFunction | null;
   private layerDeregister_: DisposableFunction | null;
+  private readonly layerIdGenerator_: BaseIdGenerator;
 
   constructor(
       @inject('pa.data.AssetCollection') assetCollection: AssetCollection,

@@ -25,10 +25,9 @@ export type SampleDataSearchIndex = {
 @bind('pa.common.SampleDataService')
 export class SampleDataService extends BaseListenable<SampleDataServiceEvent> {
   private readonly assetCollection_: AssetCollection;
+  private dataRow_: number | null;
   private readonly routeFactoryService_: RouteFactoryService;
   private readonly routeService_: RouteService<Views>;
-
-  private dataRow_: number | null;
 
   constructor(
       @inject('pa.data.AssetCollection') assetCollection: AssetCollection,

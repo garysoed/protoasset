@@ -27,11 +27,11 @@ import { Views } from '../routing/views';
   templateKey: 'src/landing/create-project-view',
 })
 export class CreateProjectView extends BaseThemedElement {
-  @hook('#editor').attribute('project-name', StringParser)
-  private readonly nameValueHook_: DomHook<string>;
-
   @hook('gs-basic-button#createButton').attribute('disabled', BooleanParser)
   private readonly createButtonDisabledHook_: DomHook<boolean>;
+
+  @hook('#editor').attribute('project-name', StringParser)
+  private readonly nameValueHook_: DomHook<string>;
 
   private readonly projectCollection_: ProjectCollection;
   private readonly routeFactoryService_: RouteFactoryService;
@@ -52,13 +52,6 @@ export class CreateProjectView extends BaseThemedElement {
     this.projectCollection_ = projectCollection;
     this.routeFactoryService_ = routeFactoryService;
     this.routeService_ = routeService;
-  }
-
-  /**
-   * Resets the form.
-   */
-  private reset_(): void {
-    this.nameValueHook_.set('');
   }
 
   /**
@@ -97,5 +90,12 @@ export class CreateProjectView extends BaseThemedElement {
 
     this.reset_();
     this.routeService_.goTo(this.routeFactoryService_.assetList(), {projectId: id});
+  }
+
+  /**
+   * Resets the form.
+   */
+  private reset_(): void {
+    this.nameValueHook_.set('');
   }
 }

@@ -27,6 +27,29 @@ export class RenderMain extends BaseDisposable {
   }
 
   /**
+   *
+   * @param resolve Function to call with the result of the rendering.
+   * @param request The request used to render.
+   * @param canvas Canvas object that the render result of html2canvas is in.
+   */
+  private onRendered_(
+      resolve: (value: RenderResponse) => void,
+      request: RenderRequest,
+      canvas: HTMLCanvasElement): void {
+    const targetCanvasEl = this.getCanvasEl_();
+    targetCanvasEl.width = request.width;
+    targetCanvasEl.height = request.height;
+    const ctx = targetCanvasEl.getContext('2d');
+    if (ctx === null) {
+      throw new Error('2d context cannot be found');
+    }
+
+    ctx.drawImage(canvas, 0, 0, request.width, request.height);
+    const dataUri = targetCanvasEl.toDataURL('image/png');
+    resolve({id: request.id, uri: dataUri});
+  }
+
+  /**
    * Processes the request from the main app.
    * @param request The request to process.
    * @return Promise that will be resolved with the response.
@@ -55,29 +78,6 @@ export class RenderMain extends BaseDisposable {
         });
       }, 100);
     });
-  }
-
-  /**
-   *
-   * @param resolve Function to call with the result of the rendering.
-   * @param request The request used to render.
-   * @param canvas Canvas object that the render result of html2canvas is in.
-   */
-  private onRendered_(
-      resolve: (value: RenderResponse) => void,
-      request: RenderRequest,
-      canvas: HTMLCanvasElement): void {
-    const targetCanvasEl = this.getCanvasEl_();
-    targetCanvasEl.width = request.width;
-    targetCanvasEl.height = request.height;
-    const ctx = targetCanvasEl.getContext('2d');
-    if (ctx === null) {
-      throw new Error('2d context cannot be found');
-    }
-
-    ctx.drawImage(canvas, 0, 0, request.width, request.height);
-    const dataUri = targetCanvasEl.toDataURL('image/png');
-    resolve({id: request.id, uri: dataUri});
   }
 
   /**

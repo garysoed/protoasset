@@ -12,8 +12,8 @@ import { TemplateCompiler } from './template-compiler';
  */
 @bind('pa.data.TemplateCompilerService')
 export class TemplateCompilerService {
-  private readonly handlebars_: typeof Handlebars;
   private dataRow_: number;
+  private readonly handlebars_: typeof Handlebars;
 
   constructor(@inject('x.Handlebars') handlebars: typeof Handlebars) {
     this.dataRow_ = 0;

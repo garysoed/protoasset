@@ -30,15 +30,15 @@ export class ProjectSettingsRouteFactory extends AbstractRouteFactory<Views, CP,
   /**
    * @override
    */
-  getRelativeMatchParams_(matches: {[key: string]: string}): CP {
-    return {};
+  getRelativeMatcher_(): string {
+    return '/settings';
   }
 
   /**
    * @override
    */
-  getRelativeMatcher_(): string {
-    return '/settings';
+  getRelativeMatchParams_(matches: {[key: string]: string}): CP {
+    return {};
   }
 
   /**

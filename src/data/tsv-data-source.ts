@@ -6,12 +6,11 @@ import { IDataSource } from './i-data-source';
 
 @Serializable('tsvDataSource')
 export class TsvDataSource implements IDataSource<string[][]> {
-  @Field('innerSource') private innerSource_: IDataSource<string>;
-  @Field('startRow') private startRow_: number;
-  @Field('endRow') private endRow_: number;
-
   private cache_: string[][] | null;
   private cachedInnerSourceData_: string | null;
+  @Field('endRow') private endRow_: number;
+  @Field('innerSource') private innerSource_: IDataSource<string>;
+  @Field('startRow') private startRow_: number;
 
   constructor(innerSource: IDataSource<string>, startRow: number, endRow: number) {
     this.endRow_ = endRow;
@@ -19,6 +18,21 @@ export class TsvDataSource implements IDataSource<string[][]> {
     this.startRow_ = startRow;
     this.cache_ = null;
     this.cachedInnerSourceData_ = null;
+  }
+
+  /**
+   * @override
+   */
+  async getData(): Promise<string[][]> {
+    const data = await this.innerSource_.getData();
+    if (this.cache_ === null || data !== this.cachedInnerSourceData_) {
+      const tsvData = this.parseData_(data);
+      this.cache_ = tsvData;
+      this.cachedInnerSourceData_ = data;
+      return tsvData;
+    } else {
+      return this.cache_;
+    }
   }
 
   /**
@@ -37,21 +51,6 @@ export class TsvDataSource implements IDataSource<string[][]> {
           return index >= this.startRow_ && index <= this.endRow_;
         })
         .asArray();
-  }
-
-  /**
-   * @override
-   */
-  async getData(): Promise<string[][]> {
-    const data = await this.innerSource_.getData();
-    if (this.cache_ === null || data !== this.cachedInnerSourceData_) {
-      const tsvData = this.parseData_(data);
-      this.cache_ = tsvData;
-      this.cachedInnerSourceData_ = data;
-      return tsvData;
-    } else {
-      return this.cache_;
-    }
   }
 
   /**

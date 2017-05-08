@@ -20,6 +20,8 @@ import { Views } from '../routing/views';
   templateKey: 'src/project/asset-item',
 })
 export class AssetItem extends BaseThemedElement {
+  private readonly assetCollection_: AssetCollection;
+
   @hook('#assetName').innerText()
   private readonly assetNameHook_: DomHook<string>;
 
@@ -29,7 +31,6 @@ export class AssetItem extends BaseThemedElement {
   @hook(null).attribute('gs-project-id', StringParser)
   private readonly gsProjectIdHook_: DomHook<string>;
 
-  private readonly assetCollection_: AssetCollection;
   private readonly routeFactoryService_: RouteFactoryService;
   private readonly routeService_: RouteService<Views>;
 

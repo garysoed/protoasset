@@ -2,8 +2,8 @@ import { Jsons } from 'external/gs_tools/src/collection';
 
 
 export class TemplateCompiler {
-  private readonly rowData_: string[];
   private readonly handlebars_: typeof Handlebars;
+  private readonly rowData_: string[];
 
   constructor(rowData: string[], handlebars: typeof Handlebars) {
     this.rowData_ = rowData;

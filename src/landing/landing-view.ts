@@ -55,12 +55,12 @@ export const PROJECT_ITEM_DATA_HELPER: ChildElementDataHelper<string> = {
   templateKey: 'src/landing/landing-view',
 })
 export class LandingView extends BaseThemedElement {
+  private readonly projectCollection_: ProjectCollection;
+
   @hook('#projects').childrenElements(PROJECT_ITEM_DATA_HELPER)
   private readonly projectCollectionHook_: DomHook<string[]>;
-
   private readonly routeFactoryService_: RouteFactoryService;
   private readonly routeService_: RouteService<Views>;
-  private readonly projectCollection_: ProjectCollection;
 
   constructor(
       @inject('theming.ThemeService') themeService: ThemeService,
@@ -75,30 +75,23 @@ export class LandingView extends BaseThemedElement {
   }
 
   /**
-   * Handles event when the location was changed.
-   */
-  private async onRouteChanged_(): Promise<void> {
-    const route = this.routeService_.getRoute();
-    if (route === null) {
-      this.routeService_.goTo(this.routeFactoryService_.landing(), {});
-      return;
-    }
-
-    if (route.getType() === Views.LANDING) {
-      const projects = await this.projectCollection_.list();
-      if (projects.length === 0) {
-        this.routeService_.goTo(this.routeFactoryService_.createProject(), {});
-      }
-    }
-  }
-
-  /**
    * Handles event when the create button is clicked.
    */
   @handle('#createButton').event(Event.ACTION)
   protected onCreateAction_(): void {
     this.routeService_.goTo(this.routeFactoryService_.createProject(), {});
   }
+
+  /**
+   * @override
+   */
+  onCreated(element: HTMLElement): void {
+    super.onCreated(element);
+    this.listenTo(this.routeService_, RouteServiceEvents.CHANGED, this.onRouteChanged_);
+    this.listenTo(this.projectCollection_, CollectionEvents.ADDED, this.onProjectAdded_);
+    this.onRouteChanged_();
+  }
+
 
   @handle('#filterButton').attributeChange('filter-text', StringParser)
   protected async onFilterButtonTextAttrChange_(newValue: string | null): Promise<void> {
@@ -116,26 +109,6 @@ export class LandingView extends BaseThemedElement {
   }
 
   /**
-   * Handles when a project is added.
-   * @param project The added project.
-   */
-  private onProjectAdded_(project: Project): void {
-    const projects = this.projectCollectionHook_.get() || [];
-    projects.push(project.getId());
-    this.projectCollectionHook_.set(projects);
-  }
-
-  /**
-   * @override
-   */
-  onCreated(element: HTMLElement): void {
-    super.onCreated(element);
-    this.listenTo(this.routeService_, RouteServiceEvents.CHANGED, this.onRouteChanged_);
-    this.listenTo(this.projectCollection_, CollectionEvents.ADDED, this.onProjectAdded_);
-    this.onRouteChanged_();
-  }
-
-  /**
    * @override
    */
   async onInserted(element: HTMLElement): Promise<void> {
@@ -147,5 +120,32 @@ export class LandingView extends BaseThemedElement {
         })
         .asArray();
     this.projectCollectionHook_.set(projectIds);
+  }
+
+  /**
+   * Handles when a project is added.
+   * @param project The added project.
+   */
+  private onProjectAdded_(project: Project): void {
+    const projects = this.projectCollectionHook_.get() || [];
+    projects.push(project.getId());
+    this.projectCollectionHook_.set(projects);
+  }
+  /**
+   * Handles event when the location was changed.
+   */
+  private async onRouteChanged_(): Promise<void> {
+    const route = this.routeService_.getRoute();
+    if (route === null) {
+      this.routeService_.goTo(this.routeFactoryService_.landing(), {});
+      return;
+    }
+
+    if (route.getType() === Views.LANDING) {
+      const projects = await this.projectCollection_.list();
+      if (projects.length === 0) {
+        this.routeService_.goTo(this.routeFactoryService_.createProject(), {});
+      }
+    }
   }
 }

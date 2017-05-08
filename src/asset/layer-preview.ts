@@ -53,12 +53,11 @@ export class LayerPreview extends BaseThemedElement {
 
   private readonly assetCollection_: AssetCollection;
   private readonly cssImportService_: CssImportService;
+  private layerDeregister_: DisposableFunction | null;
   private readonly routeFactoryService_: RouteFactoryService;
   private readonly routeService_: RouteService<Views>;
   private readonly sampleDataService_: SampleDataService;
   private readonly templateCompilerService_: TemplateCompilerService;
-
-  private layerDeregister_: DisposableFunction | null;
 
   constructor(
       @inject('pa.data.AssetCollection') assetCollection: AssetCollection,

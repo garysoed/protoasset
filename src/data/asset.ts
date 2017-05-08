@@ -23,16 +23,16 @@ export type AssetSearchIndex = {
 
 @Serializable('asset')
 export class Asset extends BaseListenable<DataEvents> {
+  @Field('data') private data_: IDataSource<string[][]> | null;
   @Field('filename') private filename_: string;
   @Field('height') private height_: number;
+  @Field('helpers') private helpers_: {[id: string]: Helper};
   @Field('id') private id_: string;
+  @Field('layers') private layers_: BaseLayer[];
   @Field('name') private name_: string;
   @Field('projectId') private projectId_: string;
   @Field('type') private type_: AssetType;
   @Field('width') private width_: number;
-  @Field('data') private data_: IDataSource<string[][]> | null;
-  @Field('helpers') private helpers_: {[id: string]: Helper};
-  @Field('layers') private layers_: BaseLayer[];
 
   constructor(id: string, projectId: string) {
     super();
@@ -48,6 +48,19 @@ export class Asset extends BaseListenable<DataEvents> {
     this.layers_ = [];
   }
 
+  /**
+   * Deletes the given helper.
+   */
+  deleteHelper(helperId: string): void {
+    if (!this.helpers_[helperId]) {
+      return;
+    }
+
+    this.dispatch(DataEvents.CHANGED, () => {
+      delete this.helpers_[helperId];
+    });
+  }
+
   disposeInternal(): void {
     Arrays
         .of(this.layers_)
@@ -60,19 +73,6 @@ export class Asset extends BaseListenable<DataEvents> {
           helper.dispose();
         });
     super.disposeInternal();
-  }
-
-  /**
-   * Deletes the given helper.
-   */
-  deleteHelper(helperId: string): void {
-    if (!this.helpers_[helperId]) {
-      return;
-    }
-
-    this.dispatch(DataEvents.CHANGED, () => {
-      delete this.helpers_[helperId];
-    });
   }
 
   /**

@@ -64,16 +64,17 @@ export const ASSET_DATA_HELPER: ChildElementDataHelper<AssetItemData> = {
   templateKey: 'src/project/asset-list-view',
 })
 export class AssetListView extends BaseThemedElement {
+  private readonly assetCollection_: AssetCollection;
+
   @hook('#assets').childrenElements<AssetItemData>(ASSET_DATA_HELPER)
   private readonly assetsHook_: DomHook<AssetItemData[]>;
+  private readonly projectCollection_: ProjectCollection;
 
   @hook('#projectName').innerText()
   private readonly projectNameTextHook_: DomHook<string>;
-
-  private readonly assetCollection_: AssetCollection;
-  private readonly projectCollection_: ProjectCollection;
   private readonly routeFactoryService_: RouteFactoryService;
   private readonly routeService_: RouteService<Views>;
+
 
   constructor(
       @inject('pa.data.AssetCollection') assetCollection: AssetCollection,
@@ -96,6 +97,27 @@ export class AssetListView extends BaseThemedElement {
   private getProjectId_(): null | string {
     const params = this.routeService_.getParams(this.routeFactoryService_.assetList());
     return params === null ? null : params.projectId;
+  }
+
+  @handle('#createButton').event(Event.ACTION)
+  onCreateButtonClicked_(): void {
+    const projectId = this.getProjectId_();
+    if (projectId !== null) {
+      this.routeService_.goTo(
+          this.routeFactoryService_.createAsset(), {projectId: projectId});
+    }
+  }
+
+  /**
+   * @override
+   */
+  onCreated(element: HTMLElement): void {
+    super.onCreated(element);
+    this.onProjectIdChanged_();
+    this.listenTo(
+        this.routeService_,
+        RouteServiceEvents.CHANGED,
+        this.onProjectIdChanged_);
   }
 
   /**
@@ -123,27 +145,6 @@ export class AssetListView extends BaseThemedElement {
     if (project !== null) {
       this.projectNameTextHook_.set(project.getName());
     }
-  }
-
-  @handle('#createButton').event(Event.ACTION)
-  onCreateButtonClicked_(): void {
-    const projectId = this.getProjectId_();
-    if (projectId !== null) {
-      this.routeService_.goTo(
-          this.routeFactoryService_.createAsset(), {projectId: projectId});
-    }
-  }
-
-  /**
-   * @override
-   */
-  onCreated(element: HTMLElement): void {
-    super.onCreated(element);
-    this.onProjectIdChanged_();
-    this.listenTo(
-        this.routeService_,
-        RouteServiceEvents.CHANGED,
-        this.onProjectIdChanged_);
   }
 
   @handle('#settingsButton').event(Event.ACTION)

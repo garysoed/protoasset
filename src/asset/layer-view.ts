@@ -216,11 +216,11 @@ export class LayerView extends BaseThemedElement {
   @hook('#previews').property('style')
   readonly layerPreviewsStyleHook_: DomHook<CSSStyleDeclaration>;
 
-  @hook('#layerTypeSwitch').attribute('gs-value', EnumParser(LayerType))
-  readonly layerTypeSwitchHook_: DomHook<LayerType>;
-
   @hook('#layers').childrenElements<LayerItemData>(LAYER_ITEM_DATA_HELPER)
   readonly layersChildElementHook_: DomHook<LayerItemData[]>;
+
+  @hook('#layerTypeSwitch').attribute('gs-value', EnumParser(LayerType))
+  readonly layerTypeSwitchHook_: DomHook<LayerType>;
 
   @hook('#previewModes').childrenElements(LAYER_PREVIEW_MODE_DATA_HELPER)
   readonly previewModeChildElementHook_: DomHook<LayerPreviewMode[]>;
@@ -241,16 +241,15 @@ export class LayerView extends BaseThemedElement {
   @hook('#textEditor').attribute('project-id', StringParser)
   readonly textEditorProjectIdHook_: DomHook<string>;
 
+  private assetChangedDeregister_: DisposableFunction | null;
   private readonly assetCollection_: AssetCollection;
+  private layerChangedDeregister_: DisposableFunction | null;
   private readonly layerIdGenerator_: BaseIdGenerator;
   private readonly overlayService_: OverlayService;
   private readonly renderService_: RenderService;
   private readonly routeFactoryService_: RouteFactoryService;
   private readonly routeService_: RouteService<Views>;
   private readonly sampleDataService_: SampleDataService;
-
-  private assetChangedDeregister_: DisposableFunction | null;
-  private layerChangedDeregister_: DisposableFunction | null;
   private selectedLayerId_: string | null;
   private selectedLayerPreviewMode_: LayerPreviewMode;
 

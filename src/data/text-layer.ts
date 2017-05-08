@@ -122,6 +122,20 @@ export class TextLayer extends BaseLayer {
   }
 
   /**
+   * @return The correct 'align-items' value corresponding to the vertical align.
+   */
+  private getAlignItems_(): string {
+    switch (this.verticalAlign_) {
+      case VerticalAlign.BOTTOM:
+        return 'flex-end';
+      case VerticalAlign.CENTER:
+        return 'center';
+      case VerticalAlign.TOP:
+        return 'flex-start';
+    }
+  }
+
+  /**
    * @return The color of the font.
    */
   getColor(): string {
@@ -154,20 +168,6 @@ export class TextLayer extends BaseLayer {
    */
   getHorizontalAlign(): HorizontalAlign {
     return this.horizontalAlign_;
-  }
-
-  /**
-   * @return The correct 'align-items' value corresponding to the vertical align.
-   */
-  private getAlignItems_(): string {
-    switch (this.verticalAlign_) {
-      case VerticalAlign.BOTTOM:
-        return 'flex-end';
-      case VerticalAlign.CENTER:
-        return 'center';
-      case VerticalAlign.TOP:
-        return 'flex-start';
-    }
   }
 
   /**

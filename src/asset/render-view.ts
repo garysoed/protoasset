@@ -89,12 +89,13 @@ export class RenderView extends BaseThemedElement {
   @hook('#downloadButton').attribute('disabled', BooleanParser)
   readonly downloadButtonDisabledHook_: DomHook<boolean>;
 
-  @hook('#renders').childrenElements(RENDER_ITEM_DATA_HELPER)
-  readonly rendersChildrenHook_: DomHook<RenderData[]>;
-
   @hook('#filenameInput').attribute('gs-value', StringParser)
   readonly filenameInputHook_: DomHook<string>;
 
+  @hook('#renders').childrenElements(RENDER_ITEM_DATA_HELPER)
+  readonly rendersChildrenHook_: DomHook<RenderData[]>;
+
+  private assetChangedDeregister_: DisposableFunction | null;
   private readonly assetCollection_: AssetCollection;
   private readonly downloadService_: DownloadService;
   private readonly expectedRenderKeys_: Set<string>;
@@ -104,8 +105,6 @@ export class RenderView extends BaseThemedElement {
   private readonly routeFactoryService_: RouteFactoryService;
   private readonly routeService_: RouteService<Views>;
   private readonly templateCompilerService_: TemplateCompilerService;
-
-  private assetChangedDeregister_: DisposableFunction | null;
 
   constructor(
       @inject('pa.data.AssetCollection') assetCollection: AssetCollection,

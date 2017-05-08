@@ -45,11 +45,10 @@ export class HelperItem extends BaseThemedElement {
   readonly rootValueHook_: DomHook<string>;
 
   private readonly assetCollection_: AssetCollection;
+  private helperUpdateDeregister_: DisposableFunction | null;
   private readonly overlayService_: OverlayService;
   private readonly routeFactoryService_: RouteFactoryService;
   private readonly routeService_: RouteService<Views>;
-
-  private helperUpdateDeregister_: DisposableFunction | null;
 
   constructor(
       @inject('pa.data.AssetCollection') assetCollection: AssetCollection,
@@ -69,6 +68,16 @@ export class HelperItem extends BaseThemedElement {
     this.rootValueHook_ =  DomHook.of<string>();
     this.routeFactoryService_ = routeFactoryService;
     this.routeService_ = routeService;
+  }
+
+  /**
+   * @override
+   */
+  disposeInternal(): void {
+    if (this.helperUpdateDeregister_ !== null) {
+      this.helperUpdateDeregister_.dispose();
+    }
+    super.disposeInternal();
   }
 
   /**
@@ -102,18 +111,18 @@ export class HelperItem extends BaseThemedElement {
     return asset.getHelper(helperId);
   }
 
-  /**
-   * Handles when the helper is updated.
-   * @param helper The updated helper.
-   */
-  private onHelperUpdated_(helper: Helper): void {
-    this.nameHook_.set(helper.getName());
-  }
-
   @handle('#cancel').event(DomEvent.CLICK)
   onCancelClick_(event: Event): void {
     event.stopPropagation();
     this.rootValueHook_.set('read');
+  }
+
+  /**
+   * @override
+   */
+  onCreated(element: HTMLElement): void {
+    super.onCreated(element);
+    this.updateHelper_();
   }
 
   @handle('#delete').event(DomEvent.CLICK)
@@ -140,6 +149,14 @@ export class HelperItem extends BaseThemedElement {
       this.nameInputHook_.delete();
     }
     this.rootValueHook_.set('edit');
+  }
+
+  /**
+   * Handles when the helper is updated.
+   * @param helper The updated helper.
+   */
+  private onHelperUpdated_(helper: Helper): void {
+    this.nameHook_.set(helper.getName());
   }
 
   @handle('#ok').event(DomEvent.CLICK)
@@ -201,23 +218,5 @@ export class HelperItem extends BaseThemedElement {
     this.helperUpdateDeregister_ = this.listenTo(
         helper, DataEvents.CHANGED, this.onHelperUpdated_.bind(this, helper));
     this.onHelperUpdated_(helper);
-  }
-
-  /**
-   * @override
-   */
-  disposeInternal(): void {
-    if (this.helperUpdateDeregister_ !== null) {
-      this.helperUpdateDeregister_.dispose();
-    }
-    super.disposeInternal();
-  }
-
-  /**
-   * @override
-   */
-  onCreated(element: HTMLElement): void {
-    super.onCreated(element);
-    this.updateHelper_();
   }
 }

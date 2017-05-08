@@ -147,14 +147,6 @@ export class Editor extends BaseThemedElement {
     this.templateWidthHook_ = DomHook.of<number>();
   }
 
-  /**
-   * @override
-   */
-  onCreated(element: HTMLElement): void {
-    super.onCreated(element);
-    this.assetTypeMenuHook_.set([AssetType.CARD]);
-  }
-
   @handle(null).attributeChange('asset-type')
   onAssetTypeExportChanged_(): void {
     const assetType = this.assetTypeExportHook_.get();
@@ -163,6 +155,14 @@ export class Editor extends BaseThemedElement {
     }
 
     this.setAssetType_(assetType);
+  }
+
+  /**
+   * @override
+   */
+  onCreated(element: HTMLElement): void {
+    super.onCreated(element);
+    this.assetTypeMenuHook_.set([AssetType.CARD]);
   }
 
   @handle('#heightInput').attributeChange('gs-value')
