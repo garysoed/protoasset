@@ -54,3 +54,4 @@ export class AssetListRouteFactory extends AbstractRouteFactory<Views, CP, CR, P
     return `/project/${params.projectId}`;
   }
 }
+// TODO: Mutable

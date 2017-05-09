@@ -78,3 +78,4 @@ export class BaseLayerEditor extends AbstractLayerEditor<BaseLayer> {
     this.rightHook_.set(layer.getRight());
   }
 }
+// TODO: Mutable

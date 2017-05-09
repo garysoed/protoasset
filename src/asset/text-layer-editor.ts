@@ -130,3 +130,4 @@ export class TextLayerEditor extends AbstractLayerEditor<TextLayer> {
     this.verticalAlignHook_.set(layer.getVerticalAlign());
   }
 }
+// TODO: Mutable

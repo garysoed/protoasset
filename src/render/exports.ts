@@ -8,3 +8,4 @@ function bootstrap(html2Canvas: Html2CanvasStatic, window: Window): void {
 }
 
 Jsons.setValue(window, 'par.bootstrap', bootstrap);
+// TODO: Mutable

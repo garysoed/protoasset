@@ -43,3 +43,4 @@ export class Editor extends BaseThemedElement {
     }
   }
 }
+// TODO: Mutable

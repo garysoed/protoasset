@@ -162,3 +162,4 @@ export class CreateAssetView extends BaseThemedElement {
         || Number.isNaN(this.heightHook_.get() || NaN));
   }
 }
+// TODO: Mutable

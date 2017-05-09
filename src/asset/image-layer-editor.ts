@@ -116,3 +116,4 @@ export class ImageLayerEditor extends AbstractLayerEditor<ImageLayer> {
     this.onFieldChange_();
   }
 }
+// TODO: Mutable

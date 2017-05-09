@@ -602,3 +602,4 @@ export class LayerView extends BaseThemedElement {
     }
   }
 }
+// TODO: Mutable

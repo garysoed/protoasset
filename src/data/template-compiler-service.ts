@@ -39,3 +39,4 @@ export class TemplateCompilerService {
     return TemplateCompiler.of(data, handlebars);
   }
 }
+// TODO: Mutable

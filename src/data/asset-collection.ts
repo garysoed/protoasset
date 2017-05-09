@@ -99,3 +99,4 @@ export class AssetCollection extends BaseListenable<CollectionEvents> {
     return asset.getSearchIndex();
   }
 }
+// TODO: Mutable

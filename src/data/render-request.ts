@@ -20,3 +20,4 @@ export const RenderRequestType = IntersectType
     .addType(HasPropertyType('id', StringType))
     .addType(HasPropertyType('width', NumberType))
     .build();
+// TODO: Mutable

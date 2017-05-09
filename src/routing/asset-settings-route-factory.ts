@@ -51,3 +51,4 @@ export class AssetSettingsRouteFactory extends AbstractRouteFactory<Views, CP, C
     return '/settings';
   }
 }
+// TODO: Mutable

@@ -51,3 +51,4 @@ export class FilterButton extends BaseThemedElement {
     this.filterTextAttrHook_.set(this.searchTextValueHook_.get() || '');
   }
 }
+// TODO: Mutable

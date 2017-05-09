@@ -13,3 +13,4 @@ export const RenderResponseType = IntersectType
     .addType(HasPropertyType('id', StringType))
     .addType(HasPropertyType('uri', StringType))
     .build();
+// TODO: Mutable

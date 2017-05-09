@@ -166,3 +166,4 @@ export class LayerPreview extends BaseThemedElement {
     this.onLayerChange_(asset, rowData, layer);
   }
 }
+// TODO: Mutable

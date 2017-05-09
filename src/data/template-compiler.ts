@@ -31,3 +31,4 @@ export class TemplateCompiler {
     return new TemplateCompiler(rowData, handlebars);
   }
 }
+// TODO: Mutable

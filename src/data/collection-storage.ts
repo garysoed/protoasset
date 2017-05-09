@@ -119,3 +119,4 @@ export class CollectionStorage<T, I extends {this: T}> {
     return new CollectionStorage(getSearchIndex, storage);
   }
 }
+// TODO: Mutable

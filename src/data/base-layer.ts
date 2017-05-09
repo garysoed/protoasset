@@ -217,3 +217,4 @@ export abstract class BaseLayer extends BaseListenable<DataEvents> {
     });
   }
 }
+// TODO: Mutable

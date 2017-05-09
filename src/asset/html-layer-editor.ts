@@ -75,3 +75,4 @@ export class HtmlLayerEditor extends AbstractLayerEditor<HtmlLayer> {
     this.htmlValueHook_.set(layer.getHtml());
   }
 }
+// TODO: Mutable

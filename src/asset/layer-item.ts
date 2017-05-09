@@ -281,3 +281,4 @@ export class LayerItem extends BaseThemedElement {
     this.downDisabledHook_.set(layerIndex >= layers.length - 1);
   }
 }
+// TODO: Mutable

@@ -4,3 +4,4 @@ export enum LayerType {
   IMAGE,
   TEXT,
 }
+// TODO: Mutable

@@ -92,3 +92,4 @@ export class RenderMain extends BaseDisposable {
     this.addDisposable(channel);
   }
 }
+// TODO: Mutable

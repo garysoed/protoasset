@@ -74,3 +74,4 @@ export class AssetItem extends BaseThemedElement {
     }
   }
 }
+// TODO: Mutable

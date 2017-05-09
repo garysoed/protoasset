@@ -117,3 +117,4 @@ export abstract class AbstractLayerEditor<T extends BaseLayer> extends BaseTheme
     this.onLayerChange_(layer);
   }
 }
+// TODO: Mutable

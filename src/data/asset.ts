@@ -333,3 +333,4 @@ export class Asset extends BaseListenable<DataEvents> {
     }
   }
 }
+// TODO: Mutable

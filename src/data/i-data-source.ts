@@ -9,3 +9,4 @@ export interface IDataSource<T> {
    */
   getData(): Promise<T>;
 }
+// TODO: Mutable

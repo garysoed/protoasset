@@ -15,3 +15,4 @@ export enum Views {
   PROJECT_SETTINGS,
   RENDER,
 }
+// TODO: Mutable

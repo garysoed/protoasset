@@ -58,3 +58,4 @@ export class AssetView extends BaseThemedElement {
         {assetId: params.assetId, projectId: params.projectId});
   }
 }
+// TODO: Mutable

@@ -76,3 +76,4 @@ export class ProjectCollection extends BaseListenable<CollectionEvents> {
     return project.getSearchIndex();
   }
 }
+// TODO: Mutable

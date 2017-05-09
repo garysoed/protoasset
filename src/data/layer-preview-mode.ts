@@ -4,3 +4,4 @@ export enum LayerPreviewMode {
   FULL,
   RENDER,
 }
+// TODO: Mutable
