@@ -1,6 +1,7 @@
 import { assert, TestBase } from '../test-base';
 TestBase.setup();
 
+import { ImmutableSet } from 'external/gs_tools/src/immutable';
 import { Mocks } from 'external/gs_tools/src/mock';
 import { TestDispose } from 'external/gs_tools/src/testing';
 import { LocationServiceEvents } from 'external/gs_tools/src/ui';
@@ -168,7 +169,7 @@ describe('landing.LandingView', () => {
           const routeFactory = Mocks.object('routeFactory');
           mockRouteFactoryService.createProject.and.returnValue(routeFactory);
 
-          mockProjectCollection.list.and.returnValue(Promise.resolve([]));
+          mockProjectCollection.list.and.returnValue(Promise.resolve(ImmutableSet.of([])));
 
           await view['onRouteChanged_']();
           assert(mockRouteService.goTo).to.haveBeenCalledWith(routeFactory, {});
@@ -180,7 +181,8 @@ describe('landing.LandingView', () => {
           mockRoute.getType.and.returnValue(Views.LANDING);
           mockRouteService.getRoute.and.returnValue(mockRoute);
 
-          mockProjectCollection.list.and.returnValue(Promise.resolve([Mocks.object('project')]));
+          mockProjectCollection.list.and.returnValue(
+              Promise.resolve(ImmutableSet.of([Mocks.object('project')])));
 
           await view['onRouteChanged_']();
           assert(mockRouteService.goTo).toNot.haveBeenCalled();
@@ -243,7 +245,8 @@ describe('landing.LandingView', () => {
       mockProject2.getId.and.returnValue(projectId2);
       mockProject2.getName.and.returnValue(projectName2);
 
-      mockProjectCollection.list.and.returnValue(Promise.resolve([mockProject1, mockProject2]));
+      mockProjectCollection.list.and
+          .returnValue(Promise.resolve(ImmutableSet.of([mockProject1, mockProject2])));
 
       spyOn(view['projectCollectionHook_'], 'set');
 

@@ -1,4 +1,5 @@
 import { BaseListenable } from 'external/gs_tools/src/event';
+import { ImmutableSet } from 'external/gs_tools/src/immutable';
 import { bind, inject } from 'external/gs_tools/src/inject';
 import { CachedStorage, LocalStorage } from 'external/gs_tools/src/store';
 
@@ -54,7 +55,7 @@ export class AssetCollection extends BaseListenable<CollectionEvents> {
    * @param projectId ID of the project whose assets should be returned.
    * @return Promise that will be resolved with the assets belonging to the given project.
    */
-  list(projectId: ProjectId): Promise<Asset[]> {
+  list(projectId: ProjectId): Promise<ImmutableSet<Asset>> {
     return this.getStorage_(projectId).list();
   }
 

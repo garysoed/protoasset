@@ -1,10 +1,11 @@
 import { BaseListenable } from 'external/gs_tools/src/event';
+import { ImmutableSet } from 'external/gs_tools/src/immutable';
 import { bind, inject } from 'external/gs_tools/src/inject';
 import { CachedStorage, LocalStorage } from 'external/gs_tools/src/store';
 
-import { CollectionEvents } from './collection-events';
-import { CollectionStorage } from './collection-storage';
-import { Project, ProjectSearchIndex } from './project';
+import { CollectionEvents } from '../data/collection-events';
+import { CollectionStorage } from '../data/collection-storage';
+import { Project, ProjectSearchIndex } from '../data/project';
 
 
 /**
@@ -34,7 +35,7 @@ export class ProjectCollection extends BaseListenable<CollectionEvents> {
   /**
    * @return A list of projects in the storage.
    */
-  list(): Promise<Project[]> {
+  list(): Promise<ImmutableSet<Project>> {
     return this.storage_.list();
   }
 

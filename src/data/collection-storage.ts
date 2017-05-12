@@ -1,4 +1,5 @@
 import { Arrays } from 'external/gs_tools/src/collection';
+import { ImmutableSet, Iterables } from 'external/gs_tools/src/immutable';
 import { Storage as GsStorage } from 'external/gs_tools/src/store';
 
 
@@ -17,10 +18,9 @@ export class CollectionStorage<T, I extends {this: T}> {
    * @param indexes Search indexes to initialize the fuse with.
    * @return New instance of Fuse.
    */
-  private createFuse_(indexes: I[]): Fuse<I> {
-    // TODO: Common place for search config.
+  private createFuse_(indexes: ImmutableSet<I>): Fuse<I> {
     return new Fuse<I>(
-        indexes,
+        Iterables.toArray(indexes),
         {
           keys: ['name'],
           shouldSort: true,
@@ -48,13 +48,11 @@ export class CollectionStorage<T, I extends {this: T}> {
 
     this.fusePromise_ = this
         .list()
-        .then((items: T[]) => {
-          const searchIndexes = Arrays
-              .of(items)
-              .map((item: T) => {
+        .then((items: ImmutableSet<T>) => {
+          const searchIndexes = items
+              .mapItem((item: T) => {
                 return this.getSearchIndex_(item);
-              })
-              .asArray();
+              });
           return this.createFuse_(searchIndexes);
         });
     return this.fusePromise_;
@@ -63,7 +61,7 @@ export class CollectionStorage<T, I extends {this: T}> {
   /**
    * @return A list of items in the storage.
    */
-  list(): Promise<T[]> {
+  list(): Promise<ImmutableSet<T>> {
     return this.storage_.list();
   }
 

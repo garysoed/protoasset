@@ -1,6 +1,7 @@
 import { assert, TestBase } from '../test-base';
 TestBase.setup();
 
+import { ImmutableSet } from 'external/gs_tools/src/immutable';
 import { Mocks } from 'external/gs_tools/src/mock';
 import { TestDispose } from 'external/gs_tools/src/testing';
 
@@ -137,7 +138,7 @@ describe('project.AssetListView', () => {
       const mockProject = jasmine.createSpyObj('Project', ['getName']);
       mockProject.getName.and.returnValue(projectName);
 
-      mockAssetCollection.list.and.returnValue(Promise.resolve([]));
+      mockAssetCollection.list.and.returnValue(Promise.resolve(ImmutableSet.of([])));
       mockProjectCollection.get.and.returnValue(Promise.resolve(mockProject));
 
       spyOn(view, 'getProjectId_').and.returnValue(projectId);
@@ -164,7 +165,8 @@ describe('project.AssetListView', () => {
       mockAsset2.getId.and.returnValue(assetId2);
       mockAsset2.getProjectId.and.returnValue(projectId2);
 
-      mockAssetCollection.list.and.returnValue(Promise.resolve([mockAsset1, mockAsset2]));
+      mockAssetCollection.list.and
+          .returnValue(Promise.resolve(ImmutableSet.of([mockAsset1, mockAsset2])));
       mockProjectCollection.get.and.returnValue(Promise.resolve(null));
 
       spyOn(view, 'getProjectId_').and.returnValue(projectId);
@@ -183,7 +185,7 @@ describe('project.AssetListView', () => {
         async () => {
           const projectId = 'projectId';
 
-          mockAssetCollection.list.and.returnValue(Promise.resolve([]));
+          mockAssetCollection.list.and.returnValue(Promise.resolve(ImmutableSet.of([])));
           mockProjectCollection.get.and.returnValue(Promise.resolve(null));
           spyOn(view, 'getProjectId_').and.returnValue(projectId);
           spyOn(view['assetsHook_'], 'set');

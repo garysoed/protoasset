@@ -1,9 +1,10 @@
 import { assert, TestBase } from '../test-base';
 TestBase.setup();
 
+import { ImmutableSet } from 'external/gs_tools/src/immutable';
 import { Mocks } from 'external/gs_tools/src/mock';
 
-import { CollectionStorage } from './collection-storage';
+import { CollectionStorage } from '../data/collection-storage';
 
 
 describe('project.CollectionStorage', () => {
@@ -33,14 +34,15 @@ describe('project.CollectionStorage', () => {
             return searchIndex2;
         }
       });
-      spyOn(storage, 'list').and.returnValue(Promise.resolve([item1, item2]));
+      spyOn(storage, 'list').and.returnValue(Promise.resolve(ImmutableSet.of([item1, item2])));
 
       const fuse = Mocks.object('fuse');
       spyOn(storage, 'createFuse_').and.returnValue(fuse);
 
       const actualFuse = await storage['getFusePromise_']();
       assert(actualFuse).to.equal(fuse);
-      assert(storage['createFuse_']).to.haveBeenCalledWith([searchIndex1, searchIndex2]);
+      assert(storage['createFuse_']).to
+          .haveBeenCalledWith(ImmutableSet.of([searchIndex1, searchIndex2]));
       assert(mockGetSearchIndex).to.haveBeenCalledWith(item1);
       assert(mockGetSearchIndex).to.haveBeenCalledWith(item2);
     });

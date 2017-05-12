@@ -1,4 +1,5 @@
 import { Arrays } from 'external/gs_tools/src/collection';
+import { Iterables } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
 import {
   ChildElementDataHelper,
@@ -134,12 +135,10 @@ export class AssetListView extends BaseThemedElement {
       this.projectCollection_.get(projectId),
     ]);
 
-    const assetItemData = Arrays
-        .of(assets)
-        .map((asset: Asset) => {
+    const assetItemData = Iterables.toArray(assets
+        .mapItem((asset: Asset) => {
           return {assetId: asset.getId(), projectId: asset.getProjectId()};
-        })
-        .asArray();
+        }));
 
     this.assetsHook_.set(assetItemData);
     if (project !== null) {

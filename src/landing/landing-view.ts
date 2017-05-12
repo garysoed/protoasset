@@ -1,4 +1,5 @@
 import { Arrays } from 'external/gs_tools/src/collection';
+import { Iterables } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
 import { StringParser } from 'external/gs_tools/src/parse';
 import {
@@ -100,7 +101,8 @@ export class LandingView extends BaseThemedElement {
         : this.projectCollection_.search(newValue);
 
     const projects = await projectsPromise;
-    const projectIds = Arrays.of(projects)
+    const normalizedProjects = projects instanceof Array ? projects : Iterables.toArray(projects);
+    const projectIds = Arrays.of(normalizedProjects)
         .map((project: Project) => {
           return project.getId();
         })
@@ -114,11 +116,10 @@ export class LandingView extends BaseThemedElement {
   async onInserted(element: HTMLElement): Promise<void> {
     super.onInserted(element);
     const projects = await this.projectCollection_.list();
-    const projectIds = Arrays.of(projects)
-        .map((project: Project) => {
+    const projectIds = Iterables.toArray(projects
+        .mapItem((project: Project) => {
           return project.getId();
-        })
-        .asArray();
+        }));
     this.projectCollectionHook_.set(projectIds);
   }
 
@@ -143,7 +144,7 @@ export class LandingView extends BaseThemedElement {
 
     if (route.getType() === Views.LANDING) {
       const projects = await this.projectCollection_.list();
-      if (projects.length === 0) {
+      if (projects.size() === 0) {
         this.routeService_.goTo(this.routeFactoryService_.createProject(), {});
       }
     }
