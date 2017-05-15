@@ -1,3 +1,4 @@
+import { ImmutableSet } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
 import { StringParser } from 'external/gs_tools/src/parse';
 import {
@@ -21,7 +22,7 @@ import { TemplateCompilerService } from '../data/template-compiler-service';
  * Image Layer
  */
 @customElement({
-  dependencies: [TemplateCompilerService],
+  dependencies: ImmutableSet.of([TemplateCompilerService]),
   tag: 'pa-asset-image-layer-editor',
   templateKey: 'src/asset/image-layer-editor',
 })

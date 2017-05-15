@@ -1,6 +1,7 @@
 import { assert, TestBase } from '../test-base';
 TestBase.setup();
 
+import { ImmutableMap } from 'external/gs_tools/src/immutable';
 import { Mocks } from 'external/gs_tools/src/mock';
 
 import { AssetListRouteFactory } from './asset-list-route-factory';
@@ -28,9 +29,8 @@ describe('routing.AssetListRouteFactory', () => {
   describe('getRelativeMatchParams_', () => {
     it('should return the correct params', () => {
       const projectId = 'projectId';
-      assert(factory['getRelativeMatchParams_']({'projectId': projectId})).to.equal({
-        projectId: projectId,
-      });
+      assert(factory['getRelativeMatchParams_'](ImmutableMap.of([['projectId', projectId]])))
+          .to.equal({projectId: projectId});
     });
   });
 

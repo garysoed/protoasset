@@ -1,5 +1,5 @@
 import { Arrays } from 'external/gs_tools/src/collection';
-import { Iterables } from 'external/gs_tools/src/immutable';
+import { ImmutableSet, Iterables } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
 import {
   ChildElementDataHelper,
@@ -60,7 +60,9 @@ export const ASSET_DATA_HELPER: ChildElementDataHelper<AssetItemData> = {
  * The main landing view of the app.
  */
 @customElement({
-  dependencies: [AssetCollection, AssetItem, FilterButton, ProjectCollection, RouteService],
+  dependencies: ImmutableSet.of([
+    AssetCollection, AssetItem, FilterButton, ProjectCollection, RouteService,
+  ]),
   tag: 'pa-asset-list-view',
   templateKey: 'src/project/asset-list-view',
 })

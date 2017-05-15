@@ -2,6 +2,7 @@ import { atomic } from 'external/gs_tools/src/async';
 import { Arrays } from 'external/gs_tools/src/collection';
 import { DisposableFunction } from 'external/gs_tools/src/dispose';
 import { DomEvent, ListenableDom } from 'external/gs_tools/src/event';
+import { ImmutableSet } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
 import { BooleanParser, StringParser } from 'external/gs_tools/src/parse';
 import { BaseIdGenerator, SimpleIdGenerator } from 'external/gs_tools/src/random';
@@ -149,12 +150,12 @@ export const HELPER_ITEM_DATA_HELPER: ChildElementDataHelper<HelperIdParams> = {
  * Helper view
  */
 @customElement({
-  dependencies: [
+  dependencies: ImmutableSet.of([
     HelperItem,
     SampleDataPicker,
     SampleDataService,
     TemplateCompilerService,
-  ],
+  ]),
   tag: 'pa-asset-helper-view',
   templateKey: 'src/asset/helper-view',
 })

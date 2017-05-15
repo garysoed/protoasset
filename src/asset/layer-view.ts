@@ -2,6 +2,7 @@ import { atomic } from 'external/gs_tools/src/async';
 import { Arrays } from 'external/gs_tools/src/collection';
 import { DisposableFunction } from 'external/gs_tools/src/dispose';
 import { DomEvent, ListenableDom } from 'external/gs_tools/src/event';
+import { ImmutableSet } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
 import {
   BooleanParser,
@@ -159,7 +160,7 @@ export const LAYER_PREVIEW_MODE_DATA_HELPER: ChildElementDataHelper<LayerPreview
  * Displays layer editor
  */
 @customElement({
-  dependencies: [
+  dependencies: ImmutableSet.of([
     BaseLayerEditor,
     HtmlLayerEditor,
     ImageLayerEditor,
@@ -169,7 +170,7 @@ export const LAYER_PREVIEW_MODE_DATA_HELPER: ChildElementDataHelper<LayerPreview
     RenderService,
     SampleDataPicker,
     TextLayerEditor,
-  ],
+  ]),
   tag: 'pa-asset-layer-view',
   templateKey: 'src/asset/layer-view',
 })

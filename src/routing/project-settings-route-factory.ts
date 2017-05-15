@@ -1,3 +1,4 @@
+import { ImmutableMap } from 'external/gs_tools/src/immutable';
 import { AbstractRouteFactory } from 'external/gs_ui/src/routing';
 
 import { ProjectCollection } from '../data/project-collection';
@@ -37,7 +38,7 @@ export class ProjectSettingsRouteFactory extends AbstractRouteFactory<Views, CP,
   /**
    * @override
    */
-  getRelativeMatchParams_(matches: {[key: string]: string}): CP {
+  getRelativeMatchParams_(matches: ImmutableMap<string, string>): CP {
     return {};
   }
 

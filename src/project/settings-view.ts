@@ -1,3 +1,4 @@
+import { ImmutableSet } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
 import { StringParser } from 'external/gs_tools/src/parse';
 import { customElement, DomHook, handle, hook } from 'external/gs_tools/src/webc';
@@ -17,7 +18,7 @@ import { Views } from '../routing/views';
  * Settings
  */
 @customElement({
-  dependencies: [Editor, ProjectCollection, RouteService],
+  dependencies: ImmutableSet.of([Editor, ProjectCollection, RouteService]),
   tag: 'pa-project-settings-view',
   templateKey: 'src/project/settings-view',
 })

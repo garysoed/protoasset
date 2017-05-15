@@ -1,3 +1,4 @@
+import { ImmutableMap } from 'external/gs_tools/src/immutable';
 import { AbstractRouteFactory } from 'external/gs_ui/src/routing';
 
 import { ProjectCollection } from '../data/project-collection';
@@ -41,10 +42,12 @@ export class AssetListRouteFactory extends AbstractRouteFactory<Views, CP, CR, P
   /**
    * @override
    */
-  getRelativeMatchParams_(matches: {[key: string]: string}): CP {
-    return {
-      projectId: matches['projectId'],
-    };
+  getRelativeMatchParams_(matches: ImmutableMap<string, string>): CP {
+    const projectId = matches.get('projectId');
+    if (!projectId) {
+      throw new Error(`No values found for project Id: ${projectId}`);
+    }
+    return {projectId};
   }
 
   /**

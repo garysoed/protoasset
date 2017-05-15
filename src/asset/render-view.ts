@@ -3,6 +3,7 @@ import { InstanceofType } from 'external/gs_tools/src/check';
 import { Arrays, Sets } from 'external/gs_tools/src/collection';
 import { DisposableFunction } from 'external/gs_tools/src/dispose';
 import { DomEvent, ListenableDom } from 'external/gs_tools/src/event';
+import { ImmutableSet } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
 import { BooleanParser, IntegerParser, StringParser } from 'external/gs_tools/src/parse';
 import { SimpleIdGenerator } from 'external/gs_tools/src/random';
@@ -81,7 +82,7 @@ export const RENDER_ITEM_DATA_HELPER: ChildElementDataHelper<RenderData> = {
  * Render View
  */
 @customElement({
-  dependencies: [RenderItem],
+  dependencies: ImmutableSet.of([RenderItem]),
   tag: 'pa-asset-render-view',
   templateKey: 'src/asset/render-view',
 })

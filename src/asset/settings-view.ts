@@ -1,5 +1,6 @@
 import { Serializer } from 'external/gs_tools/src/data';
 import { DomEvent } from 'external/gs_tools/src/event';
+import { ImmutableSet } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
 import { EnumParser, FloatParser, StringParser } from 'external/gs_tools/src/parse';
 import { Cases } from 'external/gs_tools/src/string';
@@ -25,7 +26,7 @@ import { Views } from '../routing/views';
  * Asset settings view
  */
 @customElement({
-  dependencies: [DownloadService, Editor],
+  dependencies: ImmutableSet.of([DownloadService, Editor]),
   tag: 'pa-asset-settings-view',
   templateKey: 'src/asset/settings-view',
 })

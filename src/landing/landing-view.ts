@@ -1,5 +1,5 @@
 import { Arrays } from 'external/gs_tools/src/collection';
-import { Iterables } from 'external/gs_tools/src/immutable';
+import { ImmutableSet, Iterables } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
 import { StringParser } from 'external/gs_tools/src/parse';
 import {
@@ -51,7 +51,7 @@ export const PROJECT_ITEM_DATA_HELPER: ChildElementDataHelper<string> = {
  * The main landing view of the app.
  */
 @customElement({
-  dependencies: [FilterButton, ProjectCollection, ProjectItem, RouteService],
+  dependencies: ImmutableSet.of([FilterButton, ProjectCollection, ProjectItem, RouteService]),
   tag: 'pa-landing-view',
   templateKey: 'src/landing/landing-view',
 })

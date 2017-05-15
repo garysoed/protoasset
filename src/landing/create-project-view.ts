@@ -1,3 +1,4 @@
+import { ImmutableSet } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
 import { BooleanParser, StringParser } from 'external/gs_tools/src/parse';
 import {
@@ -22,7 +23,7 @@ import { Views } from '../routing/views';
  * The main landing view of the app.
  */
 @customElement({
-  dependencies: [Editor],
+  dependencies: ImmutableSet.of([Editor]),
   tag: 'pa-create-project-view',
   templateKey: 'src/landing/create-project-view',
 })

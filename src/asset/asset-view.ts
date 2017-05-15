@@ -1,3 +1,4 @@
+import { ImmutableSet } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
 import { Reflect } from 'external/gs_tools/src/util';
 import { customElement } from 'external/gs_tools/src/webc';
@@ -20,7 +21,9 @@ import { Views } from '../routing/views';
  * Main view for the asset section.
  */
 @customElement({
-  dependencies: [DataView, HelperView, LayerView, NavBar, RenderView, SettingsView],
+  dependencies: ImmutableSet.of(
+    [DataView, HelperView, LayerView, NavBar, RenderView, SettingsView],
+  ),
   tag: 'pa-asset-view',
   templateKey: 'src/asset/asset-view',
 })

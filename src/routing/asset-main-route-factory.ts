@@ -1,8 +1,8 @@
+import { ImmutableMap } from 'external/gs_tools/src/immutable';
 import { AbstractRouteFactory } from 'external/gs_ui/src/routing';
 
 import { AssetCollection } from '../data/asset-collection';
-
-import { Views } from './views';
+import { Views } from '../routing/views';
 
 type CP = {assetId: string};
 type PR = {projectId: string};
@@ -41,7 +41,7 @@ export class AssetMainRouteFactory extends AbstractRouteFactory<Views, CP, CR, P
   /**
    * @override
    */
-  getRelativeMatchParams_(matches: {[key: string]: string}): CP {
+  getRelativeMatchParams_(matches: ImmutableMap<string, string>): CP {
     return {
       assetId: matches['assetId'],
     };
