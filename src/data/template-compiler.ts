@@ -1,4 +1,4 @@
-import { Jsons } from 'external/gs_tools/src/collection';
+import { Jsons } from 'external/gs_tools/src/data';
 
 
 export class TemplateCompiler {

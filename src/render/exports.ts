@@ -1,4 +1,4 @@
-import { Jsons } from 'external/gs_tools/src/collection';
+import { Jsons } from 'external/gs_tools/src/data';
 
 import { RenderMain } from '../render/render-main';
 
@@ -8,4 +8,3 @@ function bootstrap(html2Canvas: Html2CanvasStatic, window: Window): void {
 }
 
 Jsons.setValue(window, 'par.bootstrap', bootstrap);
-// TODO: Mutable
