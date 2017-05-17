@@ -1,6 +1,5 @@
 import { atomic } from 'external/gs_tools/src/async';
 import { InstanceofType } from 'external/gs_tools/src/check';
-import { Arrays, Sets } from 'external/gs_tools/src/collection';
 import { DisposableFunction } from 'external/gs_tools/src/dispose';
 import { DomEvent, ListenableDom } from 'external/gs_tools/src/event';
 import { ImmutableSet } from 'external/gs_tools/src/immutable';
@@ -195,13 +194,11 @@ export class RenderView extends BaseThemedElement {
     }
 
     const jsZip = new this.jsZip_();
-    Sets
-        .of(this.fileData_)
-        .forEach((fileData: FileData) => {
-          const {dataUrl, filename} = fileData;
-          const imageData = dataUrl.substring(dataUrl.indexOf(',') + 1);
-          jsZip.file(filename, imageData, {base64: true});
-        });
+    for (const fileData of this.fileData_) {
+      const {dataUrl, filename} = fileData;
+      const imageData = dataUrl.substring(dataUrl.indexOf(',') + 1);
+      jsZip.file(filename, imageData, {base64: true});
+    }
 
     const content = await jsZip.generateAsync({type: 'blob'});
     this.downloadService_.download(content, `${asset.getName()}.zip`);
@@ -245,23 +242,23 @@ export class RenderView extends BaseThemedElement {
 
     const renderData: RenderData[] = [];
     const renderKeys: string[] = [];
-    Arrays
-        .of(await dataSource.getData())
-        .forEach((value: string[], index: number) => {
-          const key = this.renderIdGenerator_.generate(renderKeys);
-          const filename = this.templateCompilerService_
-              .create(asset, value)
-              .compile(filenameTemplate);
+    const data = await dataSource.getData();
+    for (let index = 0; index < data.length; index++) {
+      const value = data[index];
+      const key = this.renderIdGenerator_.generate(renderKeys);
+      const filename = this.templateCompilerService_
+          .create(asset, value)
+          .compile(filenameTemplate);
 
-          renderKeys.push(key);
-          renderData.push({
-            assetId: asset.getId(),
-            filename,
-            key,
-            projectId: asset.getProjectId(),
-            row: index,
-          });
-        });
+      renderKeys.push(key);
+      renderData.push({
+        assetId: asset.getId(),
+        filename,
+        key,
+        projectId: asset.getProjectId(),
+        row: index,
+      });
+    }
     this.fileData_.clear();
     this.expectedRenderKeys_.clear();
     renderKeys.forEach((key: string) => {

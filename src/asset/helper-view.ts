@@ -1,8 +1,7 @@
 import { atomic } from 'external/gs_tools/src/async';
-import { Arrays } from 'external/gs_tools/src/collection';
 import { DisposableFunction } from 'external/gs_tools/src/dispose';
 import { DomEvent, ListenableDom } from 'external/gs_tools/src/event';
-import { ImmutableSet } from 'external/gs_tools/src/immutable';
+import { ImmutableList, ImmutableSet } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
 import { BooleanParser, StringParser } from 'external/gs_tools/src/parse';
 import { BaseIdGenerator, SimpleIdGenerator } from 'external/gs_tools/src/random';
@@ -97,7 +96,7 @@ export const CONSOLE_ENTRY_DATA_HELPER: ChildElementDataHelper<ConsoleEntry> = {
     element.children.item(0).textContent = data.command;
 
     const resultEl = element.children.item(1);
-    resultEl.innerHTML = Arrays
+    resultEl.innerHTML = ImmutableList
         .of(data.result.split('\n'))
         .map((line: string) => {
           return line.replace(/ /g, '&nbsp;');
@@ -105,7 +104,7 @@ export const CONSOLE_ENTRY_DATA_HELPER: ChildElementDataHelper<ConsoleEntry> = {
         .map((line: string) => {
           return `<p>${line}</p>`;
         })
-        .asArray()
+        .toArray()
         .join('');
     resultEl.classList.toggle('error', data.isError);
   },
@@ -231,12 +230,12 @@ export class HelperView extends BaseThemedElement {
    * Creates a new helper object.
    */
   private async createHelper_(asset: Asset): Promise<void> {
-    const existingHelperIds = Arrays
+    const existingHelperIds = ImmutableList
         .of(asset.getAllHelpers())
         .map((helper: Helper) => {
           return helper.getId();
         })
-        .asArray();
+        .toArray();
     const newHelperId = this.helperIdGenerator_.generate(existingHelperIds);
     const helper = Helper.of(newHelperId, `helper_${newHelperId}`);
     asset.setHelper(newHelperId, helper);
@@ -340,9 +339,9 @@ export class HelperView extends BaseThemedElement {
       return;
     }
 
-    const removedIndex = Arrays
-        .fromItemList(parentEl.children)
-        .findIndex((value: Element) => {
+    const removedIndex = ImmutableList
+        .of(parentEl.children)
+        .findKey((value: Element) => {
           return value === target;
         });
 
@@ -363,7 +362,7 @@ export class HelperView extends BaseThemedElement {
     const commaIndex = newValue.indexOf(',');
     if (commaIndex >= 0) {
       const existingArgs = this.argElementsHook_.get() || [];
-      const newArgs = Arrays
+      const newArgs = ImmutableList
           .of(newValue.split(','))
           .map((arg: string) => {
             return arg.trim();
@@ -371,7 +370,7 @@ export class HelperView extends BaseThemedElement {
           .filter((arg: string) => {
             return arg.length > 0;
           })
-          .asArray();
+          .toArray();
 
       this.argElementsHook_.set(existingArgs.concat(newArgs));
       this.argInputHook_.delete();
@@ -401,24 +400,23 @@ export class HelperView extends BaseThemedElement {
 
     this.updateHelper_(helper);
 
-    const otherHelpers = Arrays
+    const otherHelpers = ImmutableList
         .of(asset.getAllHelpers())
         .filter((value: Helper) => {
           return value.getId() !== helper.getId();
         })
-        .asArray();
-    const helperIdParams = Arrays
+        .toArray();
+    const helperIdParams = ImmutableList
         .of([helper])
-        .addAllArray(otherHelpers)
+        .addAll(ImmutableList.of(otherHelpers))
         .map((helper: Helper) => {
           return {
             assetId: asset.getId(),
             helperId: helper.getId(),
             projectId: asset.getProjectId(),
           };
-        })
-        .asIterable();
-    this.helperItemsHook_.set(Arrays.fromIterable(helperIdParams).asArray());
+        });
+    this.helperItemsHook_.set(helperIdParams.toArray());
   }
 
   @handle('#args').childListChange()

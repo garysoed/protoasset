@@ -1,7 +1,6 @@
 import { atomic } from 'external/gs_tools/src/async';
-import { Arrays } from 'external/gs_tools/src/collection';
 import { DisposableFunction } from 'external/gs_tools/src/dispose';
-import { ImmutableSet } from 'external/gs_tools/src/immutable';
+import { ImmutableList, ImmutableSet } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
 import { BooleanParser, EnumParser, StringParser } from 'external/gs_tools/src/parse';
 import {
@@ -153,7 +152,7 @@ export class LayerPreview extends BaseThemedElement {
       return;
     }
 
-    const layer = Arrays
+    const layer = ImmutableList
         .of(asset.getLayers())
         .find((layer: BaseLayer) => {
           return layer.getId() === layerId;

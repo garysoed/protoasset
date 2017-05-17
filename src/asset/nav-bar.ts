@@ -1,4 +1,3 @@
-import { Maps } from 'external/gs_tools/src/collection';
 import { DomEvent } from 'external/gs_tools/src/event';
 import { inject } from 'external/gs_tools/src/inject';
 import { BooleanParser, StringParser } from 'external/gs_tools/src/parse';
@@ -12,6 +11,7 @@ import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { AbstractRouteFactory, RouteService, RouteServiceEvents } from 'external/gs_ui/src/routing';
 import { ThemeService } from 'external/gs_ui/src/theming';
 
+import { ImmutableMap } from 'external/gs_tools/src/immutable';
 import { RouteFactoryService } from '../routing/route-factory-service';
 import { Views } from '../routing/views';
 
@@ -63,18 +63,13 @@ export class NavBar extends BaseThemedElement {
     }
 
     let currentParams = null;
-    Maps
-        .of(this.routeMap_)
-        .forOf((
-            factory: AbstractRouteFactory<any, any, any, any>,
-            tabId: string,
-            breakFn: () => void) => {
-          const params = this.routeService_.getParams(factory);
-          if (params !== null) {
-            currentParams = params;
-            breakFn();
-          }
-        });
+    for (const [tabId, factory] of this.routeMap_) {
+      const params = this.routeService_.getParams(factory);
+      if (params !== null) {
+        currentParams = params;
+        break;
+      }
+    }
     this.routeService_.goTo(routeFactory, currentParams);
   }
 
@@ -110,7 +105,7 @@ export class NavBar extends BaseThemedElement {
    * Handles when the route is changed.
    */
   private onRouteChanged_(): void {
-    const tabId = Maps
+    const tabId = ImmutableMap
         .of(this.routeMap_)
         .findKey((factory: AbstractRouteFactory<any, any, any, any>) => {
           return this.routeService_.getParams(factory) !== null;

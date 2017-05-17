@@ -1,6 +1,6 @@
 import { atomic } from 'external/gs_tools/src/async';
-import { Arrays } from 'external/gs_tools/src/collection';
 import { DisposableFunction } from 'external/gs_tools/src/dispose';
+import { ImmutableList } from 'external/gs_tools/src/immutable';
 import { StringParser } from 'external/gs_tools/src/parse';
 import {
   DomHook,
@@ -82,7 +82,7 @@ export abstract class AbstractLayerEditor<T extends BaseLayer> extends BaseTheme
       return null;
     }
 
-    const layer = Arrays
+    const layer = ImmutableList
         .of(asset.getLayers())
         .find((layer: BaseLayer) => {
           return layer.getId() === layerId;

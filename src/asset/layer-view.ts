@@ -1,8 +1,7 @@
 import { atomic } from 'external/gs_tools/src/async';
-import { Arrays } from 'external/gs_tools/src/collection';
 import { DisposableFunction } from 'external/gs_tools/src/dispose';
 import { DomEvent, ListenableDom } from 'external/gs_tools/src/event';
-import { ImmutableSet } from 'external/gs_tools/src/immutable';
+import { ImmutableList, ImmutableSet } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
 import {
   BooleanParser,
@@ -392,7 +391,7 @@ export class LayerView extends BaseThemedElement {
     // TODO: Let user pick the data row.
     this.imageEditorDataRowHook_.set(0);
 
-    const layerItemData = Arrays
+    const layerItemData = ImmutableList
         .of(asset.getLayers())
         .map((layer: BaseLayer) => {
           return {
@@ -401,13 +400,13 @@ export class LayerView extends BaseThemedElement {
             projectId: asset.getProjectId(),
           };
         })
-        .asArray();
+        .toArray();
     this.layersChildElementHook_.set(layerItemData);
     this.updateLayerPreviews_();
 
     // Check if the currently selected layer exists.
     const layers = asset.getLayers();
-    const layer = Arrays
+    const layer = ImmutableList
         .of(layers)
         .find((layer: BaseLayer) => {
           return layer.getId() === this.selectedLayerId_;
@@ -459,7 +458,7 @@ export class LayerView extends BaseThemedElement {
       return;
     }
 
-    const layer = Arrays
+    const layer = ImmutableList
         .of(asset.getLayers())
         .find((layer: BaseLayer) => {
           return layer.getId() === layerId;
@@ -519,13 +518,12 @@ export class LayerView extends BaseThemedElement {
   }
 
   private onSelectedLayerPreviewModeChanged_(): void {
-    const previewModes = Arrays
+    const previewModes = ImmutableList
         .of([this.selectedLayerPreviewMode_])
-        .addAllArray(Arrays
+        .addAll(ImmutableList
             .of(Enums.getAllValues<LayerPreviewMode>(LayerPreviewMode))
-            .removeAll(new Set([this.selectedLayerPreviewMode_]))
-            .asArray())
-        .asArray();
+            .deleteAll(ImmutableSet.of([this.selectedLayerPreviewMode_])))
+        .toArray();
     this.previewModeChildElementHook_.set(previewModes);
     this.selectedPreviewModeHook_
         .set(EnumParser(LayerPreviewMode).stringify(this.selectedLayerPreviewMode_));
@@ -587,7 +585,7 @@ export class LayerView extends BaseThemedElement {
 
       this.imageRenderSrcHook_.set(uri);
     } else {
-      const layerPreviewData = Arrays
+      const layerPreviewData = ImmutableList
           .of(asset.getLayers())
           .map((layer: BaseLayer) => {
             const layerId = layer.getId();
@@ -598,7 +596,7 @@ export class LayerView extends BaseThemedElement {
             };
           })
           .reverse()
-          .asArray();
+          .toArray();
       this.layerPreviewsChildElementHook_.set(layerPreviewData);
     }
   }

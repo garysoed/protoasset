@@ -1,7 +1,7 @@
 import { atomic } from 'external/gs_tools/src/async';
-import { Arrays } from 'external/gs_tools/src/collection';
 import { DisposableFunction } from 'external/gs_tools/src/dispose';
 import { DomEvent } from 'external/gs_tools/src/event';
+import { ImmutableList } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
 import { BooleanParser, EnumParser, StringParser } from 'external/gs_tools/src/parse';
 import { BaseIdGenerator, SimpleIdGenerator } from 'external/gs_tools/src/random';
@@ -126,7 +126,7 @@ export class LayerItem extends BaseThemedElement {
       return null;
     }
 
-    return Arrays
+    return ImmutableList
         .of(asset.getLayers())
         .find((layer: BaseLayer) => {
           return layer.getId() === layerId;

@@ -1,5 +1,5 @@
 import { ArrayOfType, NonNullType } from 'external/gs_tools/src/check';
-import { Arrays, Maps } from 'external/gs_tools/src/collection';
+import { ImmutableList, Iterables, OrderedMap } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
 import { BooleanParser, FloatParser, StringParser } from 'external/gs_tools/src/parse';
 import {
@@ -34,12 +34,12 @@ export const PREVIEW_ROW_DATA_HELPER: ChildElementDataHelper<string[]> = {
    * @override
    */
   get(root: Element): string[] | null {
-    const values = Arrays
-        .fromItemList(root.children)
+    const values = ImmutableList
+        .of(root.children)
         .map((child: Element) => {
           return child.textContent;
         })
-        .asArray();
+        .toArray();
     return ArrayOfType<string>(NonNullType<string>()).check(values) ? values : null;
   },
 
@@ -47,19 +47,18 @@ export const PREVIEW_ROW_DATA_HELPER: ChildElementDataHelper<string[]> = {
    * @override
    */
   set(data: string[], root: Element): void {
-    Arrays
-        .of(data)
-        .forEach((value: string, index: number) => {
-          let column: Element;
-          if (root.childElementCount <= index) {
-            column = root.ownerDocument.createElement('td');
-            root.appendChild(column);
-          } else {
-            column = root.children.item(index);
-          }
+    for (let index = 0; index < data.length; index++) {
+      const value = data[index];
+      let column: Element;
+      if (root.childElementCount <= index) {
+        column = root.ownerDocument.createElement('td');
+        root.appendChild(column);
+      } else {
+        column = root.children.item(index);
+      }
 
-          column.textContent = value;
-        });
+      column.textContent = value;
+    }
   },
 };
 
@@ -158,15 +157,12 @@ export class DataView extends BaseThemedElement {
     }
 
     const files = await this.fileService_.processBundle(bundleId);
-    if (files !== null) {
-      const entry = Maps.of(files).anyEntry();
-      if (entry !== null) {
-        const dataSource = TsvDataSource.of(
-            InMemoryDataSource.of(entry[1]),
-            startRow,
-            endRow);
-        await this.updateAsset_(dataSource);
-      }
+    if (files !== null && files.size > 0) {
+      const dataSource = TsvDataSource.of(
+          InMemoryDataSource.of(Iterables.unsafeToArray(files.values())[0]),
+          startRow,
+          endRow);
+      await this.updateAsset_(dataSource);
     }
 
     await this.updatePreview_();
