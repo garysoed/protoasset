@@ -1,6 +1,6 @@
 import { Field, Serializable } from 'external/gs_tools/src/data';
+import { ImmutableList } from 'external/gs_tools/src/immutable';
 
-import { ImmutableList } from "external/gs_tools/src/immutable";
 import { BaseLayer } from '../data/base-layer';
 import { DataEvents } from '../data/data-events';
 import { LayerType } from '../data/layer-type';

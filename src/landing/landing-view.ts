@@ -1,5 +1,4 @@
-import { Arrays } from 'external/gs_tools/src/collection';
-import { ImmutableSet, Iterables } from 'external/gs_tools/src/immutable';
+import { ImmutableList, ImmutableSet, Iterables } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
 import { StringParser } from 'external/gs_tools/src/parse';
 import {
@@ -102,11 +101,11 @@ export class LandingView extends BaseThemedElement {
 
     const projects = await projectsPromise;
     const normalizedProjects = projects instanceof Array ? projects : Iterables.toArray(projects);
-    const projectIds = Arrays.of(normalizedProjects)
+    const projectIds = ImmutableList.of(normalizedProjects)
         .map((project: Project) => {
           return project.getId();
         })
-        .asArray();
+        .toArray();
     this.projectCollectionHook_.set(projectIds);
   }
 

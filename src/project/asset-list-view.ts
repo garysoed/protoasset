@@ -1,4 +1,3 @@
-import { Arrays } from 'external/gs_tools/src/collection';
 import { ImmutableSet, Iterables } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
 import {

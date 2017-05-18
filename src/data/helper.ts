@@ -1,8 +1,8 @@
 import { Field, Serializable } from 'external/gs_tools/src/data';
 import { BaseListenable } from 'external/gs_tools/src/event';
+import { ImmutableList } from 'external/gs_tools/src/immutable';
 
-import { ImmutableList } from "external/gs_tools/src/immutable";
-import { DataEvents } from './data-events';
+import { DataEvents } from '../data/data-events';
 
 
 /**

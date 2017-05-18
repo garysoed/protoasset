@@ -1,6 +1,6 @@
 import { atomic } from 'external/gs_tools/src/async';
-import { Arrays } from 'external/gs_tools/src/collection';
 import { BaseDisposable } from 'external/gs_tools/src/dispose';
+import { ImmutableList } from 'external/gs_tools/src/immutable';
 import { bind, inject } from 'external/gs_tools/src/inject';
 import { BaseIdGenerator, SimpleIdGenerator } from 'external/gs_tools/src/random';
 import { ApiClient, PostMessageChannel } from 'external/gs_tools/src/rpc';
@@ -79,11 +79,11 @@ export class RenderService extends BaseDisposable {
   @atomic()
   async render(asset: Asset, data: string[]): Promise<string | null> {
     const layers = asset.getLayers();
-    const htmlComponents = Arrays
+    const htmlComponents = ImmutableList
         .of(layers)
         .reverse()
         .reduce<HtmlComponents>(
-            (layer: BaseLayer, index: number, previousResult: HtmlComponents) => {
+            (previousResult: HtmlComponents, layer: BaseLayer, index: number) => {
               const components = layer.asHtml();
               return {
                 css: previousResult.css + components.css,
