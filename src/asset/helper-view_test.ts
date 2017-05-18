@@ -1,8 +1,8 @@
 import { assert, Matchers, TestBase } from '../test-base';
 TestBase.setup();
 
-import { Arrays } from 'external/gs_tools/src/collection';
 import { DomEvent, ListenableDom } from 'external/gs_tools/src/event';
+import { ImmutableList } from 'external/gs_tools/src/immutable';
 import { Fakes, Mocks } from 'external/gs_tools/src/mock';
 import { TestDispose } from 'external/gs_tools/src/testing';
 
@@ -157,7 +157,7 @@ describe('CONSOLE_ENTRY_DATA_HELPER', () => {
       CONSOLE_ENTRY_DATA_HELPER
           .set({command, isError: false, result}, rootEl, Mocks.object('instance'));
 
-      assert(Arrays.fromItemList(resultEl.classList).asArray()).to.equal([]);
+      assert(ImmutableList.of(resultEl.classList)).to.haveElements([]);
       assert(resultEl.innerHTML).to.equal(`<p>${line1}</p><p>&nbsp;&nbsp;${line2}</p>`);
       assert(commandEl.textContent).to.equal(command);
       assert(rootEl.getAttribute('pa-result')).to.equal(result);
@@ -178,7 +178,7 @@ describe('CONSOLE_ENTRY_DATA_HELPER', () => {
       CONSOLE_ENTRY_DATA_HELPER
           .set({command, isError: true, result}, rootEl, Mocks.object('instance'));
 
-      assert(Arrays.fromItemList(resultEl.classList).asArray()).to.equal(['error']);
+      assert(ImmutableList.of(resultEl.classList)).to.haveElements(['error']);
       assert(resultEl.innerHTML).to.equal(`<p>${line1}</p><p>&nbsp;&nbsp;${line2}</p>`);
       assert(commandEl.textContent).to.equal(command);
     });
