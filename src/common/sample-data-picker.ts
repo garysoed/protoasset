@@ -1,5 +1,5 @@
-import { Arrays } from 'external/gs_tools/src/collection';
 import { DomEvent, ListenableDom } from 'external/gs_tools/src/event';
+import { ImmutableList } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
 import { BooleanParser, IntegerParser, StringParser } from 'external/gs_tools/src/parse';
 import {
@@ -139,7 +139,7 @@ export class SampleDataPicker extends BaseThemedElement {
     }
 
     const results = fuse.search(searchText);
-    const sampleItemData = Arrays
+    const sampleItemData = ImmutableList
         .of(results.slice(0, 5))
         .map((index: SampleDataSearchIndex) => {
           return {
@@ -147,7 +147,7 @@ export class SampleDataPicker extends BaseThemedElement {
             row: index.item.row,
           };
         })
-        .asArray();
+        .toArray();
     this.resultsChildrenHook_.set(sampleItemData);
   }
 }

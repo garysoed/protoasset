@@ -1,6 +1,6 @@
-import { Arrays, Maps } from 'external/gs_tools/src/collection';
 import { Field, Serializable } from 'external/gs_tools/src/data';
 import { BaseListenable } from 'external/gs_tools/src/event';
+import { ImmutableList, ImmutableMap, Iterables } from 'external/gs_tools/src/immutable';
 
 import { BaseLayer } from '../data/base-layer';
 import { DataEvents } from '../data/data-events';
@@ -62,16 +62,13 @@ export class Asset extends BaseListenable<DataEvents> {
   }
 
   disposeInternal(): void {
-    Arrays
-        .of(this.layers_)
+    this.layers_
         .forEach((layer: BaseLayer) => {
           layer.dispose();
         });
-    Maps
-        .fromRecord(this.helpers_)
-        .forEach((helper: Helper) => {
-          helper.dispose();
-        });
+    for (const [key, helper] of ImmutableMap.of(this.helpers_)) {
+      helper.dispose();
+    }
     super.disposeInternal();
   }
 
@@ -79,7 +76,7 @@ export class Asset extends BaseListenable<DataEvents> {
    * @return All helpers added to this asset..
    */
   getAllHelpers(): Helper[] {
-    return Maps.fromRecord(this.helpers_).values().asArray();
+    return Iterables.toArray(ImmutableMap.of(this.helpers_).values());
   }
 
   /**
@@ -122,12 +119,12 @@ export class Asset extends BaseListenable<DataEvents> {
    * @return IDs of the layers in the asset.
    */
   getLayerIds(): string[] {
-    return Arrays
+    return ImmutableList
         .of(this.layers_)
         .map((layer: BaseLayer) => {
           return layer.getId();
         })
-        .asArray();
+        .toArray();
   }
 
   /**
@@ -267,7 +264,7 @@ export class Asset extends BaseListenable<DataEvents> {
    * @param layers Layers to set to the asset.
    */
   setLayers(layers: BaseLayer[]): void {
-    if (Arrays.of(this.layers_).equalsTo(layers)) {
+    if (ImmutableList.of(this.layers_).equals(ImmutableList.of(layers))) {
       return;
     }
 

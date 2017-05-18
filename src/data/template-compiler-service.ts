@@ -1,4 +1,3 @@
-import { Arrays } from 'external/gs_tools/src/collection';
 import { bind, inject } from 'external/gs_tools/src/inject';
 
 import { Asset } from './asset';
@@ -29,11 +28,9 @@ export class TemplateCompilerService {
    */
   create(asset: Asset, data: string[]): TemplateCompiler {
     const handlebars = this.handlebars_.create();
-    Arrays
-        .of(asset.getAllHelpers())
-        .forEach((helper: Helper) => {
-          handlebars.registerHelper(helper.getName(), helper.asFunction());
-        });
+    for (const helper of asset.getAllHelpers()) {
+      handlebars.registerHelper(helper.getName(), helper.asFunction());
+    }
     handlebars.registerHelper('case', BuiltInHelpers.case);
     handlebars.registerHelper('ifeq', BuiltInHelpers.ifeq);
     return TemplateCompiler.of(data, handlebars);

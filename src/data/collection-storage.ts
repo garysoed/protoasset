@@ -1,5 +1,4 @@
-import { Arrays } from 'external/gs_tools/src/collection';
-import { ImmutableSet, Iterables } from 'external/gs_tools/src/immutable';
+import { ImmutableList, ImmutableSet, Iterables } from 'external/gs_tools/src/immutable';
 import { Storage as GsStorage } from 'external/gs_tools/src/store';
 
 
@@ -82,12 +81,12 @@ export class CollectionStorage<T, I extends {this: T}> {
   async search(token: string): Promise<T[]> {
     const fuse = await this.getFusePromise_();
     const results = fuse.search(token);
-    return Arrays
+    return ImmutableList
         .of(results)
         .map((result: I) => {
           return result.this;
         })
-        .asArray();
+        .toArray();
   }
 
   /**

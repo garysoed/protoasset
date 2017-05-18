@@ -1,5 +1,5 @@
-import { Arrays } from 'external/gs_tools/src/collection';
 import { Field, Serializable } from 'external/gs_tools/src/data';
+import { ImmutableList } from 'external/gs_tools/src/immutable';
 
 import { IDataSource } from './i-data-source';
 
@@ -42,15 +42,15 @@ export class TsvDataSource implements IDataSource<string[][]> {
    * @return The parsed data.
    */
   parseData_(data: string): string[][] {
-    return Arrays
+    return ImmutableList
         .of(data.split('\n'))
         .map((line: string) => {
           return line.split('\t');
         })
-        .filterElement((value: string[], index: number) => {
+        .filter((value: string[], index: number) => {
           return index >= this.startRow_ && index <= this.endRow_;
         })
-        .asArray();
+        .toArray();
   }
 
   /**

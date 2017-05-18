@@ -1,14 +1,13 @@
-import { Arrays } from 'external/gs_tools/src/collection';
 import { BaseListenable } from 'external/gs_tools/src/event';
+import { ImmutableList } from 'external/gs_tools/src/immutable';
 import { bind, inject } from 'external/gs_tools/src/inject';
 
 import { RouteService } from 'external/gs_ui/src/routing';
 
+import { SampleDataServiceEvent } from '../common/sample-data-service-event';
 import { AssetCollection } from '../data/asset-collection';
 import { RouteFactoryService } from '../routing/route-factory-service';
 import { Views } from '../routing/views';
-
-import { SampleDataServiceEvent } from './sample-data-service-event';
 
 
 export type SampleDataSearchIndex = {
@@ -51,7 +50,7 @@ export class SampleDataService extends BaseListenable<SampleDataServiceEvent> {
   }
 
   async getData_(): Promise<string[][] | null> {
-    const params = Arrays
+    const params = ImmutableList
         .of([
           this.routeService_.getParams(this.routeFactoryService_.layer()),
           this.routeService_.getParams(this.routeFactoryService_.helper()),
@@ -95,18 +94,15 @@ export class SampleDataService extends BaseListenable<SampleDataServiceEvent> {
     }
 
     const indexes: {display: string, row: number}[] = [];
-    Arrays
-        .of(data)
-        .forEach((row: string[], index: number) => {
-          Arrays
-              .of(row)
-              .forEach((entry: string) => {
-                indexes.push({
-                  display: entry,
-                  row: index,
-                });
-              });
+    for (let i = 0; i < data.length; i++) {
+      const row = data[i];
+      for (let j = 0; j < row.length; j++) {
+        indexes.push({
+          display: row[j],
+          row: i,
         });
+      }
+    }
 
     return this.createFuse_(indexes);
   }

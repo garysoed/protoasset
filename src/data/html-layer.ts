@@ -1,7 +1,6 @@
 import { Field, Serializable } from 'external/gs_tools/src/data';
 
-import { Arrays } from 'external/gs_tools/src/collection';
-
+import { ImmutableList } from "external/gs_tools/src/immutable";
 import { BaseLayer } from '../data/base-layer';
 import { DataEvents } from '../data/data-events';
 import { LayerType } from '../data/layer-type';
@@ -33,9 +32,9 @@ export class HtmlLayer extends BaseLayer {
    * @override
    */
   asInactiveNormalPreviewHtml_(): {css: string, html: string} {
-    const styles = Arrays.of(this.getBoxStyles_())
-        .addAllArray(['filter: grayscale(50%);', 'opacity: .5;'])
-        .asArray();
+    const styles = ImmutableList.of(this.getBoxStyles_())
+        .addAll(ImmutableList.of(['filter: grayscale(50%);', 'opacity: .5;']))
+        .toArray();
     return {
       css: this.css_,
       html: `<div style="${styles.join('')}">${this.html_}</div>`,
