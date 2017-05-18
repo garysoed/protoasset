@@ -48,7 +48,11 @@ export class HelperRouteFactory extends AbstractRouteFactory<Views, CP, CR, PR> 
    * @override
    */
   getRelativeMatchParams_(matches: ImmutableMap<string, string>): CP {
-    return {helperId: matches['helperId']};
+    const helperId = matches.get('helperId');
+    if (!helperId) {
+      throw new Error(`Expected helperId not found`);
+    }
+    return {helperId};
   }
 
   /**

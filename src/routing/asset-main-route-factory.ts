@@ -42,9 +42,11 @@ export class AssetMainRouteFactory extends AbstractRouteFactory<Views, CP, CR, P
    * @override
    */
   getRelativeMatchParams_(matches: ImmutableMap<string, string>): CP {
-    return {
-      assetId: matches['assetId'],
-    };
+    const assetId = matches.get('assetId');
+    if (!assetId) {
+      throw new Error(`Expected assetId does not exist`);
+    }
+    return {assetId};
   }
 
   /**

@@ -3,6 +3,7 @@ TestBase.setup();
 
 import { Mocks } from 'external/gs_tools/src/mock';
 
+import { ImmutableMap } from "external/gs_tools/src/immutable";
 import { HelperRouteFactory } from './helper-route-factory';
 
 
@@ -59,5 +60,19 @@ describe('routing.HelperRouteFactory', () => {
               .getName({assetId: 'assetId', helperId: 'helperId', projectId: 'projectId'});
           assert(actualName).to.match(/Unknown helper for asset/);
         });
+  });
+
+  describe('getRelativeMatchParams_', () => {
+    it('should return the correct object', () => {
+      const helperId = 'helperId';
+      assert(factory['getRelativeMatchParams_'](ImmutableMap.of([['helperId', helperId]])))
+          .to.equal({helperId});
+    });
+
+    it('should throw error if helperId is not found', () => {
+      assert(() => {
+        factory['getRelativeMatchParams_'](ImmutableMap.of([[]]));
+      }).to.throwError(/expected helperId/i);
+    });
   });
 });

@@ -32,6 +32,12 @@ describe('routing.AssetListRouteFactory', () => {
       assert(factory['getRelativeMatchParams_'](ImmutableMap.of([['projectId', projectId]])))
           .to.equal({projectId: projectId});
     });
+
+    it('should throw error if projectId is not found', () => {
+      assert(() => {
+        factory['getRelativeMatchParams_'](ImmutableMap.of([[]]));
+      }).to.throwError(/for project Id/);
+    });
   });
 
   describe('getName', () => {
