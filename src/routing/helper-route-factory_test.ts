@@ -1,10 +1,10 @@
 import { assert, TestBase } from '../test-base';
 TestBase.setup();
 
+import { ImmutableMap } from 'external/gs_tools/src/immutable';
 import { Mocks } from 'external/gs_tools/src/mock';
 
-import { ImmutableMap } from "external/gs_tools/src/immutable";
-import { HelperRouteFactory } from './helper-route-factory';
+import { HelperRouteFactory } from '../routing/helper-route-factory';
 
 
 describe('routing.HelperRouteFactory', () => {
