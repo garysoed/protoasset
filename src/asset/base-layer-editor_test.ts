@@ -8,7 +8,7 @@ import { BaseLayerEditor } from './base-layer-editor';
 
 
 describe('asset.BaseLayerEditor', () => {
-  let mockAssetCollection;
+  let mockAssetCollection: any;
   let editor: BaseLayerEditor;
 
   beforeEach(() => {

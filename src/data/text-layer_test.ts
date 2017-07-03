@@ -250,7 +250,7 @@ describe('data.TextLayer', () => {
 
   describe('setBottom', () => {
     it('should dispatch the CHANGED event', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -263,7 +263,7 @@ describe('data.TextLayer', () => {
     });
 
     it('should not dispatch the CHANGED event if the bottom does not change', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -279,7 +279,7 @@ describe('data.TextLayer', () => {
 
   describe('setColor', () => {
     it('should dispatch the CHANGED event', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -292,7 +292,7 @@ describe('data.TextLayer', () => {
     });
 
     it('should not dispatch the CHANGED event if the color does not change', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -308,7 +308,7 @@ describe('data.TextLayer', () => {
 
   describe('setFontFamily', () => {
     it('should dispatch the CHANGED event', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -321,7 +321,7 @@ describe('data.TextLayer', () => {
     });
 
     it('should not dispatch the CHANGED event if the fontFamily does not change', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -337,7 +337,7 @@ describe('data.TextLayer', () => {
 
   describe('setFontUrl', () => {
     it('should dispatch the CHANGED event', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -350,7 +350,7 @@ describe('data.TextLayer', () => {
     });
 
     it('should not dispatch the CHANGED event if the fontUrl does not change', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -366,7 +366,7 @@ describe('data.TextLayer', () => {
 
   describe('setFontWeight', () => {
     it('should dispatch the CHANGED event', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -379,7 +379,7 @@ describe('data.TextLayer', () => {
     });
 
     it('should not dispatch the CHANGED event if the fontUrl does not change', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -395,7 +395,7 @@ describe('data.TextLayer', () => {
 
   describe('setHorizontalAlign', () => {
     it('should dispatch the CHANGED event', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -408,7 +408,7 @@ describe('data.TextLayer', () => {
     });
 
     it('should not dispatch the CHANGED event if the fontUrl does not change', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -424,7 +424,7 @@ describe('data.TextLayer', () => {
 
   describe('setLeft', () => {
     it('should dispatch the CHANGED event', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -437,7 +437,7 @@ describe('data.TextLayer', () => {
     });
 
     it('should not dispatch the CHANGED event if the left does not change', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -453,7 +453,7 @@ describe('data.TextLayer', () => {
 
   describe('setRight', () => {
     it('should dispatch the CHANGED event', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -466,7 +466,7 @@ describe('data.TextLayer', () => {
     });
 
     it('should not dispatch the CHANGED event if the right does not change', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -482,7 +482,7 @@ describe('data.TextLayer', () => {
 
   describe('setSize', () => {
     it('should dispatch the CHANGED event', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -495,7 +495,7 @@ describe('data.TextLayer', () => {
     });
 
     it('should not dispatch the CHANGED event if the size does not change', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -511,7 +511,7 @@ describe('data.TextLayer', () => {
 
   describe('setText', () => {
     it('should dispatch the CHANGED event', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -524,7 +524,7 @@ describe('data.TextLayer', () => {
     });
 
     it('should not dispatch the CHANGED event if the text does not change', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -540,7 +540,7 @@ describe('data.TextLayer', () => {
 
   describe('setTop', () => {
     it('should dispatch the CHANGED event', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -553,7 +553,7 @@ describe('data.TextLayer', () => {
     });
 
     it('should not dispatch the CHANGED event if the top does not change', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -569,7 +569,7 @@ describe('data.TextLayer', () => {
 
   describe('setVerticalAlign', () => {
     it('should dispatch the CHANGED event', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -582,7 +582,7 @@ describe('data.TextLayer', () => {
     });
 
     it('should not dispatch the CHANGED event if the fontUrl does not change', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 

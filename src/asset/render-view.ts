@@ -178,10 +178,8 @@ export class RenderView extends BaseThemedElement {
    */
   onCreated(element: HTMLElement): void {
     super.onCreated(element);
-    this.listenTo(
-        this.routeService_,
-        RouteServiceEvents.CHANGED,
-        this.onRouteChanged_);
+    this.addDisposable(
+        this.routeService_.on(RouteServiceEvents.CHANGED, this.onRouteChanged_, this));
     this.onRouteChanged_();
     this.downloadButtonDisabledHook_.set(true);
   }

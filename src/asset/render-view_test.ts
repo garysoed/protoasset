@@ -179,12 +179,12 @@ describe('RENDER_ITEM_DATA_HELPER', () => {
 
 
 describe('asset.RenderView', () => {
-  let mockAssetCollection;
+  let mockAssetCollection: any;
   let mockDownloadService;
-  let mockJsZipCtor;
-  let mockRouteFactoryService;
-  let mockRouteService;
-  let mockTemplateCompilerService;
+  let mockJsZipCtor: any;
+  let mockRouteFactoryService: any;
+  let mockRouteService: any;
+  let mockTemplateCompilerService: any;
   let view: RenderView;
 
   beforeEach(() => {
@@ -311,9 +311,15 @@ describe('asset.RenderView', () => {
       spyOn(view, 'onRouteChanged_');
       spyOn(view, 'listenTo');
       spyOn(view.downloadButtonDisabledHook_, 'set');
+      spyOn(view, 'addDisposable').and.callThrough();
+
+      const mockDisposable = jasmine.createSpyObj('Disposable', ['dispose']);
+      mockRouteService.on.and.returnValue(mockDisposable);
+
       view.onCreated(element);
-      assert(view.listenTo).to.haveBeenCalledWith(
-          mockRouteService, RouteServiceEvents.CHANGED, view['onRouteChanged_']);
+      assert(mockRouteService.on).to.haveBeenCalledWith(
+          RouteServiceEvents.CHANGED, view['onRouteChanged_'], view);
+      assert(view.addDisposable).to.haveBeenCalledWith(mockDisposable);
       assert(view['onRouteChanged_']).to.haveBeenCalledWith();
       assert(view.downloadButtonDisabledHook_.set).to.haveBeenCalledWith(true);
     });
@@ -382,7 +388,7 @@ describe('asset.RenderView', () => {
       const mockCompiler2 = jasmine.createSpyObj('Compiler2', ['compile']);
       mockCompiler2.compile.and.returnValue(filename2);
 
-      mockTemplateCompilerService.create.and.callFake((asset: any, value: any) => {
+      mockTemplateCompilerService.create.and.callFake((_: any, value: any) => {
         switch (value) {
           case value1:
             return mockCompiler1;

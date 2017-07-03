@@ -44,7 +44,8 @@ export class AssetView extends BaseThemedElement {
    * @override
    */
   [Reflect.__initialize](): void {
-    this.listenTo(this.routeService_, RouteServiceEvents.CHANGED, this.onRouteChanged_);
+    this.addDisposable(
+        this.routeService_.on(RouteServiceEvents.CHANGED, this.onRouteChanged_, this));
   }
 
   /**

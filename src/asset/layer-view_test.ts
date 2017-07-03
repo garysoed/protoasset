@@ -227,12 +227,12 @@ describe('LAYER_PREVIEW_MODE_DATA_HELPER', () => {
 
 
 describe('asset.LayerView', () => {
-  let mockAssetCollection;
-  let mockOverlayService;
-  let mockRenderService;
-  let mockRouteFactoryService;
-  let mockRouteService;
-  let mockSampleDataService;
+  let mockAssetCollection: any;
+  let mockOverlayService: any;
+  let mockRenderService: any;
+  let mockRouteFactoryService: any;
+  let mockRouteService: any;
+  let mockSampleDataService: any;
   let view: LayerView;
 
   beforeEach(() => {
@@ -275,7 +275,7 @@ describe('asset.LayerView', () => {
 
       await view['createLayer_'](layerType);
       assert(mockAssetCollection.update).to.haveBeenCalledWith(mockAsset);
-      assert(mockOverlayService.hideOverlay).to.haveBeenCalledWith();
+      assert(mockOverlayService.hideOverlay).to.haveBeenCalledWith(Matchers.anyThing());
 
       assert(view['selectLayer_']).to.haveBeenCalledWith(Matchers.any(HtmlLayer));
       const layer: HtmlLayer = selectLayerSpy.calls.argsFor(0)[0];
@@ -421,10 +421,10 @@ describe('asset.LayerView', () => {
       await view['onAssetChanged_'](mockAsset);
       assert(view['selectDefaultLayer_']).toNot.haveBeenCalled();
       assert(view.imageEditorDataRowHook_.set).to.haveBeenCalledWith(0);
-      assert(style).to.equal({
+      assert(style).to.equal(Matchers.objectContaining({
         height: `${height}px`,
         width: `${width}px`,
-      });
+      }));
       assert(view.baseEditorAssetIdHook_.set).to.haveBeenCalledWith(id);
       assert(view.baseEditorProjectIdHook_.set).to.haveBeenCalledWith(projectId);
       assert(view.htmlEditorAssetIdHook_.set).to.haveBeenCalledWith(id);
@@ -570,10 +570,16 @@ describe('asset.LayerView', () => {
       spyOn(view, 'onRouteChanged_');
       spyOn(view, 'listenTo');
       spyOn(view, 'onSelectedLayerPreviewModeChanged_');
+      spyOn(view, 'addDisposable').and.callThrough();
+
+      const mockDisposable = jasmine.createSpyObj('Disposable', ['dispose']);
+      mockRouteService.on.and.returnValue(mockDisposable);
       view.onCreated(element);
+
       assert(view['onRouteChanged_']).to.haveBeenCalledWith();
-      assert(view.listenTo).to.haveBeenCalledWith(
-          mockRouteService, RouteServiceEvents.CHANGED, view['onRouteChanged_']);
+      assert(view.addDisposable).to.haveBeenCalledWith(mockDisposable);
+      assert(mockRouteService.on).to.haveBeenCalledWith(
+          RouteServiceEvents.CHANGED, view['onRouteChanged_'], view);
       assert(view['onSelectedLayerPreviewModeChanged_']).to.haveBeenCalledWith();
     });
   });
@@ -623,7 +629,7 @@ describe('asset.LayerView', () => {
 
       await view['onLayerItemClick_'](layerId);
       assert(view['selectLayer_']).to.haveBeenCalledWith(mockLayer);
-      assert(mockOverlayService.hideOverlay).to.haveBeenCalledWith();
+      assert(mockOverlayService.hideOverlay).to.haveBeenCalledWith(Matchers.anyThing());
     });
 
     it('should not select any layers if the layer cannot be found', async () => {
@@ -638,7 +644,7 @@ describe('asset.LayerView', () => {
 
       await view['onLayerItemClick_']('layerId');
       assert(view['selectLayer_']).toNot.haveBeenCalled();
-      assert(mockOverlayService.hideOverlay).to.haveBeenCalledWith();
+      assert(mockOverlayService.hideOverlay).to.haveBeenCalledWith(Matchers.anyThing());
     });
 
     it('should not select any layers if the asset cannot be found', async () => {
@@ -648,7 +654,7 @@ describe('asset.LayerView', () => {
 
       await view['onLayerItemClick_']('layerId');
       assert(view['selectLayer_']).toNot.haveBeenCalled();
-      assert(mockOverlayService.hideOverlay).to.haveBeenCalledWith();
+      assert(mockOverlayService.hideOverlay).to.haveBeenCalledWith(Matchers.anyThing());
     });
 
     it('should not select any layers if the layerId is null', async () => {
@@ -656,7 +662,7 @@ describe('asset.LayerView', () => {
 
       await view['onLayerItemClick_'](null);
       assert(view['selectLayer_']).toNot.haveBeenCalled();
-      assert(mockOverlayService.hideOverlay).to.haveBeenCalledWith();
+      assert(mockOverlayService.hideOverlay).to.haveBeenCalledWith(Matchers.anyThing());
     });
   });
 
@@ -673,7 +679,7 @@ describe('asset.LayerView', () => {
       spyOn(view, 'updateLayerPreviews_');
 
       view.onLayerPreviewModeSelected_(event);
-      assert(mockOverlayService.hideOverlay).to.haveBeenCalledWith();
+      assert(mockOverlayService.hideOverlay).to.haveBeenCalledWith(Matchers.anyThing());
       assert(view['updateLayerPreviews_']).to.haveBeenCalledWith();
       assert(view['onSelectedLayerPreviewModeChanged_']).to.haveBeenCalledWith();
       assert(view['selectedLayerPreviewMode_']).to.equal(previewMode);

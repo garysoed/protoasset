@@ -10,8 +10,8 @@ import { RenderMain } from '../render/render-main';
 
 
 describe('render.RenderMain', () => {
-  let mockHtml2Canvas;
-  let mockWindow;
+  let mockHtml2Canvas: any;
+  let mockWindow: any;
   let main: RenderMain;
 
   beforeEach(() => {
@@ -62,7 +62,7 @@ describe('render.RenderMain', () => {
       });
 
       const canvas = Mocks.object('canvas');
-      mockHtml2Canvas.and.callFake((root: any, options: any) => {
+      mockHtml2Canvas.and.callFake((_: any, options: any) => {
         options.onrendered(canvas);
       });
 

@@ -26,7 +26,7 @@ describe('data.Helper', () => {
 
   describe('setArgs', () => {
     it('should dispatch the changed event', () => {
-      spyOn(helper, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(helper, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -40,7 +40,7 @@ describe('data.Helper', () => {
     });
 
     it('should not dispatch the changed event if the args does not change', () => {
-      spyOn(helper, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(helper, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -56,7 +56,7 @@ describe('data.Helper', () => {
 
   describe('setBody', () => {
     it('should dispatch the changed event if the body are different', () => {
-      spyOn(helper, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(helper, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -72,7 +72,7 @@ describe('data.Helper', () => {
     });
 
     it('should not dispatch the changed event if the body does not change', () => {
-      spyOn(helper, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(helper, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -88,7 +88,7 @@ describe('data.Helper', () => {
 
   describe('seteName', () => {
     it('should dispatch the changed event if the name are different', () => {
-      spyOn(helper, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(helper, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -104,7 +104,7 @@ describe('data.Helper', () => {
     });
 
     it('should not dispatch the changed event if the name does not change', () => {
-      spyOn(helper, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(helper, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 

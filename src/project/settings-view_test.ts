@@ -9,9 +9,9 @@ import { RouteServiceEvents } from 'external/gs_ui/src/routing';
 import { SettingsView } from '../project/settings-view';
 
 describe('project.SettingsView', () => {
-  let mockProjectCollection;
-  let mockRouteFactoryService;
-  let mockRouteService;
+  let mockProjectCollection: any;
+  let mockRouteFactoryService: any;
+  let mockRouteService: any;
   let view: SettingsView;
 
   beforeEach(() => {
@@ -59,12 +59,16 @@ describe('project.SettingsView', () => {
       spyOn(view, 'listenTo');
       spyOn(view, 'addDisposable').and.callThrough();
 
+      const mockDisposable = jasmine.createSpyObj('Disposable', ['dispose']);
+      mockRouteService.on.and.returnValue(mockDisposable);
+
       view.onCreated(Mocks.object('element'));
       assert(view['onRouteChanged_']).to.haveBeenCalledWith();
-      assert(view.listenTo).to.haveBeenCalledWith(
-          mockRouteService,
+      assert(view.addDisposable).to.haveBeenCalledWith(mockDisposable);
+      assert(mockRouteService.on).to.haveBeenCalledWith(
           RouteServiceEvents.CHANGED,
-          view['onRouteChanged_']);
+          view['onRouteChanged_'],
+          view);
     });
   });
 

@@ -8,7 +8,7 @@ import { HelperRouteFactory } from '../routing/helper-route-factory';
 
 
 describe('routing.HelperRouteFactory', () => {
-  let mockAssetCollection;
+  let mockAssetCollection: any;
   let factory: HelperRouteFactory;
 
   beforeEach(() => {

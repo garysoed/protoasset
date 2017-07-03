@@ -63,7 +63,7 @@ export class NavBar extends BaseThemedElement {
     }
 
     let currentParams = null;
-    for (const [tabId, factory] of this.routeMap_) {
+    for (const [, factory] of this.routeMap_) {
       const params = this.routeService_.getParams(factory);
       if (params !== null) {
         currentParams = params;
@@ -84,10 +84,8 @@ export class NavBar extends BaseThemedElement {
     this.routeMap_.set('settings', this.routeFactoryService_.assetSettings());
     this.routeMap_.set('render', this.routeFactoryService_.render());
 
-    this.listenTo(
-        this.routeService_,
-        RouteServiceEvents.CHANGED,
-        this.onRouteChanged_);
+    this.addDisposable(
+        this.routeService_.on(RouteServiceEvents.CHANGED, this.onRouteChanged_, this));
     this.onRouteChanged_();
   }
 

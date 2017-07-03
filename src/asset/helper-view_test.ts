@@ -260,11 +260,11 @@ describe('HELPER_ITEM_DATA_HELPER', () => {
 
 
 describe('asset.HelperView', () => {
-  let mockAssetCollection;
-  let mockRouteFactoryService;
-  let mockRouteService;
-  let mockSampleDataService;
-  let mockTemplateCompilerService;
+  let mockAssetCollection: any;
+  let mockRouteFactoryService: any;
+  let mockRouteService: any;
+  let mockSampleDataService: any;
+  let mockTemplateCompilerService: any;
   let view: HelperView;
 
   beforeEach(() => {
@@ -1069,10 +1069,14 @@ describe('asset.HelperView', () => {
       spyOn(view, 'addDisposable').and.callThrough();
       spyOn(view, 'onRouteChanged_');
 
+      const mockDisposable = jasmine.createSpyObj('Disposable', ['dispose']);
+      mockRouteService.on.and.returnValue(mockDisposable);
+
       const element = Mocks.object('element');
       view.onCreated(element);
-      assert(view.listenTo).to.haveBeenCalledWith(
-          mockRouteService, RouteServiceEvents.CHANGED, view['onRouteChanged_']);
+      assert(view.addDisposable).to.haveBeenCalledWith(mockDisposable);
+      assert(mockRouteService.on).to.haveBeenCalledWith(
+          RouteServiceEvents.CHANGED, view['onRouteChanged_'], view);
       assert(view['onRouteChanged_']).to.haveBeenCalledWith();
     });
   });

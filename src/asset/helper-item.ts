@@ -197,12 +197,14 @@ export class HelperItem extends BaseThemedElement {
       helperId: helper.getId(),
       projectId: asset.getProjectId(),
     });
-    this.overlayService_.hideOverlay();
+
+    // TODO: FIX THIS
+    this.overlayService_.hideOverlay(Symbol('FIX THIS'));
   }
 
-  @handle(null).attributeChange('asset-id', StringParser)
-  @handle(null).attributeChange('helper-id', StringParser)
-  @handle(null).attributeChange('project-id', StringParser)
+  @handle(null).attributeChange('asset-id')
+  @handle(null).attributeChange('helper-id')
+  @handle(null).attributeChange('project-id')
   @atomic()
   async updateHelper_(): Promise<void> {
     const helper = await this.getHelper_();

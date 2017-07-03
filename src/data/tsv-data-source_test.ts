@@ -7,7 +7,7 @@ import { TsvDataSource } from './tsv-data-source';
 
 
 describe('data.TsvDataSource', () => {
-  let mockInnerSource;
+  let mockInnerSource: any;
   let source: TsvDataSource;
 
   beforeEach(() => {

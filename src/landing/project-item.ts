@@ -49,7 +49,7 @@ export class ProjectItem extends BaseThemedElement {
     }
   }
 
-  @handle(null).attributeChange('project-id', StringParser)
+  @handle(null).attributeChange('project-id')
   protected async onProjectIdChanged_(newId: string): Promise<void> {
     const project = await this.projectCollection_.get(newId);
     if (project !== null) {

@@ -91,7 +91,8 @@ export class LayerPreview extends BaseThemedElement {
         this.sampleDataService_,
         SampleDataServiceEvent.ROW_CHANGED,
         this.onDataChanged_);
-    this.listenTo(this.routeService_, RouteServiceEvents.CHANGED, this.onLayerIdChanged_);
+    this.addDisposable(
+        this.routeService_.on(RouteServiceEvents.CHANGED, this.onLayerIdChanged_, this));
     this.onLayerIdChanged_();
   }
 

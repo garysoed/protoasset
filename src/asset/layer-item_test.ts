@@ -10,7 +10,7 @@ import { ImageLayer } from '../data/image-layer';
 
 
 describe('asset.LayerItem', () => {
-  let mockAssetCollection;
+  let mockAssetCollection: any;
   let item: LayerItem;
 
   beforeEach(() => {

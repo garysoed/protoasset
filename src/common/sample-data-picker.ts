@@ -14,10 +14,7 @@ import { ThemeService } from 'external/gs_ui/src/theming';
 
 import { SampleDataSearchIndex, SampleDataService } from '../common/sample-data-service';
 
-
 type SampleItemData = {display: string, row: number};
-type SearchResultData = {dataRow: number, dataString: string};
-
 
 export const RESULTS_DATA_HELPER: ChildElementDataHelper<SampleItemData> = {
   /**

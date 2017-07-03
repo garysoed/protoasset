@@ -111,7 +111,7 @@ describe('RESULTS_DATA_HELPER', () => {
 
 
 describe('common.SampleDataPicker', () => {
-  let mockSampleDataService;
+  let mockSampleDataService: any;
   let picker: SampleDataPicker;
 
   beforeEach(() => {

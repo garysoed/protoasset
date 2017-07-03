@@ -10,8 +10,8 @@ import { NavBar } from './nav-bar';
 
 
 describe('asset.NavBar', () => {
-  let mockRouteFactoryService;
-  let mockRouteService;
+  let mockRouteFactoryService: any;
+  let mockRouteService: any;
   let navbar: NavBar;
 
   beforeEach(() => {
@@ -119,36 +119,39 @@ describe('asset.NavBar', () => {
 
   describe('onCreated', () => {
     it('should initialize the routeMap_ correctly, listen to route changed event, and call '
-        + 'onRouteChanged_',
-        () => {
-          const helperRouteFactory = Mocks.object('helperRouteFactory');
-          mockRouteFactoryService.helper.and.returnValue(helperRouteFactory);
-          const assetDataRouteFactory = Mocks.object('assetDataRouteFactory');
-          mockRouteFactoryService.assetData.and.returnValue(assetDataRouteFactory);
-          const layerRouteFactory = Mocks.object('layerRouteFactory');
-          mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
-          const settingsRouteFactory = Mocks.object('settingsRouteFactory');
-          mockRouteFactoryService.assetSettings.and.returnValue(settingsRouteFactory);
-          const renderRouteFactory = Mocks.object('renderRouteFactory');
-          mockRouteFactoryService.render.and.returnValue(renderRouteFactory);
+        + 'onRouteChanged_', () => {
+      const helperRouteFactory = Mocks.object('helperRouteFactory');
+      mockRouteFactoryService.helper.and.returnValue(helperRouteFactory);
+      const assetDataRouteFactory = Mocks.object('assetDataRouteFactory');
+      mockRouteFactoryService.assetData.and.returnValue(assetDataRouteFactory);
+      const layerRouteFactory = Mocks.object('layerRouteFactory');
+      mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
+      const settingsRouteFactory = Mocks.object('settingsRouteFactory');
+      mockRouteFactoryService.assetSettings.and.returnValue(settingsRouteFactory);
+      const renderRouteFactory = Mocks.object('renderRouteFactory');
+      mockRouteFactoryService.render.and.returnValue(renderRouteFactory);
 
-          spyOn(navbar, 'onRouteChanged_');
-          spyOn(navbar, 'listenTo');
-          spyOn(navbar, 'addDisposable').and.callThrough();
+      spyOn(navbar, 'onRouteChanged_');
+      spyOn(navbar, 'listenTo');
+      spyOn(navbar, 'addDisposable').and.callThrough();
 
-          navbar.onCreated(Mocks.object('element'));
-          assert(navbar['onRouteChanged_']).to.haveBeenCalledWith();
-          assert(navbar.listenTo).to.haveBeenCalledWith(
-              mockRouteService,
-              RouteServiceEvents.CHANGED,
-              navbar['onRouteChanged_']);
-          assert(navbar['routeMap_']).to.haveEntries([
-            ['data', assetDataRouteFactory],
-            ['helper', helperRouteFactory],
-            ['layer', layerRouteFactory],
-            ['settings', settingsRouteFactory],
-            ['render', renderRouteFactory],
-          ]);
-        });
+      const mockDisposable = jasmine.createSpyObj('Disposable', ['dispose']);
+      mockRouteService.on.and.returnValue(mockDisposable);
+
+      navbar.onCreated(Mocks.object('element'));
+      assert(navbar['onRouteChanged_']).to.haveBeenCalledWith();
+      assert(navbar.addDisposable).to.haveBeenCalledWith(mockDisposable);
+      assert(mockRouteService.on).to.haveBeenCalledWith(
+          RouteServiceEvents.CHANGED,
+          navbar['onRouteChanged_'],
+          navbar);
+      assert(navbar['routeMap_']).to.haveEntries([
+        ['data', assetDataRouteFactory],
+        ['helper', helperRouteFactory],
+        ['layer', layerRouteFactory],
+        ['settings', settingsRouteFactory],
+        ['render', renderRouteFactory],
+      ]);
+    });
   });
 });

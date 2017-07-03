@@ -1,7 +1,7 @@
 import { ArrayOfType, NonNullType } from 'external/gs_tools/src/check';
-import { ImmutableList, Iterables, OrderedMap } from 'external/gs_tools/src/immutable';
+import { ImmutableList, Iterables } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
-import { BooleanParser, FloatParser, StringParser } from 'external/gs_tools/src/parse';
+import { FloatParser, StringParser } from 'external/gs_tools/src/parse';
 import {
     ChildElementDataHelper,
     customElement,
@@ -120,7 +120,7 @@ export class DataView extends BaseThemedElement {
     return this.assetCollection_.get(projectId, assetId);
   }
 
-  @handle(null).attributeChange('gs-view-active', BooleanParser)
+  @handle(null).attributeChange('gs-view-active')
   protected onGsViewActiveAttrChange_(newValue: boolean | null): void {
     if (newValue === true) {
       this.updatePreview_();
@@ -141,9 +141,9 @@ export class DataView extends BaseThemedElement {
     await this.assetCollection_.update(asset);
   }
 
-  @handle('#endRowInput').attributeChange('gs-value', FloatParser)
-  @handle('#startRowInput').attributeChange('gs-value', FloatParser)
-  @handle('#dataSourceInput').attributeChange('gs-bundle-id', StringParser)
+  @handle('#endRowInput').attributeChange('gs-value')
+  @handle('#startRowInput').attributeChange('gs-value')
+  @handle('#dataSourceInput').attributeChange('gs-bundle-id')
   protected async updateDataSource_(): Promise<void> {
     const bundleId = this.dataSourceBundleIdHook_.get();
     const startRow = this.startRowValueHook_.get();

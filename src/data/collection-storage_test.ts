@@ -8,8 +8,8 @@ import { CollectionStorage } from '../data/collection-storage';
 
 
 describe('project.CollectionStorage', () => {
-  let mockGetSearchIndex;
-  let mockStorage;
+  let mockGetSearchIndex: any;
+  let mockStorage: any;
   let storage: CollectionStorage<any, any>;
 
   beforeEach(() => {

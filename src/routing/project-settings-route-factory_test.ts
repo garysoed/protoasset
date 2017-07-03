@@ -7,7 +7,7 @@ import { ProjectSettingsRouteFactory } from '../routing/project-settings-route-f
 
 
 describe('routing.ProjectSettingsRouteFactory', () => {
-  let mockProjectCollection;
+  let mockProjectCollection: any;
   let factory: ProjectSettingsRouteFactory;
 
   beforeEach(() => {

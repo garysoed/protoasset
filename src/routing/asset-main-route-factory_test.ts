@@ -8,7 +8,7 @@ import { AssetMainRouteFactory } from '../routing/asset-main-route-factory';
 
 
 describe('routing.AssetMainRouteFactory', () => {
-  let mockAssetCollection;
+  let mockAssetCollection: any;
   let factory: AssetMainRouteFactory;
 
   beforeEach(() => {

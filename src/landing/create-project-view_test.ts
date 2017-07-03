@@ -10,9 +10,9 @@ import { CreateProjectView } from './create-project-view';
 
 
 describe('landing.CreateProjectView', () => {
-  let mockProjectCollection;
-  let mockRouteFactoryService;
-  let mockRouteService;
+  let mockProjectCollection: any;
+  let mockRouteFactoryService: any;
+  let mockRouteService: any;
   let view: CreateProjectView;
 
   beforeEach(() => {

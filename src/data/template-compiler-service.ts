@@ -2,7 +2,6 @@ import { bind, inject } from 'external/gs_tools/src/inject';
 
 import { Asset } from './asset';
 import { BuiltInHelpers } from './built-in-helpers';
-import { Helper } from './helper';
 import { TemplateCompiler } from './template-compiler';
 
 

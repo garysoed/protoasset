@@ -66,7 +66,7 @@ export class Asset extends BaseListenable<DataEvents> {
         .forEach((layer: BaseLayer) => {
           layer.dispose();
         });
-    for (const [key, helper] of ImmutableMap.of(this.helpers_)) {
+    for (const [, helper] of ImmutableMap.of(this.helpers_)) {
       helper.dispose();
     }
     super.disposeInternal();

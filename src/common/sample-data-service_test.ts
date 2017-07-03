@@ -9,9 +9,9 @@ import { SampleDataServiceEvent } from './sample-data-service-event';
 
 
 describe('common.SampleDataService', () => {
-  let mockAssetCollection;
-  let mockRouteFactoryService;
-  let mockRouteService;
+  let mockAssetCollection: any;
+  let mockRouteFactoryService: any;
+  let mockRouteService: any;
   let service: SampleDataService;
 
   beforeEach(() => {

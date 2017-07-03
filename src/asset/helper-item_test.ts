@@ -10,10 +10,10 @@ import { HelperItem } from './helper-item';
 
 
 describe('asset.HelperItem', () => {
-  let mockAssetCollection;
-  let mockOverlayService;
-  let mockRouteFactoryService;
-  let mockRouteService;
+  let mockAssetCollection: any;
+  let mockOverlayService: any;
+  let mockRouteFactoryService: any;
+  let mockRouteService: any;
   let item: HelperItem;
 
   beforeEach(() => {

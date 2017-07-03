@@ -11,7 +11,7 @@ import { CollectionStorage } from './collection-storage';
 
 
 describe('data.AssetCollection', () => {
-  let window;
+  let window: any;
   let collection: AssetCollection;
 
   beforeEach(() => {

@@ -10,9 +10,9 @@ import { ImageLayer } from '../data/image-layer';
 
 
 describe('asset.ImageLayerEditor', () => {
-  let mockAssetCollection;
-  let mockSampleDataService;
-  let mockTemplateCompilerService;
+  let mockAssetCollection: any;
+  let mockSampleDataService: any;
+  let mockTemplateCompilerService: any;
   let editor: ImageLayerEditor;
 
   beforeEach(() => {

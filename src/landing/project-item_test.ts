@@ -8,10 +8,10 @@ import { ProjectItem } from './project-item';
 
 
 describe('landing.ProjectItem', () => {
-  let mockProjectCollection;
-  let mockRouteFactoryService;
-  let mockRouteService;
-  let item;
+  let mockProjectCollection: any;
+  let mockRouteFactoryService: any;
+  let mockRouteService: any;
+  let item: ProjectItem;
 
   beforeEach(() => {
     mockProjectCollection = jasmine.createSpyObj('ProjectCollection', ['get']);

@@ -8,9 +8,9 @@ import { AssetItem } from './asset-item';
 
 
 describe('project.AssetItem', () => {
-  let mockAssetCollection;
-  let mockRouteFactoryService;
-  let mockRouteService;
+  let mockAssetCollection: any;
+  let mockRouteFactoryService: any;
+  let mockRouteService: any;
   let item: AssetItem;
 
   beforeEach(() => {

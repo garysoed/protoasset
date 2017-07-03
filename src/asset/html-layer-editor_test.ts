@@ -9,7 +9,7 @@ import { HtmlLayer } from '../data/html-layer';
 
 
 describe('asset.HtmlLayerEditoror', () => {
-  let mockAssetCollection;
+  let mockAssetCollection: any;
   let editor: HtmlLayerEditor;
 
   beforeEach(() => {

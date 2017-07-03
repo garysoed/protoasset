@@ -80,10 +80,10 @@ describe('ASSET_DATA_HELPER', () => {
 
 
 describe('project.AssetListView', () => {
-  let mockAssetCollection;
-  let mockProjectCollection;
-  let mockRouteFactoryService;
-  let mockRouteService;
+  let mockAssetCollection: any;
+  let mockProjectCollection: any;
+  let mockRouteFactoryService: any;
+  let mockRouteService: any;
   let view: AssetListView;
 
   beforeEach(() => {
@@ -229,14 +229,19 @@ describe('project.AssetListView', () => {
     it('should update the project name and listen to changes to route', () => {
       spyOn(view, 'onProjectIdChanged_');
       spyOn(view, 'listenTo');
+      spyOn(view, 'addDisposable').and.callThrough();
+
+      const mockDisposable = jasmine.createSpyObj('Disposable', ['dispose']);
+      spyOn(mockRouteService, 'on').and.returnValue(mockDisposable);
 
       view.onCreated(Mocks.object('element'));
 
       assert(view['onProjectIdChanged_']).to.haveBeenCalledWith();
-      assert(view.listenTo).to.haveBeenCalledWith(
-          mockRouteService,
+      assert(view.addDisposable).to.haveBeenCalledWith(mockDisposable);
+      assert(mockRouteService.on).to.haveBeenCalledWith(
           RouteServiceEvents.CHANGED,
-          view['onProjectIdChanged_']);
+          view['onProjectIdChanged_'],
+          view);
     });
   });
 

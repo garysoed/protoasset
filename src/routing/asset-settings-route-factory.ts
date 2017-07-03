@@ -1,4 +1,3 @@
-import { ImmutableMap } from 'external/gs_tools/src/immutable';
 import { AbstractRouteFactory } from 'external/gs_ui/src/routing';
 
 import { AssetCollection } from '../data/asset-collection';
@@ -41,14 +40,14 @@ export class AssetSettingsRouteFactory extends AbstractRouteFactory<Views, CP, C
   /**
    * @override
    */
-  getRelativeMatchParams_(matches: ImmutableMap<string, string>): CP {
+  getRelativeMatchParams_(): CP {
     return {};
   }
 
   /**
    * @override
    */
-  getRelativePath_(params: CP): string {
+  getRelativePath_(): string {
     return '/settings';
   }
 }

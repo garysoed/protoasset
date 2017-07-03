@@ -9,8 +9,8 @@ import { RenderItem } from '../asset/render-item';
 
 
 describe('asset.RenderItem', () => {
-  let mockAssetCollection;
-  let mockRenderService;
+  let mockAssetCollection: any;
+  let mockRenderService: any;
   let item: RenderItem;
 
   beforeEach(() => {
@@ -252,7 +252,7 @@ describe('asset.RenderItem', () => {
       spyOn(item.renderOutHook_, 'set');
 
       const mockElement = jasmine.createSpyObj('Element', ['dispatchAsync']);
-      Fakes.build(mockElement.dispatchAsync).call((type: string, handler: () => any) => {
+      Fakes.build(mockElement.dispatchAsync).call((_: string, handler: () => any) => {
         handler();
       });
       spyOn(item, 'getElement').and.returnValue(mockElement);
@@ -283,7 +283,7 @@ describe('asset.RenderItem', () => {
       spyOn(item.renderOutHook_, 'set');
 
       const mockElement = jasmine.createSpyObj('Element', ['dispatchAsync']);
-      Fakes.build(mockElement.dispatchAsync).call((type: string, handler: () => any) => {
+      Fakes.build(mockElement.dispatchAsync).call((_: string, handler: () => any) => {
         handler();
       });
       spyOn(item, 'getElement').and.returnValue(mockElement);
@@ -314,7 +314,7 @@ describe('asset.RenderItem', () => {
           spyOn(item.renderOutHook_, 'set');
 
           const mockElement = jasmine.createSpyObj('Element', ['dispatchAsync']);
-          Fakes.build(mockElement.dispatchAsync).call((type: string, handler: () => any) => {
+          Fakes.build(mockElement.dispatchAsync).call((_: string, handler: () => any) => {
             handler();
           });
           spyOn(item, 'getElement').and.returnValue(mockElement);
@@ -341,7 +341,7 @@ describe('asset.RenderItem', () => {
           spyOn(item.loadingHiddenHook_, 'set');
 
           const mockElement = jasmine.createSpyObj('Element', ['dispatchAsync']);
-          Fakes.build(mockElement.dispatchAsync).call((type: string, handler: () => any) => {
+          Fakes.build(mockElement.dispatchAsync).call((_: string, handler: () => any) => {
             handler();
           });
           spyOn(item, 'getElement').and.returnValue(mockElement);

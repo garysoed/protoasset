@@ -11,8 +11,8 @@ import { AssetView } from './asset-view';
 
 
 describe('asset.AssetView', () => {
-  let mockRouteFactoryService;
-  let mockRouteService;
+  let mockRouteFactoryService: any;
+  let mockRouteService: any;
   let view: AssetView;
 
   beforeEach(() => {
@@ -58,10 +58,15 @@ describe('asset.AssetView', () => {
   describe('[Reflect.__initialize]', () => {
     it('should listen to route changed event', () => {
       spyOn(view, 'listenTo');
-      view[Reflect.__initialize]();
+      spyOn(view, 'addDisposable').and.callThrough();
+      const mockDisposable = jasmine.createSpyObj('Disposable', ['dispose']);
+      mockRouteService.on.and.returnValue(mockDisposable);
 
-      assert(view.listenTo).to.haveBeenCalledWith(
-          mockRouteService, RouteServiceEvents.CHANGED, view['onRouteChanged_']);
+      view[Reflect.__initialize](view);
+
+      assert(view.addDisposable).to.haveBeenCalledWith(mockDisposable);
+      assert(mockRouteService.on).to.haveBeenCalledWith(
+          RouteServiceEvents.CHANGED, view['onRouteChanged_'], view);
     });
   });
 });

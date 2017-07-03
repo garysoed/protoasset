@@ -59,7 +59,7 @@ export class AssetItem extends BaseThemedElement {
     }
   }
 
-  @handle(null).attributeChange('gs-asset-id', StringParser)
+  @handle(null).attributeChange('gs-asset-id')
   protected async onGsAssetIdChanged_(): Promise<any> {
     const assetId = this.gsAssetIdHook_.get();
     const projectId = this.gsProjectIdHook_.get();

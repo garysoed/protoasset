@@ -1,6 +1,5 @@
 import { ImmutableList, ImmutableSet, Iterables } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
-import { StringParser } from 'external/gs_tools/src/parse';
 import {
   ChildElementDataHelper,
   customElement,
@@ -87,13 +86,14 @@ export class LandingView extends BaseThemedElement {
    */
   onCreated(element: HTMLElement): void {
     super.onCreated(element);
-    this.listenTo(this.routeService_, RouteServiceEvents.CHANGED, this.onRouteChanged_);
+    this.addDisposable(
+        this.routeService_.on(RouteServiceEvents.CHANGED, this.onRouteChanged_, this));
     this.listenTo(this.projectCollection_, CollectionEvents.ADDED, this.onProjectAdded_);
     this.onRouteChanged_();
   }
 
 
-  @handle('#filterButton').attributeChange('filter-text', StringParser)
+  @handle('#filterButton').attributeChange('filter-text')
   protected async onFilterButtonTextAttrChange_(newValue: string | null): Promise<void> {
     const projectsPromise = (newValue === null || newValue === '')
         ? this.projectCollection_.list()

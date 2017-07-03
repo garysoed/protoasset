@@ -44,7 +44,7 @@ export class RenderService extends BaseDisposable {
     }
 
     const promise = new Promise(
-        (resolve: (data: any) => void, reject: (data: any) => void) => {
+        (resolve: (data: any) => void, _: (data: any) => void) => {
           const iframeEl = this.window_.document.createElement('iframe');
           iframeEl.style.visibility = 'hidden';
           iframeEl.style.position = 'fixed';
@@ -83,7 +83,7 @@ export class RenderService extends BaseDisposable {
         .of(layers)
         .reverse()
         .reduce<HtmlComponents>(
-            (previousResult: HtmlComponents, layer: BaseLayer, index: number) => {
+            (previousResult: HtmlComponents, layer: BaseLayer) => {
               const components = layer.asHtml();
               return {
                 css: previousResult.css + components.css,

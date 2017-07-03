@@ -326,7 +326,7 @@ export class LayerView extends BaseThemedElement {
     asset.insertLayer(layer);
 
     this.selectLayer_(layer);
-    this.overlayService_.hideOverlay();
+    this.overlayService_.hideOverlay(Symbol('FIX THIS'));
     await this.assetCollection_.update(asset);
   }
 
@@ -422,10 +422,8 @@ export class LayerView extends BaseThemedElement {
   onCreated(element: HTMLElement): void {
     super.onCreated(element);
 
-    this.listenTo(
-        this.routeService_,
-        RouteServiceEvents.CHANGED,
-        this.onRouteChanged_);
+    this.addDisposable(
+        this.routeService_.on(RouteServiceEvents.CHANGED, this.onRouteChanged_, this));
     this.onRouteChanged_();
 
     this.onSelectedLayerPreviewModeChanged_();
@@ -448,7 +446,7 @@ export class LayerView extends BaseThemedElement {
    * Handles event when layer item is clicked.
    */
   async onLayerItemClick_(layerId: string | null): Promise<void> {
-    this.overlayService_.hideOverlay();
+    this.overlayService_.hideOverlay(Symbol('FIX THIS'));
     if (layerId === null) {
       return;
     }
@@ -485,7 +483,7 @@ export class LayerView extends BaseThemedElement {
     this.selectedLayerPreviewMode_ = previewMode;
     this.onSelectedLayerPreviewModeChanged_();
     this.updateLayerPreviews_();
-    this.overlayService_.hideOverlay();
+    this.overlayService_.hideOverlay(Symbol('FIX THIS'));
   }
 
   /**

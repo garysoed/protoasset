@@ -7,8 +7,8 @@ import { TemplateCompiler } from './template-compiler';
 
 
 describe('data.TemplateCompiler', () => {
-  let assetData;
-  let mockHandlebars;
+  let assetData: any;
+  let mockHandlebars: any;
   let compiler: TemplateCompiler;
 
   beforeEach(() => {

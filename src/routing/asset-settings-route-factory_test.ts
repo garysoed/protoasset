@@ -7,7 +7,7 @@ import { AssetSettingsRouteFactory } from './asset-settings-route-factory';
 
 
 describe('routing.AssetSettingsRouteFactory', () => {
-  let mockAssetCollection;
+  let mockAssetCollection: any;
   let factory: AssetSettingsRouteFactory;
 
   beforeEach(() => {

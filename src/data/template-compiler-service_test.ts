@@ -9,7 +9,7 @@ import { TemplateCompilerService } from './template-compiler-service';
 
 
 describe('data.TemplateCompilerService', () => {
-  let mockHandlebars;
+  let mockHandlebars: any;
   let service: TemplateCompilerService;
 
   beforeEach(() => {

@@ -133,8 +133,8 @@ export class LayerItem extends BaseThemedElement {
         });
   }
 
-  @handle(null).attributeChange('asset-id', StringParser)
-  @handle(null).attributeChange('project-id', StringParser)
+  @handle(null).attributeChange('asset-id')
+  @handle(null).attributeChange('project-id')
   @atomic()
   async onAssetIdChanged_(): Promise<void> {
     if (this.assetDeregister_ !== null) {
@@ -204,7 +204,7 @@ export class LayerItem extends BaseThemedElement {
     this.nameInputHook_.set(layer.getName());
   }
 
-  @handle(null).attributeChange('layer-id', StringParser)
+  @handle(null).attributeChange('layer-id')
   @atomic()
   async onLayerIdChanged_(): Promise<void> {
     if (this.layerDeregister_ !== null) {

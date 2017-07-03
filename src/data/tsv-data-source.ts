@@ -47,7 +47,7 @@ export class TsvDataSource implements IDataSource<string[][]> {
         .map((line: string) => {
           return line.split('\t');
         })
-        .filter((value: string[], index: number) => {
+        .filter((_: string[], index: number) => {
           return index >= this.startRow_ && index <= this.endRow_;
         })
         .toArray();

@@ -49,9 +49,9 @@ describe('PROJECT_ITEM_DATA_HELPER', () => {
 
 describe('landing.LandingView', () => {
   let view: LandingView;
-  let mockRouteFactoryService;
-  let mockRouteService;
-  let mockProjectCollection;
+  let mockRouteFactoryService: any;
+  let mockRouteService: any;
+  let mockProjectCollection: any;
 
   beforeEach(() => {
     mockRouteFactoryService =
@@ -214,16 +214,20 @@ describe('landing.LandingView', () => {
     it('should initialize correctly', () => {
       spyOn(view, 'onRouteChanged_');
       spyOn(view, 'listenTo');
+      spyOn(view, 'addDisposable').and.callThrough();
 
       spyOn(mockProjectCollection, 'on').and.callThrough();
+      const mockDisposable = jasmine.createSpyObj('Disposable', ['dispose']);
+      mockRouteService.on.and.returnValue(mockDisposable);
 
       view.onCreated(Mocks.object('element'));
       assert(view['onRouteChanged_']).to.haveBeenCalledWith();
 
-      assert(view.listenTo).to.haveBeenCalledWith(
-          mockRouteService,
+      assert(mockRouteService.on).to.haveBeenCalledWith(
           LocationServiceEvents.CHANGED,
-          view['onRouteChanged_']);
+          view['onRouteChanged_'],
+          view);
+      assert(view.addDisposable).to.haveBeenCalledWith(mockDisposable);
       assert(view.listenTo).to.haveBeenCalledWith(
           mockProjectCollection,
           CollectionEvents.ADDED,

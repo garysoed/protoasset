@@ -10,9 +10,9 @@ import { CreateAssetView } from './create-asset-view';
 
 
 describe('project.CreateAssetView', () => {
-  let mockAssetCollection;
-  let mockRouteFactoryService;
-  let mockRouteService;
+  let mockAssetCollection: any;
+  let mockRouteFactoryService: any;
+  let mockRouteService: any;
   let view: CreateAssetView;
 
   beforeEach(() => {

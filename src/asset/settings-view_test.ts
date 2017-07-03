@@ -13,10 +13,10 @@ import { SettingsView } from './settings-view';
 
 
 describe('asset.SettingsView', () => {
-  let mockAssetCollection;
-  let mockDownloadService;
-  let mockRouteFactoryService;
-  let mockRouteService;
+  let mockAssetCollection: any;
+  let mockDownloadService: any;
+  let mockRouteFactoryService: any;
+  let mockRouteService: any;
   let view: SettingsView;
 
   beforeEach(() => {
@@ -119,11 +119,17 @@ describe('asset.SettingsView', () => {
     it('should listen to route changed event', () => {
       spyOn(view, 'onRouteChanged_');
       spyOn(view, 'listenTo');
+      spyOn(view, 'addDisposable').and.callThrough();
+
+      const mockDisposable = jasmine.createSpyObj('Disposable', ['dispose']);
+      mockRouteService.on.and.returnValue(mockDisposable);
+
       view.onCreated(Mocks.object('element'));
-      assert(view.listenTo).to.haveBeenCalledWith(
-          mockRouteService,
+      assert(view.addDisposable).to.haveBeenCalledWith(mockDisposable);
+      assert(mockRouteService.on).to.haveBeenCalledWith(
           RouteServiceEvents.CHANGED,
-          view['onRouteChanged_']);
+          view['onRouteChanged_'],
+          view);
       assert(view['onRouteChanged_']).to.haveBeenCalledWith();
     });
   });

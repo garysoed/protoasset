@@ -3,7 +3,7 @@ import { DisposableFunction } from 'external/gs_tools/src/dispose';
 import { DomEvent, ListenableDom } from 'external/gs_tools/src/event';
 import { ImmutableList, ImmutableSet } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
-import { BooleanParser, StringParser } from 'external/gs_tools/src/parse';
+import { StringParser } from 'external/gs_tools/src/parse';
 import { BaseIdGenerator, SimpleIdGenerator } from 'external/gs_tools/src/random';
 import {
   ChildElementDataHelper,
@@ -298,7 +298,7 @@ export class HelperView extends BaseThemedElement {
     return asset.getHelper(params.helperId);
   }
 
-  @handle(null).attributeChange('gs-view-active', BooleanParser)
+  @handle(null).attributeChange('gs-view-active')
   @atomic()
   protected async onActiveChange_(isActive: boolean | null): Promise<void> {
     if (this.assetUpdateDeregister_ !== null) {
@@ -353,7 +353,7 @@ export class HelperView extends BaseThemedElement {
     this.argElementsHook_.set(args);
   }
 
-  @handle('#argInput').attributeChange('gs-value', StringParser)
+  @handle('#argInput').attributeChange('gs-value')
   protected onArgInputValueChange_(newValue: string | null): void {
     if (newValue === null) {
       return;
@@ -420,7 +420,7 @@ export class HelperView extends BaseThemedElement {
   }
 
   @handle('#args').childListChange()
-  @handle('#bodyInput').attributeChange('gs-value', StringParser)
+  @handle('#bodyInput').attributeChange('gs-value')
   protected async onChanges_(): Promise<void> {
     const args = this.argElementsHook_.get();
     const body = this.bodyInputHook_.get();
@@ -456,7 +456,8 @@ export class HelperView extends BaseThemedElement {
    */
   onCreated(element: HTMLElement): void {
     super.onCreated(element);
-    this.listenTo(this.routeService_, RouteServiceEvents.CHANGED, this.onRouteChanged_);
+    this.addDisposable(
+        this.routeService_.on(RouteServiceEvents.CHANGED, this.onRouteChanged_, this));
     this.onRouteChanged_();
   }
 

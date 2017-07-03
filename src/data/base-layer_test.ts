@@ -99,7 +99,7 @@ describe('data.BaseLayer', () => {
 
   describe('setBottom', () => {
     it('should dispatch the CHANGED event', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -113,7 +113,7 @@ describe('data.BaseLayer', () => {
     });
 
     it('should not dispatch the CHANGED event if the bottom does not change', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -129,7 +129,7 @@ describe('data.BaseLayer', () => {
 
   describe('setName', () => {
     it('should dispatch the CHANGED event', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -143,7 +143,7 @@ describe('data.BaseLayer', () => {
     });
 
     it('should not dispatch the CHANGED event if the name does not change', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -159,7 +159,7 @@ describe('data.BaseLayer', () => {
 
   describe('setLeft', () => {
     it('should dispatch the CHANGED event', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -173,7 +173,7 @@ describe('data.BaseLayer', () => {
     });
 
     it('should not dispatch the CHANGED event if the left does not change', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -189,7 +189,7 @@ describe('data.BaseLayer', () => {
 
   describe('setRight', () => {
     it('should dispatch the CHANGED event', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -203,7 +203,7 @@ describe('data.BaseLayer', () => {
     });
 
     it('should not dispatch the CHANGED event if the right does not change', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -219,7 +219,7 @@ describe('data.BaseLayer', () => {
 
   describe('setTop', () => {
     it('should dispatch the CHANGED event', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -233,7 +233,7 @@ describe('data.BaseLayer', () => {
     });
 
     it('should not dispatch the CHANGED event if the top does not change', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 

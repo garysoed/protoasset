@@ -32,8 +32,8 @@ describe('checkResponse', () => {
 
 
 describe('render.RenderService', () => {
-  let mockTemplateCompilerService;
-  let window;
+  let mockTemplateCompilerService: any;
+  let window: any;
   let service: RenderService;
 
   beforeEach(() => {
@@ -48,7 +48,7 @@ describe('render.RenderService', () => {
         async () => {
           const mockIframeEl = jasmine.createSpyObj('IframeEl', ['addEventListener']);
           mockIframeEl.style = {};
-          mockIframeEl.addEventListener.and.callFake((event: string, callback: Function) => {
+          mockIframeEl.addEventListener.and.callFake((_: string, callback: Function) => {
             callback();
           });
 

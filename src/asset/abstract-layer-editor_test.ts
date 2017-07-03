@@ -20,7 +20,7 @@ class TestLayerEditor extends AbstractLayerEditor<BaseLayer> {
 
 
 describe('asset.AbstractLayerEditor', () => {
-  let mockAssetCollection;
+  let mockAssetCollection: any;
   let editor: AbstractLayerEditor<BaseLayer>;
 
   beforeEach(() => {

@@ -21,7 +21,7 @@ describe('data.Asset', () => {
       const helperId = 'helperId';
       const helper = Mocks.object('helper');
       asset['helpers_'] = {[helperId]: helper};
-      spyOn(asset, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(asset, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -33,7 +33,7 @@ describe('data.Asset', () => {
     });
 
     it('should not dispatch the changed event if the helper does not exist', () => {
-      spyOn(asset, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(asset, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -97,7 +97,7 @@ describe('data.Asset', () => {
 
   describe('insertLayer', () => {
     it('should move the layer to the correct, higher position', () => {
-      spyOn(asset, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(asset, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -115,7 +115,7 @@ describe('data.Asset', () => {
     });
 
     it('should move the layer to the correct, lower position', () => {
-      spyOn(asset, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(asset, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -133,7 +133,7 @@ describe('data.Asset', () => {
     });
 
     it('should insert the layer correctly if it does not exist', () => {
-      spyOn(asset, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(asset, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -151,7 +151,7 @@ describe('data.Asset', () => {
     });
 
     it('should do nothing if the layer is already at the correct position', () => {
-      spyOn(asset, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(asset, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -170,7 +170,7 @@ describe('data.Asset', () => {
 
   describe('removeLayer', () => {
     it('should remove the layer correctly', () => {
-      spyOn(asset, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(asset, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -189,7 +189,7 @@ describe('data.Asset', () => {
     });
 
     it('should do nothing if the layer does not exist', () => {
-      spyOn(asset, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(asset, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -209,7 +209,7 @@ describe('data.Asset', () => {
 
   describe('setData', () => {
     it('should dispatch the CHANGED event', () => {
-      spyOn(asset, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(asset, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -236,7 +236,7 @@ describe('data.Asset', () => {
 
   describe('setFilename', () => {
     it('should dispatch the CHANGED event', () => {
-      spyOn(asset, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(asset, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -262,7 +262,7 @@ describe('data.Asset', () => {
 
   describe('setHeight', () => {
     it('should dispatch the CHANGED event', () => {
-      spyOn(asset, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(asset, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -276,7 +276,7 @@ describe('data.Asset', () => {
     });
 
     it('should not dispatch the CHANGED event if the height does not change', () => {
-      spyOn(asset, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(asset, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -292,7 +292,7 @@ describe('data.Asset', () => {
 
   describe('setHelper', () => {
     it('should dispatch the CHANGED event', () => {
-      spyOn(asset, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(asset, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -307,7 +307,7 @@ describe('data.Asset', () => {
     });
 
     it('should not dispatch the CHANGED event if the helper does not change', () => {
-      spyOn(asset, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(asset, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -324,7 +324,7 @@ describe('data.Asset', () => {
 
   describe('setLayers', () => {
     it('should dispatch the CHANGED event', () => {
-      spyOn(asset, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(asset, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -337,7 +337,7 @@ describe('data.Asset', () => {
     });
 
     it('should not dispatch the CHANGED event if the layers do not change', () => {
-      spyOn(asset, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(asset, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -353,7 +353,7 @@ describe('data.Asset', () => {
 
   describe('setName', () => {
     it('should dispatch the CHANGED event', () => {
-      spyOn(asset, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(asset, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -367,7 +367,7 @@ describe('data.Asset', () => {
     });
 
     it('should not dispatch the CHANGED event if the name does not change', () => {
-      spyOn(asset, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(asset, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -382,7 +382,7 @@ describe('data.Asset', () => {
 
   describe('setType', () => {
     it('should dispatch the CHANGED event', () => {
-      spyOn(asset, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(asset, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -396,7 +396,7 @@ describe('data.Asset', () => {
     });
 
     it('should not dispatch the CHANGED event if the type does not change', () => {
-      spyOn(asset, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(asset, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -411,7 +411,7 @@ describe('data.Asset', () => {
 
   describe('setWidth', () => {
     it('should dispatch the CHANGED event', () => {
-      spyOn(asset, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(asset, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -425,7 +425,7 @@ describe('data.Asset', () => {
     });
 
     it('should not dispatch the CHANGED event if the width does not change', () => {
-      spyOn(asset, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(asset, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 

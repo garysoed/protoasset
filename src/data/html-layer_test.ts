@@ -90,7 +90,7 @@ describe('data.HtmlLayer', () => {
 
   describe('setCss', () => {
     it('should dispatch the CHANGED event', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -103,7 +103,7 @@ describe('data.HtmlLayer', () => {
     });
 
     it('should not dispatch the CHANGED event if the css does not change', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -119,7 +119,7 @@ describe('data.HtmlLayer', () => {
 
   describe('setHtml', () => {
     it('should dispatch the CHANGED event', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -132,7 +132,7 @@ describe('data.HtmlLayer', () => {
     });
 
     it('should not dispatch the CHANGED event if the html does not change', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 

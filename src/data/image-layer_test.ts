@@ -129,7 +129,7 @@ describe('data.ImageLayer', () => {
 
   describe('setImageUrl', () => {
     it('should dispatch the CHANGED event', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 
@@ -142,7 +142,7 @@ describe('data.ImageLayer', () => {
     });
 
     it('should not dispatch the CHANGED event if the imageUrl does not change', () => {
-      spyOn(layer, 'dispatch').and.callFake((event: any, callback: Function) => {
+      spyOn(layer, 'dispatch').and.callFake((_: any, callback: Function) => {
         callback();
       });
 

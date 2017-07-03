@@ -14,12 +14,12 @@ import { LayerPreview } from './layer-preview';
 
 
 describe('asset.LayerPreview', () => {
-  let mockAssetCollection;
-  let mockCssImportService;
-  let mockRouteFactoryService;
-  let mockRouteService;
-  let mockSampleDataService;
-  let mockTemplateCompilerService;
+  let mockAssetCollection: any;
+  let mockCssImportService: any;
+  let mockRouteFactoryService: any;
+  let mockRouteService: any;
+  let mockSampleDataService: any;
+  let mockTemplateCompilerService: any;
   let preview: LayerPreview;
 
   beforeEach(() => {
@@ -44,14 +44,19 @@ describe('asset.LayerPreview', () => {
     it('should initialize correctly', () => {
       spyOn(preview, 'onLayerIdChanged_');
       spyOn(preview, 'listenTo');
+      spyOn(preview, 'addDisposable').and.callThrough();
+
+      const mockDisposable = jasmine.createSpyObj('Disposable', ['dispose']);
+      mockRouteService.on.and.returnValue(mockDisposable);
 
       const element = Mocks.object('element');
       preview.onCreated(element);
       assert(preview['onLayerIdChanged_']).to.haveBeenCalledWith();
-      assert(preview.listenTo).to.haveBeenCalledWith(
-          mockRouteService,
+      assert(preview.addDisposable).to.haveBeenCalledWith(mockDisposable);
+      assert(mockRouteService.on).to.haveBeenCalledWith(
           RouteServiceEvents.CHANGED,
-          preview['onLayerIdChanged_']);
+          preview['onLayerIdChanged_'],
+          preview);
       assert(preview.listenTo).to.haveBeenCalledWith(
           mockSampleDataService,
           SampleDataServiceEvent.ROW_CHANGED,

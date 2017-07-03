@@ -97,10 +97,10 @@ describe('PREVIEW_ROW_DATA_HELPER', () => {
 
 
 describe('asset.DataView', () => {
-  let mockAssetCollection;
-  let mockFileService;
-  let mockRouteFactoryService;
-  let mockRouteService;
+  let mockAssetCollection: any;
+  let mockFileService: any;
+  let mockRouteFactoryService: any;
+  let mockRouteService: any;
   let view: DataView;
 
   beforeEach(() => {

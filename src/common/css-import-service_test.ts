@@ -7,7 +7,7 @@ import { CssImportService } from './css-import-service';
 
 
 describe('common.CssImportService', () => {
-  let mockDocument;
+  let mockDocument: any;
   let service: CssImportService;
 
   beforeEach(() => {
