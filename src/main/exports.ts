@@ -27,4 +27,3 @@ function bootstrap(document: Document): void {
 
 Jsons.setValue(window, 'gs.Templates', Templates);
 Jsons.setValue(window, 'pa.bootstrap', bootstrap);
-// TODO: Mutable
