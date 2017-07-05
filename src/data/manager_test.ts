@@ -94,7 +94,7 @@ describe('data.Manager', () => {
 
   describe('monad', () => {
     it(`should return monad with the correct get method`, () => {
-      assert(manager.monad().get()).to.equal(Matchers.any(DataAccess));
+      assert(manager.monad()(Mocks.object('instance')).get()).to.equal(Matchers.any(DataAccess));
     });
 
     it(`should return monad with the correct set method`, async () => {
@@ -109,7 +109,7 @@ describe('data.Manager', () => {
 
       spyOn(manager, 'update_');
 
-      await manager.monad().set(mockDataAccess);
+      await manager.monad()(Mocks.object('instance')).set(mockDataAccess);
       assert(manager['update_']).to.haveBeenCalledWith(id1, item1);
       assert(manager['update_']).to.haveBeenCalledWith(id2, item2);
     });

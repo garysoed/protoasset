@@ -24,9 +24,13 @@
     max-width: var(--paMarginWidth);
     min-width: var(--paMarginWidth);
   }
+
+  #root {
+    background-color: white;
+  }
 </style>
 
-<div fill-parent layout="row">
+<div fill-parent id="root" layout="row">
   <div flex-justify="flex-end" id="leftMargin" layout="column">
     <gs-basic-button class="gs-theme-normal gs-primary" id="createButton">
       <div>

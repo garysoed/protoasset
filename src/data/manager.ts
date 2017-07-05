@@ -4,7 +4,7 @@ import {
   ImmutableList,
   ImmutableSet,
   Iterables } from 'external/gs_tools/src/immutable';
-import { Monad } from 'external/gs_tools/src/interfaces';
+import { Monad, MonadFactory } from 'external/gs_tools/src/interfaces';
 import { Storage as GsStorage } from 'external/gs_tools/src/store';
 import { Log } from 'external/gs_tools/src/util';
 
@@ -13,7 +13,7 @@ import { DataModel } from '../data/data-model';
 import { SearchIndex } from '../data/search-index';
 
 type EventType = 'add' | 'remove' | 'edit';
-type ManagerEvent<T extends DataModel<any>> = {data: T, type: EventType};
+export type ManagerEvent<T extends DataModel<any>> = {data: T, type: EventType};
 
 export abstract class Manager<S extends SearchIndex<D>, D extends DataModel<S>>
     extends Bus<EventType, ManagerEvent<D>> {
@@ -84,10 +84,13 @@ export abstract class Manager<S extends SearchIndex<D>, D extends DataModel<S>>
     return this.storage_.list();
   }
 
-  monad(): Monad<DataAccess<D>> {
-    return {
+  monad(): MonadFactory<DataAccess<D>> {
+    return () => ({
       get: () => {
-        return DataAccess.of<D>(this.get_.bind(this), this.search_.bind(this));
+        return DataAccess.of<D>(
+            this.get_.bind(this),
+            this.list_.bind(this),
+            this.search_.bind(this));
       },
 
       set: (dataAccess: DataAccess<D>) => {
@@ -99,7 +102,7 @@ export abstract class Manager<S extends SearchIndex<D>, D extends DataModel<S>>
                 })
                 .values());
       },
-    };
+    });
   }
 
   private async search_(this: Manager<S, D>, token: string): Promise<ImmutableList<D>> {

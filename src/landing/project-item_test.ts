@@ -8,17 +8,14 @@ import { ProjectItem } from './project-item';
 
 
 describe('landing.ProjectItem', () => {
-  let mockProjectCollection: any;
   let mockRouteFactoryService: any;
   let mockRouteService: any;
   let item: ProjectItem;
 
   beforeEach(() => {
-    mockProjectCollection = jasmine.createSpyObj('ProjectCollection', ['get']);
     mockRouteFactoryService = jasmine.createSpyObj('RouteFactoryService', ['assetList']);
     mockRouteService = jasmine.createSpyObj('RouteService', ['goTo']);
     item = new ProjectItem(
-        mockProjectCollection,
         mockRouteFactoryService,
         mockRouteService,
         Mocks.object('ThemeService'));
@@ -28,20 +25,17 @@ describe('landing.ProjectItem', () => {
   describe('onElementClicked_', () => {
     it('should go to the correct project view', () => {
       const projectId = 'projectId';
-      spyOn(item['projectIdHook_'], 'get').and.returnValue(projectId);
 
       const routeFactory = Mocks.object('routeFactory');
       mockRouteFactoryService.assetList.and.returnValue(routeFactory);
 
-      item['onElementClicked_']();
+      item.onElementClicked_(projectId);
 
       assert(mockRouteService.goTo).to.haveBeenCalledWith(routeFactory, {projectId: projectId});
     });
 
     it('should do nothing if the project ID is null', () => {
-      spyOn(item['projectIdHook_'], 'get').and.returnValue(null);
-
-      item['onElementClicked_']();
+      item.onElementClicked_(null);
 
       assert(mockRouteService.goTo).toNot.haveBeenCalled();
     });
@@ -54,25 +48,27 @@ describe('landing.ProjectItem', () => {
       const mockProject = jasmine.createSpyObj('Project', ['getName']);
       mockProject.getName.and.returnValue(name);
 
-      mockProjectCollection.get.and.returnValue(Promise.resolve(mockProject));
+      const projectNameEl = document.createElement('div');
 
-      spyOn(item['projectNameHook_'], 'set');
+      const mockProjectAccess = jasmine.createSpyObj('ProjectAccess', ['get']);
+      mockProjectAccess.get.and.returnValue(Promise.resolve(mockProject));
 
-      await item['onProjectIdChanged_'](projectId);
-      assert(mockProjectCollection.get).to.haveBeenCalledWith(projectId);
-      assert(item['projectNameHook_'].set).to.haveBeenCalledWith(name);
+      await item.onProjectIdChanged_(projectNameEl, projectId, mockProjectAccess);
+      assert(mockProjectAccess.get).to.haveBeenCalledWith(projectId);
+      assert(projectNameEl.innerText).to.equal(name);
     });
 
     it('should delete the project name if not found', async () => {
       const projectId = 'projectId';
+      const projectNameEl = document.createElement('div');
+      projectNameEl.innerText = 'old project';
 
-      mockProjectCollection.get.and.returnValue(Promise.resolve(null));
+      const mockProjectAccess = jasmine.createSpyObj('ProjectAccess', ['get']);
+      mockProjectAccess.get.and.returnValue(Promise.resolve(null));
 
-      spyOn(item['projectNameHook_'], 'delete');
-
-      await item['onProjectIdChanged_'](projectId);
-      assert(mockProjectCollection.get).to.haveBeenCalledWith(projectId);
-      assert(item['projectNameHook_'].delete).to.haveBeenCalledWith();
+      await item.onProjectIdChanged_(projectNameEl, projectId, mockProjectAccess);
+      assert(mockProjectAccess.get).to.haveBeenCalledWith(projectId);
+      assert(projectNameEl.innerText).to.equal('');
     });
   });
 });

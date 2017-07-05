@@ -8,14 +8,17 @@ import { DataAccess } from '../data/data-access';
 
 describe('data.DataAccess', () => {
   let mockGetter: any;
+  let mockLister: any;
   let mockSearcher: any;
   let access: DataAccess<number>;
 
   beforeEach(() => {
     mockGetter = jasmine.createSpy('Getter');
+    mockLister = jasmine.createSpy('Lister');
     mockSearcher = jasmine.createSpy('Searcher');
     access = new DataAccess<number>(
         mockGetter,
+        mockLister,
         mockSearcher,
         ImmutableMap.of<string, number>([]));
   });
@@ -27,6 +30,14 @@ describe('data.DataAccess', () => {
       mockGetter.and.returnValue(Promise.resolve(value));
       assert(await access.get(id)).to.equal(value);
       assert(mockGetter).to.haveBeenCalledWith(id);
+    });
+  });
+
+  describe('list', () => {
+    it(`should call the lister correctly`, async () => {
+      const value = 123;
+      mockLister.and.returnValue(Promise.resolve(ImmutableList.of([value])));
+      assert(await access.list()).to.haveElements([value]);
     });
   });
 

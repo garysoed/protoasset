@@ -1,49 +1,52 @@
-import { ImmutableList, ImmutableSet, Iterables } from 'external/gs_tools/src/immutable';
+import {
+  ImmutableList,
+  ImmutableMap,
+  ImmutableSet,
+  Iterables } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
 import {
-  ChildElementDataHelper,
   customElement,
-  DomHook,
-  handle,
-  hook } from 'external/gs_tools/src/webc';
+  dom,
+  domOut,
+  onDom,
+  onLifecycle} from 'external/gs_tools/src/webc';
 
-import { BaseThemedElement } from 'external/gs_ui/src/common';
-import { Event } from 'external/gs_ui/src/const';
+import { eventDetails, monad, MonadSetter, on } from 'external/gs_tools/src/event';
+import { StringParser } from 'external/gs_tools/src/parse';
+import { BaseThemedElement2 } from 'external/gs_ui/src/common';
 import { RouteService, RouteServiceEvents } from 'external/gs_ui/src/routing';
 import { ThemeService } from 'external/gs_ui/src/theming';
 
 import { FilterButton } from '../common/filter-button';
-import { CollectionEvents } from '../data/collection-events';
-import { Project } from '../data/project';
+import { DataAccess } from '../data/data-access';
+import { ManagerEvent } from '../data/manager';
 import { ProjectCollection } from '../data/project-collection';
+import { ProjectManager } from '../data/project-manager';
+import { Project2 } from '../data/project2';
 import { ProjectItem } from '../landing/project-item';
 import { RouteFactoryService } from '../routing/route-factory-service';
 import { Views } from '../routing/views';
 
+const CREATE_BUTTON_EL = '#createButton';
+const FILTER_BUTTON_EL = '#filterButton';
+const PROJECTS_EL = '#projects';
+const FILTER_TEXT_ATTR = {name: 'filter-text', parser: StringParser, selector: FILTER_BUTTON_EL};
+export const PROJECT_COLLECTION_CHILDREN = {
+  bridge: {
+    create(document: Document): Element {
+      return document.createElement('pa-project-item');
+    },
 
-export const PROJECT_ITEM_DATA_HELPER: ChildElementDataHelper<string> = {
-  /**
-   * @override
-   */
-  create(document: Document): Element {
-    return document.createElement('pa-project-item');
-  },
+    get(element: Element): string | null {
+      return element.getAttribute('project-id');
+    },
 
-  /**
-   * @override
-   */
-  get(element: Element): string | null {
-    return element.getAttribute('project-id');
+    set(projectId: string, element: Element): void {
+      element.setAttribute('project-id', projectId);
+    },
   },
-
-  /**
-   * @override
-   */
-  set(projectId: string, element: Element): void {
-    element.setAttribute('project-id', projectId);
-  },
+  selector: PROJECTS_EL,
 };
-
 
 /**
  * The main landing view of the app.
@@ -53,88 +56,91 @@ export const PROJECT_ITEM_DATA_HELPER: ChildElementDataHelper<string> = {
   tag: 'pa-landing-view',
   templateKey: 'src/landing/landing-view',
 })
-export class LandingView extends BaseThemedElement {
-  private readonly projectCollection_: ProjectCollection;
-
-  @hook('#projects').childrenElements(PROJECT_ITEM_DATA_HELPER)
-  private readonly projectCollectionHook_: DomHook<string[]>;
+export class LandingView extends BaseThemedElement2 {
   private readonly routeFactoryService_: RouteFactoryService;
   private readonly routeService_: RouteService<Views>;
 
   constructor(
       @inject('theming.ThemeService') themeService: ThemeService,
-      @inject('pa.data.ProjectCollection') projectCollection: ProjectCollection,
       @inject('pa.routing.RouteFactoryService') routeFactoryService: RouteFactoryService,
       @inject('gs.routing.RouteService') routeService: RouteService<Views>) {
     super(themeService);
     this.routeFactoryService_ = routeFactoryService;
     this.routeService_ = routeService;
-    this.projectCollection_ = projectCollection;
-    this.projectCollectionHook_ = DomHook.of<string[]>();
   }
 
   /**
    * Handles event when the create button is clicked.
    */
-  @handle('#createButton').event(Event.ACTION)
-  protected onCreateAction_(): void {
+  @onDom.event(CREATE_BUTTON_EL, 'gs-action')
+  onCreateAction_(): void {
     this.routeService_.goTo(this.routeFactoryService_.createProject(), {});
   }
 
   /**
    * @override
    */
-  onCreated(element: HTMLElement): void {
-    super.onCreated(element);
-    this.addDisposable(
-        this.routeService_.on(RouteServiceEvents.CHANGED, this.onRouteChanged_, this));
-    this.listenTo(this.projectCollection_, CollectionEvents.ADDED, this.onProjectAdded_);
-    this.onRouteChanged_();
+  @onLifecycle('create')
+  onCreated(@monad(ProjectManager.monad()) projectAccess: DataAccess<Project2>): void {
+    this.onRouteChanged_(projectAccess);
   }
 
 
-  @handle('#filterButton').attributeChange('filter-text')
-  protected async onFilterButtonTextAttrChange_(newValue: string | null): Promise<void> {
-    const projectsPromise = (newValue === null || newValue === '')
-        ? this.projectCollection_.list()
-        : this.projectCollection_.search(newValue);
+  @onDom.attributeChange(FILTER_TEXT_ATTR)
+  async onFilterButtonTextAttrChange_(
+      @dom.attribute(FILTER_TEXT_ATTR) filterText: string | null,
+      @domOut.childElements(PROJECT_COLLECTION_CHILDREN)
+          {id: projectCollectionId}: MonadSetter<ImmutableList<string>>,
+      @monad(ProjectManager.monad()) projectAccess: DataAccess<Project2>):
+      Promise<ImmutableMap<string, any>> {
+    const projectsPromise = (filterText === null || filterText === '')
+        ? projectAccess.list()
+        : projectAccess.search(filterText);
 
     const projects = await projectsPromise;
     const normalizedProjects = projects instanceof Array ? projects : Iterables.toArray(projects);
     const projectIds = ImmutableList.of(normalizedProjects)
-        .map((project: Project) => {
+        .map((project: Project2) => {
           return project.getId();
-        })
-        .toArray();
-    this.projectCollectionHook_.set(projectIds);
+        });
+    return ImmutableMap.of([[projectCollectionId, projectIds]]);
   }
 
   /**
    * @override
    */
-  async onInserted(element: HTMLElement): Promise<void> {
-    super.onInserted(element);
-    const projects = await this.projectCollection_.list();
-    const projectIds = Iterables.toArray(projects
-        .mapItem((project: Project) => {
+  @onLifecycle('insert')
+  async onInserted(
+      @domOut.childElements(PROJECT_COLLECTION_CHILDREN)
+          {id: projectCollectionId}: MonadSetter<ImmutableList<string>>,
+      @monad(ProjectManager.monad()) projectAccess: DataAccess<Project2>):
+      Promise<ImmutableMap<string, any>> {
+    const projects = await projectAccess.list();
+    const projectIds = ImmutableList.of(projects
+        .mapItem((project: Project2) => {
           return project.getId();
         }));
-    this.projectCollectionHook_.set(projectIds);
+    return ImmutableMap.of([[projectCollectionId, projectIds]]);
   }
 
   /**
    * Handles when a project is added.
    * @param project The added project.
    */
-  private onProjectAdded_(project: Project): void {
-    const projects = this.projectCollectionHook_.get() || [];
-    projects.push(project.getId());
-    this.projectCollectionHook_.set(projects);
+  @on(ProjectManager, 'add')
+  onProjectAdded_(
+      @domOut.childElements(PROJECT_COLLECTION_CHILDREN)
+          {id: projectCollectionId, value: projectCollectionIds}:
+          MonadSetter<ImmutableList<string>>,
+      @eventDetails() {data: project}: ManagerEvent<Project2>): ImmutableMap<string, any> {
+    return ImmutableMap.of([[projectCollectionId, projectCollectionIds.add(project.getId())]]);
   }
   /**
    * Handles event when the location was changed.
    */
-  private async onRouteChanged_(): Promise<void> {
+  @on((instance: LandingView) => instance.routeService_, RouteServiceEvents.CHANGED)
+  async onRouteChanged_(
+      @monad(ProjectManager.monad()) projectAccess: DataAccess<Project2>): Promise<void> {
     const route = this.routeService_.getRoute();
     if (route === null) {
       this.routeService_.goTo(this.routeFactoryService_.landing(), {});
@@ -142,11 +148,10 @@ export class LandingView extends BaseThemedElement {
     }
 
     if (route.getType() === Views.LANDING) {
-      const projects = await this.projectCollection_.list();
+      const projects = await projectAccess.list();
       if (projects.size() === 0) {
         this.routeService_.goTo(this.routeFactoryService_.createProject(), {});
       }
     }
   }
 }
-// TODO: Mutable
