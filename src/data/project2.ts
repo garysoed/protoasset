@@ -1,4 +1,4 @@
-import { cache, Field } from 'external/gs_tools/src/data';
+import { cache, Field, Serializable } from 'external/gs_tools/src/data';
 
 import { DataModel } from '../data/data-model';
 
@@ -7,6 +7,7 @@ export type ProjectSearchIndex = {
   this: Project2,
 };
 
+@Serializable('project')
 export class Project2 extends DataModel<ProjectSearchIndex> {
   @Field('id') private readonly id_: string;
   @Field('name') private readonly name_: string;

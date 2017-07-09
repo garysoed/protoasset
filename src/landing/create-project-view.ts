@@ -1,23 +1,34 @@
-import { ImmutableSet } from 'external/gs_tools/src/immutable';
+import { ImmutableMap, ImmutableSet } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
 import { BooleanParser, StringParser } from 'external/gs_tools/src/parse';
 import {
     customElement,
-    DomHook,
-    handle,
-    hook } from 'external/gs_tools/src/webc';
+    dom,
+    domOut,
+    onDom} from 'external/gs_tools/src/webc';
 
-import { BaseThemedElement } from 'external/gs_ui/src/common';
-import { Event } from 'external/gs_ui/src/const';
+import { monad, monadOut, MonadSetter } from 'external/gs_tools/src/event';
+import { BaseThemedElement2 } from 'external/gs_ui/src/common';
 import { RouteService } from 'external/gs_ui/src/routing';
 import { ThemeService } from 'external/gs_ui/src/theming';
 
-import { Project } from '../data/project';
-import { ProjectCollection } from '../data/project-collection';
+import { DataAccess } from '../data/data-access';
+import { ProjectManager } from '../data/project-manager';
+import { Project2 } from '../data/project2';
 import { Editor } from '../project/editor';
 import { RouteFactoryService } from '../routing/route-factory-service';
 import { Views } from '../routing/views';
 
+const CANCEL_BUTTON_EL = '#cancelButton';
+const CREATE_BUTTON_EL = '#createButton';
+const EDITOR_EL = '#editor';
+
+const CREATE_BUTTON_DISABLED_ATTR = {
+  name: 'disabled',
+  parser: BooleanParser,
+  selector: CREATE_BUTTON_EL,
+};
+const EDITOR_PROJECT_NAME_ATTR = {name: 'project-name', parser: StringParser, selector: EDITOR_EL};
 
 /**
  * The main landing view of the app.
@@ -27,14 +38,7 @@ import { Views } from '../routing/views';
   tag: 'pa-create-project-view',
   templateKey: 'src/landing/create-project-view',
 })
-export class CreateProjectView extends BaseThemedElement {
-  @hook('gs-basic-button#createButton').attribute('disabled', BooleanParser)
-  private readonly createButtonDisabledHook_: DomHook<boolean>;
-
-  @hook('#editor').attribute('project-name', StringParser)
-  private readonly nameValueHook_: DomHook<string>;
-
-  private readonly projectCollection_: ProjectCollection;
+export class CreateProjectView extends BaseThemedElement2 {
   private readonly routeFactoryService_: RouteFactoryService;
   private readonly routeService_: RouteService<Views>;
 
@@ -44,13 +48,9 @@ export class CreateProjectView extends BaseThemedElement {
    */
   constructor(
       @inject('theming.ThemeService') themeService: ThemeService,
-      @inject('pa.data.ProjectCollection') projectCollection: ProjectCollection,
       @inject('pa.routing.RouteFactoryService') routeFactoryService: RouteFactoryService,
       @inject('gs.routing.RouteService') routeService: RouteService<Views>) {
     super(themeService);
-    this.createButtonDisabledHook_ = DomHook.of<boolean>(true);
-    this.nameValueHook_ = DomHook.of<string>();
-    this.projectCollection_ = projectCollection;
     this.routeFactoryService_ = routeFactoryService;
     this.routeService_ = routeService;
   }
@@ -58,18 +58,25 @@ export class CreateProjectView extends BaseThemedElement {
   /**
    * Handles event when the cancel button is clicked.
    */
-  @handle('#cancelButton').event(Event.ACTION)
-  protected onCancelAction_(): void {
-    this.reset_();
+  @onDom.event(CANCEL_BUTTON_EL, 'gs-action')
+  onCancelAction_(
+      @domOut.attribute(EDITOR_PROJECT_NAME_ATTR) projectNameSetter: MonadSetter<string | null>):
+      ImmutableMap<string, any> {
     this.routeService_.goTo(this.routeFactoryService_.landing(), {});
+    return this.reset_(projectNameSetter);
   }
 
   /**
    * Handles event when the name field has changed.
    */
-  @handle('#editor').attributeChange('project-name')
-  protected onNameChange_(): void {
-    this.createButtonDisabledHook_.set(!this.nameValueHook_.get());
+  @onDom.attributeChange(EDITOR_PROJECT_NAME_ATTR)
+  onNameChange_(
+      @dom.attribute(EDITOR_PROJECT_NAME_ATTR) projectName: string | null,
+      @domOut.attribute(CREATE_BUTTON_DISABLED_ATTR)
+          {id: createButtonDisabledId}: MonadSetter<boolean> ): ImmutableMap<string, any> {
+    return ImmutableMap.of([
+      [createButtonDisabledId, !projectName],
+    ]);
   }
 
   /**
@@ -77,27 +84,29 @@ export class CreateProjectView extends BaseThemedElement {
    *
    * @return Promise that will be resolved when all handling logic have completed.
    */
-  @handle('#createButton').event(Event.ACTION)
-  protected async onSubmitAction_(): Promise<void> {
-    const projectName = this.nameValueHook_.get();
+  @onDom.event(CREATE_BUTTON_EL, 'gs-action')
+  async onSubmitAction_(
+      @monad(ProjectManager.idMonad()) newId: string,
+      @domOut.attribute(EDITOR_PROJECT_NAME_ATTR) projectNameSetter: MonadSetter<string | null>,
+      @monadOut(ProjectManager.monad())
+          {id: projectAccessId, value: projectAccess}: MonadSetter<DataAccess<Project2>>):
+      Promise<ImmutableMap<string, any>> {
+    const projectName = projectNameSetter.value;
     if (projectName === null) {
       throw new Error('Project name is not set');
     }
 
-    const id = await this.projectCollection_.reserveId();
-    const project = new Project(id);
-    project.setName(projectName!);
-    await this.projectCollection_.update(project),
+    const project = new Project2(newId, projectName);
 
-    this.reset_();
-    this.routeService_.goTo(this.routeFactoryService_.assetList(), {projectId: id});
+    this.routeService_.goTo(this.routeFactoryService_.assetList(), {projectId: newId});
+    return this.reset_(projectNameSetter)
+        .set(projectAccessId, projectAccess.queueUpdate(newId, project));
   }
 
   /**
    * Resets the form.
    */
-  private reset_(): void {
-    this.nameValueHook_.set('');
+  private reset_({id: projectNameId}: MonadSetter<string | null>): ImmutableMap<string, any> {
+    return ImmutableMap.of([[projectNameId, '']]);
   }
 }
-// TODO: Mutable

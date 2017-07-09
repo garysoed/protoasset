@@ -4,7 +4,7 @@ import {
   ImmutableList,
   ImmutableSet,
   Iterables } from 'external/gs_tools/src/immutable';
-import { Monad, MonadFactory } from 'external/gs_tools/src/interfaces';
+import { MonadFactory } from 'external/gs_tools/src/interfaces';
 import { Storage as GsStorage } from 'external/gs_tools/src/store';
 import { Log } from 'external/gs_tools/src/util';
 
@@ -67,9 +67,9 @@ export abstract class Manager<S extends SearchIndex<D>, D extends DataModel<S>>
     return this.fusePromise_;
   }
 
-  idMonad(): Monad<Promise<string>> {
+  idMonad(): MonadFactory<Promise<string>> {
     const id = this.storage_.generateId();
-    return {
+    return () => ({
       get: () => {
         return id;
       },
@@ -77,7 +77,7 @@ export abstract class Manager<S extends SearchIndex<D>, D extends DataModel<S>>
       set: () => {
         // Noop
       },
-    };
+    });
   }
 
   private list_(): Promise<ImmutableSet<D>> {

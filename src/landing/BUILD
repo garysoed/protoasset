@@ -10,4 +10,5 @@ proto_asset(
         "//src/data",
         "//src/project",
         "//src/routing",
+        "//src/testing",
     ])

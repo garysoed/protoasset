@@ -2,16 +2,20 @@
   #createButton {
     min-width: 6rem;
   }
+
+  #root {
+    background-color: white;
+  }
 </style>
-<div fill-parent layout="column">
+<div fill-parent id="root" layout="column">
   <h2>Create new project</h2>
   <pa-project-editor id="editor"></pa-project-editor>
   <div layout="row" flex-justify="flex-end">
-    <gs-basic-button id="createButton" class="gs-primary">
-      <div gs-content>Create</div>
+    <gs-basic-button class="gs-primary" id="createButton" disabled>
+      <div>Create</div>
     </gs-basic-button>
     <gs-basic-button id="cancelButton">
-      <div gs-content>Cancel</div>
+      <div>Cancel</div>
     </gs-basic-button>
   </div>
 </div>

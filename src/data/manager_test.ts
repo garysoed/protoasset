@@ -72,7 +72,7 @@ describe('data.Manager', () => {
       const itemId = 'itemId';
 
       mockStorage.generateId.and.returnValue(Promise.resolve(itemId));
-      const monad = manager.idMonad();
+      const monad = manager.idMonad()(Mocks.object('instance'));
       assert(await monad.get()).to.equal(itemId);
 
       mockStorage.generateId.calls.reset();

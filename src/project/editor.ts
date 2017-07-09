@@ -1,10 +1,20 @@
 import { inject } from 'external/gs_tools/src/inject';
 import { StringParser } from 'external/gs_tools/src/parse';
-import { customElement, DomHook, handle, hook } from 'external/gs_tools/src/webc';
+import { customElement, dom, domOut, onDom } from 'external/gs_tools/src/webc';
 
-import { BaseThemedElement } from 'external/gs_ui/src/common';
+import { MonadSetter } from 'external/gs_tools/src/event';
+import { ImmutableMap } from 'external/gs_tools/src/immutable';
+import { BaseThemedElement2 } from 'external/gs_ui/src/common';
 import { ThemeService } from 'external/gs_ui/src/theming';
 
+const PROJECT_NAME_EDITOR_EL = '#editor';
+const PROJECT_NAME_EDITOR_ATTR = {
+  name: 'value',
+  parser: StringParser,
+  selector: PROJECT_NAME_EDITOR_EL,
+};
+
+const PROJECT_NAME_ATTR = {name: 'project-name', parser: StringParser, selector: null};
 
 /**
  * Project editor
@@ -13,34 +23,33 @@ import { ThemeService } from 'external/gs_ui/src/theming';
   tag: 'pa-project-editor',
   templateKey: 'src/project/editor',
 })
-export class Editor extends BaseThemedElement {
-  @hook('#editor').attribute('gs-value', StringParser)
-  readonly editorValueHook_: DomHook<string>;
-
-  @hook(null).attribute('project-name', StringParser)
-  readonly projectNameHook_: DomHook<string>;
-
+export class Editor extends BaseThemedElement2 {
   constructor(
       @inject('theming.ThemeService') themeService: ThemeService) {
     super(themeService);
-    this.editorValueHook_ = DomHook.of<string>();
-    this.projectNameHook_ = DomHook.of<string>();
   }
 
-  @handle('#editor').attributeChange('gs-value')
-  onEditorValueChanged_(): void {
-    const editorValue = this.editorValueHook_.get();
-    if (this.projectNameHook_.get() !== editorValue && editorValue !== null) {
-      this.projectNameHook_.set(editorValue);
+  @onDom.attributeChange(PROJECT_NAME_EDITOR_ATTR)
+  onEditorValueChanged_(
+      @dom.attribute(PROJECT_NAME_EDITOR_ATTR) newProjectName: string | null,
+      @domOut.attribute(PROJECT_NAME_ATTR)
+          {id: projectNameId, value: projectName}: MonadSetter<string | null>):
+      ImmutableMap<string, any> {
+    if (projectName !== newProjectName && newProjectName !== null) {
+      return ImmutableMap.of([[projectNameId, newProjectName]]);
     }
+    return ImmutableMap.of<string, any>([]);
   }
 
-  @handle(null).attributeChange('project-name')
-  onProjectNameChanged_(): void {
-    const projectName = this.projectNameHook_.get();
-    if (this.editorValueHook_.get() !== projectName && projectName !== null) {
-      this.editorValueHook_.set(projectName);
+  @onDom.attributeChange(PROJECT_NAME_ATTR)
+  onProjectNameChanged_(
+      @dom.attribute(PROJECT_NAME_ATTR) newProjectName: string | null,
+      @domOut.attribute(PROJECT_NAME_EDITOR_ATTR)
+          {id: editorId, value: projectName}: MonadSetter<string | null>):
+      ImmutableMap<string, any> {
+    if (projectName !== newProjectName && newProjectName !== null) {
+      return ImmutableMap.of([[editorId, newProjectName]]);
     }
+    return ImmutableMap.of<string, any>([]);
   }
 }
-// TODO: Mutable

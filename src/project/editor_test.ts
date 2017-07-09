@@ -18,56 +18,44 @@ describe('project.Editor', () => {
   describe('onEditorValueChanged_', () => {
     it('should update the project name', () => {
       const editorValue = 'editorValue';
-      spyOn(editor.editorValueHook_, 'get').and.returnValue(editorValue);
-      spyOn(editor.projectNameHook_, 'get').and.returnValue(null);
-      spyOn(editor.projectNameHook_, 'set');
-      editor.onEditorValueChanged_();
-      assert(editor.projectNameHook_.set).to.haveBeenCalledWith(editorValue);
+      const projectNameId = 'projectNameId';
+      assert(editor.onEditorValueChanged_(editorValue, {id: projectNameId, value: null}))
+          .to.haveElements([[projectNameId, editorValue]]);
     });
 
     it('should not update the project name if they are the same', () => {
       const editorValue = 'editorValue';
-      spyOn(editor.editorValueHook_, 'get').and.returnValue(editorValue);
-      spyOn(editor.projectNameHook_, 'get').and.returnValue(editorValue);
-      spyOn(editor.projectNameHook_, 'set');
-      editor.onEditorValueChanged_();
-      assert(editor.projectNameHook_.set).toNot.haveBeenCalled();
+      const projectNameId = 'projectNameId';
+      assert(editor.onEditorValueChanged_(editorValue, {id: projectNameId, value: editorValue}))
+          .to.haveElements([]);
     });
 
     it('should not update the project name if editor value is null', () => {
-      spyOn(editor.editorValueHook_, 'get').and.returnValue(null);
-      spyOn(editor.projectNameHook_, 'get').and.returnValue('oldValue');
-      spyOn(editor.projectNameHook_, 'set');
-      editor.onEditorValueChanged_();
-      assert(editor.projectNameHook_.set).toNot.haveBeenCalled();
+      const projectNameId = 'projectNameId';
+      assert(editor.onEditorValueChanged_(null, {id: projectNameId, value: 'oldValue'}))
+          .to.haveElements([]);
     });
   });
 
   describe('onProjectNameChanged_', () => {
     it('should update the editor value', () => {
       const projectName = 'projectName';
-      spyOn(editor.projectNameHook_, 'get').and.returnValue(projectName);
-      spyOn(editor.editorValueHook_, 'get').and.returnValue(null);
-      spyOn(editor.editorValueHook_, 'set');
-      editor.onProjectNameChanged_();
-      assert(editor.editorValueHook_.set).to.haveBeenCalledWith(projectName);
+      const editorId = 'editorId';
+      assert(editor.onProjectNameChanged_(projectName, {id: editorId, value: null}))
+          .to.haveElements([[editorId, projectName]]);
     });
 
     it('should not update the editor value if they are the same', () => {
       const projectName = 'projectName';
-      spyOn(editor.projectNameHook_, 'get').and.returnValue(projectName);
-      spyOn(editor.editorValueHook_, 'get').and.returnValue(projectName);
-      spyOn(editor.editorValueHook_, 'set');
-      editor.onProjectNameChanged_();
-      assert(editor.editorValueHook_.set).toNot.haveBeenCalled();
+      const editorId = 'editorId';
+      assert(editor.onProjectNameChanged_(projectName, {id: editorId, value: projectName}))
+          .to.haveElements([]);
     });
 
     it('should not update the editor value if project name is null', () => {
-      spyOn(editor.projectNameHook_, 'get').and.returnValue(null);
-      spyOn(editor.editorValueHook_, 'get').and.returnValue('oldProjectName');
-      spyOn(editor.editorValueHook_, 'set');
-      editor.onProjectNameChanged_();
-      assert(editor.editorValueHook_.set).toNot.haveBeenCalled();
+      const editorId = 'editorId';
+      assert(editor.onProjectNameChanged_(null, {id: editorId, value: 'oldValue'}))
+          .to.haveElements([]);
     });
   });
 });
