@@ -3,7 +3,7 @@
  *
  * @param <T> Type of the data.
  */
-export interface IDataSource<T> {
+export interface DataSource<T> {
   /**
    * @return The data.
    */

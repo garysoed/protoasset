@@ -1,18 +1,18 @@
 import { Field, Serializable } from 'external/gs_tools/src/data';
 import { ImmutableList } from 'external/gs_tools/src/immutable';
 
-import { IDataSource } from './i-data-source';
+import { DataSource } from '../data/data-source';
 
 
 @Serializable('tsvDataSource')
-export class TsvDataSource implements IDataSource<string[][]> {
+export class TsvDataSource implements DataSource<string[][]> {
   private cache_: string[][] | null;
   private cachedInnerSourceData_: string | null;
   @Field('endRow') private endRow_: number;
-  @Field('innerSource') private innerSource_: IDataSource<string>;
+  @Field('innerSource') private innerSource_: DataSource<string>;
   @Field('startRow') private startRow_: number;
 
-  constructor(innerSource: IDataSource<string>, startRow: number, endRow: number) {
+  constructor(innerSource: DataSource<string>, startRow: number, endRow: number) {
     this.endRow_ = endRow;
     this.innerSource_ = innerSource;
     this.startRow_ = startRow;
@@ -73,7 +73,7 @@ export class TsvDataSource implements IDataSource<string[][]> {
    * @param endRow The last row to include in the returned data.
    * @return The new instance of the data source.
    */
-  static of(innerSource: IDataSource<string>, startRow: number, endRow: number): TsvDataSource {
+  static of(innerSource: DataSource<string>, startRow: number, endRow: number): TsvDataSource {
     return new TsvDataSource(innerSource, startRow, endRow);
   }
 }

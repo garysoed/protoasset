@@ -1,13 +1,13 @@
 import { Field, Serializable } from 'external/gs_tools/src/data';
 
-import { IDataSource } from './i-data-source';
+import { DataSource } from '../data/data-source';
 
 
 /**
  * Data source where the data is stored in memory.
  */
 @Serializable('inMemoryDataSource')
-export class InMemoryDataSource<T> implements IDataSource<T> {
+export class InMemoryDataSource<T> implements DataSource<T> {
   @Field('data') private data_: T;
 
   /**

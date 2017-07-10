@@ -4,8 +4,8 @@ import { ImmutableList, ImmutableMap, Iterables } from 'external/gs_tools/src/im
 
 import { BaseLayer } from '../data/base-layer';
 import { DataEvents } from '../data/data-events';
+import { DataSource } from '../data/data-source';
 import { Helper } from '../data/helper';
-import { IDataSource } from '../data/i-data-source';
 
 
 /**
@@ -23,7 +23,7 @@ export type AssetSearchIndex = {
 
 @Serializable('asset')
 export class Asset extends BaseListenable<DataEvents> {
-  @Field('data') private data_: IDataSource<string[][]> | null;
+  @Field('data') private data_: DataSource<string[][]> | null;
   @Field('filename') private filename_: string;
   @Field('height') private height_: number;
   @Field('helpers') private helpers_: {[id: string]: Helper};
@@ -82,7 +82,7 @@ export class Asset extends BaseListenable<DataEvents> {
   /**
    * @return The data source for the asset.
    */
-  getData(): IDataSource<string[][]> | null {
+  getData(): DataSource<string[][]> | null {
     return this.data_;
   }
 
@@ -211,7 +211,7 @@ export class Asset extends BaseListenable<DataEvents> {
   /**
    * @param data The data to set.
    */
-  setData(data: IDataSource<string[][]>): void {
+  setData(data: DataSource<string[][]>): void {
     if (this.data_ === data) {
       return;
     }
