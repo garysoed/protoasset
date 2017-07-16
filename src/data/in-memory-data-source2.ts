@@ -9,11 +9,10 @@ type SearchIndex<T> = {this: InMemoryDataSource2<T>};
  * Data source where the data is stored in memory.
  */
 @Serializable('inMemoryDataSource')
-export class InMemoryDataSource2<T> extends DataModel<SearchIndex<T>> implements DataSource<T> {
+export class InMemoryDataSource2<T> implements DataModel<SearchIndex<T>>, DataSource<T> {
   @Field('data') private readonly data_: T;
 
   constructor(data: T) {
-    super();
     this.data_ = data;
   }
 

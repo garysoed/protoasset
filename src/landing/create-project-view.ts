@@ -13,6 +13,7 @@ import { RouteService } from 'external/gs_ui/src/routing';
 import { ThemeService } from 'external/gs_ui/src/theming';
 
 import { DataAccess } from '../data/data-access';
+import { DataModels } from '../data/data-models';
 import { ProjectManager } from '../data/project-manager';
 import { Project2 } from '../data/project2';
 import { Editor } from '../project/editor';
@@ -96,7 +97,8 @@ export class CreateProjectView extends BaseThemedElement2 {
       throw new Error('Project name is not set');
     }
 
-    const project = new Project2(newId, projectName);
+    const project = DataModels.newInstance<Project2>(Project2)
+        .setName(projectName);
 
     this.routeService_.goTo(this.routeFactoryService_.assetList(), {projectId: newId});
     return this.reset_(projectNameSetter)

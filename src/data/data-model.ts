@@ -1,3 +1,3 @@
-export abstract class DataModel<S> {
-  abstract getSearchIndex(): S;
+export interface DataModel<S> {
+  getSearchIndex(): S;
 }

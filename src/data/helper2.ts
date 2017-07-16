@@ -9,7 +9,7 @@ type SearchIndex = {name: string, this: Helper2};
  * Represents a Handlebars helper function.
  */
 @Serializable('helper')
-export class Helper2 extends DataModel<SearchIndex> {
+export class Helper2 implements DataModel<SearchIndex> {
   @Field('args') private readonly args_: ImmutableList<string>;
   @Field('fnString') private readonly body_: string;
   @Field('id') private readonly id_: string;
@@ -20,7 +20,6 @@ export class Helper2 extends DataModel<SearchIndex> {
       name: string,
       args: ImmutableList<string> = ImmutableList.of(['a', 'b']),
       body: string = 'return a + b') {
-    super();
     this.args_ = args;
     this.body_ = body;
     this.id_ = id;

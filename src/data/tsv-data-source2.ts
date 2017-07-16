@@ -7,14 +7,13 @@ import { DataSource } from '../data/data-source';
 type SearchIndex = {this: TsvDataSource2};
 
 @Serializable('tsvDataSource')
-export class TsvDataSource2 extends DataModel<SearchIndex>
-    implements DataSource<ImmutableList<ImmutableList<string>>> {
+export class TsvDataSource2 implements DataModel<SearchIndex>,
+    DataSource<ImmutableList<ImmutableList<string>>> {
   @Field('endRow') private readonly endRow_: number;
   @Field('innerSource') private readonly innerSource_: DataSource<string>;
   @Field('startRow') private readonly startRow_: number;
 
   constructor(innerSource: DataSource<string>, startRow: number, endRow: number) {
-    super();
     this.endRow_ = endRow;
     this.innerSource_ = innerSource;
     this.startRow_ = startRow;
