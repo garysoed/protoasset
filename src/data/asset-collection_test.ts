@@ -34,7 +34,8 @@ describe('data.AssetCollection', () => {
       const projectId = 'projectId';
       assert(collection['getStorage_'](projectId)).to.equal(collectionStorage);
       assert(collection['storageMap_']).to.haveEntries([[projectId, collectionStorage]]);
-      assert(LocalStorage.of).to.haveBeenCalledWith(window, `pa.assets.${projectId}`);
+      assert(LocalStorage.of).to.haveBeenCalledWith(
+          window, `pa.assets.${projectId}`, Matchers.anyThing());
       assert(CachedStorage.of).to.haveBeenCalledWith(localStorage);
       assert(CollectionStorage.of).to
           .haveBeenCalledWith(AssetCollection['getSearchIndex_'], mockCachedStorage);

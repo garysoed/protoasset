@@ -1,6 +1,7 @@
 import { BaseListenable } from 'external/gs_tools/src/event';
 import { ImmutableSet } from 'external/gs_tools/src/immutable';
 import { bind, inject } from 'external/gs_tools/src/inject';
+import { SerializableParser } from 'external/gs_tools/src/parse';
 import { CachedStorage, LocalStorage } from 'external/gs_tools/src/store';
 
 import { Asset, AssetSearchIndex } from './asset';
@@ -42,7 +43,8 @@ export class AssetCollection extends BaseListenable<CollectionEvents> {
   private getStorage_(projectId: ProjectId): CollectionStorage<Asset, AssetSearchIndex> {
     if (!this.storageMap_.has(projectId)) {
       const cachedStorage =
-          CachedStorage.of(LocalStorage.of<Asset>(this.window_, `pa.assets.${projectId}`));
+          CachedStorage.of(LocalStorage.of<Asset>(
+              this.window_, `pa.assets.${projectId}`, SerializableParser<Asset>()));
       this.addDisposable(cachedStorage);
       this.storageMap_.set(
           projectId,

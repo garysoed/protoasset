@@ -1,7 +1,5 @@
 import { cache, Serializable } from 'external/gs_tools/src/data';
-
-import { DataModel } from '../data/data-model';
-import { field } from '../data/field';
+import { DataModel, field } from 'external/gs_tools/src/datamodel';
 
 export type ProjectSearchIndex = {
   name: string,

@@ -1,3 +1,4 @@
+import { DataAccess } from 'external/gs_tools/src/datamodel';
 import { monad } from 'external/gs_tools/src/event';
 import { inject } from 'external/gs_tools/src/inject';
 import { StringParser } from 'external/gs_tools/src/parse';
@@ -7,7 +8,6 @@ import { BaseThemedElement2 } from 'external/gs_ui/src/common';
 import { RouteService } from 'external/gs_ui/src/routing';
 import { ThemeService } from 'external/gs_ui/src/theming';
 
-import { DataAccess } from '../data/data-access';
 import { ProjectManager } from '../data/project-manager';
 import { Project2 } from '../data/project2';
 import { RouteFactoryService } from '../routing/route-factory-service';

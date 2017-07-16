@@ -1,7 +1,6 @@
 import { cache, Field, Serializable } from 'external/gs_tools/src/data';
+import { DataModel } from 'external/gs_tools/src/datamodel';
 import { ImmutableList } from 'external/gs_tools/src/immutable';
-
-import { DataModel } from '../data/data-model';
 
 type SearchIndex = {name: string, this: Helper2};
 

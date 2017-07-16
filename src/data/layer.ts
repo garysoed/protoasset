@@ -1,6 +1,6 @@
 import { cache, Field } from 'external/gs_tools/src/data';
+import { DataModel } from 'external/gs_tools/src/datamodel';
 
-import { DataModel } from '../data/data-model';
 import { LayerPreviewMode } from '../data/layer-preview-mode';
 import { LayerType } from '../data/layer-type';
 

@@ -1,3 +1,4 @@
+import { DataAccess, ManagerEvent } from 'external/gs_tools/src/datamodel';
 import {
   ImmutableList,
   ImmutableMap,
@@ -18,8 +19,6 @@ import { RouteService, RouteServiceEvents } from 'external/gs_ui/src/routing';
 import { ThemeService } from 'external/gs_ui/src/theming';
 
 import { FilterButton } from '../common/filter-button';
-import { DataAccess } from '../data/data-access';
-import { ManagerEvent } from '../data/manager';
 import { ProjectCollection } from '../data/project-collection';
 import { ProjectManager } from '../data/project-manager';
 import { Project2 } from '../data/project2';

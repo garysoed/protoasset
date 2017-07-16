@@ -1,7 +1,7 @@
 import { cache, Field, Serializable } from 'external/gs_tools/src/data';
+import { DataModel } from 'external/gs_tools/src/datamodel';
 import { ImmutableList } from 'external/gs_tools/src/immutable';
 
-import { DataModel } from '../data/data-model';
 import { DataSource } from '../data/data-source';
 
 type SearchIndex = {this: TsvDataSource2};

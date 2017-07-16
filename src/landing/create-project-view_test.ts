@@ -1,15 +1,13 @@
 import { assert, Matchers, TestBase } from '../test-base';
 TestBase.setup();
 
+import { DataAccess, FakeDataAccess } from 'external/gs_tools/src/datamodel';
 import { ImmutableMap } from 'external/gs_tools/src/immutable';
 import { Mocks } from 'external/gs_tools/src/mock';
 import { TestDispose } from 'external/gs_tools/src/testing';
 
 import { Project2 } from '../data/project2';
-
-import { DataAccess } from '../data/data-access';
-import { FakeDataAccess } from '../testing/fake-data-access';
-import { CreateProjectView } from './create-project-view';
+import { CreateProjectView } from '../landing/create-project-view';
 
 
 describe('landing.CreateProjectView', () => {

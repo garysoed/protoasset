@@ -1,3 +1,4 @@
+import { DataAccess, DataModels } from 'external/gs_tools/src/datamodel';
 import { ImmutableMap, ImmutableSet } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
 import { BooleanParser, StringParser } from 'external/gs_tools/src/parse';
@@ -12,8 +13,6 @@ import { BaseThemedElement2 } from 'external/gs_ui/src/common';
 import { RouteService } from 'external/gs_ui/src/routing';
 import { ThemeService } from 'external/gs_ui/src/theming';
 
-import { DataAccess } from '../data/data-access';
-import { DataModels } from '../data/data-models';
 import { ProjectManager } from '../data/project-manager';
 import { Project2 } from '../data/project2';
 import { Editor } from '../project/editor';
