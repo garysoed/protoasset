@@ -15,14 +15,16 @@ import { ThemeService } from 'external/gs_ui/src/theming';
 import { FilterButton } from '../common/filter-button';
 import { Asset } from '../data/asset';
 import { AssetCollection } from '../data/asset-collection';
-import { ProjectCollection } from '../data/project-collection';
+import { FuseBackedManager } from '../data/fuse-backed-manager';
+import { ProjectManager } from '../data/project-manager';
+import { Project2, ProjectSearchIndex } from '../data/project2';
 import { AssetItem } from '../project/asset-item';
 import { RouteFactoryService } from '../routing/route-factory-service';
 import { Views } from '../routing/views';
 
 
 type AssetItemData = {assetId: string, projectId: string};
-
+type ProjectManagerType = FuseBackedManager<ProjectSearchIndex, Project2>;
 
 export const ASSET_DATA_HELPER: ChildElementDataHelper<AssetItemData> = {
   /**
@@ -60,7 +62,7 @@ export const ASSET_DATA_HELPER: ChildElementDataHelper<AssetItemData> = {
  */
 @customElement({
   dependencies: ImmutableSet.of([
-    AssetCollection, AssetItem, FilterButton, ProjectCollection, RouteService,
+    AssetCollection, AssetItem, FilterButton, RouteService,
   ]),
   tag: 'pa-asset-list-view',
   templateKey: 'src/project/asset-list-view',
@@ -70,7 +72,7 @@ export class AssetListView extends BaseThemedElement {
 
   @hook('#assets').childrenElements<AssetItemData>(ASSET_DATA_HELPER)
   private readonly assetsHook_: DomHook<AssetItemData[]>;
-  private readonly projectCollection_: ProjectCollection;
+  private readonly projectManager_: ProjectManagerType = ProjectManager;
 
   @hook('#projectName').innerText()
   private readonly projectNameTextHook_: DomHook<string>;
@@ -80,14 +82,12 @@ export class AssetListView extends BaseThemedElement {
 
   constructor(
       @inject('pa.data.AssetCollection') assetCollection: AssetCollection,
-      @inject('pa.data.ProjectCollection') projectCollection: ProjectCollection,
       @inject('pa.routing.RouteFactoryService') routeFactoryService: RouteFactoryService,
       @inject('gs.routing.RouteService') routeService: RouteService<Views>,
       @inject('theming.ThemeService') themeService: ThemeService) {
     super(themeService);
     this.assetCollection_ = assetCollection;
     this.assetsHook_ = DomHook.of<AssetItemData[]>();
-    this.projectCollection_ = projectCollection;
     this.projectNameTextHook_ = DomHook.of<string>();
     this.routeFactoryService_ = routeFactoryService;
     this.routeService_ = routeService;
@@ -131,7 +131,7 @@ export class AssetListView extends BaseThemedElement {
 
     const [assets, project] = await Promise.all([
       this.assetCollection_.list(projectId),
-      this.projectCollection_.get(projectId),
+      this.projectManager_.monad()(this).get().get(projectId),
     ]);
 
     const assetItemData = Iterables.toArray(assets

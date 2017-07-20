@@ -1,21 +1,20 @@
 import { assert, TestBase } from '../test-base';
 TestBase.setup();
 
+import { DataModels, FakeDataAccess } from 'external/gs_tools/src/datamodel';
 import { ImmutableMap } from 'external/gs_tools/src/immutable';
 import { Mocks } from 'external/gs_tools/src/mock';
 
-import { AssetListRouteFactory } from './asset-list-route-factory';
+import { ProjectManager } from '../data/project-manager';
+import { Project2 } from '../data/project2';
+import { AssetListRouteFactory } from '../routing/asset-list-route-factory';
 
 
 describe('routing.AssetListRouteFactory', () => {
-  let mockProjectCollection: any;
   let factory: AssetListRouteFactory;
 
   beforeEach(() => {
-    mockProjectCollection = jasmine.createSpyObj('ProjectCollection', ['get']);
-    factory = new AssetListRouteFactory(
-        mockProjectCollection,
-        Mocks.object('parent'));
+    factory = new AssetListRouteFactory(Mocks.object('parent'));
   });
 
   describe('getRelativePath_', () => {
@@ -43,19 +42,25 @@ describe('routing.AssetListRouteFactory', () => {
   describe('getName', () => {
     it('should return the correct name', async () => {
       const name = 'name';
-      const mockProject = jasmine.createSpyObj('Project', ['getName']);
-      mockProject.getName.and.returnValue(name);
-      mockProjectCollection.get.and.returnValue(Promise.resolve(mockProject));
+      const project = DataModels.newInstance<Project2>(Project2).setName(name);
 
       const projectId = 'projectId';
+      const projectDataAccess = new FakeDataAccess(
+        ImmutableMap.of([[projectId, project]]),
+      );
+      const mockProjectManagerMonad = jasmine.createSpyObj('ProjectManagerMonad', ['get']);
+      mockProjectManagerMonad.get.and.returnValue(projectDataAccess);
+      spyOn(ProjectManager, 'monad').and.returnValue(() => mockProjectManagerMonad);
 
       const actualName = await factory.getName({projectId: projectId});
       assert(actualName).to.equal(name);
-      assert(mockProjectCollection.get).to.haveBeenCalledWith(projectId);
     });
 
     it('should return the project ID if the project is unknown', async () => {
-      mockProjectCollection.get.and.returnValue(Promise.resolve(null));
+      const projectDataAccess = new FakeDataAccess();
+      const mockProjectManagerMonad = jasmine.createSpyObj('ProjectManagerMonad', ['get']);
+      mockProjectManagerMonad.get.and.returnValue(projectDataAccess);
+      spyOn(ProjectManager, 'monad').and.returnValue(() => mockProjectManagerMonad);
 
       const projectId = 'projectId';
       const actualName = await factory.getName({projectId: projectId});

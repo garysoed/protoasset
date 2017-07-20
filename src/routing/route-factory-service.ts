@@ -7,7 +7,6 @@ import {
   SimpleRouteFactory } from 'external/gs_ui/src/routing';
 
 import { AssetCollection } from '../data/asset-collection';
-import { ProjectCollection } from '../data/project-collection';
 import { AssetListRouteFactory } from '../routing/asset-list-route-factory';
 import { AssetMainRouteFactory } from '../routing/asset-main-route-factory';
 import { AssetSettingsRouteFactory } from '../routing/asset-settings-route-factory';
@@ -18,7 +17,6 @@ import { Views } from '../routing/views';
 
 @bind('pa.routing.RouteFactoryService', [
   AssetCollection,
-  ProjectCollection,
 ])
 export class RouteFactoryService implements IRouteFactoryService<Views> {
   private readonly assetCollection_: AssetCollection;
@@ -32,15 +30,12 @@ export class RouteFactoryService implements IRouteFactoryService<Views> {
   private helperList_: SimpleRouteFactory<Views, {assetId: string, projectId: string}>;
   private landing_: SimpleRouteFactory<Views, {}>;
   private layer_: SimpleRouteFactory<Views, {assetId: string, projectId: string}>;
-  private readonly projectCollection_: ProjectCollection;
   private projectSettings_: ProjectSettingsRouteFactory;
   private render_: SimpleRouteFactory<Views, {assetId: string, projectId: string}>;
 
   constructor(
-      @inject('pa.data.AssetCollection') assetCollection: AssetCollection,
-      @inject('pa.data.ProjectCollection') projectCollection: ProjectCollection) {
+      @inject('pa.data.AssetCollection') assetCollection: AssetCollection) {
     this.assetCollection_ = assetCollection;
-    this.projectCollection_ = projectCollection;
   }
 
   /**
@@ -58,13 +53,9 @@ export class RouteFactoryService implements IRouteFactoryService<Views> {
         this.landing_);
 
     // /home/project/:projectId
-    this.assetList_ = new AssetListRouteFactory(
-        this.projectCollection_,
-        this.landing_);
+    this.assetList_ = new AssetListRouteFactory(this.landing_);
 
-    this.projectSettings_ = new ProjectSettingsRouteFactory(
-        this.projectCollection_,
-        this.assetList_);
+    this.projectSettings_ = new ProjectSettingsRouteFactory(this.assetList_);
 
     // /home/project/:projectId/asset/:assetId
     this.assetMain_ = new AssetMainRouteFactory(this.assetCollection_, this.assetList_);

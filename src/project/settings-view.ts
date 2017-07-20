@@ -7,18 +7,20 @@ import { RouteService, RouteServiceEvents } from 'external/gs_ui/src/routing';
 import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { ThemeService } from 'external/gs_ui/src/theming';
 
-import { Project } from '../data/project';
-import { ProjectCollection } from '../data/project-collection';
+import { FuseBackedManager } from '../data/fuse-backed-manager';
+import { ProjectManager } from '../data/project-manager';
+import { Project2, ProjectSearchIndex } from '../data/project2';
 import { Editor } from '../project/editor';
 import { RouteFactoryService } from '../routing/route-factory-service';
 import { Views } from '../routing/views';
 
+type ProjectManagerType = FuseBackedManager<ProjectSearchIndex, Project2>;
 
 /**
  * Settings
  */
 @customElement({
-  dependencies: ImmutableSet.of([Editor, ProjectCollection, RouteService]),
+  dependencies: ImmutableSet.of([Editor, RouteService]),
   tag: 'pa-project-settings-view',
   templateKey: 'src/project/settings-view',
 })
@@ -29,9 +31,9 @@ export class SettingsView extends BaseThemedElement {
   @hook('#name').innerText()
   readonly nameInnerTextHook_: DomHook<string> = DomHook.of<string>();
 
+  private readonly projectManager_: ProjectManagerType = ProjectManager;
+
   constructor(
-      @inject('pa.data.ProjectCollection')
-      private readonly projectCollection_: ProjectCollection,
       @inject('pa.routing.RouteFactoryService')
       private readonly routeFactoryService_: RouteFactoryService,
       @inject('gs.routing.RouteService')
@@ -41,13 +43,13 @@ export class SettingsView extends BaseThemedElement {
     super(themeService);
   }
 
-  private async getProject_(): Promise<Project | null> {
+  private async getProject_(): Promise<Project2 | null> {
     const params = this.routeService_.getParams(this.routeFactoryService_.projectSettings());
     if (params === null) {
       return null;
     }
 
-    return this.projectCollection_.get(params.projectId);
+    return this.projectManager_.monad()(this).get().get(params.projectId);
   }
 
   onCreated(element: HTMLElement): void {
@@ -69,8 +71,9 @@ export class SettingsView extends BaseThemedElement {
       return;
     }
 
-    project.setName(projectName);
-    this.projectCollection_.update(project);
+    const projectManagerMonad = this.projectManager_.monad()(this);
+    projectManagerMonad.set(
+        projectManagerMonad.get().queueUpdate(project.getId(), project.setName(projectName)));
   }
 
   private async onRouteChanged_(): Promise<void> {

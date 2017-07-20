@@ -1,35 +1,42 @@
 import { assert, TestBase } from '../test-base';
 TestBase.setup();
 
+import { DataModels, FakeDataAccess } from 'external/gs_tools/src/datamodel';
+import { ImmutableMap } from 'external/gs_tools/src/immutable';
 import { Mocks } from 'external/gs_tools/src/mock';
 
+import { ProjectManager } from '../data/project-manager';
+import { Project2 } from '../data/project2';
 import { ProjectSettingsRouteFactory } from '../routing/project-settings-route-factory';
 
 
 describe('routing.ProjectSettingsRouteFactory', () => {
-  let mockProjectCollection: any;
   let factory: ProjectSettingsRouteFactory;
 
   beforeEach(() => {
-    mockProjectCollection = jasmine.createSpyObj('ProjectCollection', ['get']);
-    factory = new ProjectSettingsRouteFactory(
-        mockProjectCollection,
-        Mocks.object('Parent'));
+    factory = new ProjectSettingsRouteFactory(Mocks.object('Parent'));
   });
 
   describe('getName', () => {
     it('should resolve with the correct name', async () => {
       const projectId = 'projectId';
       const projectName = 'projectName';
-      const mockProject = jasmine.createSpyObj('Project', ['getName']);
-      mockProject.getName.and.returnValue(projectName);
-      mockProjectCollection.get.and.returnValue(mockProject);
+      const project = DataModels.newInstance<Project2>(Project2).setName(projectName);
+
+      const projectDataAccess = new FakeDataAccess(
+        ImmutableMap.of([[projectId, project]]),
+      );
+      const mockProjectManagerMonad = jasmine.createSpyObj('ProjectManagerMonad', ['get']);
+      mockProjectManagerMonad.get.and.returnValue(projectDataAccess);
+      spyOn(ProjectManager, 'monad').and.returnValue(() => mockProjectManagerMonad);
       assert(await factory.getName({projectId})).to.equal(`Settings for ${projectName}`);
-      assert(mockProjectCollection.get).to.haveBeenCalledWith(projectId);
     });
 
     it('should resolve with the correct name if project cannot be found', async () => {
-      mockProjectCollection.get.and.returnValue(null);
+      const projectDataAccess = new FakeDataAccess();
+      const mockProjectManagerMonad = jasmine.createSpyObj('ProjectManagerMonad', ['get']);
+      mockProjectManagerMonad.get.and.returnValue(projectDataAccess);
+      spyOn(ProjectManager, 'monad').and.returnValue(() => mockProjectManagerMonad);
       assert(await factory.getName({projectId: 'projectId'})).to.equal(`Settings`);
     });
   });

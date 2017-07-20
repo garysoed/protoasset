@@ -19,7 +19,6 @@ import { RouteService, RouteServiceEvents } from 'external/gs_ui/src/routing';
 import { ThemeService } from 'external/gs_ui/src/theming';
 
 import { FilterButton } from '../common/filter-button';
-import { ProjectCollection } from '../data/project-collection';
 import { ProjectManager } from '../data/project-manager';
 import { Project2 } from '../data/project2';
 import { ProjectItem } from '../landing/project-item';
@@ -51,7 +50,7 @@ export const PROJECT_COLLECTION_CHILDREN = {
  * The main landing view of the app.
  */
 @customElement({
-  dependencies: ImmutableSet.of([FilterButton, ProjectCollection, ProjectItem, RouteService]),
+  dependencies: ImmutableSet.of([FilterButton, ProjectItem, RouteService]),
   tag: 'pa-landing-view',
   templateKey: 'src/landing/landing-view',
 })

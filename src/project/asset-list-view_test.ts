@@ -1,12 +1,14 @@
 import { assert, TestBase } from '../test-base';
 TestBase.setup();
 
-import { ImmutableSet } from 'external/gs_tools/src/immutable';
+import { ImmutableMap, ImmutableSet } from 'external/gs_tools/src/immutable';
 import { Mocks } from 'external/gs_tools/src/mock';
 import { TestDispose } from 'external/gs_tools/src/testing';
 
 import { RouteServiceEvents } from 'external/gs_ui/src/routing';
 
+import { FakeDataAccess } from 'external/gs_tools/src/datamodel';
+import { ProjectManager } from 'src/data/project-manager';
 import { ASSET_DATA_HELPER, AssetListView } from '../project/asset-list-view';
 
 
@@ -81,14 +83,12 @@ describe('ASSET_DATA_HELPER', () => {
 
 describe('project.AssetListView', () => {
   let mockAssetCollection: any;
-  let mockProjectCollection: any;
   let mockRouteFactoryService: any;
   let mockRouteService: any;
   let view: AssetListView;
 
   beforeEach(() => {
     mockAssetCollection = jasmine.createSpyObj('AssetCollection', ['list']);
-    mockProjectCollection = jasmine.createSpyObj('ProjectCollection', ['get']);
     mockRouteFactoryService = jasmine.createSpyObj(
         'RouteFactoryService',
         ['assetList', 'createAsset', 'projectSettings']);
@@ -99,7 +99,6 @@ describe('project.AssetListView', () => {
 
     view = new AssetListView(
         mockAssetCollection,
-        mockProjectCollection,
         mockRouteFactoryService,
         mockRouteService,
         jasmine.createSpyObj('ThemeService', ['applyTheme']));
@@ -139,7 +138,12 @@ describe('project.AssetListView', () => {
       mockProject.getName.and.returnValue(projectName);
 
       mockAssetCollection.list.and.returnValue(Promise.resolve(ImmutableSet.of([])));
-      mockProjectCollection.get.and.returnValue(Promise.resolve(mockProject));
+      const projectDataAccess = new FakeDataAccess(
+        ImmutableMap.of([[projectId, mockProject]]),
+      );
+      const mockProjectManagerMonad = jasmine.createSpyObj('ProjectManagerMonad', ['get', 'set']);
+      mockProjectManagerMonad.get.and.returnValue(projectDataAccess);
+      spyOn(ProjectManager, 'monad').and.returnValue(() => mockProjectManagerMonad);
 
       spyOn(view, 'getProjectId_').and.returnValue(projectId);
       spyOn(view['assetsHook_'], 'set');
@@ -147,7 +151,6 @@ describe('project.AssetListView', () => {
 
       await view['onProjectIdChanged_']();
       assert(view['projectNameTextHook_'].set).to.haveBeenCalledWith(projectName);
-      assert(mockProjectCollection.get).to.haveBeenCalledWith(projectId);
     });
 
     it('should set the assets', async () => {
@@ -167,7 +170,10 @@ describe('project.AssetListView', () => {
 
       mockAssetCollection.list.and
           .returnValue(Promise.resolve(ImmutableSet.of([mockAsset1, mockAsset2])));
-      mockProjectCollection.get.and.returnValue(Promise.resolve(null));
+      const projectDataAccess = new FakeDataAccess();
+      const mockProjectManagerMonad = jasmine.createSpyObj('ProjectManagerMonad', ['get', 'set']);
+      mockProjectManagerMonad.get.and.returnValue(projectDataAccess);
+      spyOn(ProjectManager, 'monad').and.returnValue(() => mockProjectManagerMonad);
 
       spyOn(view, 'getProjectId_').and.returnValue(projectId);
       spyOn(view['assetsHook_'], 'set');
@@ -183,17 +189,20 @@ describe('project.AssetListView', () => {
 
     it('should not throw error if there are no projects corresponding to the project ID',
         async () => {
-          const projectId = 'projectId';
+      const projectId = 'projectId';
 
-          mockAssetCollection.list.and.returnValue(Promise.resolve(ImmutableSet.of([])));
-          mockProjectCollection.get.and.returnValue(Promise.resolve(null));
-          spyOn(view, 'getProjectId_').and.returnValue(projectId);
-          spyOn(view['assetsHook_'], 'set');
-          spyOn(view['projectNameTextHook_'], 'set');
+      mockAssetCollection.list.and.returnValue(Promise.resolve(ImmutableSet.of([])));
+      const projectDataAccess = new FakeDataAccess();
+      const mockProjectManagerMonad = jasmine.createSpyObj('ProjectManagerMonad', ['get', 'set']);
+      mockProjectManagerMonad.get.and.returnValue(projectDataAccess);
+      spyOn(ProjectManager, 'monad').and.returnValue(() => mockProjectManagerMonad);
+      spyOn(view, 'getProjectId_').and.returnValue(projectId);
+      spyOn(view['assetsHook_'], 'set');
+      spyOn(view['projectNameTextHook_'], 'set');
 
-          await view['onProjectIdChanged_']();
-          assert(view['projectNameTextHook_'].set).toNot.haveBeenCalled();
-        });
+      await view['onProjectIdChanged_']();
+      assert(view['projectNameTextHook_'].set).toNot.haveBeenCalled();
+    });
 
     it('should not throw error if there are no project IDs', async () => {
       spyOn(view, 'getProjectId_').and.returnValue(null);

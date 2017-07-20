@@ -1,16 +1,20 @@
 import { AbstractRouteFactory } from 'external/gs_ui/src/routing';
 
-import { ProjectCollection } from '../data/project-collection';
+import { FuseBackedManager } from '../data/fuse-backed-manager';
+import { ProjectManager } from '../data/project-manager';
+import { Project2, ProjectSearchIndex } from '../data/project2';
 import { Views } from '../routing/views';
 
 type CP = {};
 type PR = {projectId: string};
 type CR = CP & PR;
 
+type ProjectManagerType = FuseBackedManager<ProjectSearchIndex, Project2>;
+
 export class ProjectSettingsRouteFactory extends AbstractRouteFactory<Views, CP, CR, PR> {
+  private readonly projectManager_: ProjectManagerType = ProjectManager;
 
   constructor(
-      private readonly projectCollection_: ProjectCollection,
       parent: AbstractRouteFactory<Views, any, PR, any>) {
     super(Views.PROJECT_SETTINGS, parent);
   }
@@ -19,7 +23,7 @@ export class ProjectSettingsRouteFactory extends AbstractRouteFactory<Views, CP,
    * @override
    */
   async getName(params: CR): Promise<string> {
-    const project = await this.projectCollection_.get(params.projectId);
+    const project = await this.projectManager_.monad()(this).get().get(params.projectId);
     if (project === null) {
       return 'Settings';
     }
