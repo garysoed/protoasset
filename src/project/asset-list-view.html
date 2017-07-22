@@ -30,6 +30,10 @@
     text-decoration: underline;
   }
 
+  #root {
+    background: white;
+  }
+
   #settingsButton {
     position: fixed;
     top: 3.5rem;
@@ -37,18 +41,20 @@
   }
 </style>
 
-<gs-basic-button class="gs-theme-normal gs-primary" id="createButton">
-  <div gs-content>
-    <gs-icon>add</gs-icon>
+<div fill-parent id="root">
+  <gs-basic-button class="gs-theme-normal gs-primary" id="createButton">
+    <div gs-content>
+      <gs-icon>add</gs-icon>
+    </div>
+  </gs-basic-button>
+  <gs-basic-button class="gs-theme-normal gs-primary" id="settingsButton">
+    <div gs-content>
+      <gs-icon>settings</gs-icon>
+    </div>
+  </gs-basic-button>
+  <div id="main">
+    <h2>Choose Asset for project <span id="projectName"></span></h2>
+    <div flex-wrap id="assets" layout="row"></div>
   </div>
-</gs-basic-button>
-<gs-basic-button class="gs-theme-normal gs-primary" id="settingsButton">
-  <div gs-content>
-    <gs-icon>settings</gs-icon>
-  </div>
-</gs-basic-button>
-<div id="main">
-  <h2>Choose Asset for project <span id="projectName"></span></h2>
-  <div flex-wrap id="assets" layout="row"></div>
+  <pa-filter-button id="filterButton"></pa-filter-button>
 </div>
-<pa-filter-button id="filterButton"></pa-filter-button>
