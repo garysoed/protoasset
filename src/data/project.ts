@@ -1,41 +1,28 @@
-import { Field, Serializable } from 'external/gs_tools/src/data';
-
+import { cache, Serializable } from 'external/gs_tools/src/data';
+import { DataModel, field } from 'external/gs_tools/src/datamodel';
 
 export type ProjectSearchIndex = {
   name: string,
   this: Project,
 };
 
-/**
- * Represents a project
- */
+export function generateSearchIndex(instance: Project): ProjectSearchIndex {
+  return {
+    name: instance.getName(),
+    this: instance,
+  };
+}
+
 @Serializable('project')
-export class Project {
-  @Field('id') private id_: string;
-  @Field('name') private name_: string;
+export abstract class Project implements DataModel<ProjectSearchIndex> {
+  @field('id') protected readonly id_: string = '';
+  @field('name') protected readonly name_: string = '';
 
-  constructor(id: string) {
-    this.id_ = id;
-    this.name_ = 'Unnamed Project';
-  }
+  abstract getId(): string;
 
-  /**
-   * @return The ID of the project.
-   */
-  getId(): string {
-    return this.id_;
-  }
+  abstract getName(): string;
 
-  /**
-   * @return The name of the project.
-   */
-  getName(): string {
-    return this.name_;
-  }
-
-  /**
-   * @return The index used for searching.
-   */
+  @cache()
   getSearchIndex(): ProjectSearchIndex {
     return {
       name: this.name_,
@@ -43,13 +30,5 @@ export class Project {
     };
   }
 
-  /**
-   * Sets the project name.
-   *
-   * @param name The name to set.
-   */
-  setName(name: string): void {
-    this.name_ = name;
-  }
+  abstract setName(name: string): Project;
 }
-// TODO: Mutable

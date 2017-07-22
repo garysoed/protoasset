@@ -2,15 +2,15 @@ import { ImmutableMap } from 'external/gs_tools/src/immutable';
 import { AbstractRouteFactory } from 'external/gs_ui/src/routing';
 
 import { FuseBackedManager } from '../data/fuse-backed-manager';
+import { Project, ProjectSearchIndex } from '../data/project';
 import { ProjectManager } from '../data/project-manager';
-import { Project2, ProjectSearchIndex } from '../data/project2';
 import { Views } from '../routing/views';
 
 type CP = {projectId: string};
 type PR = {};
 type CR = CP & PR;
 
-type ProjectManagerType = FuseBackedManager<ProjectSearchIndex, Project2>;
+type ProjectManagerType = FuseBackedManager<ProjectSearchIndex, Project>;
 
 export class AssetListRouteFactory extends AbstractRouteFactory<Views, CP, CR, PR> {
   private readonly projectManager_: ProjectManagerType = ProjectManager;

@@ -8,8 +8,8 @@ import { BaseThemedElement2 } from 'external/gs_ui/src/common';
 import { RouteService } from 'external/gs_ui/src/routing';
 import { ThemeService } from 'external/gs_ui/src/theming';
 
+import { Project } from '../data/project';
 import { ProjectManager } from '../data/project-manager';
-import { Project2 } from '../data/project2';
 import { RouteFactoryService } from '../routing/route-factory-service';
 import { Views } from '../routing/views';
 
@@ -45,8 +45,8 @@ export class ProjectItem extends BaseThemedElement2 {
   async onProjectIdChanged_(
       @dom.element(PROJECT_NAME_EL) projectNameEl: HTMLElement,
       @dom.attribute(PROJECT_ID_ATTR) newId: string | null,
-      @monad(ProjectManager.monad()) projectDataAccess: DataAccess<Project2>): Promise<void> {
-    const projectPromise: Promise<Project2 | null> =
+      @monad(ProjectManager.monad()) projectDataAccess: DataAccess<Project>): Promise<void> {
+    const projectPromise: Promise<Project | null> =
         newId ? projectDataAccess.get(newId) : Promise.resolve(null);
     const project = await projectPromise;
     if (project !== null) {

@@ -8,13 +8,13 @@ import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { ThemeService } from 'external/gs_ui/src/theming';
 
 import { FuseBackedManager } from '../data/fuse-backed-manager';
+import { Project, ProjectSearchIndex } from '../data/project';
 import { ProjectManager } from '../data/project-manager';
-import { Project2, ProjectSearchIndex } from '../data/project2';
 import { Editor } from '../project/editor';
 import { RouteFactoryService } from '../routing/route-factory-service';
 import { Views } from '../routing/views';
 
-type ProjectManagerType = FuseBackedManager<ProjectSearchIndex, Project2>;
+type ProjectManagerType = FuseBackedManager<ProjectSearchIndex, Project>;
 
 /**
  * Settings
@@ -43,7 +43,7 @@ export class SettingsView extends BaseThemedElement {
     super(themeService);
   }
 
-  private async getProject_(): Promise<Project2 | null> {
+  private async getProject_(): Promise<Project | null> {
     const params = this.routeService_.getParams(this.routeFactoryService_.projectSettings());
     if (params === null) {
       return null;

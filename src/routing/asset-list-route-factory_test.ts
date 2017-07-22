@@ -5,8 +5,8 @@ import { DataModels, FakeDataAccess } from 'external/gs_tools/src/datamodel';
 import { ImmutableMap } from 'external/gs_tools/src/immutable';
 import { Mocks } from 'external/gs_tools/src/mock';
 
+import { Project } from '../data/project';
 import { ProjectManager } from '../data/project-manager';
-import { Project2 } from '../data/project2';
 import { AssetListRouteFactory } from '../routing/asset-list-route-factory';
 
 
@@ -42,7 +42,7 @@ describe('routing.AssetListRouteFactory', () => {
   describe('getName', () => {
     it('should return the correct name', async () => {
       const name = 'name';
-      const project = DataModels.newInstance<Project2>(Project2).setName(name);
+      const project = DataModels.newInstance<Project>(Project).setName(name);
 
       const projectId = 'projectId';
       const projectDataAccess = new FakeDataAccess(

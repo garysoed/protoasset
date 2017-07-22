@@ -8,8 +8,8 @@ import { TestDispose } from 'external/gs_tools/src/testing';
 
 import { RouteServiceEvents } from 'external/gs_ui/src/routing';
 
+import { Project } from '../data/project';
 import { ProjectManager } from '../data/project-manager';
-import { Project2 } from '../data/project2';
 import { SettingsView } from '../project/settings-view';
 
 describe('project.SettingsView', () => {
@@ -80,8 +80,8 @@ describe('project.SettingsView', () => {
   describe('onEditorProjectNameChanged_', () => {
     it('should update the project correctly', async () => {
       const projectId = 'projectId';
-      const mockProject = DataModels.newInstance<Project2>(
-          Project2,
+      const mockProject = DataModels.newInstance<Project>(
+          Project,
           ImmutableMap.of([['id_', projectId]]));
       spyOn(view, 'getProject_').and.returnValue(Promise.resolve(mockProject));
 
@@ -95,7 +95,7 @@ describe('project.SettingsView', () => {
 
       await view.onEditorProjectNameChanged_();
       assert(mockProjectManagerMonad.set).to.haveBeenCalledWith(Matchers.any(DataAccess));
-      const dataAccess: DataAccess<Project2> = mockProjectManagerMonad.set.calls.argsFor(0)[0];
+      const dataAccess: DataAccess<Project> = mockProjectManagerMonad.set.calls.argsFor(0)[0];
       assert(dataAccess.getUpdateQueue().get(projectId)!.getName()).to.equal(projectName);
     });
 

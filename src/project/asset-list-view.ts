@@ -16,15 +16,15 @@ import { FilterButton } from '../common/filter-button';
 import { Asset } from '../data/asset';
 import { AssetCollection } from '../data/asset-collection';
 import { FuseBackedManager } from '../data/fuse-backed-manager';
+import { Project, ProjectSearchIndex } from '../data/project';
 import { ProjectManager } from '../data/project-manager';
-import { Project2, ProjectSearchIndex } from '../data/project2';
 import { AssetItem } from '../project/asset-item';
 import { RouteFactoryService } from '../routing/route-factory-service';
 import { Views } from '../routing/views';
 
 
 type AssetItemData = {assetId: string, projectId: string};
-type ProjectManagerType = FuseBackedManager<ProjectSearchIndex, Project2>;
+type ProjectManagerType = FuseBackedManager<ProjectSearchIndex, Project>;
 
 export const ASSET_DATA_HELPER: ChildElementDataHelper<AssetItemData> = {
   /**

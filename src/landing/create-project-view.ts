@@ -13,8 +13,8 @@ import { BaseThemedElement2 } from 'external/gs_ui/src/common';
 import { RouteService } from 'external/gs_ui/src/routing';
 import { ThemeService } from 'external/gs_ui/src/theming';
 
+import { Project } from '../data/project';
 import { ProjectManager } from '../data/project-manager';
-import { Project2 } from '../data/project2';
 import { Editor } from '../project/editor';
 import { RouteFactoryService } from '../routing/route-factory-service';
 import { Views } from '../routing/views';
@@ -89,14 +89,14 @@ export class CreateProjectView extends BaseThemedElement2 {
       @monad(ProjectManager.idMonad()) newId: string,
       @domOut.attribute(EDITOR_PROJECT_NAME_ATTR) projectNameSetter: MonadSetter<string | null>,
       @monadOut(ProjectManager.monad())
-          {id: projectAccessId, value: projectAccess}: MonadSetter<DataAccess<Project2>>):
+          {id: projectAccessId, value: projectAccess}: MonadSetter<DataAccess<Project>>):
       Promise<ImmutableMap<string, any>> {
     const projectName = projectNameSetter.value;
     if (projectName === null) {
       throw new Error('Project name is not set');
     }
 
-    const project = DataModels.newInstance<Project2>(Project2)
+    const project = DataModels.newInstance<Project>(Project)
         .setName(projectName);
 
     this.routeService_.goTo(this.routeFactoryService_.assetList(), {projectId: newId});

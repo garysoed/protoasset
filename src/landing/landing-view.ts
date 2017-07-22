@@ -19,8 +19,8 @@ import { RouteService, RouteServiceEvents } from 'external/gs_ui/src/routing';
 import { ThemeService } from 'external/gs_ui/src/theming';
 
 import { FilterButton } from '../common/filter-button';
+import { Project } from '../data/project';
 import { ProjectManager } from '../data/project-manager';
-import { Project2 } from '../data/project2';
 import { ProjectItem } from '../landing/project-item';
 import { RouteFactoryService } from '../routing/route-factory-service';
 import { Views } from '../routing/views';
@@ -79,7 +79,7 @@ export class LandingView extends BaseThemedElement2 {
    * @override
    */
   @onLifecycle('create')
-  onCreated(@monad(ProjectManager.monad()) projectAccess: DataAccess<Project2>): void {
+  onCreated(@monad(ProjectManager.monad()) projectAccess: DataAccess<Project>): void {
     this.onRouteChanged_(projectAccess);
   }
 
@@ -89,7 +89,7 @@ export class LandingView extends BaseThemedElement2 {
       @dom.attribute(FILTER_TEXT_ATTR) filterText: string | null,
       @domOut.childElements(PROJECT_COLLECTION_CHILDREN)
           {id: projectCollectionId}: MonadSetter<ImmutableList<string>>,
-      @monad(ProjectManager.monad()) projectAccess: DataAccess<Project2>):
+      @monad(ProjectManager.monad()) projectAccess: DataAccess<Project>):
       Promise<ImmutableMap<string, any>> {
     const projectsPromise = (filterText === null || filterText === '')
         ? projectAccess.list()
@@ -98,7 +98,7 @@ export class LandingView extends BaseThemedElement2 {
     const projects = await projectsPromise;
     const normalizedProjects = projects instanceof Array ? projects : Iterables.toArray(projects);
     const projectIds = ImmutableList.of(normalizedProjects)
-        .map((project: Project2) => {
+        .map((project: Project) => {
           return project.getId();
         });
     return ImmutableMap.of([[projectCollectionId, projectIds]]);
@@ -111,11 +111,11 @@ export class LandingView extends BaseThemedElement2 {
   async onInserted(
       @domOut.childElements(PROJECT_COLLECTION_CHILDREN)
           {id: projectCollectionId}: MonadSetter<ImmutableList<string>>,
-      @monad(ProjectManager.monad()) projectAccess: DataAccess<Project2>):
+      @monad(ProjectManager.monad()) projectAccess: DataAccess<Project>):
       Promise<ImmutableMap<string, any>> {
     const projects = await projectAccess.list();
     const projectIds = ImmutableList.of(projects
-        .mapItem((project: Project2) => {
+        .mapItem((project: Project) => {
           return project.getId();
         }));
     return ImmutableMap.of([[projectCollectionId, projectIds]]);
@@ -130,7 +130,7 @@ export class LandingView extends BaseThemedElement2 {
       @domOut.childElements(PROJECT_COLLECTION_CHILDREN)
           {id: projectCollectionId, value: projectCollectionIds}:
           MonadSetter<ImmutableList<string>>,
-      @eventDetails() {data: project}: ManagerEvent<Project2>): ImmutableMap<string, any> {
+      @eventDetails() {data: project}: ManagerEvent<Project>): ImmutableMap<string, any> {
     return ImmutableMap.of([[projectCollectionId, projectCollectionIds.add(project.getId())]]);
   }
   /**
@@ -138,7 +138,7 @@ export class LandingView extends BaseThemedElement2 {
    */
   @on((instance: LandingView) => instance.routeService_, RouteServiceEvents.CHANGED)
   async onRouteChanged_(
-      @monad(ProjectManager.monad()) projectAccess: DataAccess<Project2>): Promise<void> {
+      @monad(ProjectManager.monad()) projectAccess: DataAccess<Project>): Promise<void> {
     const route = this.routeService_.getRoute();
     if (route === null) {
       this.routeService_.goTo(this.routeFactoryService_.landing(), {});

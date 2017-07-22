@@ -5,8 +5,8 @@ import { DataModels, FakeDataAccess } from 'external/gs_tools/src/datamodel';
 import { ImmutableMap } from 'external/gs_tools/src/immutable';
 import { Mocks } from 'external/gs_tools/src/mock';
 
+import { Project } from '../data/project';
 import { ProjectManager } from '../data/project-manager';
-import { Project2 } from '../data/project2';
 import { ProjectSettingsRouteFactory } from '../routing/project-settings-route-factory';
 
 
@@ -21,7 +21,7 @@ describe('routing.ProjectSettingsRouteFactory', () => {
     it('should resolve with the correct name', async () => {
       const projectId = 'projectId';
       const projectName = 'projectName';
-      const project = DataModels.newInstance<Project2>(Project2).setName(projectName);
+      const project = DataModels.newInstance<Project>(Project).setName(projectName);
 
       const projectDataAccess = new FakeDataAccess(
         ImmutableMap.of([[projectId, project]]),

@@ -6,7 +6,7 @@ import { ImmutableMap } from 'external/gs_tools/src/immutable';
 import { Mocks } from 'external/gs_tools/src/mock';
 import { TestDispose } from 'external/gs_tools/src/testing';
 
-import { Project2 } from '../data/project2';
+import { Project } from '../data/project';
 import { CreateProjectView } from '../landing/create-project-view';
 
 
@@ -73,7 +73,7 @@ describe('landing.CreateProjectView', () => {
       const projectNameSetter = Mocks.object('projectNameSetter');
       projectNameSetter.value = projectName;
 
-      const projectAccess = new FakeDataAccess<Project2>();
+      const projectAccess = new FakeDataAccess<Project>();
       const map = await view.onSubmitAction_(
           projectId,
           projectNameSetter,
@@ -83,10 +83,10 @@ describe('landing.CreateProjectView', () => {
         [projectAccessId, Matchers.any(DataAccess)],
       ]);
 
-      const projectUpdateQueue = (map.get(projectAccessId) as DataAccess<Project2>)
+      const projectUpdateQueue = (map.get(projectAccessId) as DataAccess<Project>)
           .getUpdateQueue();
       assert(projectUpdateQueue).to
-          .haveElements([[projectId, Matchers.any<Project2>(Project2 as any)]]);
+          .haveElements([[projectId, Matchers.any<Project>(Project as any)]]);
 
       const project = projectUpdateQueue.get(projectId)!;
       assert(project.getName()).to.equal(projectName);
