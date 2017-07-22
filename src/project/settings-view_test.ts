@@ -1,7 +1,7 @@
 import { assert, Matchers, TestBase } from '../test-base';
 TestBase.setup();
 
-import { DataAccess, DataModels, FakeDataAccess } from 'external/gs_tools/src/datamodel';
+import { DataAccess, FakeDataAccess } from 'external/gs_tools/src/datamodel';
 import { ImmutableMap } from 'external/gs_tools/src/immutable';
 import { Mocks } from 'external/gs_tools/src/mock';
 import { TestDispose } from 'external/gs_tools/src/testing';
@@ -80,9 +80,7 @@ describe('project.SettingsView', () => {
   describe('onEditorProjectNameChanged_', () => {
     it('should update the project correctly', async () => {
       const projectId = 'projectId';
-      const mockProject = DataModels.newInstance<Project>(
-          Project,
-          ImmutableMap.of([['id_', projectId]]));
+      const mockProject = Project.withId(projectId);
       spyOn(view, 'getProject_').and.returnValue(Promise.resolve(mockProject));
 
       const projectName = 'projectName';

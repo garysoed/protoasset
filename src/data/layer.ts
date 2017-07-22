@@ -1,5 +1,5 @@
-import { cache, Field } from 'external/gs_tools/src/data';
-import { DataModel } from 'external/gs_tools/src/datamodel';
+import { cache } from 'external/gs_tools/src/data';
+import { DataModel, field } from 'external/gs_tools/src/datamodel';
 
 import { LayerPreviewMode } from '../data/layer-preview-mode';
 import { LayerType } from '../data/layer-type';
@@ -11,34 +11,17 @@ type SearchIndex = {name: string, this: Layer};
  * Base class of all layers.
  */
 export abstract class Layer implements DataModel<SearchIndex> {
-  @Field('bottom') private readonly bottom_: number;
-  @Field('id') private readonly id_: string;
-  @Field('left') private readonly left_: number;
-  @Field('name') private readonly name_: string;
-  @Field('right') private readonly right_: number;
-  @Field('top') private readonly top_: number;
-
-  private readonly type_: LayerType;
+  @field('bottom') protected readonly bottom_: number;
+  @field('id') protected readonly id_: string;
+  @field('left') protected readonly left_: number;
+  @field('name') protected readonly name_: string;
+  @field('right') protected readonly right_: number;
+  @field('top') protected readonly top_: number;
 
   /**
    * @param name Name of the layer.
    */
-  constructor(
-      id: string,
-      name: string,
-      type: LayerType,
-      bottom: number,
-      left: number,
-      right: number,
-      top: number) {
-    this.bottom_ = bottom;
-    this.id_ = id;
-    this.left_ = left;
-    this.name_ = name;
-    this.right_ = right;
-    this.top_ = top;
-    this.type_ = type;
-  }
+  constructor(protected readonly type_: LayerType) { }
 
   /**
    * @return The layer as HTML and CSS components when the layer is actively previewe in BOUNDARY
@@ -86,9 +69,7 @@ export abstract class Layer implements DataModel<SearchIndex> {
   /**
    * @return The bottom bounding box of the image layer, in px.
    */
-  getBottom(): number {
-    return this.bottom_;
-  }
+  abstract getBottom(): number;
 
   /**
    * @return Array of styles based on the boundary box top, left, bottom, right.
@@ -107,39 +88,35 @@ export abstract class Layer implements DataModel<SearchIndex> {
   /**
    * @return ID of the layer.
    */
-  getId(): string {
-    return this.id_;
-  }
+  abstract getId(): string;
 
   /**
    * @return The left bounding box of the image layer, in px.
    */
-  getLeft(): number {
-    return this.left_;
-  }
+  abstract getLeft(): number;
 
   /**
    * @return Name of the layer.
    */
-  getName(): string {
-    return this.name_;
-  }
+  abstract getName(): string;
 
   /**
    * @return The right bounding box of the image layer, in px.
    */
-  getRight(): number {
-    return this.right_;
-  }
+  abstract getRight(): number;
 
-  abstract getSearchIndex(): SearchIndex;
+  @cache()
+  getSearchIndex(): SearchIndex {
+    return {
+      name: this.name_,
+      this: this,
+    };
+  }
 
   /**
    * @return The top bounding box of the image layer, in px.
    */
-  getTop(): number {
-    return this.top_;
-  }
+  abstract getTop(): number;
 
   /**
    * @return Type of the layer.

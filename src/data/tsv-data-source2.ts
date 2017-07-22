@@ -1,5 +1,5 @@
-import { cache, Field, Serializable } from 'external/gs_tools/src/data';
-import { DataModel } from 'external/gs_tools/src/datamodel';
+import { cache, Serializable } from 'external/gs_tools/src/data';
+import { DataModel, field } from 'external/gs_tools/src/datamodel';
 import { ImmutableList } from 'external/gs_tools/src/immutable';
 
 import { DataSource } from '../data/data-source';
@@ -7,17 +7,11 @@ import { DataSource } from '../data/data-source';
 type SearchIndex = {this: TsvDataSource2};
 
 @Serializable('tsvDataSource')
-export class TsvDataSource2 implements DataModel<SearchIndex>,
+export abstract class TsvDataSource2 implements DataModel<SearchIndex>,
     DataSource<ImmutableList<ImmutableList<string>>> {
-  @Field('endRow') private readonly endRow_: number;
-  @Field('innerSource') private readonly innerSource_: DataSource<string>;
-  @Field('startRow') private readonly startRow_: number;
-
-  constructor(innerSource: DataSource<string>, startRow: number, endRow: number) {
-    this.endRow_ = endRow;
-    this.innerSource_ = innerSource;
-    this.startRow_ = startRow;
-  }
+  @field('endRow') protected readonly endRow_: number;
+  @field('innerSource') protected readonly innerSource_: DataSource<string>;
+  @field('startRow') protected readonly startRow_: number;
 
   /**
    * @override
@@ -35,32 +29,22 @@ export class TsvDataSource2 implements DataModel<SearchIndex>,
         });
   }
 
+  abstract getEndRow(): number;
+
   @cache()
   getSearchIndex(): SearchIndex {
     return {this: this};
   }
 
+  abstract getStartRow(): number;
+
   /**
    * @param row The last row to include in the returned data.
    */
-  setEndRow(row: number): TsvDataSource2 {
-    return new TsvDataSource2(this.innerSource_, this.startRow_, row);
-  }
+  abstract setEndRow(row: number): TsvDataSource2;
 
   /**
    * @param row The first row to include in the returned data.
    */
-  setStartRow(row: number): TsvDataSource2 {
-    return new TsvDataSource2(this.innerSource_, row, this.endRow_);
-  }
-
-  /**
-   * @param innerSource The inner data source.
-   * @param startRow The first row to include in the returned data.
-   * @param endRow The last row to include in the returned data.
-   * @return The new instance of the data source.
-   */
-  static of(innerSource: DataSource<string>, startRow: number, endRow: number): TsvDataSource2 {
-    return new TsvDataSource2(innerSource, startRow, endRow);
-  }
+  abstract setStartRow(row: number): TsvDataSource2;
 }

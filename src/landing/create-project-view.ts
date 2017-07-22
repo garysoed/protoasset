@@ -96,8 +96,7 @@ export class CreateProjectView extends BaseThemedElement2 {
       throw new Error('Project name is not set');
     }
 
-    const project = DataModels.newInstance<Project>(Project)
-        .setName(projectName);
+    const project = DataModels.newInstance<Project>(Project).setName(projectName);
 
     this.routeService_.goTo(this.routeFactoryService_.assetList(), {projectId: newId});
     return this.reset_(projectNameSetter)

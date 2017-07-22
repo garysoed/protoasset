@@ -1,5 +1,6 @@
 import { cache, Serializable } from 'external/gs_tools/src/data';
-import { DataModel, field } from 'external/gs_tools/src/datamodel';
+import { DataModel, DataModels, field } from 'external/gs_tools/src/datamodel';
+import { ImmutableMap } from 'external/gs_tools/src/immutable';
 
 export type ProjectSearchIndex = {
   name: string,
@@ -31,4 +32,10 @@ export abstract class Project implements DataModel<ProjectSearchIndex> {
   }
 
   abstract setName(name: string): Project;
+
+  static withId(id: string): Project {
+    return DataModels.newInstance<Project>(
+        Project,
+        ImmutableMap.of([['id_', id]]));
+  }
 }
