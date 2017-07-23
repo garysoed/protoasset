@@ -1,4 +1,4 @@
-import { DataAccess, DataModels } from 'external/gs_tools/src/datamodel';
+import { DataAccess } from 'external/gs_tools/src/datamodel';
 import { ImmutableMap, ImmutableSet } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
 import { BooleanParser, StringParser } from 'external/gs_tools/src/parse';
@@ -86,7 +86,7 @@ export class CreateProjectView extends BaseThemedElement2 {
    */
   @onDom.event(CREATE_BUTTON_EL, 'gs-action')
   async onSubmitAction_(
-      @monad(ProjectManager.idMonad()) newId: string,
+      @monad(ProjectManager.idMonad()) newIdPromise: Promise<string>,
       @domOut.attribute(EDITOR_PROJECT_NAME_ATTR) projectNameSetter: MonadSetter<string | null>,
       @monadOut(ProjectManager.monad())
           {id: projectAccessId, value: projectAccess}: MonadSetter<DataAccess<Project>>):
@@ -96,7 +96,8 @@ export class CreateProjectView extends BaseThemedElement2 {
       throw new Error('Project name is not set');
     }
 
-    const project = DataModels.newInstance<Project>(Project).setName(projectName);
+    const newId = await newIdPromise;
+    const project = Project.withId(newId).setName(projectName);
 
     this.routeService_.goTo(this.routeFactoryService_.assetList(), {projectId: newId});
     return this.reset_(projectNameSetter)

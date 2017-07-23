@@ -1,5 +1,6 @@
 import { cache, Serializable } from 'external/gs_tools/src/data';
 import { field } from 'external/gs_tools/src/datamodel';
+import { StringParser } from 'external/gs_tools/src/parse';
 
 import { Layer } from '../data/layer';
 import { LayerType } from '../data/layer-type';
@@ -9,7 +10,7 @@ import { LayerType } from '../data/layer-type';
  */
 @Serializable('imageLayer')
 export abstract class ImageLayer2 extends Layer {
-  @field('imageUrl') protected readonly imageUrl_: string;
+  @field('imageUrl', StringParser) protected readonly imageUrl_: string;
 
   constructor() {
     super(LayerType.IMAGE);

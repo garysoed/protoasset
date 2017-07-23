@@ -75,7 +75,7 @@ describe('landing.CreateProjectView', () => {
 
       const projectAccess = new FakeDataAccess<Project>();
       const map = await view.onSubmitAction_(
-          projectId,
+          Promise.resolve(projectId),
           projectNameSetter,
           {id: projectAccessId, value: projectAccess});
       assert(map).to.haveElements([
@@ -103,8 +103,11 @@ describe('landing.CreateProjectView', () => {
       projectNameSetter.value = null;
       const projectAccess = Mocks.object('projectAccess');
 
-      await assert(view.onSubmitAction_('newId', projectNameSetter, projectAccess)).to
-          .rejectWithError(/Project name is not set/);
+      const promise = view.onSubmitAction_(
+        Promise.resolve('newId'),
+        projectNameSetter,
+        projectAccess);
+      await assert(promise).to.rejectWithError(/Project name is not set/);
     });
   });
 

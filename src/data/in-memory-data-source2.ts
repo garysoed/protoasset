@@ -1,5 +1,7 @@
 import { cache, Serializable } from 'external/gs_tools/src/data';
 import { DataModel, field } from 'external/gs_tools/src/datamodel';
+import { Parser } from 'external/gs_tools/src/interfaces';
+import { StringParser } from 'external/gs_tools/src/parse';
 
 import { DataSource } from '../data/data-source';
 
@@ -10,21 +12,28 @@ type SearchIndex<T> = {this: InMemoryDataSource2<T>};
  */
 @Serializable('inMemoryDataSource')
 export abstract class InMemoryDataSource2<T> implements DataModel<SearchIndex<T>>, DataSource<T> {
-  @field('data') protected readonly data_: T;
+  @field('unparsedData', StringParser) protected readonly unparsedData_: string;
 
-  constructor(data: T) {
-    this.data_ = data;
-  }
+  constructor(private readonly parser_: Parser<T>) { }
 
   /**
    * @override
    */
-  abstract getData(): Promise<T>;
+  async getData(): Promise<T> {
+    const unparsedData = await this.loadUnparsedData();
+    const data = this.parser_.parse(unparsedData);
+    if (!data) {
+      throw new Error('data cannot be found / parsed');
+    }
+    return data;
+  }
 
   @cache()
   getSearchIndex(): SearchIndex<T> {
     return {this: this};
   }
+
+  protected abstract loadUnparsedData(): Promise<string>;
 
   /**
    * Sets the data.

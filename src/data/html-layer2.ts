@@ -1,14 +1,15 @@
 import { cache, Serializable } from 'external/gs_tools/src/data';
 import { field } from 'external/gs_tools/src/datamodel';
 import { ImmutableList } from 'external/gs_tools/src/immutable';
+import { StringParser } from 'external/gs_tools/src/parse';
 
 import { Layer } from 'src/data/layer';
 import { LayerType } from '../data/layer-type';
 
 @Serializable('htmlLayer')
 export abstract class HtmlLayer2 extends Layer {
-  @field('css') protected readonly css_: string;
-  @field('html') protected readonly html_: string;
+  @field('css', StringParser) protected readonly css_: string;
+  @field('html', StringParser) protected readonly html_: string;
 
   constructor() {
     super(LayerType.HTML);

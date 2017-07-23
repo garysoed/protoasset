@@ -1,6 +1,7 @@
 import { cache } from 'external/gs_tools/src/data';
 import { DataModel, field } from 'external/gs_tools/src/datamodel';
 
+import { FloatParser, StringParser } from 'external/gs_tools/src/parse';
 import { LayerPreviewMode } from '../data/layer-preview-mode';
 import { LayerType } from '../data/layer-type';
 
@@ -11,12 +12,12 @@ type SearchIndex = {name: string, this: Layer};
  * Base class of all layers.
  */
 export abstract class Layer implements DataModel<SearchIndex> {
-  @field('bottom') protected readonly bottom_: number;
-  @field('id') protected readonly id_: string;
-  @field('left') protected readonly left_: number;
-  @field('name') protected readonly name_: string;
-  @field('right') protected readonly right_: number;
-  @field('top') protected readonly top_: number;
+  @field('bottom', FloatParser) protected readonly bottom_: number;
+  @field('id', StringParser) protected readonly id_: string;
+  @field('left', FloatParser) protected readonly left_: number;
+  @field('name', StringParser) protected readonly name_: string;
+  @field('right', FloatParser) protected readonly right_: number;
+  @field('top', FloatParser) protected readonly top_: number;
 
   /**
    * @param name Name of the layer.

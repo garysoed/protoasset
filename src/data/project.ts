@@ -1,6 +1,7 @@
 import { cache, Serializable } from 'external/gs_tools/src/data';
 import { DataModel, DataModels, field } from 'external/gs_tools/src/datamodel';
-import { ImmutableMap } from 'external/gs_tools/src/immutable';
+import { ImmutableMap, ImmutableSet } from 'external/gs_tools/src/immutable';
+import { SetParser, StringParser } from 'external/gs_tools/src/parse';
 
 export type ProjectSearchIndex = {
   name: string,
@@ -16,8 +17,11 @@ export function generateSearchIndex(instance: Project): ProjectSearchIndex {
 
 @Serializable('project')
 export abstract class Project implements DataModel<ProjectSearchIndex> {
-  @field('id') protected readonly id_: string = '';
-  @field('name') protected readonly name_: string = '';
+  @field('assets', SetParser(StringParser))
+  protected readonly assets_: ImmutableSet<string> = ImmutableSet.of([]);
+
+  @field('id', StringParser) protected readonly id_: string = '';
+  @field('name', StringParser) protected readonly name_: string = '';
 
   abstract getId(): string;
 

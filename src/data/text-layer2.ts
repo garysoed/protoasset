@@ -1,5 +1,6 @@
 import { cache, Serializable } from 'external/gs_tools/src/data';
 import { field } from 'external/gs_tools/src/datamodel';
+import { EnumParser, StringParser } from 'external/gs_tools/src/parse';
 import { Enums } from 'external/gs_tools/src/typescript';
 
 import { Layer } from '../data/layer';
@@ -23,14 +24,16 @@ export enum VerticalAlign {
 
 @Serializable('textLayer')
 export abstract class TextLayer2 extends Layer {
-  @field('color') protected readonly color_: string;
-  @field('fontFamily') protected readonly fontFamily_: string;
-  @field('fontUrl') protected readonly fontUrl_: string | null;
-  @field('fontWeight') protected readonly fontWeight_: string | null;
-  @field('hAlign') protected readonly horizontalAlign_: HorizontalAlign;
-  @field('size') protected readonly size_: string;
-  @field('text') protected readonly text_: string;
-  @field('vAlign') protected readonly verticalAlign_: VerticalAlign;
+  @field('color', StringParser) protected readonly color_: string;
+  @field('fontFamily', StringParser) protected readonly fontFamily_: string;
+  @field('fontUrl', StringParser) protected readonly fontUrl_: string | null;
+  @field('fontWeight', StringParser) protected readonly fontWeight_: string | null;
+  @field('hAlign', EnumParser(HorizontalAlign))
+  protected readonly horizontalAlign_: HorizontalAlign;
+
+  @field('size', StringParser) protected readonly size_: string;
+  @field('text', StringParser) protected readonly text_: string;
+  @field('vAlign', EnumParser(VerticalAlign)) protected readonly verticalAlign_: VerticalAlign;
 
   constructor() {
     super(LayerType.TEXT);

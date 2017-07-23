@@ -1,6 +1,7 @@
 import { cache, Serializable } from 'external/gs_tools/src/data';
 import { DataModel, DataModels, field } from 'external/gs_tools/src/datamodel';
 import { ImmutableList, ImmutableMap } from 'external/gs_tools/src/immutable';
+import { ListParser, StringParser } from 'external/gs_tools/src/parse';
 
 type SearchIndex = {name: string, this: Helper2};
 
@@ -9,10 +10,11 @@ type SearchIndex = {name: string, this: Helper2};
  */
 @Serializable('helper')
 export abstract class Helper2 implements DataModel<SearchIndex> {
-  @field('args') protected readonly args_: ImmutableList<string> = ImmutableList.of(['a', 'b']);
-  @field('fnString') protected readonly body_: string = 'return a + b';
-  @field('id') protected readonly id_: string;
-  @field('name') protected readonly name_: string;
+  @field('args', ListParser(StringParser))
+  protected readonly args_: ImmutableList<string> = ImmutableList.of(['a', 'b']);
+  @field('fnString', StringParser) protected readonly body_: string = 'return a + b';
+  @field('id', StringParser) protected readonly id_: string;
+  @field('name', StringParser) protected readonly name_: string;
 
   /**
    * @return The helper as a function object.

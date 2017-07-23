@@ -1,17 +1,21 @@
 import { cache, Serializable } from 'external/gs_tools/src/data';
 import { DataModel, field } from 'external/gs_tools/src/datamodel';
 import { ImmutableList } from 'external/gs_tools/src/immutable';
+import { DataModelParser, IntegerParser } from 'external/gs_tools/src/parse';
 
 import { DataSource } from '../data/data-source';
+import { DataSource2 } from '../data/data-source2';
 
 type SearchIndex = {this: TsvDataSource2};
 
 @Serializable('tsvDataSource')
 export abstract class TsvDataSource2 implements DataModel<SearchIndex>,
     DataSource<ImmutableList<ImmutableList<string>>> {
-  @field('endRow') protected readonly endRow_: number;
-  @field('innerSource') protected readonly innerSource_: DataSource<string>;
-  @field('startRow') protected readonly startRow_: number;
+  @field('endRow', IntegerParser) protected readonly endRow_: number;
+  @field('innerSource', DataModelParser<DataSource2<string>>())
+  protected readonly innerSource_: DataSource<string>;
+
+  @field('startRow', IntegerParser) protected readonly startRow_: number;
 
   /**
    * @override

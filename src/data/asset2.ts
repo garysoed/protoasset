@@ -2,8 +2,17 @@ import { cache, Serializable } from 'external/gs_tools/src/data';
 import { DataModel, field } from 'external/gs_tools/src/datamodel';
 import { ImmutableList, ImmutableMap } from 'external/gs_tools/src/immutable';
 
+import {
+  DataModelParser,
+  EnumParser,
+  FloatParser,
+  ListParser,
+  MapParser,
+  StringParser} from 'external/gs_tools/src/parse';
 import { DataSource } from '../data/data-source';
+import { DataSource2 } from '../data/data-source2';
 import { Helper } from '../data/helper';
+import { Helper2 } from '../data/helper2';
 import { Layer } from '../data/layer';
 
 
@@ -22,18 +31,19 @@ export type AssetSearchIndex = {
 
 @Serializable('asset')
 export abstract class Asset2 implements DataModel<AssetSearchIndex> {
-  @field('data') protected readonly data_: DataSource<ImmutableList<ImmutableList<string>>> | null
-      = null;
-  @field('filename') protected readonly filename_: string = 'unnamed_asset.png';
-  @field('height') protected readonly height_: number = NaN;
-  @field('helpers') protected readonly helpers_: ImmutableMap<string, Helper>
-      = ImmutableMap.of<string, Helper>([]);
-  @field('id') protected readonly id_: string;
-  @field('layers') protected readonly layers_: ImmutableList<Layer> = ImmutableList.of([]);
-  @field('name') protected readonly name_: string = 'Unnamed Asset';
-  @field('projectId') protected readonly projectId_: string;
-  @field('type') protected readonly type_: AssetType = AssetType.UNKNOWN;
-  @field('width') protected readonly width_: number = NaN;
+  @field('data', DataModelParser())
+  protected readonly data_: DataSource2<ImmutableList<ImmutableList<string>>> | null = null;
+  @field('filename', StringParser) protected readonly filename_: string = 'unnamed_asset.png';
+  @field('height', FloatParser) protected readonly height_: number = NaN;
+  @field('helpers', MapParser(StringParser, DataModelParser()))
+  protected readonly helpers_: ImmutableMap<string, Helper2> = ImmutableMap.of<string, Helper2>([]);
+  @field('id', StringParser) protected readonly id_: string;
+  @field('layers', ListParser(DataModelParser()))
+  protected readonly layers_: ImmutableList<Layer> = ImmutableList.of([]);
+  @field('name', StringParser) protected readonly name_: string = 'Unnamed Asset';
+  @field('projectId', StringParser) protected readonly projectId_: string;
+  @field('type', EnumParser(AssetType)) protected readonly type_: AssetType = AssetType.UNKNOWN;
+  @field('width', FloatParser) protected readonly width_: number = NaN;
 
   /**
    * @return The data source for the asset.
