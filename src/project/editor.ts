@@ -2,8 +2,8 @@ import { inject } from 'external/gs_tools/src/inject';
 import { StringParser } from 'external/gs_tools/src/parse';
 import { customElement, dom, domOut, onDom } from 'external/gs_tools/src/webc';
 
-import { MonadSetter } from 'external/gs_tools/src/event';
-import { ImmutableMap } from 'external/gs_tools/src/immutable';
+import { ImmutableList } from 'external/gs_tools/src/immutable';
+import { MonadSetter } from 'external/gs_tools/src/interfaces';
 import { BaseThemedElement2 } from 'external/gs_ui/src/common';
 import { ThemeService } from 'external/gs_ui/src/theming';
 
@@ -32,24 +32,24 @@ export class Editor extends BaseThemedElement2 {
   @onDom.attributeChange(PROJECT_NAME_EDITOR_ATTR)
   onEditorValueChanged_(
       @dom.attribute(PROJECT_NAME_EDITOR_ATTR) newProjectName: string | null,
-      @domOut.attribute(PROJECT_NAME_ATTR)
-          {id: projectNameId, value: projectName}: MonadSetter<string | null>):
-      ImmutableMap<string, any> {
-    if (projectName !== newProjectName && newProjectName !== null) {
-      return ImmutableMap.of([[projectNameId, newProjectName]]);
+      @domOut.attribute(PROJECT_NAME_ATTR) projectNameSetter: MonadSetter<string | null>):
+      ImmutableList<MonadSetter<any>> {
+    if (projectNameSetter.value !== newProjectName && newProjectName !== null) {
+      projectNameSetter.value = newProjectName;
+      return ImmutableList.of([projectNameSetter]);
     }
-    return ImmutableMap.of<string, any>([]);
+    return ImmutableList.of([]);
   }
 
   @onDom.attributeChange(PROJECT_NAME_ATTR)
   onProjectNameChanged_(
       @dom.attribute(PROJECT_NAME_ATTR) newProjectName: string | null,
-      @domOut.attribute(PROJECT_NAME_EDITOR_ATTR)
-          {id: editorId, value: projectName}: MonadSetter<string | null>):
-      ImmutableMap<string, any> {
-    if (projectName !== newProjectName && newProjectName !== null) {
-      return ImmutableMap.of([[editorId, newProjectName]]);
+      @domOut.attribute(PROJECT_NAME_EDITOR_ATTR) projectNameSetter: MonadSetter<string | null>):
+      ImmutableList<MonadSetter<any>> {
+    if (projectNameSetter.value !== newProjectName && newProjectName !== null) {
+      projectNameSetter.value = newProjectName;
+      return ImmutableList.of([projectNameSetter]);
     }
-    return ImmutableMap.of<string, any>([]);
+    return ImmutableList.of([]);
   }
 }

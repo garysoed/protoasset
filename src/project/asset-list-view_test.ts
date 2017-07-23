@@ -5,7 +5,7 @@ import { ImmutableMap, ImmutableSet } from 'external/gs_tools/src/immutable';
 import { Mocks } from 'external/gs_tools/src/mock';
 import { TestDispose } from 'external/gs_tools/src/testing';
 
-import { RouteServiceEvents } from 'external/gs_ui/src/routing';
+import { RouteServiceEvents } from 'external/gs_ui/src/const';
 
 import { FakeDataAccess } from 'external/gs_tools/src/datamodel';
 import { ProjectManager } from 'src/data/project-manager';

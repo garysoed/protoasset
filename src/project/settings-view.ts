@@ -2,9 +2,10 @@ import { ImmutableSet } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
 import { StringParser } from 'external/gs_tools/src/parse';
 import { customElement, DomHook, handle, hook } from 'external/gs_tools/src/webc';
-import { RouteService, RouteServiceEvents } from 'external/gs_ui/src/routing';
+import { RouteService } from 'external/gs_ui/src/routing';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
+import { RouteServiceEvents } from 'external/gs_ui/src/const';
 import { ThemeService } from 'external/gs_ui/src/theming';
 
 import { FuseBackedManager } from '../data/fuse-backed-manager';

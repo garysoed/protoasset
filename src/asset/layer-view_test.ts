@@ -6,7 +6,7 @@ import { Fakes, Mocks } from 'external/gs_tools/src/mock';
 import { BooleanParser, EnumParser } from 'external/gs_tools/src/parse';
 import { TestDispose } from 'external/gs_tools/src/testing';
 
-import { RouteServiceEvents } from 'external/gs_ui/src/routing';
+import { RouteServiceEvents } from 'external/gs_ui/src/const';
 
 import {
   LAYER_ITEM_DATA_HELPER,

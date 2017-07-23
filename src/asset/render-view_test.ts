@@ -5,7 +5,7 @@ import { ListenableDom } from 'external/gs_tools/src/event';
 import { Fakes, Mocks } from 'external/gs_tools/src/mock';
 import { TestDispose } from 'external/gs_tools/src/testing';
 
-import { RouteServiceEvents } from 'external/gs_ui/src/routing';
+import { RouteServiceEvents } from 'external/gs_ui/src/const';
 
 import { RENDER_ITEM_DATA_HELPER, RenderView } from '../asset/render-view';
 import { DataEvents } from '../data/data-events';

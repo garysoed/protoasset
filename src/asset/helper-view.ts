@@ -13,7 +13,8 @@ import {
   hook } from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
-import { RouteService, RouteServiceEvents } from 'external/gs_ui/src/routing';
+import { RouteServiceEvents } from 'external/gs_ui/src/const';
+import { RouteService } from 'external/gs_ui/src/routing';
 import { ThemeService } from 'external/gs_ui/src/theming';
 
 import { HelperItem } from '../asset/helper-item';

@@ -1,5 +1,4 @@
-import { DataAccess } from 'external/gs_tools/src/datamodel';
-import { ImmutableMap, ImmutableSet } from 'external/gs_tools/src/immutable';
+import { ImmutableList, ImmutableSet } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
 import { BooleanParser, StringParser } from 'external/gs_tools/src/parse';
 import {
@@ -8,11 +7,13 @@ import {
     domOut,
     onDom} from 'external/gs_tools/src/webc';
 
-import { monad, monadOut, MonadSetter } from 'external/gs_tools/src/event';
+import { monad, monadOut } from 'external/gs_tools/src/event';
 import { BaseThemedElement2 } from 'external/gs_ui/src/common';
 import { RouteService } from 'external/gs_ui/src/routing';
 import { ThemeService } from 'external/gs_ui/src/theming';
 
+import { DataAccess } from 'external/gs_tools/src/datamodel';
+import { MonadSetter } from 'external/gs_tools/src/interfaces';
 import { Project } from '../data/project';
 import { ProjectManager } from '../data/project-manager';
 import { Editor } from '../project/editor';
@@ -61,7 +62,7 @@ export class CreateProjectView extends BaseThemedElement2 {
   @onDom.event(CANCEL_BUTTON_EL, 'gs-action')
   onCancelAction_(
       @domOut.attribute(EDITOR_PROJECT_NAME_ATTR) projectNameSetter: MonadSetter<string | null>):
-      ImmutableMap<string, any> {
+      ImmutableList<MonadSetter<any>> {
     this.routeService_.goTo(this.routeFactoryService_.landing(), {});
     return this.reset_(projectNameSetter);
   }
@@ -73,10 +74,9 @@ export class CreateProjectView extends BaseThemedElement2 {
   onNameChange_(
       @dom.attribute(EDITOR_PROJECT_NAME_ATTR) projectName: string | null,
       @domOut.attribute(CREATE_BUTTON_DISABLED_ATTR)
-          {id: createButtonDisabledId}: MonadSetter<boolean> ): ImmutableMap<string, any> {
-    return ImmutableMap.of([
-      [createButtonDisabledId, !projectName],
-    ]);
+          createButtonDisabledSetter: MonadSetter<boolean> ): ImmutableList<MonadSetter<any>> {
+    createButtonDisabledSetter.value = !projectName;
+    return ImmutableList.of([createButtonDisabledSetter]);
   }
 
   /**
@@ -89,8 +89,8 @@ export class CreateProjectView extends BaseThemedElement2 {
       @monad(ProjectManager.idMonad()) newIdPromise: Promise<string>,
       @domOut.attribute(EDITOR_PROJECT_NAME_ATTR) projectNameSetter: MonadSetter<string | null>,
       @monadOut(ProjectManager.monad())
-          {id: projectAccessId, value: projectAccess}: MonadSetter<DataAccess<Project>>):
-      Promise<ImmutableMap<string, any>> {
+          projectAccessSetter: MonadSetter<DataAccess<Project>>):
+      Promise<ImmutableList<MonadSetter<any>>> {
     const projectName = projectNameSetter.value;
     if (projectName === null) {
       throw new Error('Project name is not set');
@@ -100,14 +100,16 @@ export class CreateProjectView extends BaseThemedElement2 {
     const project = Project.withId(newId).setName(projectName);
 
     this.routeService_.goTo(this.routeFactoryService_.assetList(), {projectId: newId});
+    projectAccessSetter.value = projectAccessSetter.value.queueUpdate(newId, project);
     return this.reset_(projectNameSetter)
-        .set(projectAccessId, projectAccess.queueUpdate(newId, project));
+        .add(projectAccessSetter);
   }
 
   /**
    * Resets the form.
    */
-  private reset_({id: projectNameId}: MonadSetter<string | null>): ImmutableMap<string, any> {
-    return ImmutableMap.of([[projectNameId, '']]);
+  private reset_(projectNameSetter: MonadSetter<string | null>): ImmutableList<MonadSetter<any>> {
+    projectNameSetter.value = '';
+    return ImmutableList.of([projectNameSetter]);
   }
 }

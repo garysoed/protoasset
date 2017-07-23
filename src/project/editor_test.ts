@@ -1,4 +1,4 @@
-import { assert, TestBase } from '../test-base';
+import { assert, Matchers, TestBase } from '../test-base';
 TestBase.setup();
 
 import { Mocks } from 'external/gs_tools/src/mock';
@@ -20,7 +20,7 @@ describe('project.Editor', () => {
       const editorValue = 'editorValue';
       const projectNameId = 'projectNameId';
       assert(editor.onEditorValueChanged_(editorValue, {id: projectNameId, value: null}))
-          .to.haveElements([[projectNameId, editorValue]]);
+          .to.haveElements([Matchers.monadSetterWith(editorValue)]);
     });
 
     it('should not update the project name if they are the same', () => {
@@ -42,7 +42,7 @@ describe('project.Editor', () => {
       const projectName = 'projectName';
       const editorId = 'editorId';
       assert(editor.onProjectNameChanged_(projectName, {id: editorId, value: null}))
-          .to.haveElements([[editorId, projectName]]);
+          .to.haveElements([Matchers.monadSetterWith(projectName)]);
     });
 
     it('should not update the editor value if they are the same', () => {

@@ -2,7 +2,7 @@ import { assert, Matchers, TestBase } from '../test-base';
 TestBase.setup();
 
 import { DataAccess, FakeDataAccess } from 'external/gs_tools/src/datamodel';
-import { ImmutableMap } from 'external/gs_tools/src/immutable';
+import { ImmutableList } from 'external/gs_tools/src/immutable';
 import { Mocks } from 'external/gs_tools/src/mock';
 import { TestDispose } from 'external/gs_tools/src/testing';
 
@@ -45,14 +45,14 @@ describe('landing.CreateProjectView', () => {
       const createButtonId = 'createButtonId';
 
       assert(view.onNameChange_('', {id: createButtonId} as any)).to
-          .haveElements([[createButtonId, true]]);
+          .haveElements([Matchers.monadSetterWith(true)]);
     });
 
     it('should enable the create button if there is a name', () => {
       const createButtonId = 'createButtonId';
 
       assert(view.onNameChange_('Project Name', {id: createButtonId} as any)).to
-          .haveElements([[createButtonId, false]]);
+          .haveElements([Matchers.monadSetterWith(false)]);
     });
   });
 
@@ -65,9 +65,8 @@ describe('landing.CreateProjectView', () => {
       const routeFactory = Mocks.object('routeFactory');
       mockRouteFactoryService.assetList.and.returnValue(routeFactory);
 
-      const resetId = 'resetId';
       const resetValue = Mocks.object('resetValue');
-      spyOn(view, 'reset_').and.returnValue(ImmutableMap.of([[resetId, resetValue]]));
+      spyOn(view, 'reset_').and.returnValue(ImmutableList.of([{value: resetValue}]));
 
       const projectName = 'projectName';
       const projectNameSetter = Mocks.object('projectNameSetter');
@@ -79,19 +78,18 @@ describe('landing.CreateProjectView', () => {
           projectNameSetter,
           {id: projectAccessId, value: projectAccess});
       assert(map).to.haveElements([
-        [resetId, resetValue],
-        [projectAccessId, Matchers.any(DataAccess)],
+        Matchers.monadSetterWith(resetValue),
+        Matchers.monadSetterWith(Matchers.any(DataAccess)),
       ]);
 
-      const projectUpdateQueue = (map.get(projectAccessId) as DataAccess<Project>)
+      const projectUpdateQueue = (map.getAt(1)!.value as DataAccess<Project>)
           .getUpdateQueue();
       assert(projectUpdateQueue).to
           .haveElements([[projectId, Matchers.any<Project>(Project as any)]]);
 
       const project = projectUpdateQueue.get(projectId)!;
       assert(project.getName()).to.equal(projectName);
-      // TODO: Support this.
-      // assert(project.getId()).to.equal(projectId);
+      assert(project.getId()).to.equal(projectId);
 
       assert(view['reset_']).to.haveBeenCalledWith(projectNameSetter);
       assert(mockRouteService.goTo).to
@@ -114,7 +112,8 @@ describe('landing.CreateProjectView', () => {
   describe('reset_', () => {
     it('should clear the name value', () => {
       const projectNameId = 'projectNameId';
-      assert(view['reset_']({id: projectNameId} as any)).to.haveElements([[projectNameId, '']]);
+      assert(view['reset_']({id: projectNameId} as any)).to
+          .haveElements([Matchers.monadSetterWith('')]);
     });
   });
 });

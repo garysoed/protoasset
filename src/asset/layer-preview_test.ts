@@ -4,7 +4,7 @@ TestBase.setup();
 import { Fakes, Mocks } from 'external/gs_tools/src/mock';
 import { TestDispose } from 'external/gs_tools/src/testing';
 
-import { RouteServiceEvents } from 'external/gs_ui/src/routing';
+import { RouteServiceEvents } from 'external/gs_ui/src/const';
 
 import { SampleDataServiceEvent } from '../common/sample-data-service-event';
 import { DataEvents } from '../data/data-events';

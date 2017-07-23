@@ -104,7 +104,7 @@ describe('landing.LandingView', () => {
           newValue,
           {id: projectCollectionId} as any,
           mockProjectAccess);
-      assert(rv.get(projectCollectionId) as ImmutableList<any>)
+      assert(rv.getAt(0)!.value as ImmutableList<any>)
           .to.haveElements([projectId1, projectId2]);
       assert(mockProjectAccess.search).to.haveBeenCalledWith(newValue);
     });
@@ -126,7 +126,7 @@ describe('landing.LandingView', () => {
           null,
           {id: projectCollectionId} as any,
           mockProjectAccess);
-      assert(rv.get(projectCollectionId) as ImmutableList<any>)
+      assert(rv.getAt(0)!.value as ImmutableList<any>)
           .to.haveElements([projectId1, projectId2]);
     });
 
@@ -147,7 +147,7 @@ describe('landing.LandingView', () => {
           '',
           {id: projectCollectionId} as any,
           mockProjectAccess);
-      assert(rv.get(projectCollectionId) as ImmutableList<any>)
+      assert(rv.getAt(0)!.value as ImmutableList<any>)
           .to.haveElements([projectId1, projectId2]);
     });
   });
@@ -167,8 +167,8 @@ describe('landing.LandingView', () => {
       mockProjectAccess.list.and
           .returnValue(Promise.resolve(ImmutableSet.of([mockProject1, mockProject2])));
 
-      const map = await view.onInserted({id: projectCollectionId} as any, mockProjectAccess);
-      assert(map.get(projectCollectionId) as ImmutableList<any>)
+      const list = await view.onInserted({id: projectCollectionId} as any, mockProjectAccess);
+      assert(list.getAt(0)!.value as ImmutableList<any>)
           .to.haveElements([projectId1, projectId2]);
     });
   });
@@ -183,11 +183,11 @@ describe('landing.LandingView', () => {
       const oldProjectId = 'oldProjectId';
       const projects = ImmutableList.of([oldProjectId]);
 
-      const map = view.onProjectAdded_(
+      const list = view.onProjectAdded_(
           {id: projectCollectionId, value: projects},
           {data: mockProject} as any);
 
-      assert(map.get(projectCollectionId) as ImmutableList<any>)
+      assert(list.getAt(0)!.value as ImmutableList<any>)
           .to.haveElements([oldProjectId, projectId]);
     });
   });
