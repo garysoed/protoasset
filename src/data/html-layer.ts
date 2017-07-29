@@ -33,11 +33,10 @@ export class HtmlLayer extends BaseLayer {
    */
   asInactiveNormalPreviewHtml_(): {css: string, html: string} {
     const styles = ImmutableList.of(this.getBoxStyles_())
-        .addAll(ImmutableList.of(['filter: grayscale(50%);', 'opacity: .5;']))
-        .toArray();
+        .addAll(ImmutableList.of(['filter: grayscale(50%);', 'opacity: .5;']));
     return {
       css: this.css_,
-      html: `<div style="${styles.join('')}">${this.html_}</div>`,
+      html: `<div style="${[...styles].join('')}">${this.html_}</div>`,
     };
   }
 

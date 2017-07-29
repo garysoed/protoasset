@@ -97,16 +97,15 @@ export const CONSOLE_ENTRY_DATA_HELPER: ChildElementDataHelper<ConsoleEntry> = {
     element.children.item(0).textContent = data.command;
 
     const resultEl = element.children.item(1);
-    resultEl.innerHTML = ImmutableList
+    const list = ImmutableList
         .of(data.result.split('\n'))
         .map((line: string) => {
           return line.replace(/ /g, '&nbsp;');
         })
         .map((line: string) => {
           return `<p>${line}</p>`;
-        })
-        .toArray()
-        .join('');
+        });
+    resultEl.innerHTML = [...list].join('');
     resultEl.classList.toggle('error', data.isError);
   },
 };
@@ -235,9 +234,8 @@ export class HelperView extends BaseThemedElement {
         .of(asset.getAllHelpers())
         .map((helper: Helper) => {
           return helper.getId();
-        })
-        .toArray();
-    const newHelperId = this.helperIdGenerator_.generate(existingHelperIds);
+        });
+    const newHelperId = this.helperIdGenerator_.generate([...existingHelperIds]);
     const helper = Helper.of(newHelperId, `helper_${newHelperId}`);
     asset.setHelper(newHelperId, helper);
 
@@ -370,10 +368,9 @@ export class HelperView extends BaseThemedElement {
           })
           .filter((arg: string) => {
             return arg.length > 0;
-          })
-          .toArray();
+          });
 
-      this.argElementsHook_.set(existingArgs.concat(newArgs));
+      this.argElementsHook_.set(existingArgs.concat([...newArgs]));
       this.argInputHook_.delete();
     }
   }
@@ -405,8 +402,7 @@ export class HelperView extends BaseThemedElement {
         .of(asset.getAllHelpers())
         .filter((value: Helper) => {
           return value.getId() !== helper.getId();
-        })
-        .toArray();
+        });
     const helperIdParams = ImmutableList
         .of([helper])
         .addAll(ImmutableList.of(otherHelpers))
@@ -417,7 +413,7 @@ export class HelperView extends BaseThemedElement {
             projectId: asset.getProjectId(),
           };
         });
-    this.helperItemsHook_.set(helperIdParams.toArray());
+    this.helperItemsHook_.set([...helperIdParams]);
   }
 
   @handle('#args').childListChange()

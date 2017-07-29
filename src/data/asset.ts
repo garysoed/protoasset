@@ -1,6 +1,6 @@
 import { Field, Serializable } from 'external/gs_tools/src/data';
 import { BaseListenable } from 'external/gs_tools/src/event';
-import { ImmutableList, ImmutableMap, Iterables } from 'external/gs_tools/src/immutable';
+import { ImmutableList, ImmutableMap } from 'external/gs_tools/src/immutable';
 
 import { BaseLayer } from '../data/base-layer';
 import { DataEvents } from '../data/data-events';
@@ -76,7 +76,7 @@ export class Asset extends BaseListenable<DataEvents> {
    * @return All helpers added to this asset..
    */
   getAllHelpers(): Helper[] {
-    return Iterables.toArray(ImmutableMap.of(this.helpers_).values());
+    return [...ImmutableMap.of(this.helpers_).values()];
   }
 
   /**
@@ -119,12 +119,12 @@ export class Asset extends BaseListenable<DataEvents> {
    * @return IDs of the layers in the asset.
    */
   getLayerIds(): string[] {
-    return ImmutableList
+    const list = ImmutableList
         .of(this.layers_)
         .map((layer: BaseLayer) => {
           return layer.getId();
-        })
-        .toArray();
+        });
+    return [...list];
   }
 
   /**

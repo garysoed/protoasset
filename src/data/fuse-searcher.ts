@@ -1,6 +1,6 @@
 import { DataModel, Searcher } from 'external/gs_tools/src/datamodel';
 import { SearchIndex } from 'external/gs_tools/src/datamodel/search-index';
-import { ImmutableList, ImmutableSet, Iterables } from 'external/gs_tools/src/immutable';
+import { ImmutableList, ImmutableSet } from 'external/gs_tools/src/immutable';
 
 export class FuseSearcher<S extends SearchIndex<T>, T extends DataModel<S>> implements Searcher<T> {
   private fusePromise_: Promise<Fuse<S>> | null;
@@ -12,7 +12,7 @@ export class FuseSearcher<S extends SearchIndex<T>, T extends DataModel<S>> impl
    */
   private createFuse_(indexes: ImmutableSet<S>): Fuse<S> {
     return new Fuse<S>(
-        Iterables.toArray(indexes),
+        [...indexes],
         {
           keys: ['name'],
           shouldSort: true,

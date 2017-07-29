@@ -1,9 +1,6 @@
 import { DataAccess, ManagerEvent } from 'external/gs_tools/src/datamodel';
 import { eventDetails, monad, on } from 'external/gs_tools/src/event';
-import {
-  ImmutableList,
-  ImmutableSet,
-  Iterables } from 'external/gs_tools/src/immutable';
+import { ImmutableList, ImmutableSet } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
 import { MonadSetter, MonadValue } from 'external/gs_tools/src/interfaces';
 import { StringParser } from 'external/gs_tools/src/parse';
@@ -97,8 +94,7 @@ export class LandingView extends BaseThemedElement2 {
         : projectAccess.search(filterText);
 
     const projects = await projectsPromise;
-    const normalizedProjects = projects instanceof Array ? projects : Iterables.toArray(projects);
-    const projectIds = ImmutableList.of(normalizedProjects)
+    const projectIds = ImmutableList.of(projects)
         .map((project: Project) => {
           return project.getId();
         });

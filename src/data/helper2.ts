@@ -21,7 +21,7 @@ export abstract class Helper2 implements DataModel<SearchIndex> {
    */
   @cache()
   asFunction(): (...args: any[]) => any {
-    return Function.apply(this, this.args_.toArray().concat([this.body_]));
+    return Function.apply(this, [...this.args_].concat([this.body_]));
   }
 
   /**

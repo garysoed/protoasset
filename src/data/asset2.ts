@@ -74,12 +74,12 @@ export abstract class Asset2 implements DataModel<AssetSearchIndex> {
    * @return IDs of the layers in the asset.
    */
   getLayerIds(): string[] {
-    return ImmutableList
+    const list = ImmutableList
         .of(this.layers_)
         .map((layer: Layer) => {
           return layer.getId();
-        })
-        .toArray();
+        });
+    return [...list];
   }
 
   /**

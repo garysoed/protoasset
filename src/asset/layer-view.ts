@@ -400,9 +400,8 @@ export class LayerView extends BaseThemedElement {
             layerId: layer.getId(),
             projectId: asset.getProjectId(),
           };
-        })
-        .toArray();
-    this.layersChildElementHook_.set(layerItemData);
+        });
+    this.layersChildElementHook_.set([...layerItemData]);
     this.updateLayerPreviews_();
 
     // Check if the currently selected layer exists.
@@ -521,9 +520,8 @@ export class LayerView extends BaseThemedElement {
         .of([this.selectedLayerPreviewMode_])
         .addAll(ImmutableList
             .of(Enums.getAllValues<LayerPreviewMode>(LayerPreviewMode))
-            .deleteAll(ImmutableSet.of([this.selectedLayerPreviewMode_])))
-        .toArray();
-    this.previewModeChildElementHook_.set(previewModes);
+            .deleteAll(ImmutableSet.of([this.selectedLayerPreviewMode_])));
+    this.previewModeChildElementHook_.set([...previewModes]);
     this.selectedPreviewModeHook_
         .set(EnumParser(LayerPreviewMode).stringify(this.selectedLayerPreviewMode_));
   }
@@ -594,9 +592,8 @@ export class LayerView extends BaseThemedElement {
               mode: this.selectedLayerPreviewMode_,
             };
           })
-          .reverse()
-          .toArray();
-      this.layerPreviewsChildElementHook_.set(layerPreviewData);
+          .reverse();
+      this.layerPreviewsChildElementHook_.set([...layerPreviewData]);
     }
   }
 }

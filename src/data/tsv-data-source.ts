@@ -42,15 +42,15 @@ export class TsvDataSource implements DataSource<string[][]> {
    * @return The parsed data.
    */
   parseData_(data: string): string[][] {
-    return ImmutableList
+    const list = ImmutableList
         .of(data.split('\n'))
         .map((line: string) => {
           return line.split('\t');
         })
         .filter((_: string[], index: number) => {
           return index >= this.startRow_ && index <= this.endRow_;
-        })
-        .toArray();
+        });
+    return [...list];
   }
 
   /**

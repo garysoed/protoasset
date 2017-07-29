@@ -1,5 +1,5 @@
 import { ArrayOfType, NonNullType } from 'external/gs_tools/src/check';
-import { ImmutableList, Iterables } from 'external/gs_tools/src/immutable';
+import { ImmutableList } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
 import { FloatParser, StringParser } from 'external/gs_tools/src/parse';
 import {
@@ -34,12 +34,12 @@ export const PREVIEW_ROW_DATA_HELPER: ChildElementDataHelper<string[]> = {
    * @override
    */
   get(root: Element): string[] | null {
-    const values = ImmutableList
+    const list = ImmutableList
         .of(root.children)
         .map((child: Element) => {
           return child.textContent;
-        })
-        .toArray();
+        });
+    const values = [...list];
     return ArrayOfType<string>(NonNullType<string>()).check(values) ? values : null;
   },
 
@@ -159,7 +159,7 @@ export class DataView extends BaseThemedElement {
     const files = await this.fileService_.processBundle(bundleId);
     if (files !== null && files.size > 0) {
       const dataSource = TsvDataSource.of(
-          InMemoryDataSource.of(Iterables.unsafeToArray(files.values())[0]),
+          InMemoryDataSource.of([...files.values()][0]),
           startRow,
           endRow);
       await this.updateAsset_(dataSource);

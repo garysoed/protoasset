@@ -143,9 +143,8 @@ export class SampleDataPicker extends BaseThemedElement {
             display: index.item.display,
             row: index.item.row,
           };
-        })
-        .toArray();
-    this.resultsChildrenHook_.set(sampleItemData);
+        });
+    this.resultsChildrenHook_.set([...sampleItemData]);
   }
 }
 // TODO: Mutable

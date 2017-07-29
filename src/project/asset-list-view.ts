@@ -1,4 +1,4 @@
-import { ImmutableSet, Iterables } from 'external/gs_tools/src/immutable';
+import { ImmutableSet } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
 import {
   ChildElementDataHelper,
@@ -135,12 +135,12 @@ export class AssetListView extends BaseThemedElement {
       this.projectManager_.monad()(this).get().get(projectId),
     ]);
 
-    const assetItemData = Iterables.toArray(assets
+    const assetItemData = assets
         .mapItem((asset: Asset) => {
           return {assetId: asset.getId(), projectId: asset.getProjectId()};
-        }));
+        });
 
-    this.assetsHook_.set(assetItemData);
+    this.assetsHook_.set([...assetItemData]);
     if (project !== null) {
       this.projectNameTextHook_.set(project.getName());
     }
