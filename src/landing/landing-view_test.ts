@@ -5,6 +5,7 @@ import { ImmutableList, ImmutableSet } from 'external/gs_tools/src/immutable';
 import { Mocks } from 'external/gs_tools/src/mock';
 import { TestDispose } from 'external/gs_tools/src/testing';
 
+import { FakeMonadSetter } from 'external/gs_tools/src/event';
 import { LandingView, PROJECT_COLLECTION_CHILDREN } from '../landing/landing-view';
 import { Views } from '../routing/views';
 
@@ -96,16 +97,16 @@ describe('landing.LandingView', () => {
       const mockProject2 = jasmine.createSpyObj('Project2', ['getId']);
       mockProject2.getId.and.returnValue(projectId2);
 
-      const projectCollectionId = 'projectCollectionId';
       const mockProjectAccess = jasmine.createSpyObj('ProjectAccess', ['search']);
       mockProjectAccess.search.and.returnValue(Promise.resolve([mockProject1, mockProject2]));
 
+      const fakeProjectIdsSetter = new FakeMonadSetter<ImmutableList<string>>(ImmutableList.of([]));
+
       const rv = await view.onFilterButtonTextAttrChange_(
           newValue,
-          {id: projectCollectionId} as any,
+          fakeProjectIdsSetter,
           mockProjectAccess);
-      assert(rv.getAt(0)!.value as ImmutableList<any>)
-          .to.haveElements([projectId1, projectId2]);
+      assert(fakeProjectIdsSetter.findValue(rv)!.value).to.haveElements([projectId1, projectId2]);
       assert(mockProjectAccess.search).to.haveBeenCalledWith(newValue);
     });
 
@@ -118,16 +119,16 @@ describe('landing.LandingView', () => {
       const mockProject2 = jasmine.createSpyObj('Project2', ['getId']);
       mockProject2.getId.and.returnValue(projectId2);
 
-      const projectCollectionId = 'projectCollectionId';
       const mockProjectAccess = jasmine.createSpyObj('ProjectAccess', ['list']);
       mockProjectAccess.list.and.returnValue(Promise.resolve([mockProject1, mockProject2]));
 
+      const fakeProjectIdsSetter = new FakeMonadSetter<ImmutableList<string>>(ImmutableList.of([]));
+
       const rv = await view.onFilterButtonTextAttrChange_(
           null,
-          {id: projectCollectionId} as any,
+          fakeProjectIdsSetter,
           mockProjectAccess);
-      assert(rv.getAt(0)!.value as ImmutableList<any>)
-          .to.haveElements([projectId1, projectId2]);
+      assert(fakeProjectIdsSetter.findValue(rv)!.value).to.haveElements([projectId1, projectId2]);
     });
 
     it('should set the project collection to all projects if the filter text is empty string',
@@ -139,15 +140,16 @@ describe('landing.LandingView', () => {
       const mockProject2 = jasmine.createSpyObj('Project2', ['getId']);
       mockProject2.getId.and.returnValue(projectId2);
 
-      const projectCollectionId = 'projectCollectionId';
       const mockProjectAccess = jasmine.createSpyObj('ProjectAccess', ['list']);
       mockProjectAccess.list.and.returnValue(Promise.resolve([mockProject1, mockProject2]));
 
+      const fakeProjectIdsSetter = new FakeMonadSetter<ImmutableList<string>>(ImmutableList.of([]));
+
       const rv = await view.onFilterButtonTextAttrChange_(
           '',
-          {id: projectCollectionId} as any,
+          fakeProjectIdsSetter,
           mockProjectAccess);
-      assert(rv.getAt(0)!.value as ImmutableList<any>)
+      assert(fakeProjectIdsSetter.findValue(rv)!.value as ImmutableList<any>)
           .to.haveElements([projectId1, projectId2]);
     });
   });
@@ -162,14 +164,14 @@ describe('landing.LandingView', () => {
       const mockProject2 = jasmine.createSpyObj('Project2', ['getId', 'getName']);
       mockProject2.getId.and.returnValue(projectId2);
 
-      const projectCollectionId = 'projectCollectionId';
       const mockProjectAccess = jasmine.createSpyObj('ProjectAccess', ['list']);
       mockProjectAccess.list.and
           .returnValue(Promise.resolve(ImmutableSet.of([mockProject1, mockProject2])));
 
-      const list = await view.onInserted({id: projectCollectionId} as any, mockProjectAccess);
-      assert(list.getAt(0)!.value as ImmutableList<any>)
-          .to.haveElements([projectId1, projectId2]);
+      const fakeProjectIdsSetter = new FakeMonadSetter<ImmutableList<string>>(ImmutableList.of([]));
+
+      const list = await view.onInserted(fakeProjectIdsSetter, mockProjectAccess);
+      assert(fakeProjectIdsSetter.findValue(list)!.value).to.haveElements([projectId1, projectId2]);
     });
   });
 
@@ -179,15 +181,13 @@ describe('landing.LandingView', () => {
       const mockProject = jasmine.createSpyObj('Project', ['getId']);
       mockProject.getId.and.returnValue(projectId);
 
-      const projectCollectionId = 'projectCollectionId';
       const oldProjectId = 'oldProjectId';
       const projects = ImmutableList.of([oldProjectId]);
+      const fakeProjectIdsSetter = new FakeMonadSetter<ImmutableList<string>>(projects);
 
-      const list = view.onProjectAdded_(
-          {id: projectCollectionId, value: projects},
-          {data: mockProject} as any);
+      const list = view.onProjectAdded_(fakeProjectIdsSetter, {data: mockProject} as any);
 
-      assert(list.getAt(0)!.value as ImmutableList<any>)
+      assert(fakeProjectIdsSetter.findValue(list)!.value)
           .to.haveElements([oldProjectId, projectId]);
     });
   });

@@ -13,7 +13,7 @@ import { RouteService } from 'external/gs_ui/src/routing';
 import { ThemeService } from 'external/gs_ui/src/theming';
 
 import { DataAccess } from 'external/gs_tools/src/datamodel';
-import { MonadSetter } from 'external/gs_tools/src/interfaces';
+import { MonadSetter, MonadValue } from 'external/gs_tools/src/interfaces';
 import { Project } from '../data/project';
 import { ProjectManager } from '../data/project-manager';
 import { Editor } from '../project/editor';
@@ -62,7 +62,7 @@ export class CreateProjectView extends BaseThemedElement2 {
   @onDom.event(CANCEL_BUTTON_EL, 'gs-action')
   onCancelAction_(
       @domOut.attribute(EDITOR_PROJECT_NAME_ATTR) projectNameSetter: MonadSetter<string | null>):
-      ImmutableList<MonadSetter<any>> {
+      ImmutableList<MonadValue<any>> {
     this.routeService_.goTo(this.routeFactoryService_.landing(), {});
     return this.reset_(projectNameSetter);
   }
@@ -74,9 +74,8 @@ export class CreateProjectView extends BaseThemedElement2 {
   onNameChange_(
       @dom.attribute(EDITOR_PROJECT_NAME_ATTR) projectName: string | null,
       @domOut.attribute(CREATE_BUTTON_DISABLED_ATTR)
-          createButtonDisabledSetter: MonadSetter<boolean> ): ImmutableList<MonadSetter<any>> {
-    createButtonDisabledSetter.value = !projectName;
-    return ImmutableList.of([createButtonDisabledSetter]);
+          createButtonDisabledSetter: MonadSetter<boolean> ): Iterable<MonadValue<any>> {
+    return ImmutableList.of([createButtonDisabledSetter.set(!projectName)]);
   }
 
   /**
@@ -90,7 +89,7 @@ export class CreateProjectView extends BaseThemedElement2 {
       @domOut.attribute(EDITOR_PROJECT_NAME_ATTR) projectNameSetter: MonadSetter<string | null>,
       @monadOut(ProjectManager.monad())
           projectAccessSetter: MonadSetter<DataAccess<Project>>):
-      Promise<ImmutableList<MonadSetter<any>>> {
+      Promise<Iterable<MonadValue<any>>> {
     const projectName = projectNameSetter.value;
     if (projectName === null) {
       throw new Error('Project name is not set');
@@ -100,16 +99,14 @@ export class CreateProjectView extends BaseThemedElement2 {
     const project = Project.withId(newId).setName(projectName);
 
     this.routeService_.goTo(this.routeFactoryService_.assetList(), {projectId: newId});
-    projectAccessSetter.value = projectAccessSetter.value.queueUpdate(newId, project);
     return this.reset_(projectNameSetter)
-        .add(projectAccessSetter);
+        .add(projectAccessSetter.set(projectAccessSetter.value.queueUpdate(newId, project)));
   }
 
   /**
    * Resets the form.
    */
-  private reset_(projectNameSetter: MonadSetter<string | null>): ImmutableList<MonadSetter<any>> {
-    projectNameSetter.value = '';
-    return ImmutableList.of([projectNameSetter]);
+  private reset_(projectNameSetter: MonadSetter<string | null>): ImmutableList<MonadValue<any>> {
+    return ImmutableList.of([projectNameSetter.set('')]);
   }
 }

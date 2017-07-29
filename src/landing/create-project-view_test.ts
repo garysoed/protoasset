@@ -2,6 +2,7 @@ import { assert, Matchers, TestBase } from '../test-base';
 TestBase.setup();
 
 import { DataAccess, FakeDataAccess } from 'external/gs_tools/src/datamodel';
+import { FakeMonadSetter } from 'external/gs_tools/src/event';
 import { ImmutableList } from 'external/gs_tools/src/immutable';
 import { Mocks } from 'external/gs_tools/src/mock';
 import { TestDispose } from 'external/gs_tools/src/testing';
@@ -42,17 +43,17 @@ describe('landing.CreateProjectView', () => {
 
   describe('onNameChange_', () => {
     it('should disable the create button if there are no names', () => {
-      const createButtonId = 'createButtonId';
+      const fakeCreateButtonDisabledSetter = new FakeMonadSetter<boolean>(false);
 
-      assert(view.onNameChange_('', {id: createButtonId} as any)).to
-          .haveElements([Matchers.monadSetterWith(true)]);
+      const list = view.onNameChange_('', fakeCreateButtonDisabledSetter);
+      assert(fakeCreateButtonDisabledSetter.findValue(list)!.value).to.beTrue();
     });
 
     it('should enable the create button if there is a name', () => {
-      const createButtonId = 'createButtonId';
+      const fakeCreateButtonDisabledSetter = new FakeMonadSetter<boolean>(true);
 
-      assert(view.onNameChange_('Project Name', {id: createButtonId} as any)).to
-          .haveElements([Matchers.monadSetterWith(false)]);
+      const list = view.onNameChange_('Project Name', fakeCreateButtonDisabledSetter);
+      assert(fakeCreateButtonDisabledSetter.findValue(list)!.value).to.beFalse();
     });
   });
 
@@ -60,30 +61,26 @@ describe('landing.CreateProjectView', () => {
     it('should create the project correctly, reset, and redirect to project page',
     async () => {
       const projectId = 'projectId';
-      const projectAccessId = 'projectAccessId';
 
       const routeFactory = Mocks.object('routeFactory');
       mockRouteFactoryService.assetList.and.returnValue(routeFactory);
 
       const resetValue = Mocks.object('resetValue');
-      spyOn(view, 'reset_').and.returnValue(ImmutableList.of([{value: resetValue}]));
+      spyOn(view, 'reset_').and.returnValue(ImmutableList.of([resetValue]));
 
       const projectName = 'projectName';
       const projectNameSetter = Mocks.object('projectNameSetter');
       projectNameSetter.value = projectName;
 
       const projectAccess = new FakeDataAccess<Project>();
-      const map = await view.onSubmitAction_(
+      const fakeProjectAccessSetter = new FakeMonadSetter<DataAccess<Project>>(projectAccess);
+      const list = await view.onSubmitAction_(
           Promise.resolve(projectId),
           projectNameSetter,
-          {id: projectAccessId, value: projectAccess});
-      assert(map).to.haveElements([
-        Matchers.monadSetterWith(resetValue),
-        Matchers.monadSetterWith(Matchers.any(DataAccess)),
-      ]);
+          fakeProjectAccessSetter);
+      assert(list).to.startWith([resetValue]);
 
-      const projectUpdateQueue = (map.getAt(1)!.value as DataAccess<Project>)
-          .getUpdateQueue();
+      const projectUpdateQueue = fakeProjectAccessSetter.findValue(list)!.value.getUpdateQueue();
       assert(projectUpdateQueue).to
           .haveElements([[projectId, Matchers.any<Project>(Project as any)]]);
 
@@ -111,9 +108,9 @@ describe('landing.CreateProjectView', () => {
 
   describe('reset_', () => {
     it('should clear the name value', () => {
-      const projectNameId = 'projectNameId';
-      assert(view['reset_']({id: projectNameId} as any)).to
-          .haveElements([Matchers.monadSetterWith('')]);
+      const fakeProjectNameSetter = new FakeMonadSetter<string | null>(null);
+      const list = view['reset_'](fakeProjectNameSetter);
+      assert(fakeProjectNameSetter.findValue(list)!.value).to.equal('');
     });
   });
 });

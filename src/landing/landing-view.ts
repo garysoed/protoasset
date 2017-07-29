@@ -1,9 +1,12 @@
 import { DataAccess, ManagerEvent } from 'external/gs_tools/src/datamodel';
+import { eventDetails, monad, on } from 'external/gs_tools/src/event';
 import {
   ImmutableList,
   ImmutableSet,
   Iterables } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
+import { MonadSetter, MonadValue } from 'external/gs_tools/src/interfaces';
+import { StringParser } from 'external/gs_tools/src/parse';
 import {
   customElement,
   dom,
@@ -11,14 +14,11 @@ import {
   onDom,
   onLifecycle} from 'external/gs_tools/src/webc';
 
-import { eventDetails, monad, on } from 'external/gs_tools/src/event';
-import { StringParser } from 'external/gs_tools/src/parse';
 import { BaseThemedElement2 } from 'external/gs_ui/src/common';
 import { RouteServiceEvents } from 'external/gs_ui/src/const';
 import { RouteService } from 'external/gs_ui/src/routing';
 import { ThemeService } from 'external/gs_ui/src/theming';
 
-import { MonadSetter } from "external/gs_tools/src/interfaces";
 import { FilterButton } from '../common/filter-button';
 import { Project } from '../data/project';
 import { ProjectManager } from '../data/project-manager';
@@ -91,18 +91,18 @@ export class LandingView extends BaseThemedElement2 {
       @domOut.childElements(PROJECT_COLLECTION_CHILDREN)
           projectIdsSetter: MonadSetter<ImmutableList<string>>,
       @monad(ProjectManager.monad()) projectAccess: DataAccess<Project>):
-      Promise<ImmutableList<MonadSetter<any>>> {
+      Promise<Iterable<MonadValue<any>>> {
     const projectsPromise = (filterText === null || filterText === '')
         ? projectAccess.list()
         : projectAccess.search(filterText);
 
     const projects = await projectsPromise;
     const normalizedProjects = projects instanceof Array ? projects : Iterables.toArray(projects);
-    projectIdsSetter.value = ImmutableList.of(normalizedProjects)
+    const projectIds = ImmutableList.of(normalizedProjects)
         .map((project: Project) => {
           return project.getId();
         });
-    return ImmutableList.of([projectIdsSetter]);
+    return ImmutableList.of([projectIdsSetter.set(projectIds)]);
   }
 
   /**
@@ -113,13 +113,13 @@ export class LandingView extends BaseThemedElement2 {
       @domOut.childElements(PROJECT_COLLECTION_CHILDREN)
           projectIdsSetter: MonadSetter<ImmutableList<string>>,
       @monad(ProjectManager.monad()) projectAccess: DataAccess<Project>):
-      Promise<ImmutableList<MonadSetter<any>>> {
+      Promise<Iterable<MonadValue<any>>> {
     const projects = await projectAccess.list();
-    projectIdsSetter.value = ImmutableList.of(projects
+    const projectIds = ImmutableList.of(projects
         .mapItem((project: Project) => {
           return project.getId();
         }));
-    return ImmutableList.of([projectIdsSetter]);
+    return ImmutableList.of([projectIdsSetter.set(projectIds)]);
   }
 
   /**
@@ -130,9 +130,10 @@ export class LandingView extends BaseThemedElement2 {
   onProjectAdded_(
       @domOut.childElements(PROJECT_COLLECTION_CHILDREN)
           projectIdsSetter: MonadSetter<ImmutableList<string>>,
-      @eventDetails() {data: project}: ManagerEvent<Project>): ImmutableList<MonadSetter<any>> {
-    projectIdsSetter.value = projectIdsSetter.value.add(project.getId());
-    return ImmutableList.of([projectIdsSetter]);
+      @eventDetails() {data: project}: ManagerEvent<Project>): Iterable<MonadValue<any>> {
+    return ImmutableList.of([
+      projectIdsSetter.set(projectIdsSetter.value.add(project.getId())),
+    ]);
   }
   /**
    * Handles event when the location was changed.

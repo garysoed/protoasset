@@ -3,7 +3,7 @@ import { StringParser } from 'external/gs_tools/src/parse';
 import { customElement, dom, domOut, onDom } from 'external/gs_tools/src/webc';
 
 import { ImmutableList } from 'external/gs_tools/src/immutable';
-import { MonadSetter } from 'external/gs_tools/src/interfaces';
+import { MonadSetter, MonadValue } from 'external/gs_tools/src/interfaces';
 import { BaseThemedElement2 } from 'external/gs_ui/src/common';
 import { ThemeService } from 'external/gs_ui/src/theming';
 
@@ -33,10 +33,9 @@ export class Editor extends BaseThemedElement2 {
   onEditorValueChanged_(
       @dom.attribute(PROJECT_NAME_EDITOR_ATTR) newProjectName: string | null,
       @domOut.attribute(PROJECT_NAME_ATTR) projectNameSetter: MonadSetter<string | null>):
-      ImmutableList<MonadSetter<any>> {
+      Iterable<MonadValue<any>> {
     if (projectNameSetter.value !== newProjectName && newProjectName !== null) {
-      projectNameSetter.value = newProjectName;
-      return ImmutableList.of([projectNameSetter]);
+      return ImmutableList.of([projectNameSetter.set(newProjectName)]);
     }
     return ImmutableList.of([]);
   }
@@ -45,10 +44,9 @@ export class Editor extends BaseThemedElement2 {
   onProjectNameChanged_(
       @dom.attribute(PROJECT_NAME_ATTR) newProjectName: string | null,
       @domOut.attribute(PROJECT_NAME_EDITOR_ATTR) projectNameSetter: MonadSetter<string | null>):
-      ImmutableList<MonadSetter<any>> {
+      Iterable<MonadValue<any>> {
     if (projectNameSetter.value !== newProjectName && newProjectName !== null) {
-      projectNameSetter.value = newProjectName;
-      return ImmutableList.of([projectNameSetter]);
+      return ImmutableList.of([projectNameSetter.set(newProjectName)]);
     }
     return ImmutableList.of([]);
   }

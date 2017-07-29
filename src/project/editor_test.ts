@@ -1,9 +1,10 @@
-import { assert, Matchers, TestBase } from '../test-base';
+import { assert, TestBase } from '../test-base';
 TestBase.setup();
 
 import { Mocks } from 'external/gs_tools/src/mock';
 import { TestDispose } from 'external/gs_tools/src/testing';
 
+import { FakeMonadSetter } from 'external/gs_tools/src/event';
 import { Editor } from '../project/editor';
 
 
@@ -18,44 +19,50 @@ describe('project.Editor', () => {
   describe('onEditorValueChanged_', () => {
     it('should update the project name', () => {
       const editorValue = 'editorValue';
-      const projectNameId = 'projectNameId';
-      assert(editor.onEditorValueChanged_(editorValue, {id: projectNameId, value: null}))
-          .to.haveElements([Matchers.monadSetterWith(editorValue)]);
+      const fakeProjectNameSetter = new FakeMonadSetter<string | null>(null);
+
+      const list = editor.onEditorValueChanged_(editorValue, fakeProjectNameSetter);
+      assert(fakeProjectNameSetter.findValue(list)!.value).to.equal(editorValue);
     });
 
     it('should not update the project name if they are the same', () => {
       const editorValue = 'editorValue';
-      const projectNameId = 'projectNameId';
-      assert(editor.onEditorValueChanged_(editorValue, {id: projectNameId, value: editorValue}))
-          .to.haveElements([]);
+      const fakeProjectNameSetter = new FakeMonadSetter<string | null>(editorValue);
+
+      const list = editor.onEditorValueChanged_(editorValue, fakeProjectNameSetter);
+      assert([...list]).to.equal([]);
     });
 
     it('should not update the project name if editor value is null', () => {
-      const projectNameId = 'projectNameId';
-      assert(editor.onEditorValueChanged_(null, {id: projectNameId, value: 'oldValue'}))
-          .to.haveElements([]);
+      const fakeProjectNameSetter = new FakeMonadSetter<string | null>('oldValue');
+
+      const list = editor.onEditorValueChanged_(null, fakeProjectNameSetter);
+      assert([...list]).to.equal([]);
     });
   });
 
   describe('onProjectNameChanged_', () => {
     it('should update the editor value', () => {
       const projectName = 'projectName';
-      const editorId = 'editorId';
-      assert(editor.onProjectNameChanged_(projectName, {id: editorId, value: null}))
-          .to.haveElements([Matchers.monadSetterWith(projectName)]);
+      const fakeProjectNameSetter = new FakeMonadSetter<string | null>(null);
+
+      const list = editor.onProjectNameChanged_(projectName, fakeProjectNameSetter);
+      assert(fakeProjectNameSetter.findValue(list)!.value).to.equal(projectName);
     });
 
     it('should not update the editor value if they are the same', () => {
       const projectName = 'projectName';
-      const editorId = 'editorId';
-      assert(editor.onProjectNameChanged_(projectName, {id: editorId, value: projectName}))
-          .to.haveElements([]);
+      const fakeProjectNameSetter = new FakeMonadSetter<string | null>(projectName);
+
+      const list = editor.onProjectNameChanged_(projectName, fakeProjectNameSetter);
+      assert([...list]).to.equal([]);
     });
 
     it('should not update the editor value if project name is null', () => {
-      const editorId = 'editorId';
-      assert(editor.onProjectNameChanged_(null, {id: editorId, value: 'oldValue'}))
-          .to.haveElements([]);
+      const fakeProjectNameSetter = new FakeMonadSetter<string | null>('oldValue');
+
+      const list = editor.onProjectNameChanged_(null, fakeProjectNameSetter);
+      assert([...list]).to.equal([]);
     });
   });
 });
