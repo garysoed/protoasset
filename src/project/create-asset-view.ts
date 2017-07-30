@@ -1,23 +1,45 @@
-import { ImmutableSet } from 'external/gs_tools/src/immutable';
+import { DataAccess } from 'external/gs_tools/src/datamodel';
+import { monad, monadOut, MonadUtil } from 'external/gs_tools/src/event';
+import { ImmutableList, ImmutableSet } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
+import { MonadSetter, MonadValue } from 'external/gs_tools/src/interfaces';
 import { BooleanParser, EnumParser, FloatParser, StringParser } from 'external/gs_tools/src/parse';
+import { Log } from 'external/gs_tools/src/util';
 import {
     customElement,
-    DomHook,
-    handle,
-    hook } from 'external/gs_tools/src/webc';
+    dom,
+    domOut,
+    onDom,
+    onLifecycle} from 'external/gs_tools/src/webc';
 
-import { BaseThemedElement } from 'external/gs_ui/src/common';
-import { Event } from 'external/gs_ui/src/const';
+import { BaseThemedElement2 } from 'external/gs_ui/src/common';
 import { RouteService } from 'external/gs_ui/src/routing';
 import { ThemeService } from 'external/gs_ui/src/theming';
 
 import { Editor } from '../asset/editor';
-import { Asset, AssetType } from '../data/asset';
 import { AssetCollection } from '../data/asset-collection';
+import { AssetManager } from '../data/asset-manager';
+import { Asset2, AssetType } from '../data/asset2';
+import { Project } from '../data/project';
+import { ProjectManager } from '../data/project-manager';
 import { RouteFactoryService } from '../routing/route-factory-service';
 import { Views } from '../routing/views';
 
+const LOG = Log.of('protoasset.project.CreateAssetView');
+
+const ASSET_EDITOR_EL = '#assetEditor';
+const CANCEL_BUTTON_EL = '#cancelButton';
+const CREATE_BUTTON_EL = '#createButton';
+
+const ASSET_TYPE_ATTR = {
+  name: 'asset-type',
+  parser: EnumParser(AssetType),
+  selector: ASSET_EDITOR_EL,
+};
+const CREATE_DISABLED_ATTR = {name: 'disabled', parser: BooleanParser, selector: CREATE_BUTTON_EL};
+const HEIGHT_ATTR = {name: 'asset-height', parser: FloatParser, selector: ASSET_EDITOR_EL};
+const NAME_ATTR = {name: 'asset-name', parser: StringParser, selector: ASSET_EDITOR_EL};
+const WIDTH_ATTR = {name: 'asset-width', parser: FloatParser, selector: ASSET_EDITOR_EL};
 
 /**
  * The main landing view of the app.
@@ -27,23 +49,7 @@ import { Views } from '../routing/views';
   tag: 'pa-create-asset-view',
   templateKey: 'src/project/create-asset-view',
 })
-export class CreateAssetView extends BaseThemedElement {
-  @hook('#assetEditor').attribute('asset-type', EnumParser(AssetType))
-  readonly assetTypeHook_: DomHook<AssetType>;
-
-  @hook('#createButton').attribute('disabled', BooleanParser)
-  readonly createButtonDisabledHook_: DomHook<boolean>;
-
-  @hook('#assetEditor').attribute('asset-height', FloatParser)
-  readonly heightHook_: DomHook<number>;
-
-  @hook('#assetEditor').attribute('asset-name', StringParser)
-  readonly nameHook_: DomHook<string>;
-
-  @hook('#assetEditor').attribute('asset-width', FloatParser)
-  readonly widthHook_: DomHook<number>;
-
-  private readonly assetCollection_: AssetCollection;
+export class CreateAssetView extends BaseThemedElement2 {
   private readonly routeFactoryService_: RouteFactoryService;
   private readonly routeService_: RouteService<Views>;
 
@@ -52,19 +58,12 @@ export class CreateAssetView extends BaseThemedElement {
    * @param projectCollection
    */
   constructor(
-      @inject('pa.data.AssetCollection') assetCollection: AssetCollection,
       @inject('pa.routing.RouteFactoryService') routeFactoryService: RouteFactoryService,
       @inject('gs.routing.RouteService') routeService: RouteService<Views>,
       @inject('theming.ThemeService') themeService: ThemeService) {
     super(themeService);
-    this.assetCollection_ = assetCollection;
-    this.assetTypeHook_ = DomHook.of<AssetType>();
-    this.createButtonDisabledHook_ = DomHook.of<boolean>(true);
-    this.nameHook_ = DomHook.of<string>();
     this.routeFactoryService_ = routeFactoryService;
     this.routeService_ = routeService;
-    this.heightHook_ = DomHook.of<number>();
-    this.widthHook_ = DomHook.of<number>();
   }
 
   /**
@@ -78,21 +77,12 @@ export class CreateAssetView extends BaseThemedElement {
   /**
    * Handles event when the cancel button is clicked.
    */
-  @handle('#cancelButton').event(Event.ACTION)
-  protected onCancelAction_(): void {
+  @onDom.event(CANCEL_BUTTON_EL, 'gs-action')
+  onCancelAction_(): void {
     const projectId = this.getProjectId_();
     if (projectId !== null) {
-      this.reset_();
       this.routeService_.goTo(this.routeFactoryService_.assetList(), {projectId: projectId});
     }
-  }
-
-  /**
-   * @override
-   */
-  onCreated(element: HTMLElement): void {
-    super.onCreated(element);
-    this.reset_();
   }
 
   /**
@@ -100,67 +90,98 @@ export class CreateAssetView extends BaseThemedElement {
    *
    * @return Promise that will be resolved when all handling logic have completed.
    */
-  @handle('#createButton').event(Event.ACTION)
-  async onSubmitAction_(): Promise<void> {
-    const assetName = this.nameHook_.get();
+  @onDom.event(CREATE_BUTTON_EL, 'gs-action')
+  async onSubmitAction_(
+      @dom.attribute(NAME_ATTR) assetName: string | null,
+      @dom.attribute(ASSET_TYPE_ATTR) assetType: AssetType | null,
+      @dom.attribute(HEIGHT_ATTR) height: number | null,
+      @dom.attribute(WIDTH_ATTR) width: number | null,
+      @monad(AssetManager.idMonad()) newIdPromise: Promise<string>,
+      @monadOut(ProjectManager.monad()) projectAccessSetter: MonadSetter<DataAccess<Project>>,
+      @monadOut(AssetManager.monad()) assetAccessSetter: MonadSetter<DataAccess<Asset2>>):
+      Promise<Iterable<MonadValue<any>>> {
     if (!assetName) {
-      throw new Error('Project name is not set');
+      throw new Error('Asset name is not set');
     }
 
-    const assetType = this.assetTypeHook_.get();
     if (assetType === null) {
       throw new Error('Asset type is not set');
     }
 
-    const height = this.heightHook_.get();
     if (height === null || Number.isNaN(height)) {
       throw new Error('Asset height is not set');
     }
 
-    const width = this.widthHook_.get();
     if (width === null || Number.isNaN(width)) {
       throw new Error('Asset width is not set');
     }
 
     const projectId = this.getProjectId_();
     if (projectId === null) {
-      return Promise.resolve();
+      return ImmutableList.of([]);
     }
-
-    const id = await this.assetCollection_.reserveId(projectId);
-    const asset = new Asset(id, projectId);
-    asset.setName(assetName);
-    asset.setType(assetType);
-    asset.setHeight(height);
-    asset.setWidth(width);
-    await this.assetCollection_.update(asset);
-    this.reset_();
+    const project = await projectAccessSetter.value.get(projectId);
+    if (project === null) {
+      Log.warn(LOG, 'No projects found for project ID:', projectId);
+      return ImmutableList.of([]);
+    }
+    const id = await newIdPromise;
+    const asset = Asset2.withId(id)
+        .setName(assetName)
+        .setType(assetType)
+        .setHeight(height)
+        .setWidth(width);
     this.routeService_.goTo(this.routeFactoryService_.assetList(), {projectId: projectId});
+
+    MonadUtil.callFunction({type: 'submit'}, this, 'reset_');
+
+    return ImmutableList.of([
+      assetAccessSetter.set(assetAccessSetter.value.queueUpdate(id, asset)),
+      projectAccessSetter.set(
+          projectAccessSetter.value.queueUpdate(
+              projectId,
+              project.setAssets(project.getAssets().add(id)))),
+    ]);
   }
 
   /**
    * Resets the form.
    */
-  private reset_(): void {
-    this.assetTypeHook_.delete();
-    this.nameHook_.delete();
-    this.heightHook_.delete();
-    this.widthHook_.delete();
+  @onLifecycle('create')
+  @onDom.event(CANCEL_BUTTON_EL, 'gs-action')
+  reset_(
+      @domOut.attribute(NAME_ATTR) assetNameSetter: MonadSetter<string | null>,
+      @domOut.attribute(ASSET_TYPE_ATTR) assetTypeSetter: MonadSetter<AssetType | null>,
+      @domOut.attribute(HEIGHT_ATTR) heightSetter: MonadSetter<number | null>,
+      @domOut.attribute(WIDTH_ATTR) widthSetter: MonadSetter<number | null>):
+      ImmutableList<MonadValue<any>> {
+    return ImmutableList.of([
+      assetNameSetter.set(null),
+      assetTypeSetter.set(null),
+      heightSetter.set(null),
+      widthSetter.set(null),
+    ]);
   }
 
   /**
    * Verifies the input values.
    */
-  @handle('#assetEditor').attributeChange('asset-type')
-  @handle('#assetEditor').attributeChange('asset-name')
-  @handle('#assetEditor').attributeChange('asset-height')
-  @handle('#assetEditor').attributeChange('asset-width')
-  verifyInput_(): void {
-    this.createButtonDisabledHook_.set(
-        !this.nameHook_.get()
-        || this.assetTypeHook_.get() === null
-        || Number.isNaN(this.widthHook_.get() || NaN)
-        || Number.isNaN(this.heightHook_.get() || NaN));
+  @onDom.attributeChange(ASSET_TYPE_ATTR)
+  @onDom.attributeChange(NAME_ATTR)
+  @onDom.attributeChange(HEIGHT_ATTR)
+  @onDom.attributeChange(WIDTH_ATTR)
+  verifyInput_(
+      @dom.attribute(NAME_ATTR) assetName: string | null,
+      @dom.attribute(ASSET_TYPE_ATTR) assetType: AssetType | null,
+      @dom.attribute(HEIGHT_ATTR) height: number | null,
+      @dom.attribute(WIDTH_ATTR) width: number | null,
+      @domOut.attribute(CREATE_DISABLED_ATTR) createDisabledSetter: MonadSetter<boolean | null>):
+      Iterable<MonadValue<any>> {
+    const isDisabled =
+        !assetName
+        || assetType === null
+        || Number.isNaN(width || NaN)
+        || Number.isNaN(height || NaN);
+    return ImmutableList.of([createDisabledSetter.set(isDisabled)]);
   }
 }
-// TODO: Mutable

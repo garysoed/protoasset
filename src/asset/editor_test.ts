@@ -1,39 +1,33 @@
 import { assert, Matchers, TestBase } from '../test-base';
 TestBase.setup();
 
-import { DomEvent, ListenableDom } from 'external/gs_tools/src/event';
+import { FakeMonadSetter, MonadUtil } from 'external/gs_tools/src/event';
 import { Mocks } from 'external/gs_tools/src/mock';
 import { EnumParser } from 'external/gs_tools/src/parse';
 import { TestDispose } from 'external/gs_tools/src/testing';
 
+import { ImmutableList } from 'external/gs_tools/src/immutable';
 import { ASSET_PRESETS, PresetType, Render } from '../asset/asset-presets';
 import {
   ASSET_MAP_,
-  ASSET_TYPE_MENU_DATA_HELPER,
+  ASSET_TYPE_MENU_CHILDREN,
   Editor,
-  PRESET_TYPE_MENU_DATA_HELPER,
+  MENU_ITEM_VALUE_ATTR,
+  PRESET_TYPE_MENU_CHILDREN,
 } from '../asset/editor';
-import { Asset, AssetType } from '../data/asset';
+import { Asset2, AssetType } from '../data/asset2';
 
 
-describe('ASSET_TYPE_MENU_DATA_HELPER', () => {
+describe('ASSET_TYPE_MENU_CHILDREN', () => {
   describe('create', () => {
-    it('should create the element correctly and listen to the click event', () => {
-      const mockInstance = jasmine.createSpyObj(
-          'Instance', ['addDisposable', 'listenTo', 'onTypeClicked']);
-
-      const listenableElement = Mocks.object('listenableElement');
-      spyOn(ListenableDom, 'of').and.returnValue(listenableElement);
+    it('should create the element correctly', () => {
+      const instance = Mocks.object('instance');
 
       const element = Mocks.object('element');
       const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
       mockDocument.createElement.and.returnValue(element);
 
-      assert(ASSET_TYPE_MENU_DATA_HELPER.create(mockDocument, mockInstance)).to.equal(element);
-      assert(mockInstance.listenTo).to
-          .haveBeenCalledWith(listenableElement, DomEvent.CLICK, mockInstance.onTypeClicked);
-      assert(mockInstance.addDisposable).to.haveBeenCalledWith(listenableElement);
-      assert(ListenableDom.of).to.haveBeenCalledWith(element);
+      assert(ASSET_TYPE_MENU_CHILDREN.bridge.create(mockDocument, instance)).to.equal(element);
       assert(mockDocument.createElement).to.haveBeenCalledWith('gs-menu-item');
     });
   });
@@ -41,54 +35,45 @@ describe('ASSET_TYPE_MENU_DATA_HELPER', () => {
   describe('get', () => {
     it('should return the correct AssetType', () => {
       const assetType = AssetType.CARD;
-      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
-      mockElement.getAttribute.and.returnValue(EnumParser(AssetType).stringify(assetType));
-      assert(ASSET_TYPE_MENU_DATA_HELPER.get(mockElement)).to.equal(assetType);
-      assert(mockElement.getAttribute).to.haveBeenCalledWith('gs-value');
+      const element = document.createElement('div');
+      element.setAttribute(MENU_ITEM_VALUE_ATTR, EnumParser(AssetType).stringify(assetType));
+
+      assert(ASSET_TYPE_MENU_CHILDREN.bridge.get(element)).to.equal(assetType);
     });
 
-    it('should return null if there are no gs-value attributes', () => {
-      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
-      mockElement.getAttribute.and.returnValue(null);
-      assert(ASSET_TYPE_MENU_DATA_HELPER.get(mockElement)).to.beNull();
+    it('should return null if there are no value attributes', () => {
+      const element = document.createElement('div');
+
+      assert(ASSET_TYPE_MENU_CHILDREN.bridge.get(element)).to.beNull();
     });
   });
 
   describe('set', () => {
     it('should set the attribute correctly', () => {
       const renderedAsset = 'renderedAsset';
-      spyOn(Asset, 'renderType').and.returnValue(renderedAsset);
+      spyOn(Asset2, 'renderType').and.returnValue(renderedAsset);
 
-      const mockElement = jasmine.createSpyObj('Element', ['setAttribute']);
+      const element = document.createElement('div');
 
-      ASSET_TYPE_MENU_DATA_HELPER.set(AssetType.CARD, mockElement, Mocks.object('instance'));
-
-      assert(mockElement.setAttribute).to.haveBeenCalledWith('gs-value', 'card');
-      assert(mockElement.setAttribute).to.haveBeenCalledWith('gs-content', renderedAsset);
-      assert(Asset.renderType).to.haveBeenCalledWith(AssetType.CARD);
+      ASSET_TYPE_MENU_CHILDREN.bridge.set(AssetType.CARD, element, Mocks.object('instance'));
+      assert(element.getAttribute(MENU_ITEM_VALUE_ATTR)).to.equal('card');
+      assert(element.getAttribute('content')).to.equal(renderedAsset);
+      assert(Asset2.renderType).to.haveBeenCalledWith(AssetType.CARD);
     });
   });
 });
 
 
-describe('PRESET_TYPE_MENU_DATA_HELPER', () => {
+describe('PRESET_TYPE_MENU_CHILDREN', () => {
   describe('create', () => {
     it('should create the element correctly and listen to the click event', () => {
-      const mockInstance = jasmine.createSpyObj(
-          'Instance', ['addDisposable', 'listenTo', 'onPresetClicked']);
-
-      const listenableElement = Mocks.object('listenableElement');
-      spyOn(ListenableDom, 'of').and.returnValue(listenableElement);
+      const instance = Mocks.object('instance');
 
       const element = Mocks.object('element');
       const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
       mockDocument.createElement.and.returnValue(element);
 
-      assert(PRESET_TYPE_MENU_DATA_HELPER.create(mockDocument, mockInstance)).to.equal(element);
-      assert(mockInstance.listenTo).to
-          .haveBeenCalledWith(listenableElement, DomEvent.CLICK, mockInstance.onPresetClicked);
-      assert(mockInstance.addDisposable).to.haveBeenCalledWith(listenableElement);
-      assert(ListenableDom.of).to.haveBeenCalledWith(element);
+      assert(PRESET_TYPE_MENU_CHILDREN.bridge.create(mockDocument, instance)).to.equal(element);
       assert(mockDocument.createElement).to.haveBeenCalledWith('gs-menu-item');
     });
   });
@@ -96,16 +81,16 @@ describe('PRESET_TYPE_MENU_DATA_HELPER', () => {
   describe('get', () => {
     it('should return the correct PresetType', () => {
       const presetType = PresetType.GAME_CRAFTER_DECK_POKER;
-      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
-      mockElement.getAttribute.and.returnValue(EnumParser(PresetType).stringify(presetType));
-      assert(PRESET_TYPE_MENU_DATA_HELPER.get(mockElement)).to.equal(presetType);
-      assert(mockElement.getAttribute).to.haveBeenCalledWith('gs-value');
+      const element = document.createElement('div');
+      element.setAttribute(MENU_ITEM_VALUE_ATTR, EnumParser(PresetType).stringify(presetType));
+
+      assert(PRESET_TYPE_MENU_CHILDREN.bridge.get(element)).to.equal(presetType);
     });
 
     it('should return null if there are no gs-value attributes', () => {
       const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
       mockElement.getAttribute.and.returnValue(null);
-      assert(PRESET_TYPE_MENU_DATA_HELPER.get(mockElement)).to.beNull();
+      assert(PRESET_TYPE_MENU_CHILDREN.bridge.get(mockElement)).to.beNull();
     });
   });
 
@@ -114,15 +99,14 @@ describe('PRESET_TYPE_MENU_DATA_HELPER', () => {
       const renderedPreset = 'renderedPreset';
       spyOn(Render, 'preset').and.returnValue(renderedPreset);
 
-      const mockElement = jasmine.createSpyObj('Element', ['setAttribute']);
+      const element = document.createElement('div');
 
-      PRESET_TYPE_MENU_DATA_HELPER.set(
+      PRESET_TYPE_MENU_CHILDREN.bridge.set(
           PresetType.GAME_CRAFTER_DECK_POKER,
-          mockElement,
+          element,
           Mocks.object('instance'));
-
-      assert(mockElement.setAttribute).to.haveBeenCalledWith('gs-value', 'game_crafter_deck_poker');
-      assert(mockElement.setAttribute).to.haveBeenCalledWith('gs-content', renderedPreset);
+      assert(element.getAttribute(MENU_ITEM_VALUE_ATTR)).to.equal('game_crafter_deck_poker');
+      assert(element.getAttribute('content')).to.equal(renderedPreset);
       assert(Render.preset).to.haveBeenCalledWith(PresetType.GAME_CRAFTER_DECK_POKER);
     });
   });
@@ -137,368 +121,352 @@ describe('asset.Editor', () => {
     TestDispose.add(editor);
   });
 
-  describe('onCreated', () => {
-    it('should initialize the asset type menu correctly', () => {
-      const element = Mocks.object('element');
-      spyOn(editor.assetTypeMenuHook_, 'set');
-      editor.onCreated(element);
-      assert(editor.assetTypeMenuHook_.set).to.haveBeenCalledWith([AssetType.CARD]);
-    });
-  });
-
   describe('onAssetTypeExportChanged_', () => {
     it('should set the asset correctly', () => {
       const assetType = Mocks.object('assetType');
-      spyOn(editor.assetTypeExportHook_, 'get').and.returnValue(assetType);
-      spyOn(editor, 'setAssetType_');
-      editor.onAssetTypeExportChanged_();
-      assert(editor['setAssetType_']).to.haveBeenCalledWith(assetType);
-    });
+      spyOn(MonadUtil, 'callFunction');
 
-    it('should do nothing if the asset type does not change', () => {
-      const assetType = Mocks.object('assetType');
-      spyOn(editor.assetTypeExportHook_, 'get').and.returnValue(assetType);
-      spyOn(editor, 'setAssetType_');
-      editor.onAssetTypeExportChanged_();
-      assert(editor['setAssetType_']).to.haveBeenCalledWith(assetType);
+      editor.onAssetTypeExportChanged_(assetType);
+      assert(MonadUtil.callFunction).to.haveBeenCalledWith(
+          Matchers.objectContaining({assetType}),
+          editor,
+          'setAssetType_');
+    });
+  });
+
+  describe('onCreated', () => {
+    it('should initialize the asset type menu correctly', () => {
+      const fakeAssetTypeMenuChildrenSetter =
+          new FakeMonadSetter<ImmutableList<AssetType>>(ImmutableList.of([]));
+
+      const updates = editor.onCreated(fakeAssetTypeMenuChildrenSetter);
+      assert(fakeAssetTypeMenuChildrenSetter.findValue(updates)!.value).to
+          .haveElements([AssetType.CARD]);
     });
   });
 
   describe('onHeightChanged_', () => {
     it('should update the export height correctly', () => {
       const height = 123;
-      spyOn(editor.templateHeightHook_, 'get').and.returnValue(height);
-      spyOn(editor.templateHeightExportHook_, 'get').and.returnValue(456);
-      spyOn(editor.templateHeightExportHook_, 'set');
-      editor.onHeightChanged_();
-      assert(editor.templateHeightExportHook_.set).to.haveBeenCalledWith(height);
-    });
+      const fakeHeightSetter = new FakeMonadSetter<number | null>(null);
 
-    it('should delete the export value if height is null', () => {
-      spyOn(editor.templateHeightHook_, 'get').and.returnValue(null);
-      spyOn(editor.templateHeightExportHook_, 'get').and.returnValue(456);
-      spyOn(editor.templateHeightExportHook_, 'delete');
-      editor.onHeightChanged_();
-      assert(editor.templateHeightExportHook_.delete).to.haveBeenCalledWith();
+      const updates = editor.onHeightChanged_(height, fakeHeightSetter);
+      assert(fakeHeightSetter.findValue(updates)!.value).to.equal(height);
     });
 
     it('should do nothing if the export height is already up to date', () => {
       const height = 123;
-      spyOn(editor.templateHeightHook_, 'get').and.returnValue(height);
-      spyOn(editor.templateHeightExportHook_, 'get').and.returnValue(height);
-      spyOn(editor.templateHeightExportHook_, 'delete');
-      spyOn(editor.templateHeightExportHook_, 'set');
-      editor.onHeightChanged_();
-      assert(editor.templateHeightExportHook_.set).toNot.haveBeenCalled();
-      assert(editor.templateHeightExportHook_.delete).toNot.haveBeenCalled();
+      const fakeHeightSetter = new FakeMonadSetter<number | null>(height);
+
+      const updates = editor.onHeightChanged_(height, fakeHeightSetter);
+      assert([...updates]).to.equal([]);
     });
   });
 
   describe('onHeightExportChanged_', () => {
     it('should update the height correctly', () => {
       const height = 123;
-      spyOn(editor.templateHeightExportHook_, 'get').and.returnValue(height);
-      spyOn(editor.templateHeightHook_, 'get').and.returnValue(456);
-      spyOn(editor.templateHeightHook_, 'set');
-      editor.onHeightExportChanged_();
-      assert(editor.templateHeightHook_.set).to.haveBeenCalledWith(height);
-    });
+      const fakeInputHeightSetter = new FakeMonadSetter<number | null>(null);
 
-    it('should delete the height if the new height is null', () => {
-      spyOn(editor.templateHeightExportHook_, 'get').and.returnValue(null);
-      spyOn(editor.templateHeightHook_, 'get').and.returnValue(456);
-      spyOn(editor.templateHeightHook_, 'delete');
-      editor.onHeightExportChanged_();
-      assert(editor.templateHeightHook_.delete).to.haveBeenCalledWith();
+      const updates = editor.onHeightExportChanged_(fakeInputHeightSetter, height);
+      assert(fakeInputHeightSetter.findValue(updates)!.value).to.equal(height);
     });
 
     it('should do nothing if the height is already up to date', () => {
       const height = 123;
-      spyOn(editor.templateHeightExportHook_, 'get').and.returnValue(height);
-      spyOn(editor.templateHeightHook_, 'get').and.returnValue(height);
-      spyOn(editor.templateHeightHook_, 'delete');
-      spyOn(editor.templateHeightHook_, 'set');
-      editor.onHeightExportChanged_();
-      assert(editor.templateHeightHook_.set).toNot.haveBeenCalled();
-      assert(editor.templateHeightHook_.delete).toNot.haveBeenCalled();
+      const fakeInputHeightSetter = new FakeMonadSetter<number | null>(height);
+
+      const updates = editor.onHeightExportChanged_(fakeInputHeightSetter, height);
+      assert([...updates]).to.equal([]);
     });
   });
 
   describe('onNameChanged_', () => {
     it('should update the export name correctly', () => {
       const name = 'name';
-      spyOn(editor.nameValueHook_, 'get').and.returnValue(name);
-      spyOn(editor.nameExportHook_, 'get').and.returnValue('otherName');
-      spyOn(editor.nameExportHook_, 'set');
-      editor.onNameChanged_();
-      assert(editor.nameExportHook_.set).to.haveBeenCalledWith(name);
-    });
+      const fakeNameSetter = new FakeMonadSetter<string | null>(null);
 
-    it('should delete the export value if name is null', () => {
-      spyOn(editor.nameValueHook_, 'get').and.returnValue(null);
-      spyOn(editor.nameExportHook_, 'get').and.returnValue('name');
-      spyOn(editor.nameExportHook_, 'delete');
-      editor.onNameChanged_();
-      assert(editor.nameExportHook_.delete).to.haveBeenCalledWith();
+      const updates = editor.onNameChanged_(name, fakeNameSetter);
+      assert(fakeNameSetter.findValue(updates)!.value).to.equal(name);
     });
 
     it('should do nothing if the export name is already up to date', () => {
       const name = 'name';
-      spyOn(editor.nameValueHook_, 'get').and.returnValue(name);
-      spyOn(editor.nameExportHook_, 'get').and.returnValue(name);
-      spyOn(editor.nameExportHook_, 'delete');
-      spyOn(editor.nameExportHook_, 'set');
-      editor.onNameChanged_();
-      assert(editor.nameExportHook_.set).toNot.haveBeenCalled();
-      assert(editor.nameExportHook_.delete).toNot.haveBeenCalled();
+      const fakeNameSetter = new FakeMonadSetter<string | null>(name);
+
+      const updates = editor.onNameChanged_(name, fakeNameSetter);
+      assert([...updates]).to.equal([]);
     });
   });
 
   describe('onNameExportChanged_', () => {
     it('should update the name correctly', () => {
       const name = 'name';
-      spyOn(editor.nameExportHook_, 'get').and.returnValue(name);
-      spyOn(editor.nameValueHook_, 'get').and.returnValue('otherName');
-      spyOn(editor.nameValueHook_, 'set');
-      editor.onNameExportChanged_();
-      assert(editor.nameValueHook_.set).to.haveBeenCalledWith(name);
-    });
+      const fakeNameInputSetter = new FakeMonadSetter<string | null>(null);
 
-    it('should delete the name if the new name is null', () => {
-      spyOn(editor.nameExportHook_, 'get').and.returnValue(null);
-      spyOn(editor.nameValueHook_, 'get').and.returnValue('name');
-      spyOn(editor.nameValueHook_, 'delete');
-      editor.onNameExportChanged_();
-      assert(editor.nameValueHook_.delete).to.haveBeenCalledWith();
+      const updates = editor.onNameExportChanged_(fakeNameInputSetter, name);
+      assert(fakeNameInputSetter.findValue(updates)!.value).to.equal(name);
     });
 
     it('should do nothing if the name is already up to date', () => {
       const name = 'name';
-      spyOn(editor.nameExportHook_, 'get').and.returnValue(name);
-      spyOn(editor.nameValueHook_, 'get').and.returnValue(name);
-      spyOn(editor.nameValueHook_, 'delete');
-      spyOn(editor.nameValueHook_, 'set');
-      editor.onNameExportChanged_();
-      assert(editor.nameValueHook_.set).toNot.haveBeenCalled();
-      assert(editor.nameValueHook_.delete).toNot.haveBeenCalled();
+      const fakeNameInputSetter = new FakeMonadSetter<string | null>(name);
+
+      const updates = editor.onNameExportChanged_(fakeNameInputSetter, name);
+      assert([...updates]).to.equal([]);
     });
   });
 
   describe('onPresetClicked', () => {
     it('should set the type correctly', () => {
+      const presetType = PresetType.GAME_CRAFTER_DECK_POKER;
+
+      const height = ASSET_PRESETS.get(presetType)!.heightPx;
+      const width = ASSET_PRESETS.get(presetType)!.widthPx;
+
+      const renderedPreset = 'renderedPreset';
+      spyOn(Render, 'preset').and.returnValue(renderedPreset);
+
       const stringType = 'game_crafter_deck_poker';
-      const mockTarget = jasmine.createSpyObj('Target', ['getAttribute']);
-      mockTarget.getAttribute.and.returnValue(stringType);
+      const target = document.createElement('div');
+      target.setAttribute(MENU_ITEM_VALUE_ATTR, stringType);
 
-      spyOn(editor, 'setPresetType_');
+      const fakePresetTypeInnerTextSetter = new FakeMonadSetter<string | null>(null);
+      const fakeTemplateHeightSetter = new FakeMonadSetter<number | null>(null);
+      const fakeTemplateWidthSetter = new FakeMonadSetter<number | null>(null);
+      const fakePresetTypeMenuVisibleSetter = new FakeMonadSetter<boolean | null>(null);
 
-      editor.onPresetClicked({target: mockTarget} as any);
+      const updates = editor.onPresetClicked(
+          {target} as any,
+          fakePresetTypeInnerTextSetter,
+          fakeTemplateHeightSetter,
+          fakeTemplateWidthSetter,
+          fakePresetTypeMenuVisibleSetter);
+      assert(fakeTemplateWidthSetter.findValue(updates)!.value).to.equal(width);
+      assert(fakeTemplateHeightSetter.findValue(updates)!.value).to.equal(height);
+      assert(fakePresetTypeInnerTextSetter.findValue(updates)!.value).to.equal(renderedPreset);
+      assert(Render.preset).to.haveBeenCalledWith(presetType);
+      assert(fakePresetTypeMenuVisibleSetter.findValue(updates)!.value).to.beFalse();
+    });
 
-      assert(editor['setPresetType_']).to.haveBeenCalledWith(PresetType.GAME_CRAFTER_DECK_POKER);
-      assert(mockTarget.getAttribute).to.haveBeenCalledWith('gs-value');
+    it('should handle where there are no corresponding preset object', () => {
+      const presetType = PresetType.GAME_CRAFTER_DECK_POKER;
+      spyOn(ASSET_PRESETS, 'get').and.returnValue(null);
+
+      const renderedPreset = 'renderedPreset';
+      spyOn(Render, 'preset').and.returnValue(renderedPreset);
+
+      const stringType = 'game_crafter_deck_poker';
+      const target = document.createElement('div');
+      target.setAttribute(MENU_ITEM_VALUE_ATTR, stringType);
+
+      const fakePresetTypeInnerTextSetter = new FakeMonadSetter<string | null>(null);
+      const fakeTemplateHeightSetter = new FakeMonadSetter<number | null>(null);
+      const fakeTemplateWidthSetter = new FakeMonadSetter<number | null>(null);
+      const fakePresetTypeMenuVisibleSetter = new FakeMonadSetter<boolean | null>(null);
+
+      const updates = editor.onPresetClicked(
+          {target} as any,
+          fakePresetTypeInnerTextSetter,
+          fakeTemplateHeightSetter,
+          fakeTemplateWidthSetter,
+          fakePresetTypeMenuVisibleSetter);
+      assert(fakeTemplateWidthSetter.findValue(updates)).to.beNull();
+      assert(fakeTemplateHeightSetter.findValue(updates)).to.beNull();
+      assert(fakePresetTypeInnerTextSetter.findValue(updates)!.value).to.equal(renderedPreset);
+      assert(Render.preset).to.haveBeenCalledWith(presetType);
+      assert(fakePresetTypeMenuVisibleSetter.findValue(updates)!.value).to.beFalse();
+    });
+
+    it('should handle the case where the preset type is null', () => {
+      spyOn(ASSET_PRESETS, 'get').and.returnValue(null);
+
+      const target = document.createElement('div');
+      target.setAttribute(MENU_ITEM_VALUE_ATTR, '');
+
+      const fakePresetTypeInnerTextSetter = new FakeMonadSetter<string | null>(null);
+      const fakeTemplateHeightSetter = new FakeMonadSetter<number | null>(null);
+      const fakeTemplateWidthSetter = new FakeMonadSetter<number | null>(null);
+      const fakePresetTypeMenuVisibleSetter = new FakeMonadSetter<boolean | null>(null);
+
+      const updates = editor.onPresetClicked(
+          {target} as any,
+          fakePresetTypeInnerTextSetter,
+          fakeTemplateHeightSetter,
+          fakeTemplateWidthSetter,
+          fakePresetTypeMenuVisibleSetter);
+      assert(fakeTemplateWidthSetter.findValue(updates)).to.beNull();
+      assert(fakeTemplateHeightSetter.findValue(updates)).to.beNull();
+      assert(fakePresetTypeInnerTextSetter.findValue(updates)!.value).to.match(/select a preset/i);
+      assert(fakePresetTypeMenuVisibleSetter.findValue(updates)!.value).to.beFalse();
+    });
+
+    it(`should do nothing if the target has no value attribute`, () => {
+      const target = document.createElement('div');
+
+      const fakePresetTypeInnerTextSetter = new FakeMonadSetter<string | null>(null);
+      const fakeTemplateHeightSetter = new FakeMonadSetter<number | null>(null);
+      const fakeTemplateWidthSetter = new FakeMonadSetter<number | null>(null);
+      const fakePresetTypeMenuVisibleSetter = new FakeMonadSetter<boolean | null>(null);
+
+      const updates = editor.onPresetClicked(
+          {target} as any,
+          fakePresetTypeInnerTextSetter,
+          fakeTemplateHeightSetter,
+          fakeTemplateWidthSetter,
+          fakePresetTypeMenuVisibleSetter);
+      assert([...updates]).to.equal([]);
     });
   });
 
   describe('onTypeClicked', () => {
     it('should set the type correctly', () => {
-      const stringType = 'card';
-      const mockTarget = jasmine.createSpyObj('Target', ['getAttribute']);
-      mockTarget.getAttribute.and.returnValue(stringType);
+      const assetType = AssetType.CARD;
 
-      spyOn(editor, 'setAssetType_');
+      const target = document.createElement('div');
+      target.setAttribute(MENU_ITEM_VALUE_ATTR, 'card');
+      const fakeAssetTypeMenuVisibleSetter = new FakeMonadSetter<boolean | null>(null);
 
-      editor.onTypeClicked({target: mockTarget} as any);
+      spyOn(MonadUtil, 'callFunction');
 
-      assert(editor['setAssetType_']).to.haveBeenCalledWith(AssetType.CARD);
-      assert(mockTarget.getAttribute).to.haveBeenCalledWith('gs-value');
+      const updates = editor.onTypeClicked({target} as any, fakeAssetTypeMenuVisibleSetter);
+      assert(fakeAssetTypeMenuVisibleSetter.findValue(updates)!.value).to.beFalse();
+      assert(MonadUtil.callFunction).to.haveBeenCalledWith(
+          Matchers.objectContaining({assetType}), editor, 'setAssetType_');
+    });
+
+    it(`should do nothing if the target has no value attribute`, () => {
+      const target = document.createElement('div');
+      const fakeAssetTypeMenuVisibleSetter = new FakeMonadSetter<boolean | null>(null);
+
+      spyOn(MonadUtil, 'callFunction');
+
+      const updates = editor.onTypeClicked({target} as any, fakeAssetTypeMenuVisibleSetter);
+      assert([...updates]).to.equal([]);
+      assert(MonadUtil.callFunction).toNot.haveBeenCalled();
     });
   });
 
   describe('onWidthChanged_', () => {
     it('should update the export width correctly', () => {
       const width = 123;
-      spyOn(editor.templateWidthHook_, 'get').and.returnValue(width);
-      spyOn(editor.templateWidthExportHook_, 'get').and.returnValue(456);
-      spyOn(editor.templateWidthExportHook_, 'set');
-      editor.onWidthChanged_();
-      assert(editor.templateWidthExportHook_.set).to.haveBeenCalledWith(width);
-    });
+      const fakeWidthSetter = new FakeMonadSetter<number | null>(null);
 
-    it('should delete the export value if width is null', () => {
-      spyOn(editor.templateWidthHook_, 'get').and.returnValue(null);
-      spyOn(editor.templateWidthExportHook_, 'get').and.returnValue(123);
-      spyOn(editor.templateWidthExportHook_, 'delete');
-      editor.onWidthChanged_();
-      assert(editor.templateWidthExportHook_.delete).to.haveBeenCalledWith();
+      const updates = editor.onWidthChanged_(width, fakeWidthSetter);
+      assert(fakeWidthSetter.findValue(updates)!.value).to.equal(width);
     });
 
     it('should do nothing if the export width is already up to date', () => {
       const width = 123;
-      spyOn(editor.templateWidthHook_, 'get').and.returnValue(width);
-      spyOn(editor.templateWidthExportHook_, 'get').and.returnValue(width);
-      spyOn(editor.templateWidthExportHook_, 'delete');
-      spyOn(editor.templateWidthExportHook_, 'set');
-      editor.onWidthChanged_();
-      assert(editor.templateWidthExportHook_.set).toNot.haveBeenCalled();
-      assert(editor.templateWidthExportHook_.delete).toNot.haveBeenCalled();
+      const fakeWidthSetter = new FakeMonadSetter<number | null>(width);
+
+      const updates = editor.onWidthChanged_(width, fakeWidthSetter);
+      assert([...updates]).to.equal([]);
     });
   });
 
   describe('onWidthExportChanged_', () => {
     it('should update the width correctly', () => {
       const width = 123;
-      spyOn(editor.templateWidthExportHook_, 'get').and.returnValue(width);
-      spyOn(editor.templateWidthHook_, 'get').and.returnValue(456);
-      spyOn(editor.templateWidthHook_, 'set');
-      editor.onWidthExportChanged_();
-      assert(editor.templateWidthHook_.set).to.haveBeenCalledWith(width);
-    });
+      const fakeInputWidthSetter = new FakeMonadSetter<number | null>(null);
 
-    it('should delete the width if the new width is null', () => {
-      spyOn(editor.templateWidthExportHook_, 'get').and.returnValue(null);
-      spyOn(editor.templateWidthHook_, 'get').and.returnValue(123);
-      spyOn(editor.templateWidthHook_, 'delete');
-      editor.onWidthExportChanged_();
-      assert(editor.templateWidthHook_.delete).to.haveBeenCalledWith();
+      const updates = editor.onWidthExportChanged_(fakeInputWidthSetter, width);
+      assert(fakeInputWidthSetter.findValue(updates)!.value).to.equal(width);
     });
 
     it('should do nothing if the width is already up to date', () => {
       const width = 123;
-      spyOn(editor.templateWidthExportHook_, 'get').and.returnValue(width);
-      spyOn(editor.templateWidthHook_, 'get').and.returnValue(width);
-      spyOn(editor.templateWidthHook_, 'delete');
-      spyOn(editor.templateWidthHook_, 'set');
-      editor.onWidthExportChanged_();
-      assert(editor.templateWidthHook_.set).toNot.haveBeenCalled();
-      assert(editor.templateWidthHook_.delete).toNot.haveBeenCalled();
+      const fakeInputWidthSetter = new FakeMonadSetter<number | null>(width);
+
+      const updates = editor.onWidthExportChanged_(fakeInputWidthSetter, width);
+      assert([...updates]).to.equal([]);
     });
   });
 
   describe('setAssetType_', () => {
     it('should set the hook correctly if the type is non null', () => {
       const renderedType = 'renderedType';
-      spyOn(Asset, 'renderType').and.returnValue(renderedType);
-
-      const assetType = Mocks.object('assetType');
-
-      spyOn(editor, 'updateTemplateSection_');
-      spyOn(editor.assetTypeHook_, 'set');
-      spyOn(editor.assetTypeExportHook_, 'set');
-
-      editor['setAssetType_'](assetType);
-
-      assert(editor.assetTypeHook_.set).to.haveBeenCalledWith(renderedType);
-      assert(editor.assetTypeExportHook_.set).to.haveBeenCalledWith(assetType);
-      assert(editor['updateTemplateSection_']).to.haveBeenCalledWith();
-      assert(Asset.renderType).to.haveBeenCalledWith(assetType);
-    });
-
-    it('should set the hook correctly if the type is null', () => {
-      spyOn(editor, 'updateTemplateSection_');
-      spyOn(editor.assetTypeHook_, 'set');
-      spyOn(editor.assetTypeExportHook_, 'delete');
-
-      editor['setAssetType_'](null);
-
-      assert(editor['updateTemplateSection_']).to.haveBeenCalledWith();
-      assert(editor.assetTypeHook_.set).to
-          .haveBeenCalledWith(Matchers.stringMatching(/Select a type/));
-      assert(editor.assetTypeExportHook_.delete).to.haveBeenCalledWith();
-    });
-  });
-
-  describe('setPresetType_', () => {
-    it('should set the preset correctly', () => {
-      const presetType = PresetType.GAME_CRAFTER_DECK_SQUARE;
-      const renderedPreset = 'renderedPreset';
-      spyOn(Render, 'preset').and.returnValue(renderedPreset);
-
-      const height = 123;
-      const width = 456;
-      const presetObj = {heightPx: height, widthPx: width};
-      spyOn(ASSET_PRESETS, 'get').and.returnValue(presetObj);
-
-      spyOn(editor['presetTypeHook_'], 'set');
-      spyOn(editor['templateHeightHook_'], 'set');
-      spyOn(editor['templateWidthHook_'], 'set');
-
-      editor['setPresetType_'](presetType);
-
-      assert(editor['templateHeightHook_'].set).to.haveBeenCalledWith(height);
-      assert(editor['templateWidthHook_'].set).to.haveBeenCalledWith(width);
-      assert(ASSET_PRESETS.get).to.haveBeenCalledWith(presetType);
-      assert(editor['presetTypeHook_'].set).to.haveBeenCalledWith(renderedPreset);
-      assert(editor['presetType_']).to.equal(presetType);
-    });
-
-    it('should handle where there are no corresponding preset object', () => {
-      const presetType = PresetType.GAME_CRAFTER_DECK_SQUARE;
-      spyOn(Render, 'preset').and.returnValue('renderedPreset');
-
-      spyOn(ASSET_PRESETS, 'get').and.returnValue(undefined);
-
-      spyOn(editor['presetTypeHook_'], 'set');
-      spyOn(editor['templateHeightHook_'], 'set');
-      spyOn(editor['templateWidthHook_'], 'set');
-
-      editor['setPresetType_'](presetType);
-
-      assert(editor['templateHeightHook_'].set).toNot.haveBeenCalled();
-      assert(editor['templateWidthHook_'].set).toNot.haveBeenCalled();
-      assert(editor['presetType_']).to.equal(presetType);
-    });
-
-    it('should handle the case where the preset type is null', () => {
-      spyOn(ASSET_PRESETS, 'get').and.returnValue(undefined);
-
-      spyOn(editor['presetTypeHook_'], 'set');
-      spyOn(editor['templateHeightHook_'], 'set');
-      spyOn(editor['templateWidthHook_'], 'set');
-
-      editor['setPresetType_'](null);
-
-      assert(editor['templateHeightHook_'].set).toNot.haveBeenCalled();
-      assert(editor['templateWidthHook_'].set).toNot.haveBeenCalled();
-      assert(editor['presetTypeHook_'].set).to
-          .haveBeenCalledWith(Matchers.stringMatching(/Select/));
-      assert(editor['presetType_']).to.beNull();
-    });
-  });
-
-  describe('updateTemplateSection_', () => {
-    it('should set the class and presets correctly, and verify inputs', () => {
-      spyOn(editor['templateSectionHiddenHook_'], 'set');
-
-      spyOn(editor['presetTypeMenuHook_'], 'set');
-      spyOn(editor['presetTypeHook_'], 'set');
-
-      const presetSet = Mocks.object('presetSet');
-      spyOn(ASSET_MAP_, 'get').and.returnValue(presetSet);
+      spyOn(Asset2, 'renderType').and.returnValue(renderedType);
 
       const assetType = AssetType.CARD;
-      editor['assetType_'] = assetType;
+      const fakeAssetTypeInnerTextSetter = new FakeMonadSetter<string | null>(null);
+      const fakeAssetTypeSetter = new FakeMonadSetter<AssetType | null>(null);
+      const fakeTemplateSectionHiddenSetter = new FakeMonadSetter<boolean | null>(null);
+      const fakePresetTypeMenuSetter =
+          new FakeMonadSetter<ImmutableList<PresetType>>(ImmutableList.of([]));
+      const fakePresetTypeSetter = new FakeMonadSetter<string | null>(null);
 
-      editor['updateTemplateSection_']();
+      const updates = editor.setAssetType_(
+          {assetType} as any,
+          fakeAssetTypeInnerTextSetter,
+          fakeAssetTypeSetter,
+          fakeTemplateSectionHiddenSetter,
+          fakePresetTypeMenuSetter,
+          fakePresetTypeSetter);
 
-      assert(editor['templateSectionHiddenHook_'].set).to.haveBeenCalledWith(false);
-      assert(editor['presetTypeMenuHook_'].set).to.haveBeenCalledWith(presetSet);
-      assert(editor['presetTypeHook_'].set).to.haveBeenCalledWith('');
-      assert(ASSET_MAP_.get).to.haveBeenCalledWith(assetType);
+      assert(fakePresetTypeMenuSetter.findValue(updates)!.value).to
+          .haveElements([...ASSET_MAP_.get(assetType)!]);
+      assert(fakeTemplateSectionHiddenSetter.findValue(updates)!.value).to.beFalse();
+      assert(fakeAssetTypeInnerTextSetter.findValue(updates)!.value).to.equal(renderedType);
+      assert(Asset2.renderType).to.haveBeenCalledWith(assetType);
+      assert(fakePresetTypeSetter.findValue(updates)!.value).to.equal('');
+      assert(fakeAssetTypeSetter.findValue(updates)!.value).to.equal(assetType);
     });
 
-    it('should set the class and presets correctly if there are no asset types', () => {
-      spyOn(editor['templateSectionHiddenHook_'], 'set');
+    it(`should set the preset type menu correctly if there are no corresponding asset types`,
+        () => {
+      const renderedType = 'renderedType';
+      spyOn(Asset2, 'renderType').and.returnValue(renderedType);
 
-      spyOn(editor['presetTypeMenuHook_'], 'set');
-      spyOn(editor['presetTypeHook_'], 'set');
+      spyOn(ASSET_MAP_, 'get').and.returnValue(null);
 
-      editor['assetType_'] = null;
+      const assetType = AssetType.CARD;
+      const fakeAssetTypeInnerTextSetter = new FakeMonadSetter<string | null>(null);
+      const fakeAssetTypeSetter = new FakeMonadSetter<AssetType | null>(null);
+      const fakeTemplateSectionHiddenSetter = new FakeMonadSetter<boolean | null>(null);
+      const fakePresetTypeMenuSetter =
+          new FakeMonadSetter<ImmutableList<PresetType>>(ImmutableList.of([]));
+      const fakePresetTypeSetter = new FakeMonadSetter<string | null>(null);
 
-      editor['updateTemplateSection_']();
+      const updates = editor.setAssetType_(
+          {assetType} as any,
+          fakeAssetTypeInnerTextSetter,
+          fakeAssetTypeSetter,
+          fakeTemplateSectionHiddenSetter,
+          fakePresetTypeMenuSetter,
+          fakePresetTypeSetter);
 
-      assert(editor['templateSectionHiddenHook_'].set).to.haveBeenCalledWith(true);
-      assert(editor['presetTypeMenuHook_'].set).to.haveBeenCalledWith([]);
-      assert(editor['presetTypeHook_'].set).to.haveBeenCalledWith('');
+      assert(fakePresetTypeMenuSetter.findValue(updates)!.value).to.haveElements([]);
+      assert(ASSET_MAP_.get).to.haveBeenCalledWith(assetType);
+      assert(fakeTemplateSectionHiddenSetter.findValue(updates)!.value).to.beFalse();
+      assert(fakeAssetTypeInnerTextSetter.findValue(updates)!.value).to.equal(renderedType);
+      assert(Asset2.renderType).to.haveBeenCalledWith(assetType);
+      assert(fakePresetTypeSetter.findValue(updates)!.value).to.equal('');
+      assert(fakeAssetTypeSetter.findValue(updates)!.value).to.equal(assetType);
+    });
+
+    it(`should reset if asset type is null`, () => {
+      const assetType = null;
+      const fakeAssetTypeInnerTextSetter = new FakeMonadSetter<string | null>(null);
+      const fakeAssetTypeSetter = new FakeMonadSetter<AssetType | null>(null);
+      const fakeTemplateSectionHiddenSetter = new FakeMonadSetter<boolean | null>(null);
+      const fakePresetTypeMenuSetter =
+          new FakeMonadSetter<ImmutableList<PresetType>>(ImmutableList.of([]));
+      const fakePresetTypeSetter = new FakeMonadSetter<string | null>(null);
+
+      const updates = editor.setAssetType_(
+          {assetType} as any,
+          fakeAssetTypeInnerTextSetter,
+          fakeAssetTypeSetter,
+          fakeTemplateSectionHiddenSetter,
+          fakePresetTypeMenuSetter,
+          fakePresetTypeSetter);
+
+      assert(fakePresetTypeMenuSetter.findValue(updates)!.value).to.haveElements([]);
+      assert(fakeTemplateSectionHiddenSetter.findValue(updates)!.value).to.beTrue();
+      assert(fakeAssetTypeInnerTextSetter.findValue(updates)!.value).to.match(/select a type/i);
+      assert(fakePresetTypeSetter.findValue(updates)!.value).to.equal('');
+      assert(fakeAssetTypeSetter.findValue(updates)!.value).to.beNull();
     });
   });
 });

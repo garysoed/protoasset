@@ -23,6 +23,8 @@ export abstract class Project implements DataModel<ProjectSearchIndex> {
   @field('id', StringParser) protected readonly id_: string = '';
   @field('name', StringParser) protected readonly name_: string = '';
 
+  abstract getAssets(): ImmutableSet<string>;
+
   abstract getId(): string;
 
   abstract getName(): string;
@@ -35,11 +37,11 @@ export abstract class Project implements DataModel<ProjectSearchIndex> {
     };
   }
 
+  abstract setAssets(assets: ImmutableSet<string>): Project;
+
   abstract setName(name: string): Project;
 
   static withId(id: string): Project {
-    return DataModels.newInstance<Project>(
-        Project,
-        ImmutableMap.of([['id_', id]]));
+    return DataModels.newInstance<Project>(Project, ImmutableMap.of([['id_', id]]));
   }
 }

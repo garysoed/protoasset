@@ -1,24 +1,25 @@
 import { assert, TestBase } from '../test-base';
 TestBase.setup();
 
-import { ImmutableMap, ImmutableSet } from 'external/gs_tools/src/immutable';
+import { FakeDataAccess } from 'external/gs_tools/src/datamodel';
+import { FakeMonadSetter } from 'external/gs_tools/src/event';
+import { ImmutableList, ImmutableMap, ImmutableSet } from 'external/gs_tools/src/immutable';
 import { Mocks } from 'external/gs_tools/src/mock';
 import { TestDispose } from 'external/gs_tools/src/testing';
 
-import { RouteServiceEvents } from 'external/gs_ui/src/const';
-
-import { FakeDataAccess } from 'external/gs_tools/src/datamodel';
-import { ProjectManager } from 'src/data/project-manager';
-import { ASSET_DATA_HELPER, AssetListView } from '../project/asset-list-view';
+import { Project } from '../data/project';
+import { ASSET_ITEM_CHILDREN, AssetItemData, AssetListView } from '../project/asset-list-view';
 
 
-describe('ASSET_DATA_HELPER', () => {
+describe('ASSET_ITEM_CHILDREN', () => {
   describe('create', () => {
     it('should create the correct element', () => {
       const element = Mocks.object('element');
       const mockDocument = jasmine.createSpyObj('Document', ['createElement']);
       mockDocument.createElement.and.returnValue(element);
-      assert(ASSET_DATA_HELPER.create(mockDocument, Mocks.object('instance'))).to.equal(element);
+
+      assert(ASSET_ITEM_CHILDREN.bridge.create(mockDocument, Mocks.object('instance')))
+          .to.equal(element);
       assert(mockDocument.createElement).to.haveBeenCalledWith('pa-asset-item');
     });
   });
@@ -27,44 +28,27 @@ describe('ASSET_DATA_HELPER', () => {
     it('should return the correct data', () => {
       const assetId = 'assetId';
       const projectId = 'projectId';
-      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
-      mockElement.getAttribute.and.callFake((attrName: string) => {
-        switch (attrName) {
-          case 'gs-asset-id':
-            return assetId;
-          case 'gs-project-id':
-            return projectId;
-        }
-      });
-      assert(ASSET_DATA_HELPER.get(mockElement)).to.equal({assetId, projectId});
-      assert(mockElement.getAttribute).to.haveBeenCalledWith('gs-asset-id');
-      assert(mockElement.getAttribute).to.haveBeenCalledWith('gs-project-id');
+      const element = document.createElement('div');
+      element.setAttribute('asset-id', assetId);
+      element.setAttribute('project-id', projectId);
+
+      assert(ASSET_ITEM_CHILDREN.bridge.get(element)).to.equal({assetId, projectId});
     });
 
     it('should return null if assetId is null', () => {
-      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
-      mockElement.getAttribute.and.callFake((attrName: string) => {
-        switch (attrName) {
-          case 'gs-asset-id':
-            return null;
-          case 'gs-project-id':
-            return 'projectId';
-        }
-      });
-      assert(ASSET_DATA_HELPER.get(mockElement)).to.beNull();
+      const element = document.createElement('div');
+      element.setAttribute('asset-id', '');
+      element.setAttribute('project-id', 'projectId');
+
+      assert(ASSET_ITEM_CHILDREN.bridge.get(element)).to.beNull();
     });
 
     it('should return null if projectId is null', () => {
-      const mockElement = jasmine.createSpyObj('Element', ['getAttribute']);
-      mockElement.getAttribute.and.callFake((attrName: string) => {
-        switch (attrName) {
-          case 'gs-asset-id':
-            return 'assetId';
-          case 'gs-project-id':
-            return null;
-        }
-      });
-      assert(ASSET_DATA_HELPER.get(mockElement)).to.beNull();
+      const element = document.createElement('div');
+      element.setAttribute('asset-id', 'assetId');
+      element.setAttribute('project-id', '');
+
+      assert(ASSET_ITEM_CHILDREN.bridge.get(element)).to.beNull();
     });
   });
 
@@ -72,23 +56,22 @@ describe('ASSET_DATA_HELPER', () => {
     it('should set the attributes correctly', () => {
       const assetId = 'assetId';
       const projectId = 'projectId';
-      const mockElement = jasmine.createSpyObj('Element', ['setAttribute']);
-      ASSET_DATA_HELPER.set({assetId, projectId}, mockElement, Mocks.object('instance'));
-      assert(mockElement.setAttribute).to.haveBeenCalledWith('gs-asset-id', assetId);
-      assert(mockElement.setAttribute).to.haveBeenCalledWith('gs-project-id', projectId);
+      const element = document.createElement('div');
+
+      ASSET_ITEM_CHILDREN.bridge.set({assetId, projectId}, element, Mocks.object('instance'));
+      assert(element.getAttribute('asset-id')).to.equal(assetId);
+      assert(element.getAttribute('project-id')).to.equal(projectId);
     });
   });
 });
 
 
 describe('project.AssetListView', () => {
-  let mockAssetCollection: any;
   let mockRouteFactoryService: any;
   let mockRouteService: any;
   let view: AssetListView;
 
   beforeEach(() => {
-    mockAssetCollection = jasmine.createSpyObj('AssetCollection', ['list']);
     mockRouteFactoryService = jasmine.createSpyObj(
         'RouteFactoryService',
         ['assetList', 'createAsset', 'projectSettings']);
@@ -98,7 +81,6 @@ describe('project.AssetListView', () => {
     TestDispose.add(mockRouteService);
 
     view = new AssetListView(
-        mockAssetCollection,
         mockRouteFactoryService,
         mockRouteService,
         jasmine.createSpyObj('ThemeService', ['applyTheme']));
@@ -129,90 +111,6 @@ describe('project.AssetListView', () => {
     });
   });
 
-  describe('onProjectIdChanged_', () => {
-    it('should update the project name corretly if there are matches', async () => {
-      const projectId = 'projectId';
-      const projectName = 'projectName';
-
-      const mockProject = jasmine.createSpyObj('Project', ['getName']);
-      mockProject.getName.and.returnValue(projectName);
-
-      mockAssetCollection.list.and.returnValue(Promise.resolve(ImmutableSet.of([])));
-      const projectDataAccess = new FakeDataAccess(
-        ImmutableMap.of([[projectId, mockProject]]),
-      );
-      const mockProjectManagerMonad = jasmine.createSpyObj('ProjectManagerMonad', ['get', 'set']);
-      mockProjectManagerMonad.get.and.returnValue(projectDataAccess);
-      spyOn(ProjectManager, 'monad').and.returnValue(() => mockProjectManagerMonad);
-
-      spyOn(view, 'getProjectId_').and.returnValue(projectId);
-      spyOn(view['assetsHook_'], 'set');
-      spyOn(view['projectNameTextHook_'], 'set');
-
-      await view['onProjectIdChanged_']();
-      assert(view['projectNameTextHook_'].set).to.haveBeenCalledWith(projectName);
-    });
-
-    it('should set the assets', async () => {
-      const projectId = 'projectId';
-
-      const assetId1 = 'assetId1';
-      const projectId1 = 'projectId1';
-      const mockAsset1 = jasmine.createSpyObj('Asset1', ['getId', 'getProjectId']);
-      mockAsset1.getId.and.returnValue(assetId1);
-      mockAsset1.getProjectId.and.returnValue(projectId1);
-
-      const assetId2 = 'assetId2';
-      const projectId2 = 'projectId2';
-      const mockAsset2 = jasmine.createSpyObj('Asset2', ['getId', 'getProjectId']);
-      mockAsset2.getId.and.returnValue(assetId2);
-      mockAsset2.getProjectId.and.returnValue(projectId2);
-
-      mockAssetCollection.list.and
-          .returnValue(Promise.resolve(ImmutableSet.of([mockAsset1, mockAsset2])));
-      const projectDataAccess = new FakeDataAccess();
-      const mockProjectManagerMonad = jasmine.createSpyObj('ProjectManagerMonad', ['get', 'set']);
-      mockProjectManagerMonad.get.and.returnValue(projectDataAccess);
-      spyOn(ProjectManager, 'monad').and.returnValue(() => mockProjectManagerMonad);
-
-      spyOn(view, 'getProjectId_').and.returnValue(projectId);
-      spyOn(view['assetsHook_'], 'set');
-      spyOn(view['projectNameTextHook_'], 'set');
-
-      await view['onProjectIdChanged_']();
-      assert(view['assetsHook_'].set).to.haveBeenCalledWith([
-        {assetId: assetId1, projectId: projectId1},
-        {assetId: assetId2, projectId: projectId2},
-      ]);
-      assert(mockAssetCollection.list).to.haveBeenCalledWith(projectId);
-    });
-
-    it('should not throw error if there are no projects corresponding to the project ID',
-        async () => {
-      const projectId = 'projectId';
-
-      mockAssetCollection.list.and.returnValue(Promise.resolve(ImmutableSet.of([])));
-      const projectDataAccess = new FakeDataAccess();
-      const mockProjectManagerMonad = jasmine.createSpyObj('ProjectManagerMonad', ['get', 'set']);
-      mockProjectManagerMonad.get.and.returnValue(projectDataAccess);
-      spyOn(ProjectManager, 'monad').and.returnValue(() => mockProjectManagerMonad);
-      spyOn(view, 'getProjectId_').and.returnValue(projectId);
-      spyOn(view['assetsHook_'], 'set');
-      spyOn(view['projectNameTextHook_'], 'set');
-
-      await view['onProjectIdChanged_']();
-      assert(view['projectNameTextHook_'].set).toNot.haveBeenCalled();
-    });
-
-    it('should not throw error if there are no project IDs', async () => {
-      spyOn(view, 'getProjectId_').and.returnValue(null);
-      spyOn(view['projectNameTextHook_'], 'set');
-
-      await view['onProjectIdChanged_']();
-      assert(view['projectNameTextHook_'].set).toNot.haveBeenCalled();
-    });
-  });
-
   describe('onCreateButtonClicked_', () => {
     it('should navigate to create asset view', () => {
       const projectId = 'projectId';
@@ -234,23 +132,66 @@ describe('project.AssetListView', () => {
     });
   });
 
-  describe('onCreated', () => {
-    it('should update the project name and listen to changes to route', () => {
-      spyOn(view, 'onProjectIdChanged_');
-      spyOn(view, 'listenTo');
-      spyOn(view, 'addDisposable').and.callThrough();
+  describe('onProjectIdChanged_', () => {
+    it('should update the project name corretly if there are matches', async () => {
+      const projectId = 'projectId';
+      spyOn(view, 'getProjectId_').and.returnValue(projectId);
 
-      const mockDisposable = jasmine.createSpyObj('Disposable', ['dispose']);
-      spyOn(mockRouteService, 'on').and.returnValue(mockDisposable);
+      const projectName = 'projectName';
+      const assetId1 = 'assetId1';
+      const assetId2 = 'assetId2';
+      const project = Project.withId(projectId)
+          .setName(projectName)
+          .setAssets(ImmutableSet.of([assetId1, assetId2]));
 
-      view.onCreated(Mocks.object('element'));
+      const fakeAssetItemListSetter =
+          new FakeMonadSetter<ImmutableList<AssetItemData>>(ImmutableList.of([]));
+      const fakeProjectNameSetter = new FakeMonadSetter<string | null>(null);
+      const fakeProjectAccess = new FakeDataAccess<Project>(ImmutableMap.of([
+        [projectId, project],
+      ]));
 
-      assert(view['onProjectIdChanged_']).to.haveBeenCalledWith();
-      assert(view.addDisposable).to.haveBeenCalledWith(mockDisposable);
-      assert(mockRouteService.on).to.haveBeenCalledWith(
-          RouteServiceEvents.CHANGED,
-          view['onProjectIdChanged_'],
-          view);
+      const updates = await view.onProjectIdChanged_(
+          fakeAssetItemListSetter,
+          fakeProjectNameSetter,
+          fakeProjectAccess);
+      assert(fakeProjectNameSetter.findValue(updates)!.value).to.equal(projectName);
+      assert(fakeAssetItemListSetter.findValue(updates)!.value).to.haveElements([
+        {assetId: assetId1, projectId},
+        {assetId: assetId2, projectId},
+      ]);
+    });
+
+    it('should do nothing if project cannot be found', async () => {
+      const projectId = 'projectId';
+      spyOn(view, 'getProjectId_').and.returnValue(projectId);
+
+      const fakeAssetItemListSetter =
+          new FakeMonadSetter<ImmutableList<AssetItemData>>(ImmutableList.of([]));
+      const fakeProjectNameSetter = new FakeMonadSetter<string | null>(null);
+      const fakeProjectAccess = new FakeDataAccess<Project>();
+
+      const updates = await view.onProjectIdChanged_(
+          fakeAssetItemListSetter,
+          fakeProjectNameSetter,
+          fakeProjectAccess);
+      assert([...updates]).to.equal([]);
+    });
+
+    it('should do nothing if there are no project IDs',
+        async () => {
+      spyOn(view, 'getProjectId_').and.returnValue(null);
+
+      const fakeAssetItemListSetter =
+          new FakeMonadSetter<ImmutableList<AssetItemData>>(ImmutableList.of([]));
+      const fakeProjectNameSetter = new FakeMonadSetter<string | null>(null);
+      const fakeProjectAccess = new FakeDataAccess<Project>();
+
+      const updates = await view.onProjectIdChanged_(
+          fakeAssetItemListSetter,
+          fakeProjectNameSetter,
+          fakeProjectAccess);
+      assert([...updates]).to.equal([]);
     });
   });
 

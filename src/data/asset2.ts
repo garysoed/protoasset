@@ -1,5 +1,5 @@
 import { cache, Serializable } from 'external/gs_tools/src/data';
-import { DataModel, field } from 'external/gs_tools/src/datamodel';
+import { DataModel, DataModels, field } from 'external/gs_tools/src/datamodel';
 import { ImmutableList, ImmutableMap } from 'external/gs_tools/src/immutable';
 
 import {
@@ -172,5 +172,9 @@ export abstract class Asset2 implements DataModel<AssetSearchIndex> {
       default:
         return '';
     }
+  }
+
+  static withId(id: string): Asset2 {
+    return DataModels.newInstance<Asset2>(Asset2, ImmutableMap.of([['id_', id]]));
   }
 }

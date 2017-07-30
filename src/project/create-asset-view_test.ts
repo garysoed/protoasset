@@ -1,27 +1,27 @@
 import { assert, Matchers, TestBase } from '../test-base';
 TestBase.setup();
 
+import { DataModels, FakeDataAccess } from 'external/gs_tools/src/datamodel';
+import { FakeMonadSetter, MonadUtil } from 'external/gs_tools/src/event';
+import { ImmutableMap } from 'external/gs_tools/src/immutable';
 import { Mocks } from 'external/gs_tools/src/mock';
 import { TestDispose } from 'external/gs_tools/src/testing';
 
-import { Asset } from '../data/asset';
-
+import { Asset2, AssetType } from '../data/asset2';
+import { Project } from '../data/project';
 import { CreateAssetView } from './create-asset-view';
 
 
 describe('project.CreateAssetView', () => {
-  let mockAssetCollection: any;
   let mockRouteFactoryService: any;
   let mockRouteService: any;
   let view: CreateAssetView;
 
   beforeEach(() => {
-    mockAssetCollection = jasmine.createSpyObj('AssetCollection', ['reserveId', 'update']);
     mockRouteFactoryService =
         jasmine.createSpyObj('RouteFactoryService', ['createAsset', 'assetList']);
     mockRouteService = jasmine.createSpyObj('RouteService', ['getParams', 'goTo']);
     view = new CreateAssetView(
-        mockAssetCollection,
         mockRouteFactoryService,
         mockRouteService,
         Mocks.object('ThemeService'));
@@ -52,289 +52,274 @@ describe('project.CreateAssetView', () => {
     });
   });
 
-  describe('reset_', () => {
-    it('should reset all values', () => {
-      spyOn(view.widthHook_, 'delete');
-      spyOn(view.heightHook_, 'delete');
-      spyOn(view.nameHook_, 'delete');
-      spyOn(view.assetTypeHook_, 'delete');
-      view['reset_']();
-      assert(view.widthHook_.delete).to.haveBeenCalledWith();
-      assert(view.heightHook_.delete).to.haveBeenCalledWith();
-      assert(view.nameHook_.delete).to.haveBeenCalled();
-      assert(view.assetTypeHook_.delete).to.haveBeenCalledWith();
-    });
-  });
-
-  describe('verifyInput_', () => {
-    it('should enable the create button if the required fields are set', () => {
-      spyOn(view.createButtonDisabledHook_, 'set');
-      spyOn(view.nameHook_, 'get').and.returnValue('name');
-      spyOn(view.heightHook_, 'get').and.returnValue(123);
-      spyOn(view.widthHook_, 'get').and.returnValue(456);
-      spyOn(view.assetTypeHook_, 'get').and.returnValue(Mocks.object('assetType'));
-
-      view.verifyInput_();
-
-      assert(view.createButtonDisabledHook_.set).to.haveBeenCalledWith(false);
-    });
-
-    it('should disable the create button if the name is not set', () => {
-      spyOn(view.createButtonDisabledHook_, 'set');
-      spyOn(view.nameHook_, 'get').and.returnValue(null);
-      spyOn(view.heightHook_, 'get').and.returnValue(123);
-      spyOn(view.widthHook_, 'get').and.returnValue(456);
-      spyOn(view.assetTypeHook_, 'get').and.returnValue(Mocks.object('assetType'));
-      view.verifyInput_();
-
-      assert(view.createButtonDisabledHook_.set).to.haveBeenCalledWith(true);
-    });
-
-    it('should disable the create button if the asset type is not set', () => {
-      spyOn(view.createButtonDisabledHook_, 'set');
-      spyOn(view.nameHook_, 'get').and.returnValue('name');
-      spyOn(view.heightHook_, 'get').and.returnValue(123);
-      spyOn(view.widthHook_, 'get').and.returnValue(456);
-      spyOn(view.assetTypeHook_, 'get').and.returnValue(null);
-      view.verifyInput_();
-
-      assert(view.createButtonDisabledHook_.set).to.haveBeenCalledWith(true);
-    });
-
-    it('should disable the create button if the width is zero', () => {
-      spyOn(view.createButtonDisabledHook_, 'set');
-      spyOn(view.nameHook_, 'get').and.returnValue('name');
-      spyOn(view.heightHook_, 'get').and.returnValue(123);
-      spyOn(view.widthHook_, 'get').and.returnValue(0);
-      spyOn(view.assetTypeHook_, 'get').and.returnValue(Mocks.object('assetType'));
-      view.verifyInput_();
-
-      assert(view.createButtonDisabledHook_.set).to.haveBeenCalledWith(true);
-    });
-
-    it('should disable the create button if the width is NaN', () => {
-      spyOn(view.createButtonDisabledHook_, 'set');
-      spyOn(view.nameHook_, 'get').and.returnValue('name');
-      spyOn(view.heightHook_, 'get').and.returnValue(123);
-      spyOn(view.widthHook_, 'get').and.returnValue(NaN);
-      spyOn(view.assetTypeHook_, 'get').and.returnValue(Mocks.object('assetType'));
-      view.verifyInput_();
-
-      assert(view.createButtonDisabledHook_.set).to.haveBeenCalledWith(true);
-    });
-
-    it('should disable the create button if the height is zero', () => {
-      spyOn(view.createButtonDisabledHook_, 'set');
-      spyOn(view.nameHook_, 'get').and.returnValue('name');
-      spyOn(view.heightHook_, 'get').and.returnValue(0);
-      spyOn(view.widthHook_, 'get').and.returnValue(456);
-      spyOn(view.assetTypeHook_, 'get').and.returnValue(Mocks.object('assetType'));
-      view.verifyInput_();
-
-      assert(view.createButtonDisabledHook_.set).to.haveBeenCalledWith(true);
-    });
-
-    it('should disable the create button if the height is NaN', () => {
-      spyOn(view.createButtonDisabledHook_, 'set');
-      spyOn(view.nameHook_, 'get').and.returnValue('name');
-      spyOn(view.heightHook_, 'get').and.returnValue(NaN);
-      spyOn(view.widthHook_, 'get').and.returnValue(456);
-      spyOn(view.assetTypeHook_, 'get').and.returnValue(Mocks.object('assetType'));
-      view.verifyInput_();
-
-      assert(view.createButtonDisabledHook_.set).to.haveBeenCalledWith(true);
-    });
-  });
-
   describe('onCancelAction_', () => {
     it('should reset the form and go to the project main view', () => {
       const routeFactory = Mocks.object('routeFactory');
       mockRouteFactoryService.assetList.and.returnValue(routeFactory);
 
       const projectId = 'projectId';
-      spyOn(view, 'reset_');
       spyOn(view, 'getProjectId_').and.returnValue(projectId);
 
-      view['onCancelAction_']();
+      view.onCancelAction_();
 
       assert(mockRouteService.goTo).to.haveBeenCalledWith(routeFactory, {projectId: projectId});
-      assert(view['reset_']).to.haveBeenCalledWith();
     });
 
     it('should do nothing if there are no project IDs', () => {
-      spyOn(view, 'reset_');
       spyOn(view, 'getProjectId_').and.returnValue(null);
 
       view['onCancelAction_']();
 
       assert(mockRouteService.goTo).toNot.haveBeenCalled();
-      assert(view['reset_']).toNot.haveBeenCalled();
     });
   });
 
   describe('onSubmitAction_', () => {
     it('should create the asset correctly and navigate to the project main view',
-    async () => {
+        async () => {
       const routeFactory = Mocks.object('routeFactory');
       mockRouteFactoryService.assetList.and.returnValue(routeFactory);
 
       const projectId = 'projectId';
       spyOn(view, 'getProjectId_').and.returnValue(projectId);
 
-      spyOn(view, 'reset_');
-
       const assetName = 'assetName';
-      spyOn(view.nameHook_, 'get').and.returnValue(assetName);
-
       const height = 123;
-      spyOn(view.heightHook_, 'get').and.returnValue(height);
-
       const width = 456;
-      spyOn(view.widthHook_, 'get').and.returnValue(width);
-
       const assetType = Mocks.object('assetType');
-      spyOn(view.assetTypeHook_, 'get').and.returnValue(assetType);
-
       const assetId = 'assetId';
-      mockAssetCollection.reserveId.and.returnValue(Promise.resolve(assetId));
 
-      await view.onSubmitAction_();
-      assert(mockRouteService.goTo).to
-          .haveBeenCalledWith(routeFactory, {projectId: projectId});
-      assert(view['reset_']).to.haveBeenCalledWith();
+      spyOn(MonadUtil, 'callFunction');
 
-      assert(mockAssetCollection.update).to.haveBeenCalledWith(Matchers.any(Asset));
+      const fakeProjectAccess = new FakeDataAccess<Project>(ImmutableMap.of([
+        [projectId, DataModels.newInstance<Project>(Project)],
+      ]));
+      const fakeProjectAccessSetter =
+          new FakeMonadSetter<FakeDataAccess<Project>>(fakeProjectAccess);
+      const fakeAssetAccess = new FakeDataAccess<Asset2>();
+      const fakeAssetAccessSetter = new FakeMonadSetter<FakeDataAccess<Asset2>>(fakeAssetAccess);
 
-      const asset = mockAssetCollection.update.calls.argsFor(0)[0];
+      const updates = await view.onSubmitAction_(
+          assetName,
+          assetType,
+          height,
+          width,
+          Promise.resolve(assetId),
+          fakeProjectAccessSetter,
+          fakeAssetAccessSetter);
+
+      const updatedProject = fakeProjectAccessSetter.findValue(updates)!.value
+          .getUpdateQueue()
+          .get(projectId);
+      assert(updatedProject!.getAssets()).to.haveElements([assetId]);
+
+      const asset = fakeAssetAccessSetter.findValue(updates)!.value.getUpdateQueue().get(assetId)!;
       assert(asset.getName()).to.equal(assetName);
       assert(asset.getType()).to.equal(assetType);
       assert(asset.getId()).to.equal(assetId);
       assert(asset.getHeight()).to.equal(height);
       assert(asset.getWidth()).to.equal(width);
-      TestDispose.add(asset);
 
-      assert(mockAssetCollection.reserveId).to.haveBeenCalledWith(projectId);
+      assert(mockRouteService.goTo).to
+          .haveBeenCalledWith(routeFactory, {projectId: projectId});
+      assert(MonadUtil.callFunction).to.haveBeenCalledWith(Matchers.anyThing(), view, 'reset_');
     });
 
     it('should do nothing if there are no project IDs', async () => {
+      const routeFactory = Mocks.object('routeFactory');
+      mockRouteFactoryService.assetList.and.returnValue(routeFactory);
+
       spyOn(view, 'getProjectId_').and.returnValue(null);
 
-      spyOn(view, 'reset_');
+      spyOn(MonadUtil, 'callFunction');
 
-      spyOn(view.nameHook_, 'get').and.returnValue('assetName');
-      spyOn(view.heightHook_, 'get').and.returnValue(123);
-      spyOn(view.widthHook_, 'get').and.returnValue(456);
+      const fakeProjectAccess = new FakeDataAccess<Project>();
+      const fakeProjectAccessSetter =
+          new FakeMonadSetter<FakeDataAccess<Project>>(fakeProjectAccess);
+      const fakeAssetAccess = new FakeDataAccess<Asset2>();
+      const fakeAssetAccessSetter = new FakeMonadSetter<FakeDataAccess<Asset2>>(fakeAssetAccess);
 
-      const assetType = Mocks.object('assetType');
-      spyOn(view.assetTypeHook_, 'get').and.returnValue(assetType);
+      const updates = await view.onSubmitAction_(
+          'assetName',
+          AssetType.CARD,
+          123,
+          456,
+          Promise.resolve('assetId'),
+          fakeProjectAccessSetter,
+          fakeAssetAccessSetter);
 
-      await view.onSubmitAction_();
+      assert([...updates]).to.equal([]);
       assert(mockRouteService.goTo).toNot.haveBeenCalled();
-      assert(view['reset_']).toNot.haveBeenCalled();
-
-      assert(mockAssetCollection.update).toNot.haveBeenCalled();
+      assert(MonadUtil.callFunction).toNot.haveBeenCalled();
     });
 
-    it('should reject if project name is not set', async (done: any) => {
-      spyOn(view.nameHook_, 'get').and.returnValue(null);
+    it('should reject if asset name is not set', async () => {
+      const fakeProjectAccess = new FakeDataAccess<Project>();
+      const fakeProjectAccessSetter =
+          new FakeMonadSetter<FakeDataAccess<Project>>(fakeProjectAccess);
+      const fakeAssetAccess = new FakeDataAccess<Asset2>();
+      const fakeAssetAccessSetter = new FakeMonadSetter<FakeDataAccess<Asset2>>(fakeAssetAccess);
 
-      try {
-        await view.onSubmitAction_();
-        done.fail();
-      } catch (e) {
-        const error: Error = e;
-        assert(error.message).to.equal(Matchers.stringMatching(/Project name/));
-      }
+      await assert(view.onSubmitAction_(
+          null,
+          AssetType.CARD,
+          123,
+          456,
+          Promise.resolve('assetId'),
+          fakeProjectAccessSetter,
+          fakeAssetAccessSetter)).to.rejectWithError(/Asset name/);
     });
 
-    it('should reject if the asset type is not set', async (done: any) => {
-      const assetName = 'assetName';
-      spyOn(view.nameHook_, 'get').and.returnValue(assetName);
-      spyOn(view.assetTypeHook_, 'get').and.returnValue(null);
+    it('should reject if the asset type is not set', async () => {
+      const fakeProjectAccess = new FakeDataAccess<Project>();
+      const fakeProjectAccessSetter =
+          new FakeMonadSetter<FakeDataAccess<Project>>(fakeProjectAccess);
+      const fakeAssetAccess = new FakeDataAccess<Asset2>();
+      const fakeAssetAccessSetter = new FakeMonadSetter<FakeDataAccess<Asset2>>(fakeAssetAccess);
 
-      try {
-        await view.onSubmitAction_();
-        done.fail();
-      } catch (e) {
-        const error: Error = e;
-        assert(error.message).to.equal(Matchers.stringMatching(/Asset type/));
-      }
+      await assert(view.onSubmitAction_(
+          'name',
+          null,
+          123,
+          456,
+          Promise.resolve('assetId'),
+          fakeProjectAccessSetter,
+          fakeAssetAccessSetter)).to.rejectWithError(/Asset type/);
     });
 
-    it('should reject if the height is null', async (done: any) => {
-      spyOn(view, 'getProjectId_').and.returnValue(null);
+    it('should reject if the height is null', async () => {
+      const fakeProjectAccess = new FakeDataAccess<Project>();
+      const fakeProjectAccessSetter =
+          new FakeMonadSetter<FakeDataAccess<Project>>(fakeProjectAccess);
+      const fakeAssetAccess = new FakeDataAccess<Asset2>();
+      const fakeAssetAccessSetter = new FakeMonadSetter<FakeDataAccess<Asset2>>(fakeAssetAccess);
 
-      spyOn(view, 'reset_');
-
-      spyOn(view.nameHook_, 'get').and.returnValue('assetName');
-      spyOn(view.heightHook_, 'get').and.returnValue(null);
-      spyOn(view.widthHook_, 'get').and.returnValue(456);
-      spyOn(view.assetTypeHook_, 'get').and.returnValue(Mocks.object('assetType'));
-
-      try {
-        await view.onSubmitAction_();
-        done.fail();
-      } catch (e) {
-        const error: Error = e;
-        assert(error.message).to.equal(Matchers.stringMatching(/Asset height/));
-      }
+      await assert(view.onSubmitAction_(
+          'name',
+          AssetType.CARD,
+          null,
+          456,
+          Promise.resolve('assetId'),
+          fakeProjectAccessSetter,
+          fakeAssetAccessSetter)).to.rejectWithError(/Asset height/);
     });
 
-    it('should reject if the height is NaN', async (done: any) => {
-      spyOn(view, 'getProjectId_').and.returnValue(null);
+    it('should reject if the height is NaN', async () => {
+      const fakeProjectAccess = new FakeDataAccess<Project>();
+      const fakeProjectAccessSetter =
+          new FakeMonadSetter<FakeDataAccess<Project>>(fakeProjectAccess);
+      const fakeAssetAccess = new FakeDataAccess<Asset2>();
+      const fakeAssetAccessSetter = new FakeMonadSetter<FakeDataAccess<Asset2>>(fakeAssetAccess);
 
-      spyOn(view, 'reset_');
-
-      spyOn(view.nameHook_, 'get').and.returnValue('assetName');
-      spyOn(view.heightHook_, 'get').and.returnValue(NaN);
-      spyOn(view.widthHook_, 'get').and.returnValue(456);
-      spyOn(view.assetTypeHook_, 'get').and.returnValue(Mocks.object('assetType'));
-
-      try {
-        await view.onSubmitAction_();
-        done.fail();
-      } catch (e) {
-        const error: Error = e;
-        assert(error.message).to.equal(Matchers.stringMatching(/Asset height/));
-      }
+      await assert(view.onSubmitAction_(
+          'name',
+          AssetType.CARD,
+          NaN,
+          456,
+          Promise.resolve('assetId'),
+          fakeProjectAccessSetter,
+          fakeAssetAccessSetter)).to.rejectWithError(/Asset height/);
     });
 
-    it('should reject if the width is null', async (done: any) => {
-      spyOn(view, 'getProjectId_').and.returnValue(null);
+    it('should reject if the width is null', async () => {
+      const fakeProjectAccess = new FakeDataAccess<Project>();
+      const fakeProjectAccessSetter =
+          new FakeMonadSetter<FakeDataAccess<Project>>(fakeProjectAccess);
+      const fakeAssetAccess = new FakeDataAccess<Asset2>();
+      const fakeAssetAccessSetter = new FakeMonadSetter<FakeDataAccess<Asset2>>(fakeAssetAccess);
 
-      spyOn(view, 'reset_');
-
-      spyOn(view.nameHook_, 'get').and.returnValue('assetName');
-      spyOn(view.heightHook_, 'get').and.returnValue(123);
-      spyOn(view.widthHook_, 'get').and.returnValue(null);
-      spyOn(view.assetTypeHook_, 'get').and.returnValue(Mocks.object('assetType'));
-
-      try {
-        await view.onSubmitAction_();
-        done.fail();
-      } catch (e) {
-        const error: Error = e;
-        assert(error.message).to.equal(Matchers.stringMatching(/Asset width/));
-      }
+      await assert(view.onSubmitAction_(
+          'name',
+          AssetType.CARD,
+          123,
+          null,
+          Promise.resolve('assetId'),
+          fakeProjectAccessSetter,
+          fakeAssetAccessSetter)).to.rejectWithError(/Asset width/);
     });
 
-    it('should reject if the width is NaN', async (done: any) => {
-      spyOn(view, 'getProjectId_').and.returnValue(null);
+    it('should reject if the width is NaN', async () => {
+      const fakeProjectAccess = new FakeDataAccess<Project>();
+      const fakeProjectAccessSetter =
+          new FakeMonadSetter<FakeDataAccess<Project>>(fakeProjectAccess);
+      const fakeAssetAccess = new FakeDataAccess<Asset2>();
+      const fakeAssetAccessSetter = new FakeMonadSetter<FakeDataAccess<Asset2>>(fakeAssetAccess);
 
-      spyOn(view, 'reset_');
+      await assert(view.onSubmitAction_(
+          'name',
+          AssetType.CARD,
+          123,
+          NaN,
+          Promise.resolve('assetId'),
+          fakeProjectAccessSetter,
+          fakeAssetAccessSetter)).to.rejectWithError(/Asset width/);
+    });
+  });
 
-      spyOn(view.nameHook_, 'get').and.returnValue('assetName');
-      spyOn(view.heightHook_, 'get').and.returnValue(123);
-      spyOn(view.widthHook_, 'get').and.returnValue(NaN);
-      spyOn(view.assetTypeHook_, 'get').and.returnValue(Mocks.object('assetType'));
+  describe('reset_', () => {
+    it('should reset all values', () => {
+      const fakeAssetNameSetter = new FakeMonadSetter<string | null>('name');
+      const fakeAssetTypeSetter = new FakeMonadSetter<AssetType | null>(AssetType.CARD);
+      const fakeHeightSetter = new FakeMonadSetter<number | null>(123);
+      const fakeWidthSetter = new FakeMonadSetter<number | null>(456);
 
-      try {
-        await view.onSubmitAction_();
-        done.fail();
-      } catch (e) {
-        const error: Error = e;
-        assert(error.message).to.equal(Matchers.stringMatching(/Asset width/));
-      }
+      const updates =
+          view.reset_(fakeAssetNameSetter, fakeAssetTypeSetter, fakeHeightSetter, fakeWidthSetter);
+      assert(fakeAssetNameSetter.findValue(updates)!.value).to.beNull();
+      assert(fakeHeightSetter.findValue(updates)!.value).to.beNull();
+      assert(fakeWidthSetter.findValue(updates)!.value).to.beNull();
+      assert(fakeAssetTypeSetter.findValue(updates)!.value).to.beNull();
+    });
+  });
+
+  describe('verifyInput_', () => {
+    it('should enable the create button if the required fields are set', () => {
+      const fakeCreateDisabledSetter = new FakeMonadSetter<boolean | null>(null);
+
+      const updates = view.verifyInput_('name', AssetType.CARD, 123, 456, fakeCreateDisabledSetter);
+      assert(fakeCreateDisabledSetter.findValue(updates)!.value).to.beFalse();
+    });
+
+    it('should disable the create button if the name is not set', () => {
+      const fakeCreateDisabledSetter = new FakeMonadSetter<boolean | null>(null);
+
+      const updates = view.verifyInput_(null, AssetType.CARD, 123, 456, fakeCreateDisabledSetter);
+      assert(fakeCreateDisabledSetter.findValue(updates)!.value).to.beTrue();
+    });
+
+    it('should disable the create button if the asset type is not set', () => {
+      const fakeCreateDisabledSetter = new FakeMonadSetter<boolean | null>(null);
+
+      const updates = view.verifyInput_('name', null, 123, 456, fakeCreateDisabledSetter);
+      assert(fakeCreateDisabledSetter.findValue(updates)!.value).to.beTrue();
+    });
+
+    it('should disable the create button if the width is zero', () => {
+      const fakeCreateDisabledSetter = new FakeMonadSetter<boolean | null>(null);
+
+      const updates = view.verifyInput_('name', AssetType.CARD, 123, 0, fakeCreateDisabledSetter);
+      assert(fakeCreateDisabledSetter.findValue(updates)!.value).to.beTrue();
+    });
+
+    it('should disable the create button if the width is NaN', () => {
+      const fakeCreateDisabledSetter = new FakeMonadSetter<boolean | null>(null);
+
+      const updates = view.verifyInput_('name', AssetType.CARD, 123, NaN, fakeCreateDisabledSetter);
+      assert(fakeCreateDisabledSetter.findValue(updates)!.value).to.beTrue();
+    });
+
+    it('should disable the create button if the height is zero', () => {
+      const fakeCreateDisabledSetter = new FakeMonadSetter<boolean | null>(null);
+
+      const updates = view.verifyInput_('name', AssetType.CARD, 0, 456, fakeCreateDisabledSetter);
+      assert(fakeCreateDisabledSetter.findValue(updates)!.value).to.beTrue();
+    });
+
+    it('should disable the create button if the height is NaN', () => {
+      const fakeCreateDisabledSetter = new FakeMonadSetter<boolean | null>(null);
+
+      const updates = view.verifyInput_('name', AssetType.CARD, NaN, 456, fakeCreateDisabledSetter);
+      assert(fakeCreateDisabledSetter.findValue(updates)!.value).to.beTrue();
     });
   });
 });

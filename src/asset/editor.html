@@ -27,20 +27,25 @@
     <label>
       Name:
     </label>
-    <gs-text-input flex gs-value="" id="nameInput"></gs-text-input>
+    <gs-text-input flex value="" id="nameInput"></gs-text-input>
   </div>
 </div>
 <div id="assetRow" layout="row">
   <label>
     Asset type:
   </label>
-  <gs-basic-button flex>
-    <div gs-content layout="row">
+  <gs-basic-button flex id="assetTypeButton">
+    <div layout="row">
       <div flex id="assetType"></div>
       <gs-icon>arrow_drop_down</gs-icon>
     </div>
-    <gs-menu gs-anchor-point="top_left" gs-anchor-target="top_left" gs-fit-parent-width="true">
-      <div gs-content id="assetTypeMenu"></div>
+    <gs-menu
+        anchor-point="top_left"
+        anchor-target="top_left"
+        id="assetTypeMenu"
+        fit-parent-width="true"
+        triggered-by="#assetTypeButton">
+      <div id="assetTypeMenuContent"></div>
     </gs-menu>
   </gs-basic-button>
 </div>
@@ -48,13 +53,17 @@
   <legend>Template</legend>
   <div id="presetRow" layout="row">
     <label>Choose preset:</label>
-    <gs-basic-button flex>
-      <div gs-content layout="row">
+    <gs-basic-button flex id="presetMenuButton">
+      <div layout="row">
         <div flex id="presetType"></div>
         <gs-icon>arrow_drop_down</gs-icon>
       </div>
-      <gs-menu gs-anchor-point="top_left" gs-anchor-target="top_left">
-        <div gs-content id="presetTypeMenu"></div>
+      <gs-menu
+          anchor-point="top_left"
+          anchor-target="top_left"
+          id="presetTypeMenu"
+          triggered-by="#presetMenuButton">
+        <div id="presetTypeMenuContent"></div>
       </gs-menu>
     </gs-basic-button>
   </div>

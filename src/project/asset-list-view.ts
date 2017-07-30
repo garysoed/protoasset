@@ -1,60 +1,62 @@
-import { ImmutableSet } from 'external/gs_tools/src/immutable';
+import { DataAccess } from 'external/gs_tools/src/datamodel';
+import { monad, on } from 'external/gs_tools/src/event';
+import { ImmutableList, ImmutableSet } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
+import { ChildElementsSelector, MonadValue } from 'external/gs_tools/src/interfaces';
+import { MonadSetter } from 'external/gs_tools/src/interfaces/monad-setter';
+import { StringParser } from 'external/gs_tools/src/parse';
 import {
-  ChildElementDataHelper,
   customElement,
-  DomHook,
-  handle,
-  hook } from 'external/gs_tools/src/webc';
+  domOut,
+  onDom,
+  onLifecycle} from 'external/gs_tools/src/webc';
 
-import { BaseThemedElement } from 'external/gs_ui/src/common';
-import { Event } from 'external/gs_ui/src/const';
+import { BaseThemedElement2 } from 'external/gs_ui/src/common';
 import { RouteServiceEvents } from 'external/gs_ui/src/const';
 import { RouteService } from 'external/gs_ui/src/routing';
 import { ThemeService } from 'external/gs_ui/src/theming';
 
 import { FilterButton } from '../common/filter-button';
-import { Asset } from '../data/asset';
 import { AssetCollection } from '../data/asset-collection';
-import { FuseBackedManager } from '../data/fuse-backed-manager';
-import { Project, ProjectSearchIndex } from '../data/project';
+import { Project } from '../data/project';
 import { ProjectManager } from '../data/project-manager';
 import { AssetItem } from '../project/asset-item';
 import { RouteFactoryService } from '../routing/route-factory-service';
 import { Views } from '../routing/views';
 
 
-type AssetItemData = {assetId: string, projectId: string};
-type ProjectManagerType = FuseBackedManager<ProjectSearchIndex, Project>;
+export type AssetItemData = {assetId: string, projectId: string};
 
-export const ASSET_DATA_HELPER: ChildElementDataHelper<AssetItemData> = {
-  /**
-   * @override
-   */
-  create(document: Document): Element {
-    return document.createElement('pa-asset-item');
+const ASSET_LIST_EL = '#assets';
+const CREATE_BUTTON_EL = '#createButton';
+const PROJECT_NAME_EL = '#projectName';
+const SETTINGS_BUTTON_EL = '#settingsButton';
+
+const PROJECT_NAME_INNER_TEXT = {parser: StringParser, selector: PROJECT_NAME_EL};
+
+export const ASSET_ITEM_CHILDREN: ChildElementsSelector<AssetItemData> = {
+  bridge: {
+    create(document: Document): Element {
+      return document.createElement('pa-asset-item');
+    },
+
+    get(element: Element): AssetItemData | null {
+      const assetId = element.getAttribute('asset-id');
+      const projectId = element.getAttribute('project-id');
+      if (!assetId || !projectId) {
+        return null;
+      }
+
+      return {assetId, projectId};
+    },
+
+    set(data: AssetItemData, element: Element): void {
+      element.setAttribute('asset-id', data.assetId);
+      element.setAttribute('project-id', data.projectId);
+    },
   },
 
-  /**
-   * @override
-   */
-  get(element: Element): AssetItemData | null {
-    const assetId = element.getAttribute('gs-asset-id');
-    const projectId = element.getAttribute('gs-project-id');
-    if (assetId === null || projectId === null) {
-      return null;
-    }
-
-    return {assetId, projectId};
-  },
-
-  /**
-   * @override
-   */
-  set(data: AssetItemData, element: Element): void {
-    element.setAttribute('gs-asset-id', data.assetId);
-    element.setAttribute('gs-project-id', data.projectId);
-  },
+  selector: ASSET_LIST_EL,
 };
 
 
@@ -68,28 +70,15 @@ export const ASSET_DATA_HELPER: ChildElementDataHelper<AssetItemData> = {
   tag: 'pa-asset-list-view',
   templateKey: 'src/project/asset-list-view',
 })
-export class AssetListView extends BaseThemedElement {
-  private readonly assetCollection_: AssetCollection;
-
-  @hook('#assets').childrenElements<AssetItemData>(ASSET_DATA_HELPER)
-  private readonly assetsHook_: DomHook<AssetItemData[]>;
-  private readonly projectManager_: ProjectManagerType = ProjectManager;
-
-  @hook('#projectName').innerText()
-  private readonly projectNameTextHook_: DomHook<string>;
+export class AssetListView extends BaseThemedElement2 {
   private readonly routeFactoryService_: RouteFactoryService;
   private readonly routeService_: RouteService<Views>;
 
-
   constructor(
-      @inject('pa.data.AssetCollection') assetCollection: AssetCollection,
       @inject('pa.routing.RouteFactoryService') routeFactoryService: RouteFactoryService,
       @inject('gs.routing.RouteService') routeService: RouteService<Views>,
       @inject('theming.ThemeService') themeService: ThemeService) {
     super(themeService);
-    this.assetCollection_ = assetCollection;
-    this.assetsHook_ = DomHook.of<AssetItemData[]>();
-    this.projectNameTextHook_ = DomHook.of<string>();
     this.routeFactoryService_ = routeFactoryService;
     this.routeService_ = routeService;
   }
@@ -102,7 +91,7 @@ export class AssetListView extends BaseThemedElement {
     return params === null ? null : params.projectId;
   }
 
-  @handle('#createButton').event(Event.ACTION)
+  @onDom.event(CREATE_BUTTON_EL, 'gs-action')
   onCreateButtonClicked_(): void {
     const projectId = this.getProjectId_();
     if (projectId !== null) {
@@ -112,41 +101,36 @@ export class AssetListView extends BaseThemedElement {
   }
 
   /**
-   * @override
-   */
-  onCreated(element: HTMLElement): void {
-    super.onCreated(element);
-    this.onProjectIdChanged_();
-    this.addDisposable(
-        this.routeService_.on(RouteServiceEvents.CHANGED, this.onProjectIdChanged_, this));
-  }
-
-  /**
    * Updates the project name.
    */
-  private async onProjectIdChanged_(): Promise<void> {
+  @onLifecycle('create')
+  @on((instance: AssetListView) => instance.routeService_, RouteServiceEvents.CHANGED)
+  async onProjectIdChanged_(
+      @domOut.childElements(ASSET_ITEM_CHILDREN)
+          assetItemListSetter: MonadSetter<ImmutableList<AssetItemData>>,
+      @domOut.innerText(PROJECT_NAME_INNER_TEXT) projectNameSetter: MonadSetter<string | null>,
+      @monad(ProjectManager.monad()) projectAccess: DataAccess<Project>):
+      Promise<Iterable<MonadValue<any>>> {
     const projectId = this.getProjectId_();
     if (projectId === null) {
-      return;
+      return ImmutableList.of([]);
     }
 
-    const [assets, project] = await Promise.all([
-      this.assetCollection_.list(projectId),
-      this.projectManager_.monad()(this).get().get(projectId),
+    const project = await projectAccess.get(projectId);
+    if (project === null) {
+      return ImmutableList.of([]);
+    }
+
+    return ImmutableList.of([
+      projectNameSetter.set(project.getName()),
+      assetItemListSetter.set(ImmutableList.of(
+        project.getAssets().mapItem((assetId: string) => {
+          return {assetId: assetId, projectId};
+        }))),
     ]);
-
-    const assetItemData = assets
-        .mapItem((asset: Asset) => {
-          return {assetId: asset.getId(), projectId: asset.getProjectId()};
-        });
-
-    this.assetsHook_.set([...assetItemData]);
-    if (project !== null) {
-      this.projectNameTextHook_.set(project.getName());
-    }
   }
 
-  @handle('#settingsButton').event(Event.ACTION)
+  @onDom.event(SETTINGS_BUTTON_EL, 'gs-action')
   onSettingsButtonClicked_(): void {
     const projectId = this.getProjectId_();
     if (projectId !== null) {
@@ -155,4 +139,3 @@ export class AssetListView extends BaseThemedElement {
     }
   }
 }
-// TODO: Mutable

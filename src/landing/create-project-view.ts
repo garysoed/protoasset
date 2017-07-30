@@ -87,9 +87,8 @@ export class CreateProjectView extends BaseThemedElement2 {
   async onSubmitAction_(
       @monad(ProjectManager.idMonad()) newIdPromise: Promise<string>,
       @domOut.attribute(EDITOR_PROJECT_NAME_ATTR) projectNameSetter: MonadSetter<string | null>,
-      @monadOut(ProjectManager.monad())
-          projectAccessSetter: MonadSetter<DataAccess<Project>>):
-      Promise<Iterable<MonadValue<any>>> {
+      @monadOut(ProjectManager.monad()) projectAccessSetter: MonadSetter<DataAccess<Project>>):
+      Promise<ImmutableList<MonadValue<any>>> {
     const projectName = projectNameSetter.value;
     if (projectName === null) {
       throw new Error('Project name is not set');
