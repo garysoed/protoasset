@@ -58,7 +58,7 @@ export class RouteFactoryService implements IRouteFactoryService<Views> {
     this.projectSettings_ = new ProjectSettingsRouteFactory(this.assetList_);
 
     // /home/project/:projectId/asset/:assetId
-    this.assetMain_ = new AssetMainRouteFactory(this.assetCollection_, this.assetList_);
+    this.assetMain_ = new AssetMainRouteFactory(this.assetList_);
 
     // /home/project/:projectId/create
     this.createAsset_ = new SimpleRouteFactory(

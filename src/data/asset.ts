@@ -1,4 +1,4 @@
-import { Field, Serializable } from 'external/gs_tools/src/data';
+import { Field } from 'external/gs_tools/src/data';
 import { BaseListenable } from 'external/gs_tools/src/event';
 import { ImmutableList, ImmutableMap } from 'external/gs_tools/src/immutable';
 
@@ -21,7 +21,6 @@ export type AssetSearchIndex = {
   this: Asset,
 };
 
-@Serializable('asset')
 export class Asset extends BaseListenable<DataEvents> {
   @Field('data') private data_: DataSource<string[][]> | null;
   @Field('filename') private filename_: string;

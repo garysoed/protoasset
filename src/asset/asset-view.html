@@ -7,23 +7,26 @@
 
   #navBar {
     bottom: 0;
+    left: 0;
     position: absolute;
     top: 0;
-    z-index: 10;
+    /* z-index: 1; */
   }
 
   #navBarContainer {
     width: 3.9rem;
   }
 
+  #root {
+    background-color: white;
+  }
+
   #viewSlot {
+    left: 3.9rem;
     position: relative;
   }
 </style>
-<div fill-parent layout="row">
-  <div id="navBarContainer">
-    <pa-asset-nav-bar flex id="navBar"></pa-asset-nav-bar>
-  </div>
+<div fill-parent id="root" layout="row">
   <gs-view-slot flex id="viewSlot">
     <pa-asset-data-view gs-view-path="/data"></pa-asset-data-view>
     <pa-asset-helper-view gs-view-path="/helper/edit/:helperId"></pa-asset-helper-view>
@@ -31,4 +34,7 @@
     <pa-asset-render-view gs-view-path="/render"></pa-asset-render-view>
     <pa-asset-settings-view gs-view-path="/settings"></pa-asset-settings-view>
   </gs-view-slot>
+  <div id="navBarContainer">
+    <pa-asset-nav-bar flex id="navBar"></pa-asset-nav-bar>
+  </div>
 </div>

@@ -1,7 +1,7 @@
 import { ImmutableMap } from 'external/gs_tools/src/immutable';
 import { AbstractRouteFactory } from 'external/gs_ui/src/routing';
 
-import { AssetCollection } from '../data/asset-collection';
+import { AssetManager } from '../data/asset-manager';
 import { Views } from '../routing/views';
 
 type CP = {assetId: string};
@@ -10,20 +10,16 @@ type CR = CP & PR;
 
 
 export class AssetMainRouteFactory extends AbstractRouteFactory<Views, CP, CR, PR> {
-  private readonly assetCollection_: AssetCollection;
 
-  constructor(
-      assetCollection: AssetCollection,
-      parent: AbstractRouteFactory<Views, any, PR, any>) {
+  constructor(parent: AbstractRouteFactory<Views, any, PR, any>) {
     super(Views.ASSET_DATA, parent);
-    this.assetCollection_ = assetCollection;
   }
 
   /**
    * @override
    */
   async getName(params: CR): Promise<string> {
-    const asset = await this.assetCollection_.get(params.projectId, params.assetId);
+    const asset = await AssetManager.monad()(this).get().get(params.assetId);
     if (asset === null) {
       return 'Unknown asset';
     } else {
@@ -56,4 +52,3 @@ export class AssetMainRouteFactory extends AbstractRouteFactory<Views, CP, CR, P
     return `/asset/${params.assetId}`;
   }
 }
-// TODO: Mutable

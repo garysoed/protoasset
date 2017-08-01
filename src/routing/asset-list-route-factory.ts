@@ -1,8 +1,6 @@
 import { ImmutableMap } from 'external/gs_tools/src/immutable';
 import { AbstractRouteFactory } from 'external/gs_ui/src/routing';
 
-import { FuseBackedManager } from '../data/fuse-backed-manager';
-import { Project, ProjectSearchIndex } from '../data/project';
 import { ProjectManager } from '../data/project-manager';
 import { Views } from '../routing/views';
 
@@ -10,10 +8,7 @@ type CP = {projectId: string};
 type PR = {};
 type CR = CP & PR;
 
-type ProjectManagerType = FuseBackedManager<ProjectSearchIndex, Project>;
-
 export class AssetListRouteFactory extends AbstractRouteFactory<Views, CP, CR, PR> {
-  private readonly projectManager_: ProjectManagerType = ProjectManager;
 
   constructor(
       parent: AbstractRouteFactory<Views, any, PR, any>) {
@@ -24,7 +19,7 @@ export class AssetListRouteFactory extends AbstractRouteFactory<Views, CP, CR, P
    * @override
    */
   async getName(params: CR): Promise<string> {
-    const project = await this.projectManager_.monad()(this).get().get(params.projectId);
+    const project = await ProjectManager.monad()(this).get().get(params.projectId);
     if (project === null) {
       return `Unknown project ${params.projectId}`;
     }
@@ -57,4 +52,3 @@ export class AssetListRouteFactory extends AbstractRouteFactory<Views, CP, CR, P
     return `/project/${params.projectId}`;
   }
 }
-// TODO: Mutable

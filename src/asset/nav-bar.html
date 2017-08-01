@@ -7,7 +7,7 @@
     width: 9.6rem;
   }
 
-  gs-drawer[gs-is-expanded="true"] gs-basic-button {
+  gs-drawer[expanded="true"] gs-basic-button {
     width: 9.6rem;
   }
 
@@ -24,37 +24,37 @@
 <gs-drawer
     class="gs-theme-normal-hilite"
     id="drawer"
-    gs-align-content="left"
-    gs-anchor-point="left"
-    gs-max-width="10rem"
-    gs-min-width="3.9rem">
-  <gs-vertical-tab gs-content id="tab">
-    <gs-basic-button gs-tab-id="data" id="data">
-      <div gs-content layout="row">
+    align-content="left"
+    anchor-point="left"
+    max-width="10rem"
+    min-width="3.9rem">
+  <gs-vertical-tab id="tab">
+    <gs-basic-button tab-id="data" id="data">
+      <div layout="row">
         <gs-icon>insert_drive_file</gs-icon>
         <div>Data</div>
       </div>
     </gs-basic-button>
-    <gs-basic-button gs-tab-id="helper" id="helper">
-      <div gs-content layout="row">
+    <gs-basic-button tab-id="helper" id="helper">
+      <div layout="row">
         <gs-icon>code</gs-icon>
         <div>Helpers</div>
       </div>
     </gs-basic-button>
-    <gs-basic-button gs-tab-id="layer" id="layer">
-      <div gs-content layout="row">
+    <gs-basic-button tab-id="layer" id="layer">
+      <div layout="row">
         <gs-icon>view_quilt</gs-icon>
         <div>Layers</div>
       </div>
     </gs-basic-button>
-    <gs-basic-button gs-tab-id="render" id="render">
-      <div gs-content layout="row">
+    <gs-basic-button tab-id="render" id="render">
+      <div layout="row">
         <gs-icon>format_paint</gs-icon>
         <div>Render</div>
       </div>
     </gs-basic-button>
-    <gs-basic-button gs-tab-id="settings" id="settings">
-      <div gs-content layout="row">
+    <gs-basic-button tab-id="settings" id="settings">
+      <div layout="row">
         <gs-icon>settings</gs-icon>
         <div>Settings</div>
       </div>

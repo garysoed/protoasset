@@ -1,14 +1,11 @@
-import { DomEvent } from 'external/gs_tools/src/event';
-import { ImmutableMap } from 'external/gs_tools/src/immutable';
+import { eventDetails, on } from 'external/gs_tools/src/event';
+import { ImmutableMap, ImmutableSet } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
+import { MonadSetter, MonadValue } from 'external/gs_tools/src/interfaces';
 import { BooleanParser, StringParser } from 'external/gs_tools/src/parse';
-import {
-  customElement,
-  DomHook,
-  handle,
-  hook } from 'external/gs_tools/src/webc';
+import { customElement, domOut, onDom, onLifecycle} from 'external/gs_tools/src/webc';
 
-import { BaseThemedElement } from 'external/gs_ui/src/common';
+import { BaseThemedElement2 } from 'external/gs_ui/src/common';
 import { RouteServiceEvents } from 'external/gs_ui/src/const';
 import { AbstractRouteFactory, RouteService } from 'external/gs_ui/src/routing';
 import { ThemeService } from 'external/gs_ui/src/theming';
@@ -16,6 +13,16 @@ import { ThemeService } from 'external/gs_ui/src/theming';
 import { RouteFactoryService } from '../routing/route-factory-service';
 import { Views } from '../routing/views';
 
+const DATA_EL = '#data';
+const DRAWER_EL = '#drawer';
+const HELPER_EL = '#helper';
+const LAYER_EL = '#layer';
+const RENDER_EL = '#render';
+const SETTINGS_EL = '#settings';
+const TAB_EL = '#tab';
+
+const DRAWER_EXPANDED_ATTR = {name: 'expanded', parser: BooleanParser, selector: DRAWER_EL};
+const SELECTED_TAB_ATTR = {name: 'selected-tab', parser: StringParser, selector: TAB_EL};
 
 /**
  * NavBar
@@ -24,49 +31,56 @@ import { Views } from '../routing/views';
   tag: 'pa-asset-nav-bar',
   templateKey: 'src/asset/nav-bar',
 })
-export class NavBar extends BaseThemedElement {
-  @hook('#drawer').attribute('gs-is-expanded', BooleanParser)
-  private readonly drawerHook_: DomHook<boolean>;
-
+export class NavBar extends BaseThemedElement2 {
   private readonly routeFactoryService_: RouteFactoryService;
-  private readonly routeMap_: Map<string, AbstractRouteFactory<any, any, any, any>>;
+  private readonly routeMap_: ImmutableMap<string, AbstractRouteFactory<any, any, any, any>>;
   private readonly routeService_: RouteService<Views>;
-
-  @hook('#tab').attribute('gs-selected-tab', StringParser)
-  private readonly selectedTabHook_: DomHook<string>;
-
 
   constructor(
       @inject('pa.routing.RouteFactoryService') routeFactoryService: RouteFactoryService,
       @inject('gs.routing.RouteService') routeService: RouteService<Views>,
       @inject('theming.ThemeService') themeService: ThemeService) {
     super(themeService);
-    this.drawerHook_ = DomHook.of<boolean>();
     this.routeFactoryService_ = routeFactoryService;
-    this.routeMap_ = new Map<string, AbstractRouteFactory<any, any, any, any>>();
+    this.routeMap_ = ImmutableMap.of<string, AbstractRouteFactory<any, any, any, any>>([
+      ['data', this.routeFactoryService_.assetData()],
+      ['helper', this.routeFactoryService_.helper()],
+      ['layer', this.routeFactoryService_.layer()],
+      ['settings', this.routeFactoryService_.assetSettings()],
+      ['render', this.routeFactoryService_.render()],
+    ]);
     this.routeService_ = routeService;
-    this.selectedTabHook_ = DomHook.of<string>();
   }
 
   /**
    * Handles when a nav button is clicked.
    * @param tabId Tab ID corresponding to the clicked button.
    */
-  @handle('#data').event(DomEvent.CLICK, ['data'])
-  @handle('#helper').event(DomEvent.CLICK, ['helper'])
-  @handle('#layer').event(DomEvent.CLICK, ['layer'])
-  @handle('#render').event(DomEvent.CLICK, ['render'])
-  @handle('#settings').event(DomEvent.CLICK, ['settings'])
-  protected onButtonClick_(tabId: string): void {
+  @onDom.event(DATA_EL, 'gs-action')
+  @onDom.event(HELPER_EL, 'gs-action')
+  @onDom.event(LAYER_EL, 'gs-action')
+  @onDom.event(RENDER_EL, 'gs-action')
+  @onDom.event(SETTINGS_EL, 'gs-action')
+  onButtonClick_(@eventDetails() event: Event): void {
+    const eventTarget = event.target;
+    if (!(eventTarget instanceof Element)) {
+      return;
+    }
+
+    const tabId = eventTarget.getAttribute('tab-id');
+    if (tabId === null) {
+      return;
+    }
+
     const routeFactory = this.routeMap_.get(tabId);
-    if (routeFactory === undefined) {
+    if (!routeFactory) {
       return;
     }
 
     let currentParams = null;
     for (const [, factory] of this.routeMap_) {
       const params = this.routeService_.getParams(factory);
-      if (params !== null) {
+      if (params) {
         currentParams = params;
         break;
       }
@@ -74,36 +88,28 @@ export class NavBar extends BaseThemedElement {
     this.routeService_.goTo(routeFactory, currentParams);
   }
 
-  /**
-   * @override
-   */
-  onCreated(element: HTMLElement): void {
-    super.onCreated(element);
-    this.routeMap_.set('data', this.routeFactoryService_.assetData());
-    this.routeMap_.set('helper', this.routeFactoryService_.helper());
-    this.routeMap_.set('layer', this.routeFactoryService_.layer());
-    this.routeMap_.set('settings', this.routeFactoryService_.assetSettings());
-    this.routeMap_.set('render', this.routeFactoryService_.render());
-
-    this.addDisposable(
-        this.routeService_.on(RouteServiceEvents.CHANGED, this.onRouteChanged_, this));
-    this.onRouteChanged_();
+  @onDom.event(null, 'mouseenter')
+  onMouseEnter_(
+      @domOut.attribute(DRAWER_EXPANDED_ATTR) drawerExpandedSetter: MonadSetter<boolean | null>):
+      Iterable<MonadValue<any>> {
+    return ImmutableSet.of([drawerExpandedSetter.set(true)]);
   }
 
-  @handle(null).event(DomEvent.MOUSEENTER)
-  protected onMouseEnter_(): void {
-    this.drawerHook_.set(true);
-  }
-
-  @handle(null).event(DomEvent.MOUSELEAVE)
-  protected onMouseLeave_(): void {
-    this.drawerHook_.set(false);
+  @onDom.event(null, 'mouseleave')
+  onMouseLeave_(
+      @domOut.attribute(DRAWER_EXPANDED_ATTR) drawerExpandedSetter: MonadSetter<boolean | null>):
+      Iterable<MonadValue<any>> {
+    return ImmutableSet.of([drawerExpandedSetter.set(false)]);
   }
 
   /**
    * Handles when the route is changed.
    */
-  private onRouteChanged_(): void {
+  @on((bar: NavBar) => bar.routeService_, RouteServiceEvents.CHANGED)
+  @onLifecycle('create')
+  onRouteChanged_(
+      @domOut.attribute(SELECTED_TAB_ATTR) selectedTabSetter: MonadSetter<string | null>):
+      Iterable<MonadValue<any>> {
     const tabId = ImmutableMap
         .of(this.routeMap_)
         .findKey((factory: AbstractRouteFactory<any, any, any, any>) => {
@@ -111,8 +117,9 @@ export class NavBar extends BaseThemedElement {
         });
 
     if (tabId !== null) {
-      this.selectedTabHook_.set(tabId);
+      return ImmutableSet.of([selectedTabSetter.set(tabId)]);
+    } else {
+      return ImmutableSet.of([]);
     }
   }
 }
-// TODO: Mutable
