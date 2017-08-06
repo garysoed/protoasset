@@ -13,6 +13,7 @@
   }
 
   #root {
+    background-color: white;
     margin: 0 1rem;
   }
 
@@ -26,9 +27,9 @@
     <div flex layout="column">
       <div flex id="fileInputContainer">
         <gs-file-input
-            gs-label="Drop a TSV file"
-            gs-mime-types="text/tab-separated-values"
-            id="dataSourceInput">
+            id="dataSourceInput"
+            label="Drop a TSV file"
+            mime-types="[&quot;text/tab-separated-values&quot;]">
         </gs-file-input>
       </div>
       <div layout="row">

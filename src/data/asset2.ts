@@ -10,8 +10,6 @@ import {
   MapParser,
   StringParser} from 'external/gs_tools/src/parse';
 import { DataSource } from '../data/data-source';
-import { DataSource2 } from '../data/data-source2';
-import { Helper } from '../data/helper';
 import { Helper2 } from '../data/helper2';
 import { Layer } from '../data/layer';
 
@@ -32,7 +30,7 @@ export type AssetSearchIndex = {
 @Serializable('asset')
 export abstract class Asset2 implements DataModel<AssetSearchIndex> {
   @field('data', DataModelParser())
-  protected readonly data_: DataSource2<ImmutableList<ImmutableList<string>>> | null = null;
+  protected readonly data_: DataSource<ImmutableList<ImmutableList<string>>> | null = null;
   @field('filename', StringParser) protected readonly filename_: string = 'unnamed_asset.png';
   @field('height', FloatParser) protected readonly height_: number = NaN;
   @field('helpers', MapParser(StringParser, DataModelParser()))
@@ -48,7 +46,7 @@ export abstract class Asset2 implements DataModel<AssetSearchIndex> {
   /**
    * @return The data source for the asset.
    */
-  abstract getData(): DataSource<string[][]> | null;
+  abstract getData(): DataSource<ImmutableList<ImmutableList<string>>> | null;
 
   /**
    * @return The filename of the assets generated.
@@ -63,7 +61,7 @@ export abstract class Asset2 implements DataModel<AssetSearchIndex> {
   /**
    * @return All helpers added to this asset..
    */
-  abstract getHelpers(): ImmutableMap<string, Helper>;
+  abstract getHelpers(): ImmutableMap<string, Helper2>;
 
   /**
    * @return ID of the asset.
@@ -136,7 +134,7 @@ export abstract class Asset2 implements DataModel<AssetSearchIndex> {
   /**
    * Deletes the given helper.
    */
-  abstract setHelpers(helpers: ImmutableMap<string, Helper>): Asset2;
+  abstract setHelpers(helpers: ImmutableMap<string, Helper2>): Asset2;
 
   abstract setLayers(layers: ImmutableList<Layer>): Asset2;
 

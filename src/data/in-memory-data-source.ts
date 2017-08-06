@@ -1,39 +1,32 @@
-import { Field, Serializable } from 'external/gs_tools/src/data';
+import { cache, Serializable } from 'external/gs_tools/src/data';
+import { DataModel, DataModels, field } from 'external/gs_tools/src/datamodel';
+import { ImmutableMap } from 'external/gs_tools/src/immutable';
+import { StringParser } from 'external/gs_tools/src/parse';
 
 import { DataSource } from '../data/data-source';
 
+type SearchIndex = {this: InMemoryDataSource};
 
 /**
  * Data source where the data is stored in memory.
  */
 @Serializable('inMemoryDataSource')
-export class InMemoryDataSource<T> implements DataSource<T> {
-  @Field('data') private data_: T;
+export abstract class InMemoryDataSource implements DataModel<SearchIndex>, DataSource<string> {
+  @field('data', StringParser) protected readonly data_: string;
 
   /**
    * @override
    */
-  getData(): Promise<T> {
-    return Promise.resolve(this.data_);
+  abstract getData(): Promise<string>;
+
+  @cache()
+  getSearchIndex(): SearchIndex {
+    return {this: this};
   }
 
-  /**
-   * Sets the data.
-   * @param data The data to set.
-   */
-  setData(data: T): void {
-    this.data_ = data;
-  }
-
-  /**
-   * Create a new instance of the data source.
-   * @param data The data.
-   * @return The newly created data source.
-   */
-  static of<T>(data: T): InMemoryDataSource<T> {
-    const source = new InMemoryDataSource<T>();
-    source.data_ = data;
-    return source;
+  static newInstance(data: string): InMemoryDataSource {
+    return DataModels.newInstance<InMemoryDataSource>(
+        InMemoryDataSource,
+        ImmutableMap.of([['data_', data]]));
   }
 }
-// TODO: Mutable
