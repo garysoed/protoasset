@@ -1,5 +1,5 @@
 import { DataAccess, ManagerEvent } from 'external/gs_tools/src/datamodel';
-import { eventDetails, monad, on } from 'external/gs_tools/src/event';
+import { eventDetails, monad, monadOut, on } from 'external/gs_tools/src/event';
 import { ImmutableList, ImmutableSet } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
 import { MonadSetter, MonadValue } from 'external/gs_tools/src/interfaces';
@@ -13,7 +13,7 @@ import {
 
 import { BaseThemedElement2 } from 'external/gs_ui/src/common';
 import { RouteServiceEvents } from 'external/gs_ui/src/const';
-import { RouteService } from 'external/gs_ui/src/routing';
+import { RouteNavigator, RouteService } from 'external/gs_ui/src/routing';
 import { ThemeService } from 'external/gs_ui/src/theming';
 
 import { FilterButton } from '../common/filter-button';
@@ -66,21 +66,44 @@ export class LandingView extends BaseThemedElement2 {
   }
 
   /**
-   * Handles event when the create button is clicked.
+   * Handles event when the location was changed.
    */
-  @onDom.event(CREATE_BUTTON_EL, 'gs-action')
-  onCreateAction_(): void {
-    this.routeService_.goTo(this.routeFactoryService_.createProject(), {});
+  @on((instance: LandingView) => instance.routeService_, RouteServiceEvents.CHANGED)
+  @onLifecycle('create')
+  async initialize_(
+      @monad(ProjectManager.monad()) projectAccess: DataAccess<Project>,
+      @monadOut((view: LandingView) => view.routeService_.monad())
+          routeSetter: MonadSetter<RouteNavigator<Views>>): Promise<MonadValue<any>[]> {
+    const match = routeSetter.value.getMatch();
+    if (match === null) {
+      return [
+        routeSetter.set(routeSetter.value.goTo(this.routeFactoryService_.landing(), {})),
+      ];
+    }
+
+    if (match.type === Views.LANDING) {
+      const projects = await projectAccess.list();
+      if (projects.size() === 0) {
+        return [
+          routeSetter.set(routeSetter.value.goTo(this.routeFactoryService_.createProject(), {})),
+        ];
+      }
+    }
+
+    return [];
   }
 
   /**
-   * @override
+   * Handles event when the create button is clicked.
    */
-  @onLifecycle('create')
-  onCreated(@monad(ProjectManager.monad()) projectAccess: DataAccess<Project>): void {
-    this.onRouteChanged_(projectAccess);
+  @onDom.event(CREATE_BUTTON_EL, 'gs-action')
+  onCreateAction_(
+      @monadOut((view: LandingView) => view.routeService_.monad())
+          routeSetter: MonadSetter<RouteNavigator<Views>>): MonadValue<any>[] {
+    return [
+      routeSetter.set(routeSetter.value.goTo(this.routeFactoryService_.createProject(), {})),
+    ];
   }
-
 
   @onDom.attributeChange(FILTER_TEXT_ATTR)
   async onFilterButtonTextAttrChange_(
@@ -130,24 +153,5 @@ export class LandingView extends BaseThemedElement2 {
     return ImmutableList.of([
       projectIdsSetter.set(projectIdsSetter.value.add(project.getId())),
     ]);
-  }
-  /**
-   * Handles event when the location was changed.
-   */
-  @on((instance: LandingView) => instance.routeService_, RouteServiceEvents.CHANGED)
-  async onRouteChanged_(
-      @monad(ProjectManager.monad()) projectAccess: DataAccess<Project>): Promise<void> {
-    const route = this.routeService_.getRoute();
-    if (route === null) {
-      this.routeService_.goTo(this.routeFactoryService_.landing(), {});
-      return;
-    }
-
-    if (route.getType() === Views.LANDING) {
-      const projects = await projectAccess.list();
-      if (projects.size() === 0) {
-        this.routeService_.goTo(this.routeFactoryService_.createProject(), {});
-      }
-    }
   }
 }

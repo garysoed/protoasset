@@ -1,5 +1,5 @@
 import { DataAccess } from 'external/gs_tools/src/datamodel';
-import { monad, on } from 'external/gs_tools/src/event';
+import { monad, monadOut, on } from 'external/gs_tools/src/event';
 import { ImmutableList, ImmutableSet } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
 import { ChildElementsSelector, MonadValue } from 'external/gs_tools/src/interfaces';
@@ -13,7 +13,7 @@ import {
 
 import { BaseThemedElement2 } from 'external/gs_ui/src/common';
 import { RouteServiceEvents } from 'external/gs_ui/src/const';
-import { RouteService } from 'external/gs_ui/src/routing';
+import { RouteNavigator, RouteService } from 'external/gs_ui/src/routing';
 import { ThemeService } from 'external/gs_ui/src/theming';
 
 import { FilterButton } from '../common/filter-button';
@@ -86,18 +86,25 @@ export class AssetListView extends BaseThemedElement2 {
   /**
    * @return The project ID of the view, or null if the view has no project IDs.
    */
-  private getProjectId_(): null | string {
-    const params = this.routeService_.getParams(this.routeFactoryService_.assetList());
-    return params === null ? null : params.projectId;
+  private getProjectId_(routeNavigator: RouteNavigator<Views>): null | string {
+    const route = routeNavigator.getRoute(this.routeFactoryService_.assetList());
+    return route === null ? null : route.params.projectId;
   }
 
   @onDom.event(CREATE_BUTTON_EL, 'gs-action')
-  onCreateButtonClicked_(): void {
-    const projectId = this.getProjectId_();
-    if (projectId !== null) {
-      this.routeService_.goTo(
-          this.routeFactoryService_.createAsset(), {projectId: projectId});
+  onCreateButtonClicked_(
+      @monadOut((view: AssetListView) => view.routeService_.monad())
+          routeSetter: MonadSetter<RouteNavigator<Views>>): MonadValue<any>[] {
+    const projectId = this.getProjectId_(routeSetter.value);
+    if (!projectId) {
+      return [];
     }
+
+    return [
+      routeSetter.set(routeSetter.value.goTo(
+        this.routeFactoryService_.createAsset(), {projectId: projectId},
+      )),
+    ];
   }
 
   /**
@@ -109,33 +116,41 @@ export class AssetListView extends BaseThemedElement2 {
       @domOut.childElements(ASSET_ITEM_CHILDREN)
           assetItemListSetter: MonadSetter<ImmutableList<AssetItemData>>,
       @domOut.innerText(PROJECT_NAME_INNER_TEXT) projectNameSetter: MonadSetter<string | null>,
-      @monad(ProjectManager.monad()) projectAccess: DataAccess<Project>):
+      @monad(ProjectManager.monad()) projectAccess: DataAccess<Project>,
+      @monad((view: AssetListView) => view.routeService_.monad())
+          routeNavigator: RouteNavigator<Views>):
       Promise<Iterable<MonadValue<any>>> {
-    const projectId = this.getProjectId_();
+    const projectId = this.getProjectId_(routeNavigator);
     if (projectId === null) {
-      return ImmutableList.of([]);
+      return [];
     }
 
     const project = await projectAccess.get(projectId);
     if (project === null) {
-      return ImmutableList.of([]);
+      return [];
     }
 
-    return ImmutableList.of([
+    return [
       projectNameSetter.set(project.getName()),
       assetItemListSetter.set(ImmutableList.of(
         project.getAssets().mapItem((assetId: string) => {
           return {assetId: assetId, projectId};
         }))),
-    ]);
+    ];
   }
 
   @onDom.event(SETTINGS_BUTTON_EL, 'gs-action')
-  onSettingsButtonClicked_(): void {
-    const projectId = this.getProjectId_();
-    if (projectId !== null) {
-      this.routeService_.goTo(
-          this.routeFactoryService_.projectSettings(), {projectId: projectId});
+  onSettingsButtonClicked_(
+      @monadOut((view: AssetListView) => view.routeService_.monad())
+          routeSetter: MonadSetter<RouteNavigator<Views>>): MonadValue<any>[] {
+    const projectId = this.getProjectId_(routeSetter.value);
+    if (!projectId) {
+      return [];
     }
+
+    return [
+      routeSetter.set(routeSetter.value.goTo(
+          this.routeFactoryService_.projectSettings(), {projectId})),
+    ];
   }
 }

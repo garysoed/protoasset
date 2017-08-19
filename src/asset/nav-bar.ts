@@ -1,4 +1,4 @@
-import { eventDetails, on } from 'external/gs_tools/src/event';
+import { eventDetails, monad, monadOut, on } from 'external/gs_tools/src/event';
 import { ImmutableMap, ImmutableSet } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
 import { MonadSetter, MonadValue } from 'external/gs_tools/src/interfaces';
@@ -7,7 +7,7 @@ import { customElement, domOut, onDom, onLifecycle} from 'external/gs_tools/src/
 
 import { BaseThemedElement2 } from 'external/gs_ui/src/common';
 import { RouteServiceEvents } from 'external/gs_ui/src/const';
-import { AbstractRouteFactory, RouteService } from 'external/gs_ui/src/routing';
+import { AbstractRouteFactory, RouteNavigator, RouteService } from 'external/gs_ui/src/routing';
 import { ThemeService } from 'external/gs_ui/src/theming';
 
 import { RouteFactoryService } from '../routing/route-factory-service';
@@ -61,31 +61,30 @@ export class NavBar extends BaseThemedElement2 {
   @onDom.event(LAYER_EL, 'gs-action')
   @onDom.event(RENDER_EL, 'gs-action')
   @onDom.event(SETTINGS_EL, 'gs-action')
-  onButtonClick_(@eventDetails() event: Event): void {
+  onButtonClick_(
+      @eventDetails() event: Event,
+      @monadOut((bar: NavBar) => bar.routeService_.monad())
+          routeSetter: MonadSetter<RouteNavigator<Views>>): MonadValue<any>[] {
     const eventTarget = event.target;
     if (!(eventTarget instanceof Element)) {
-      return;
+      return [];
     }
 
     const tabId = eventTarget.getAttribute('tab-id');
     if (tabId === null) {
-      return;
+      return [];
     }
 
     const routeFactory = this.routeMap_.get(tabId);
     if (!routeFactory) {
-      return;
+      return [];
     }
 
-    let currentParams = null;
-    for (const [, factory] of this.routeMap_) {
-      const params = this.routeService_.getParams(factory);
-      if (params) {
-        currentParams = params;
-        break;
-      }
+    const match = routeSetter.value.getMatch();
+    if (!match) {
+      return [];
     }
-    this.routeService_.goTo(routeFactory, currentParams);
+    return [routeSetter.set(routeSetter.value.goTo(routeFactory, match.params))];
   }
 
   @onDom.event(null, 'mouseenter')
@@ -108,18 +107,19 @@ export class NavBar extends BaseThemedElement2 {
   @on((bar: NavBar) => bar.routeService_, RouteServiceEvents.CHANGED)
   @onLifecycle('create')
   onRouteChanged_(
-      @domOut.attribute(SELECTED_TAB_ATTR) selectedTabSetter: MonadSetter<string | null>):
-      Iterable<MonadValue<any>> {
+      @domOut.attribute(SELECTED_TAB_ATTR) selectedTabSetter: MonadSetter<string | null>,
+      @monad((bar: NavBar) => bar.routeService_.monad()) routeNavigator: RouteNavigator<Views>):
+      MonadValue<any>[] {
     const tabId = ImmutableMap
         .of(this.routeMap_)
         .findKey((factory: AbstractRouteFactory<any, any, any, any>) => {
-          return this.routeService_.getParams(factory) !== null;
+          return !!routeNavigator.getRoute(factory);
         });
 
     if (tabId !== null) {
-      return ImmutableSet.of([selectedTabSetter.set(tabId)]);
+      return [selectedTabSetter.set(tabId)];
     } else {
-      return ImmutableSet.of([]);
+      return [];
     }
   }
 }

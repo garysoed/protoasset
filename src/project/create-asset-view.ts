@@ -13,7 +13,7 @@ import {
     onLifecycle} from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement2 } from 'external/gs_ui/src/common';
-import { RouteService } from 'external/gs_ui/src/routing';
+import { RouteNavigator, RouteService } from 'external/gs_ui/src/routing';
 import { ThemeService } from 'external/gs_ui/src/theming';
 
 import { Editor } from '../asset/editor';
@@ -69,20 +69,28 @@ export class CreateAssetView extends BaseThemedElement2 {
   /**
    * @return Project ID of the view, or null if there is none.
    */
-  private getProjectId_(): string | null {
-    const params = this.routeService_.getParams(this.routeFactoryService_.createAsset());
-    return params === null ? null : params.projectId;
+  private getProjectId_(routeNavigator: RouteNavigator<Views>): string | null {
+    const route = routeNavigator.getRoute(this.routeFactoryService_.createAsset());
+    return route === null ? null : route.params.projectId;
   }
 
   /**
    * Handles event when the cancel button is clicked.
    */
   @onDom.event(CANCEL_BUTTON_EL, 'gs-action')
-  onCancelAction_(): void {
-    const projectId = this.getProjectId_();
+  onCancelAction_(
+      @monadOut((view: CreateAssetView) => view.routeService_.monad())
+          routeSetter: MonadSetter<RouteNavigator<Views>>): MonadValue<any>[] {
+    const projectId = this.getProjectId_(routeSetter.value);
     if (projectId !== null) {
-      this.routeService_.goTo(this.routeFactoryService_.assetList(), {projectId: projectId});
+      return [
+        routeSetter.set(routeSetter.value.goTo(
+            this.routeFactoryService_.assetList(),
+            {projectId})),
+      ];
     }
+
+    return [];
   }
 
   /**
@@ -98,8 +106,9 @@ export class CreateAssetView extends BaseThemedElement2 {
       @dom.attribute(WIDTH_ATTR) width: number | null,
       @monad(AssetManager.idMonad()) newIdPromise: Promise<string>,
       @monadOut(ProjectManager.monad()) projectAccessSetter: MonadSetter<DataAccess<Project>>,
-      @monadOut(AssetManager.monad()) assetAccessSetter: MonadSetter<DataAccess<Asset2>>):
-      Promise<Iterable<MonadValue<any>>> {
+      @monadOut(AssetManager.monad()) assetAccessSetter: MonadSetter<DataAccess<Asset2>>,
+      @monadOut((view: CreateAssetView) => view.routeService_.monad())
+          routeSetter: MonadSetter<RouteNavigator<Views>>): Promise<MonadValue<any>[]> {
     if (!assetName) {
       throw new Error('Asset name is not set');
     }
@@ -116,14 +125,14 @@ export class CreateAssetView extends BaseThemedElement2 {
       throw new Error('Asset width is not set');
     }
 
-    const projectId = this.getProjectId_();
+    const projectId = this.getProjectId_(routeSetter.value);
     if (projectId === null) {
-      return ImmutableList.of([]);
+      return [];
     }
     const project = await projectAccessSetter.value.get(projectId);
     if (project === null) {
       Log.warn(LOG, 'No projects found for project ID:', projectId);
-      return ImmutableList.of([]);
+      return [];
     }
     const id = await newIdPromise;
     const asset = Asset2.withId(id)
@@ -131,17 +140,19 @@ export class CreateAssetView extends BaseThemedElement2 {
         .setType(assetType)
         .setHeight(height)
         .setWidth(width);
-    this.routeService_.goTo(this.routeFactoryService_.assetList(), {projectId: projectId});
 
     MonadUtil.callFunction({type: 'submit'}, this, 'reset_');
 
-    return ImmutableList.of([
+    return [
       assetAccessSetter.set(assetAccessSetter.value.queueUpdate(id, asset)),
       projectAccessSetter.set(
           projectAccessSetter.value.queueUpdate(
               projectId,
               project.setAssets(project.getAssets().add(id)))),
-    ]);
+      routeSetter.set(
+          routeSetter.value.goTo(
+              this.routeFactoryService_.assetList(), {projectId})),
+    ];
   }
 
   /**

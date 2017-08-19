@@ -200,7 +200,7 @@ describe('asset.LayerPreview', () => {
     });
   });
 
-  describe('onLayerIdChanged_', () => {
+  xdescribe('onLayerIdChanged_', () => {
     it('should listen to layer change events', async () => {
       const layerRouteFactory = Mocks.object('layerRouteFactory');
       mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);

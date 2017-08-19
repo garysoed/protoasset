@@ -7,6 +7,8 @@ import { ImmutableMap } from 'external/gs_tools/src/immutable';
 import { Mocks } from 'external/gs_tools/src/mock';
 import { TestDispose } from 'external/gs_tools/src/testing';
 
+import { FakeRouteFactory, FakeRouteNavigator, RouteNavigator } from 'external/gs_ui/src/routing';
+import { Views } from 'src/routing/views';
 import { Asset2 } from '../data/asset2';
 import { AssetItem } from './asset-item';
 
@@ -31,13 +33,17 @@ describe('project.AssetItem', () => {
       const assetId = 'assetId';
       const projectId = 'projectId';
 
-      const assetMainFactory = Mocks.object('assetMainFactory');
+      const assetMainFactory = new FakeRouteFactory<Views>(Views.ASSET_MAIN);
       mockRouteFactoryService.assetMain.and.returnValue(assetMainFactory);
 
-      item.onElementClicked_(assetId, projectId);
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
+      const fakeMonadSetter = new FakeMonadSetter<RouteNavigator<Views>>(fakeRouteNavigator);
 
-      assert(mockRouteService.goTo).to
-          .haveBeenCalledWith(assetMainFactory, {assetId: assetId, projectId: projectId});
+      const updates = item.onElementClicked_(assetId, projectId, fakeMonadSetter);
+      assert(fakeMonadSetter.findValue(updates)!.value.getDestination()!).to.matchObject({
+        params: {assetId, projectId},
+        type: Views.ASSET_MAIN,
+      });
     });
 
     it('should not navigate if there are no asset IDs', () => {
@@ -46,9 +52,10 @@ describe('project.AssetItem', () => {
       const assetMainFactory = Mocks.object('assetMainFactory');
       mockRouteFactoryService.assetMain.and.returnValue(assetMainFactory);
 
-      item.onElementClicked_(null, projectId);
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
+      const fakeMonadSetter = new FakeMonadSetter<RouteNavigator<Views>>(fakeRouteNavigator);
 
-      assert(mockRouteService.goTo).toNot.haveBeenCalled();
+      assert(item.onElementClicked_(null, projectId, fakeMonadSetter)).to.equal([]);
     });
 
     it('should not navigate if there are no project IDs', () => {
@@ -57,9 +64,10 @@ describe('project.AssetItem', () => {
       const assetMainFactory = Mocks.object('assetMainFactory');
       mockRouteFactoryService.assetMain.and.returnValue(assetMainFactory);
 
-      item.onElementClicked_(assetId, null);
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
+      const fakeMonadSetter = new FakeMonadSetter<RouteNavigator<Views>>(fakeRouteNavigator);
 
-      assert(mockRouteService.goTo).toNot.haveBeenCalled();
+      assert(item.onElementClicked_(assetId, null, fakeMonadSetter)).to.equal([]);
     });
   });
 

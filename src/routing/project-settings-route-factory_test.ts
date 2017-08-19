@@ -28,7 +28,7 @@ describe('routing.ProjectSettingsRouteFactory', () => {
       );
       const mockProjectManagerMonad = jasmine.createSpyObj('ProjectManagerMonad', ['get']);
       mockProjectManagerMonad.get.and.returnValue(projectDataAccess);
-      spyOn(ProjectManager, 'monad').and.returnValue(() => mockProjectManagerMonad);
+      spyOn(ProjectManager, 'monad').and.returnValue(mockProjectManagerMonad);
       assert(await factory.getName({projectId})).to.equal(`Settings for ${projectName}`);
     });
 
@@ -36,7 +36,7 @@ describe('routing.ProjectSettingsRouteFactory', () => {
       const projectDataAccess = new FakeDataAccess();
       const mockProjectManagerMonad = jasmine.createSpyObj('ProjectManagerMonad', ['get']);
       mockProjectManagerMonad.get.and.returnValue(projectDataAccess);
-      spyOn(ProjectManager, 'monad').and.returnValue(() => mockProjectManagerMonad);
+      spyOn(ProjectManager, 'monad').and.returnValue(mockProjectManagerMonad);
       assert(await factory.getName({projectId: 'projectId'})).to.equal(`Settings`);
     });
   });

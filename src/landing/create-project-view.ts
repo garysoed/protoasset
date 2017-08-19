@@ -9,7 +9,7 @@ import {
 
 import { monad, monadOut } from 'external/gs_tools/src/event';
 import { BaseThemedElement2 } from 'external/gs_ui/src/common';
-import { RouteService } from 'external/gs_ui/src/routing';
+import { RouteNavigator, RouteService } from 'external/gs_ui/src/routing';
 import { ThemeService } from 'external/gs_ui/src/theming';
 
 import { DataAccess } from 'external/gs_tools/src/datamodel';
@@ -60,11 +60,12 @@ export class CreateProjectView extends BaseThemedElement2 {
    * Handles event when the cancel button is clicked.
    */
   @onDom.event(CANCEL_BUTTON_EL, 'gs-action')
-  onCancelAction_(
-      @domOut.attribute(EDITOR_PROJECT_NAME_ATTR) projectNameSetter: MonadSetter<string | null>):
-      ImmutableList<MonadValue<any>> {
-    this.routeService_.goTo(this.routeFactoryService_.landing(), {});
-    return this.reset_(projectNameSetter);
+  goToLanding_(
+      @monadOut((instance: CreateProjectView) => instance.routeService_.monad())
+          navigatorSetter: MonadSetter<RouteNavigator<Views>>): Iterable<MonadValue<any>> {
+    return [
+      navigatorSetter.set(navigatorSetter.value.goTo(this.routeFactoryService_.landing(), {})),
+    ];
   }
 
   /**
@@ -87,8 +88,10 @@ export class CreateProjectView extends BaseThemedElement2 {
   async onSubmitAction_(
       @monad(ProjectManager.idMonad()) newIdPromise: Promise<string>,
       @domOut.attribute(EDITOR_PROJECT_NAME_ATTR) projectNameSetter: MonadSetter<string | null>,
-      @monadOut(ProjectManager.monad()) projectAccessSetter: MonadSetter<DataAccess<Project>>):
-      Promise<ImmutableList<MonadValue<any>>> {
+      @monadOut(ProjectManager.monad()) projectAccessSetter: MonadSetter<DataAccess<Project>>,
+      @monadOut((instance: CreateProjectView) => instance.routeService_.monad())
+          navigatorSetter: MonadSetter<RouteNavigator<Views>>):
+      Promise<MonadValue<any>[]> {
     const projectName = projectNameSetter.value;
     if (projectName === null) {
       throw new Error('Project name is not set');
@@ -96,16 +99,20 @@ export class CreateProjectView extends BaseThemedElement2 {
 
     const newId = await newIdPromise;
     const project = Project.withId(newId).setName(projectName);
-
-    this.routeService_.goTo(this.routeFactoryService_.assetList(), {projectId: newId});
-    return this.reset_(projectNameSetter)
-        .add(projectAccessSetter.set(projectAccessSetter.value.queueUpdate(newId, project)));
+    return [
+      projectAccessSetter.set(projectAccessSetter.value.queueUpdate(newId, project)),
+      navigatorSetter.set(navigatorSetter.value.goTo(
+          this.routeFactoryService_.assetList(), {projectId: newId})),
+    ];
   }
 
   /**
    * Resets the form.
    */
-  private reset_(projectNameSetter: MonadSetter<string | null>): ImmutableList<MonadValue<any>> {
-    return ImmutableList.of([projectNameSetter.set('')]);
+  @onDom.event(CANCEL_BUTTON_EL, 'gs-action')
+  @onDom.event(CREATE_BUTTON_EL, 'gs-action')
+  reset_(@domOut.attribute(EDITOR_PROJECT_NAME_ATTR) projectNameSetter: MonadSetter<string | null>):
+      MonadValue<any>[] {
+    return [projectNameSetter.set('')];
   }
 }

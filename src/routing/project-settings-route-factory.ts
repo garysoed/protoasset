@@ -23,7 +23,7 @@ export class ProjectSettingsRouteFactory extends AbstractRouteFactory<Views, CP,
    * @override
    */
   async getName(params: CR): Promise<string> {
-    const project = await this.projectManager_.monad()(this).get().get(params.projectId);
+    const project = await this.projectManager_.monad().get().get(params.projectId);
     if (project === null) {
       return 'Settings';
     }

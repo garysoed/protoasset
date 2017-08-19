@@ -7,6 +7,8 @@ import { ImmutableMap } from 'external/gs_tools/src/immutable';
 import { Mocks } from 'external/gs_tools/src/mock';
 import { TestDispose } from 'external/gs_tools/src/testing';
 
+import { FakeRouteFactory, FakeRouteNavigator, RouteNavigator } from 'external/gs_ui/src/routing';
+import { Views } from 'src/routing/views';
 import { Asset2, AssetType } from '../data/asset2';
 import { Project } from '../data/project';
 import { CreateAssetView } from './create-asset-view';
@@ -14,16 +16,14 @@ import { CreateAssetView } from './create-asset-view';
 
 describe('project.CreateAssetView', () => {
   let mockRouteFactoryService: any;
-  let mockRouteService: any;
   let view: CreateAssetView;
 
   beforeEach(() => {
     mockRouteFactoryService =
         jasmine.createSpyObj('RouteFactoryService', ['createAsset', 'assetList']);
-    mockRouteService = jasmine.createSpyObj('RouteService', ['getParams', 'goTo']);
     view = new CreateAssetView(
         mockRouteFactoryService,
-        mockRouteService,
+        Mocks.object('RouteService'),
         Mocks.object('ThemeService'));
     TestDispose.add(view);
   });
@@ -35,50 +35,59 @@ describe('project.CreateAssetView', () => {
       const routeFactory = Mocks.object('routeFactory');
       mockRouteFactoryService.createAsset.and.returnValue(routeFactory);
 
-      mockRouteService.getParams.and.returnValue({projectId: projectId});
+      const mockRouteNavigator = jasmine.createSpyObj('RouteNavigator', ['getRoute']);
+      mockRouteNavigator.getRoute.and.returnValue({params: {projectId}});
 
-      assert(view['getProjectId_']()).to.equal(projectId);
-      assert(mockRouteService.getParams).to.haveBeenCalledWith(routeFactory);
+      assert(view['getProjectId_'](mockRouteNavigator)).to.equal(projectId);
+      assert(mockRouteNavigator.getRoute).to.haveBeenCalledWith(routeFactory);
     });
 
     it('should return null if there are no matches', () => {
       const routeFactory = Mocks.object('routeFactory');
       mockRouteFactoryService.createAsset.and.returnValue(routeFactory);
 
-      mockRouteService.getParams.and.returnValue(null);
+      const mockRouteNavigator = jasmine.createSpyObj('RouteNavigator', ['getRoute']);
+      mockRouteNavigator.getRoute.and.returnValue(null);
 
-      assert(view['getProjectId_']()).to.beNull();
-      assert(mockRouteService.getParams).to.haveBeenCalledWith(routeFactory);
+      assert(view['getProjectId_'](mockRouteNavigator)).to.beNull();
+      assert(mockRouteNavigator.getRoute).to.haveBeenCalledWith(routeFactory);
     });
   });
 
   describe('onCancelAction_', () => {
     it('should reset the form and go to the project main view', () => {
-      const routeFactory = Mocks.object('routeFactory');
-      mockRouteFactoryService.assetList.and.returnValue(routeFactory);
+      const fakeRouteFactory = new FakeRouteFactory(Views.PROJECT);
+      mockRouteFactoryService.assetList.and.returnValue(fakeRouteFactory);
 
       const projectId = 'projectId';
       spyOn(view, 'getProjectId_').and.returnValue(projectId);
 
-      view.onCancelAction_();
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
+      const fakeRouteSetter = new FakeMonadSetter<RouteNavigator<Views>>(fakeRouteNavigator);
 
-      assert(mockRouteService.goTo).to.haveBeenCalledWith(routeFactory, {projectId: projectId});
+      const updates = view.onCancelAction_(fakeRouteSetter);
+      assert(fakeRouteSetter.findValue(updates)!.value.getDestination()!).to.matchObject({
+        params: {projectId},
+        type: Views.PROJECT,
+      });
+      assert(view['getProjectId_']).to.haveBeenCalledWith(fakeRouteNavigator);
     });
 
     it('should do nothing if there are no project IDs', () => {
       spyOn(view, 'getProjectId_').and.returnValue(null);
 
-      view['onCancelAction_']();
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
+      const fakeRouteSetter = new FakeMonadSetter<RouteNavigator<Views>>(fakeRouteNavigator);
 
-      assert(mockRouteService.goTo).toNot.haveBeenCalled();
+      assert(view.onCancelAction_(fakeRouteSetter)).to.equal([]);
     });
   });
 
   describe('onSubmitAction_', () => {
     it('should create the asset correctly and navigate to the project main view',
         async () => {
-      const routeFactory = Mocks.object('routeFactory');
-      mockRouteFactoryService.assetList.and.returnValue(routeFactory);
+      const fakeRouteFactory = new FakeRouteFactory(Views.PROJECT);
+      mockRouteFactoryService.assetList.and.returnValue(fakeRouteFactory);
 
       const projectId = 'projectId';
       spyOn(view, 'getProjectId_').and.returnValue(projectId);
@@ -99,6 +108,9 @@ describe('project.CreateAssetView', () => {
       const fakeAssetAccess = new FakeDataAccess<Asset2>();
       const fakeAssetAccessSetter = new FakeMonadSetter<FakeDataAccess<Asset2>>(fakeAssetAccess);
 
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
+      const fakeRouteSetter = new FakeMonadSetter<RouteNavigator<Views>>(fakeRouteNavigator);
+
       const updates = await view.onSubmitAction_(
           assetName,
           assetType,
@@ -106,7 +118,13 @@ describe('project.CreateAssetView', () => {
           width,
           Promise.resolve(assetId),
           fakeProjectAccessSetter,
-          fakeAssetAccessSetter);
+          fakeAssetAccessSetter,
+          fakeRouteSetter);
+
+      assert(fakeRouteSetter.findValue(updates)!.value.getDestination()!).to.matchObject({
+        params: {projectId},
+        type: Views.PROJECT,
+      });
 
       const updatedProject = fakeProjectAccessSetter.findValue(updates)!.value
           .getUpdateQueue()
@@ -120,8 +138,6 @@ describe('project.CreateAssetView', () => {
       assert(asset.getHeight()).to.equal(height);
       assert(asset.getWidth()).to.equal(width);
 
-      assert(mockRouteService.goTo).to
-          .haveBeenCalledWith(routeFactory, {projectId: projectId});
       assert(MonadUtil.callFunction).to.haveBeenCalledWith(Matchers.anyThing(), view, 'reset_');
     });
 
@@ -139,6 +155,9 @@ describe('project.CreateAssetView', () => {
       const fakeAssetAccess = new FakeDataAccess<Asset2>();
       const fakeAssetAccessSetter = new FakeMonadSetter<FakeDataAccess<Asset2>>(fakeAssetAccess);
 
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
+      const fakeRouteSetter = new FakeMonadSetter<RouteNavigator<Views>>(fakeRouteNavigator);
+
       const updates = await view.onSubmitAction_(
           'assetName',
           AssetType.CARD,
@@ -146,10 +165,10 @@ describe('project.CreateAssetView', () => {
           456,
           Promise.resolve('assetId'),
           fakeProjectAccessSetter,
-          fakeAssetAccessSetter);
+          fakeAssetAccessSetter,
+          fakeRouteSetter);
 
       assert([...updates]).to.equal([]);
-      assert(mockRouteService.goTo).toNot.haveBeenCalled();
       assert(MonadUtil.callFunction).toNot.haveBeenCalled();
     });
 
@@ -160,6 +179,9 @@ describe('project.CreateAssetView', () => {
       const fakeAssetAccess = new FakeDataAccess<Asset2>();
       const fakeAssetAccessSetter = new FakeMonadSetter<FakeDataAccess<Asset2>>(fakeAssetAccess);
 
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
+      const fakeRouteSetter = new FakeMonadSetter<RouteNavigator<Views>>(fakeRouteNavigator);
+
       await assert(view.onSubmitAction_(
           null,
           AssetType.CARD,
@@ -167,7 +189,8 @@ describe('project.CreateAssetView', () => {
           456,
           Promise.resolve('assetId'),
           fakeProjectAccessSetter,
-          fakeAssetAccessSetter)).to.rejectWithError(/Asset name/);
+          fakeAssetAccessSetter,
+          fakeRouteSetter)).to.rejectWithError(/Asset name/);
     });
 
     it('should reject if the asset type is not set', async () => {
@@ -177,6 +200,9 @@ describe('project.CreateAssetView', () => {
       const fakeAssetAccess = new FakeDataAccess<Asset2>();
       const fakeAssetAccessSetter = new FakeMonadSetter<FakeDataAccess<Asset2>>(fakeAssetAccess);
 
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
+      const fakeRouteSetter = new FakeMonadSetter<RouteNavigator<Views>>(fakeRouteNavigator);
+
       await assert(view.onSubmitAction_(
           'name',
           null,
@@ -184,7 +210,8 @@ describe('project.CreateAssetView', () => {
           456,
           Promise.resolve('assetId'),
           fakeProjectAccessSetter,
-          fakeAssetAccessSetter)).to.rejectWithError(/Asset type/);
+          fakeAssetAccessSetter,
+          fakeRouteSetter)).to.rejectWithError(/Asset type/);
     });
 
     it('should reject if the height is null', async () => {
@@ -194,6 +221,9 @@ describe('project.CreateAssetView', () => {
       const fakeAssetAccess = new FakeDataAccess<Asset2>();
       const fakeAssetAccessSetter = new FakeMonadSetter<FakeDataAccess<Asset2>>(fakeAssetAccess);
 
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
+      const fakeRouteSetter = new FakeMonadSetter<RouteNavigator<Views>>(fakeRouteNavigator);
+
       await assert(view.onSubmitAction_(
           'name',
           AssetType.CARD,
@@ -201,7 +231,8 @@ describe('project.CreateAssetView', () => {
           456,
           Promise.resolve('assetId'),
           fakeProjectAccessSetter,
-          fakeAssetAccessSetter)).to.rejectWithError(/Asset height/);
+          fakeAssetAccessSetter,
+          fakeRouteSetter)).to.rejectWithError(/Asset height/);
     });
 
     it('should reject if the height is NaN', async () => {
@@ -211,6 +242,9 @@ describe('project.CreateAssetView', () => {
       const fakeAssetAccess = new FakeDataAccess<Asset2>();
       const fakeAssetAccessSetter = new FakeMonadSetter<FakeDataAccess<Asset2>>(fakeAssetAccess);
 
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
+      const fakeRouteSetter = new FakeMonadSetter<RouteNavigator<Views>>(fakeRouteNavigator);
+
       await assert(view.onSubmitAction_(
           'name',
           AssetType.CARD,
@@ -218,7 +252,8 @@ describe('project.CreateAssetView', () => {
           456,
           Promise.resolve('assetId'),
           fakeProjectAccessSetter,
-          fakeAssetAccessSetter)).to.rejectWithError(/Asset height/);
+          fakeAssetAccessSetter,
+          fakeRouteSetter)).to.rejectWithError(/Asset height/);
     });
 
     it('should reject if the width is null', async () => {
@@ -228,6 +263,9 @@ describe('project.CreateAssetView', () => {
       const fakeAssetAccess = new FakeDataAccess<Asset2>();
       const fakeAssetAccessSetter = new FakeMonadSetter<FakeDataAccess<Asset2>>(fakeAssetAccess);
 
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
+      const fakeRouteSetter = new FakeMonadSetter<RouteNavigator<Views>>(fakeRouteNavigator);
+
       await assert(view.onSubmitAction_(
           'name',
           AssetType.CARD,
@@ -235,7 +273,8 @@ describe('project.CreateAssetView', () => {
           null,
           Promise.resolve('assetId'),
           fakeProjectAccessSetter,
-          fakeAssetAccessSetter)).to.rejectWithError(/Asset width/);
+          fakeAssetAccessSetter,
+          fakeRouteSetter)).to.rejectWithError(/Asset width/);
     });
 
     it('should reject if the width is NaN', async () => {
@@ -244,6 +283,8 @@ describe('project.CreateAssetView', () => {
           new FakeMonadSetter<FakeDataAccess<Project>>(fakeProjectAccess);
       const fakeAssetAccess = new FakeDataAccess<Asset2>();
       const fakeAssetAccessSetter = new FakeMonadSetter<FakeDataAccess<Asset2>>(fakeAssetAccess);
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
+      const fakeRouteSetter = new FakeMonadSetter<RouteNavigator<Views>>(fakeRouteNavigator);
 
       await assert(view.onSubmitAction_(
           'name',
@@ -252,7 +293,8 @@ describe('project.CreateAssetView', () => {
           NaN,
           Promise.resolve('assetId'),
           fakeProjectAccessSetter,
-          fakeAssetAccessSetter)).to.rejectWithError(/Asset width/);
+          fakeAssetAccessSetter,
+          fakeRouteSetter)).to.rejectWithError(/Asset width/);
     });
   });
 

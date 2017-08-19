@@ -136,11 +136,12 @@ export class LayerPreview extends BaseThemedElement {
       this.layerDeregister_.dispose();
       this.layerDeregister_ = null;
     }
-    const params = this.routeService_.getParams(this.routeFactoryService_.layer());
-    if (params === null) {
+    const route = this.routeService_.monad().get().getRoute(this.routeFactoryService_.layer());
+    if (route === null) {
       return;
     }
 
+    const params = route.params;
     const [asset, rowData] = await Promise.all([
       this.assetCollection_.get(params.projectId, params.assetId),
       this.sampleDataService_.getRowData(),

@@ -25,7 +25,7 @@ describe('common.SampleDataService', () => {
     TestDispose.add(service);
   });
 
-  describe('getData_', () => {
+  xdescribe('getData_', () => {
     it('should resolve with the correct data', async () => {
       const layerRouteFactory = Mocks.object('layerRouteFactory');
       mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);

@@ -1,14 +1,21 @@
 import { assert, TestBase } from '../test-base';
 TestBase.setup();
 
-import { ImmutableList, ImmutableSet } from 'external/gs_tools/src/immutable';
+import { FakeDataAccess } from 'external/gs_tools/src/datamodel';
+import { FakeMonadSetter } from 'external/gs_tools/src/event';
+import { ImmutableList, ImmutableMap, ImmutableSet } from 'external/gs_tools/src/immutable';
 import { Mocks } from 'external/gs_tools/src/mock';
 import { TestDispose } from 'external/gs_tools/src/testing';
 
-import { FakeMonadSetter } from 'external/gs_tools/src/event';
+import {
+  FakeRouteFactoryService,
+  FakeRouteNavigator,
+  Route,
+  RouteNavigator} from 'external/gs_ui/src/routing';
+
+import { Project } from '../data/project';
 import { LandingView, PROJECT_COLLECTION_CHILDREN } from '../landing/landing-view';
 import { Views } from '../routing/views';
-
 
 describe('PROJECT_COLLECTION_CHILDREN', () => {
   describe('create', () => {
@@ -52,8 +59,10 @@ describe('landing.LandingView', () => {
   let mockProjectCollection: any;
 
   beforeEach(() => {
-    mockRouteFactoryService =
-        jasmine.createSpyObj('RouteFactoryService', ['createProject', 'landing']);
+    mockRouteFactoryService = FakeRouteFactoryService.create([
+      ['createProject', Views.CREATE_PROJECT],
+      ['landing', Views.LANDING],
+    ]);
     mockRouteService = jasmine.createSpyObj('RouteService', ['getRoute', 'goTo', 'on']);
     mockProjectCollection = Mocks.listenable('ProjectCollection');
     mockProjectCollection.list = jasmine.createSpy('ProjectCollection.list');
@@ -65,24 +74,70 @@ describe('landing.LandingView', () => {
     TestDispose.add(view, mockProjectCollection);
   });
 
-  describe('onCreateAction_', () => {
-    it('should go to create project view', () => {
-      const routeFactory = Mocks.object('routeFactory');
-      mockRouteFactoryService.createProject.and.returnValue(routeFactory);
+  describe('initialize_', () => {
+    it('should redirect to create page if the new location is landing but there are no projects',
+        async () => {
+      const fakeProjectAccess = new FakeDataAccess<Project>();
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>([
+        [/.*/, {params: {}, path: '', type: Views.LANDING}] as [RegExp, Route<Views, any>],
+      ]);
+      const fakeRouteSetter = new FakeMonadSetter<RouteNavigator<Views>>(fakeRouteNavigator);
 
-      view.onCreateAction_();
+      const updates = await view.initialize_(fakeProjectAccess, fakeRouteSetter);
+      assert(fakeRouteSetter.findValue(updates)!.value.getDestination()).to.matchObject({
+        params: {},
+        type: Views.CREATE_PROJECT,
+      });
+    });
 
-      assert(mockRouteService.goTo).to.haveBeenCalledWith(routeFactory, {});
+    it('should not redirect if the new location is landing but there are projects',
+        async () => {
+      const project = Project.withId('projectId');
+      const fakeProjectAccess = new FakeDataAccess<Project>(ImmutableMap.of([
+        [project.getId(), project],
+      ]));
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>([
+        [/.*/, {params: {}, path: '', type: Views.LANDING}] as [RegExp, Route<Views, any>],
+      ]);
+      const fakeRouteSetter = new FakeMonadSetter<RouteNavigator<Views>>(fakeRouteNavigator);
+
+      assert(await view.initialize_(fakeProjectAccess, fakeRouteSetter)).to.equal([]);
+      assert(mockRouteService.goTo).toNot.haveBeenCalled();
+    });
+
+    it('should redirect to landing page if there are no valid routes', async () => {
+      const fakeProjectAccess = new FakeDataAccess<Project>();
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
+      const fakeRouteSetter = new FakeMonadSetter<RouteNavigator<Views>>(fakeRouteNavigator);
+
+      const updates = await view.initialize_(fakeProjectAccess, fakeRouteSetter);
+      assert(fakeRouteSetter.findValue(updates)!.value.getDestination()).to.matchObject({
+        params: {},
+        type: Views.LANDING,
+      });
+    });
+
+    it('should not redirect if the new location is not landing', async () => {
+      const fakeProjectAccess = new FakeDataAccess<Project>();
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>([
+        [/.*/, {params: {}, path: '', type: Views.CREATE_ASSET}] as [RegExp, Route<Views, any>],
+      ]);
+      const fakeRouteSetter = new FakeMonadSetter<RouteNavigator<Views>>(fakeRouteNavigator);
+
+      assert(await view.initialize_(fakeProjectAccess, fakeRouteSetter)).to.equal([]);
     });
   });
 
-  describe('onCreated', () => {
-    it('should initialize correctly', () => {
-      const projectAccess = Mocks.object('projectAccess');
-      spyOn(view, 'onRouteChanged_');
+  describe('onCreateAction_', () => {
+    it('should go to create project view', () => {
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
+      const fakeRouteSetter = new FakeMonadSetter<RouteNavigator<Views>>(fakeRouteNavigator);
 
-      view.onCreated(projectAccess);
-      assert(view.onRouteChanged_).to.haveBeenCalledWith(projectAccess);
+      const updates = view.onCreateAction_(fakeRouteSetter);
+      assert(fakeRouteSetter.findValue(updates)!.value.getDestination()!).to.matchObject({
+        params: {},
+        type: Views.CREATE_PROJECT,
+      });
     });
   });
 
@@ -189,62 +244,6 @@ describe('landing.LandingView', () => {
 
       assert(fakeProjectIdsSetter.findValue(list)!.value)
           .to.haveElements([oldProjectId, projectId]);
-    });
-  });
-
-  describe('onRouteChanged_', () => {
-    it('should redirect to create page if the new location is landing but there are no projects',
-        async () => {
-          const mockRoute = jasmine.createSpyObj('Route', ['getType']);
-          mockRoute.getType.and.returnValue(Views.LANDING);
-          mockRouteService.getRoute.and.returnValue(mockRoute);
-
-          const routeFactory = Mocks.object('routeFactory');
-          mockRouteFactoryService.createProject.and.returnValue(routeFactory);
-
-          const mockProjectAccess = jasmine.createSpyObj('ProjectAccess', ['list']);
-          mockProjectAccess.list.and.returnValue(Promise.resolve(ImmutableSet.of([])));
-
-          await view.onRouteChanged_(mockProjectAccess);
-          assert(mockRouteService.goTo).to.haveBeenCalledWith(routeFactory, {});
-        });
-
-    it('should not redirect if the new location is landing but there are projects',
-        async () => {
-          const mockRoute = jasmine.createSpyObj('Route', ['getType']);
-          mockRoute.getType.and.returnValue(Views.LANDING);
-          mockRouteService.getRoute.and.returnValue(mockRoute);
-
-          const mockProjectAccess = jasmine.createSpyObj('ProjectAccess', ['list']);
-          mockProjectAccess.list.and.returnValue(
-              Promise.resolve(ImmutableSet.of([Mocks.object('project')])));
-
-          await view.onRouteChanged_(mockProjectAccess);
-          assert(mockRouteService.goTo).toNot.haveBeenCalled();
-        });
-
-    it('should redirect to landing page if there are no valid routes', async () => {
-      mockRouteService.getRoute.and.returnValue(null);
-
-      const routeFactory = Mocks.object('routeFactory');
-      mockRouteFactoryService.landing.and.returnValue(routeFactory);
-
-      const mockProjectAccess = jasmine.createSpyObj('ProjectAccess', ['list']);
-
-      await view.onRouteChanged_(mockProjectAccess);
-      assert(mockRouteService.goTo).to.haveBeenCalledWith(routeFactory, {});
-    });
-
-    it('should not redirect if the new location is not landing', async () => {
-      const mockRoute = jasmine.createSpyObj('Route', ['getType']);
-      mockRoute.getType.and.returnValue(Views.CREATE_ASSET);
-      mockRouteService.getRoute.and.returnValue(mockRoute);
-
-      const mockProjectAccess = jasmine.createSpyObj('ProjectAccess', ['list']);
-      mockProjectAccess.list.and.returnValue(Promise.resolve([]));
-
-      await view.onRouteChanged_(mockProjectAccess);
-      assert(mockRouteService.goTo).toNot.haveBeenCalled();
     });
   });
 });

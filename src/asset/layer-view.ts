@@ -350,12 +350,12 @@ export class LayerView extends BaseThemedElement {
    * @return Promise that will be resolved with the selected asset, or null if it does not exist.
    */
   private async getAsset_(): Promise<Asset | null> {
-    const params = this.routeService_.getParams<{assetId: string, projectId: string}>(
-        this.routeFactoryService_.layer());
-    if (params === null) {
+    const route = this.routeService_.monad().get().getRoute(this.routeFactoryService_.layer());
+    if (route === null) {
       return null;
     }
 
+    const params = route.params;
     return await this.assetCollection_.get(params.projectId, params.assetId);
   }
 
@@ -497,11 +497,12 @@ export class LayerView extends BaseThemedElement {
       this.assetChangedDeregister_ = null;
     }
 
-    const params = this.routeService_.getParams(this.routeFactoryService_.layer());
-    if (params === null) {
+    const route = this.routeService_.monad().get().getRoute(this.routeFactoryService_.layer());
+    if (route === null) {
       return;
     }
 
+    const params = route.params;
     const asset = await this.assetCollection_.get(params.projectId, params.assetId);
     if (asset === null) {
       return;

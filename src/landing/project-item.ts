@@ -1,11 +1,12 @@
 import { DataAccess } from 'external/gs_tools/src/datamodel';
-import { monad } from 'external/gs_tools/src/event';
+import { monad, monadOut } from 'external/gs_tools/src/event';
 import { inject } from 'external/gs_tools/src/inject';
+import { MonadSetter, MonadValue } from 'external/gs_tools/src/interfaces';
 import { StringParser } from 'external/gs_tools/src/parse';
 import { customElement, dom, onDom } from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement2 } from 'external/gs_ui/src/common';
-import { RouteService } from 'external/gs_ui/src/routing';
+import { RouteNavigator, RouteService } from 'external/gs_ui/src/routing';
 import { ThemeService } from 'external/gs_ui/src/theming';
 
 import { Project } from '../data/project';
@@ -35,10 +36,18 @@ export class ProjectItem extends BaseThemedElement2 {
   }
 
   @onDom.event(null, 'click')
-  onElementClicked_(@dom.attribute(PROJECT_ID_ATTR) projectId: string | null): void {
+  onElementClicked_(
+        @dom.attribute(PROJECT_ID_ATTR) projectId: string | null,
+        @monadOut((item: ProjectItem) => item.routeService_.monad())
+            routeSetter: MonadSetter<RouteNavigator<Views>>): MonadValue<any>[] {
     if (projectId !== null) {
-      this.routeService_.goTo(this.routeFactoryService_.assetList(), {projectId: projectId});
+      return [
+        routeSetter.set(routeSetter.value.goTo(
+            this.routeFactoryService_.assetList(), {projectId: projectId})),
+      ];
     }
+
+    return [];
   }
 
   @onDom.attributeChange(PROJECT_ID_ATTR)

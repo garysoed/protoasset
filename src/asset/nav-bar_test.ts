@@ -1,25 +1,24 @@
 import { assert, Fakes, TestBase } from '../test-base';
 TestBase.setup();
 
-import { ImmutableMap } from 'external/gs_tools/src/immutable';
 import { Mocks } from 'external/gs_tools/src/mock';
 import { TestDispose } from 'external/gs_tools/src/testing';
 
 import { FakeMonadSetter } from 'external/gs_tools/src/event';
-import { NavBar } from './nav-bar';
+import { FakeRouteNavigator, Route, RouteNavigator } from 'external/gs_ui/src/routing';
+
+import { NavBar } from '../asset/nav-bar';
+import { TestRouteFactoryService } from '../routing/test-route-factory-service';
+import { Views } from '../routing/views';
 
 describe('asset.NavBar', () => {
-  let mockRouteFactoryService: any;
   let mockRouteService: any;
   let navbar: NavBar;
 
   beforeEach(() => {
-    mockRouteFactoryService = jasmine.createSpyObj(
-        'RouteFactoryService',
-        ['assetData', 'assetSettings', 'helper', 'layer', 'render']);
     mockRouteService = jasmine.createSpyObj('RouteService', ['getParams', 'goTo', 'on']);
     navbar = new NavBar(
-        mockRouteFactoryService,
+        TestRouteFactoryService,
         mockRouteService,
         jasmine.createSpyObj('ThemeService', ['applyTheme']));
     TestDispose.add(navbar);
@@ -27,68 +26,57 @@ describe('asset.NavBar', () => {
 
   describe('onButtonClick_', () => {
     it('should navigate to the correct view', () => {
-      const tabId1 = 'tabId1';
-      const tabId2 = 'tabId2';
-      const tabId3 = 'tabId3';
-      const routeFactory1 = Mocks.object('routeFactory1');
-      const routeFactory2 = Mocks.object('routeFactory2');
-      const routeFactory3 = Mocks.object('routeFactory3');
-
-      const destinationTabId = 'destinationTabId';
-      const destinationRouteFactory = Mocks.object('destinationRouteFactory');
-      Fakes.build(spyOn(navbar['routeMap_'], 'get'))
-          .when(tabId1).return(routeFactory1)
-          .when(tabId2).return(routeFactory2)
-          .when(tabId3).return(routeFactory3)
-          .when(destinationTabId).return(destinationRouteFactory);
-
-      const map = ImmutableMap.of([
-        [tabId1, routeFactory1],
-        [tabId2, routeFactory2],
-        [tabId3, routeFactory3],
-        [destinationTabId, destinationRouteFactory],
-      ]);
-      spyOn(navbar['routeMap_'], Symbol.iterator).and.returnValue(map[Symbol.iterator]());
-
-      const params = Mocks.object('param');
-      mockRouteService.getParams.and.callFake((factory: any) => {
-        return factory === destinationRouteFactory ? params : null;
-      });
+      const destinationTabId = 'helper';
+      const params = Mocks.object('params');
 
       const target = document.createElement('div');
       target.setAttribute('tab-id', destinationTabId);
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>([
+        [/.*/, {params, path: '', type: Views.ASSET_MAIN}] as [RegExp, Route<Views, any>],
+      ]);
+      const fakeRouteSetter = new FakeMonadSetter<RouteNavigator<Views>>(fakeRouteNavigator);
 
-      navbar.onButtonClick_({target} as any);
+      const updates = navbar.onButtonClick_({target} as any, fakeRouteSetter);
+      assert(fakeRouteSetter.findValue(updates)!.value.getDestination()).to.matchObject({
+        params,
+        type: Views.HELPER,
+      });
+    });
 
-      assert(mockRouteService.goTo).to.haveBeenCalledWith(destinationRouteFactory, params);
+    it(`should do nothing if the current URL has no match`, () => {
+      const destinationTabId = 'helper';
+
+      const target = document.createElement('div');
+      target.setAttribute('tab-id', destinationTabId);
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
+      const fakeRouteSetter = new FakeMonadSetter<RouteNavigator<Views>>(fakeRouteNavigator);
+
+      assert(navbar.onButtonClick_({target} as any, fakeRouteSetter)).to.equal([]);
     });
 
     it('should do nothing if the tab ID does not have a corresponding route factory', () => {
-      const tabId = 'tabId';
-      spyOn(navbar['routeMap_'], 'get').and.returnValue(null);
-
       const target = document.createElement('div');
-      target.setAttribute('tab-id', tabId);
+      target.setAttribute('tab-id', 'unknownTabId');
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
+      const fakeRouteSetter = new FakeMonadSetter<RouteNavigator<Views>>(fakeRouteNavigator);
 
-      navbar.onButtonClick_({target} as any);
-
-      assert(mockRouteService.goTo).toNot.haveBeenCalled();
+      assert(navbar.onButtonClick_({target} as any, fakeRouteSetter)).to.equal([]);
     });
 
     it(`should do nothing if there are no tab IDs`, () => {
       const target = document.createElement('div');
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
+      const fakeRouteSetter = new FakeMonadSetter<RouteNavigator<Views>>(fakeRouteNavigator);
 
-      navbar.onButtonClick_({target} as any);
-
-      assert(mockRouteService.goTo).toNot.haveBeenCalled();
+      assert(navbar.onButtonClick_({target} as any, fakeRouteSetter)).to.equal([]);
     });
 
     it(`should do nothing if the target is not an Element`, () => {
       const target = Mocks.object('target');
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
+      const fakeRouteSetter = new FakeMonadSetter<RouteNavigator<Views>>(fakeRouteNavigator);
 
-      navbar.onButtonClick_({target} as any);
-
-      assert(mockRouteService.goTo).toNot.haveBeenCalled();
+      assert(navbar.onButtonClick_({target} as any, fakeRouteSetter)).to.equal([]);
     });
   });
 
@@ -112,46 +100,22 @@ describe('asset.NavBar', () => {
 
   describe('onRouteChanged_', () => {
     it('should set the selected tab to the correct tab ID', () => {
-      const tabId1 = 'tabId1';
-      const tabId2 = 'tabId2';
-      const tabId3 = 'tabId3';
-      const routeFactory1 = Mocks.object('routeFactory1');
-      const routeFactory2 = Mocks.object('routeFactory2');
-      const routeFactory3 = Mocks.object('routeFactory3');
-
-      const map = ImmutableMap.of([
-        [tabId1, routeFactory1],
-        [tabId2, routeFactory2],
-        [tabId3, routeFactory3],
-      ]);
-      spyOn(navbar['routeMap_'], Symbol.iterator).and.returnValue(map[Symbol.iterator]());
-
-      mockRouteService.getParams.and.callFake((factory: any) => {
-        return factory === routeFactory2 ? {} : null;
-      });
-
       const fakeSelectedTabSetter = new FakeMonadSetter<string | null>(null);
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
+      Fakes.build(spyOn(fakeRouteNavigator, 'getRoute'))
+          .when(TestRouteFactoryService.helper()).return(Mocks.object('params'))
+          .else().return(null);
 
-      const updates = navbar.onRouteChanged_(fakeSelectedTabSetter);
-
-      assert(fakeSelectedTabSetter.findValue(updates)!.value).to.equal(tabId2);
+      const updates = navbar.onRouteChanged_(fakeSelectedTabSetter, fakeRouteNavigator);
+      assert(fakeSelectedTabSetter.findValue(updates)!.value).to.equal('helper');
     });
 
     it('should not set the selected tab if there are no corresponding tab IDs', () => {
-      const tabId = 'tabId';
-      const routeFactory = Mocks.object('routeFactory');
-
-      const map = ImmutableMap.of([
-        [tabId, routeFactory],
-      ]);
-      spyOn(navbar['routeMap_'], Symbol.iterator).and.returnValue(map[Symbol.iterator]());
-
-      mockRouteService.getParams.and.returnValue(null);
-
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
+      spyOn(fakeRouteNavigator, 'getRoute').and.returnValue(null);
       const fakeSelectedTabSetter = new FakeMonadSetter<string | null>(null);
 
-      const updates = navbar.onRouteChanged_(fakeSelectedTabSetter);
-      assert([...updates]).to.equal([]);
+      assert(navbar.onRouteChanged_(fakeSelectedTabSetter, fakeRouteNavigator)).to.equal([]);
     });
   });
 });

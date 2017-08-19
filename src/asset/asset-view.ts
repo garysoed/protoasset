@@ -1,11 +1,12 @@
+import { monadOut, on } from 'external/gs_tools/src/event';
 import { ImmutableSet } from 'external/gs_tools/src/immutable';
 import { inject } from 'external/gs_tools/src/inject';
-import { Reflect } from 'external/gs_tools/src/util';
+import { MonadSetter, MonadValue } from 'external/gs_tools/src/interfaces';
 import { customElement } from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement } from 'external/gs_ui/src/common';
 import { RouteServiceEvents } from 'external/gs_ui/src/const';
-import { RouteService } from 'external/gs_ui/src/routing';
+import { RouteNavigator, RouteService } from 'external/gs_ui/src/routing';
 import { ThemeService } from 'external/gs_ui/src/theming';
 
 import { DataView } from '../asset/data-view';
@@ -42,25 +43,22 @@ export class AssetView extends BaseThemedElement {
   }
 
   /**
-   * @override
-   */
-  [Reflect.__initialize](): void {
-    this.addDisposable(
-        this.routeService_.on(RouteServiceEvents.CHANGED, this.onRouteChanged_, this));
-  }
-
-  /**
    * Handles when the route was changed.
    */
-  private onRouteChanged_(): void {
-    const params = this.routeService_.getParams(this.routeFactoryService_.assetMain());
-    if (params === null) {
-      return;
+  @on((view: AssetView) => view.routeService_, RouteServiceEvents.CHANGED)
+  onRouteChanged_(
+      @monadOut((view: AssetView) => view.routeService_.monad())
+          routeSetter: MonadSetter<RouteNavigator<Views>>): MonadValue<any>[] {
+    const route = routeSetter.value.getRoute(this.routeFactoryService_.assetMain());
+    if (route === null) {
+      return [];
     }
 
-    this.routeService_.goTo(
-        this.routeFactoryService_.assetData(),
-        {assetId: params.assetId, projectId: params.projectId});
+    const params = route.params;
+    return [
+      routeSetter.set(routeSetter.value.goTo(
+          this.routeFactoryService_.assetData(),
+          {assetId: params.assetId, projectId: params.projectId})),
+    ];
   }
 }
-// TODO: Mutable

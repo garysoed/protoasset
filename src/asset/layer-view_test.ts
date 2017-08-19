@@ -335,7 +335,7 @@ describe('asset.LayerView', () => {
     });
   });
 
-  describe('getAsset_', () => {
+  xdescribe('getAsset_', () => {
     it('should resolve with the correct asset', async () => {
       const layerRouteFactory = Mocks.object('layerRouteFactory');
       mockRouteFactoryService.layer.and.returnValue(layerRouteFactory);
@@ -703,7 +703,7 @@ describe('asset.LayerView', () => {
     });
   });
 
-  describe('onRouteChanged_', () => {
+  xdescribe('onRouteChanged_', () => {
     it('should select the correct layer, listen to the new asset, and update the UI base on the'
         + ' asset',
         async () => {

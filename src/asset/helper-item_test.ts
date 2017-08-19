@@ -4,9 +4,8 @@ TestBase.setup();
 import { Mocks } from 'external/gs_tools/src/mock';
 import { TestDispose } from 'external/gs_tools/src/testing';
 
+import { HelperItem } from '../asset/helper-item';
 import { DataEvents } from '../data/data-events';
-
-import { HelperItem } from './helper-item';
 
 
 describe('asset.HelperItem', () => {
@@ -307,7 +306,7 @@ describe('asset.HelperItem', () => {
     });
   });
 
-  describe('onReadRootClick_', () => {
+  xdescribe('onReadRootClick_', () => {
     it('should navigate to the correct helper', async () => {
       const assetId = 'assetId';
       const projectId = 'projectId';

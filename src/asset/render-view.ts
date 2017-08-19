@@ -143,12 +143,12 @@ export class RenderView extends BaseThemedElement {
   }
 
   private getAsset_(): Promise<Asset | null> {
-    const params = this.routeService_.getParams(this.routeFactoryService_.render());
-    if (params === null) {
+    const route = this.routeService_.monad().get().getRoute(this.routeFactoryService_.render());
+    if (route === null) {
       return Promise.resolve(null);
     }
 
-    const {assetId, projectId} = params;
+    const {assetId, projectId} = route.params;
     if (assetId === null || projectId === null) {
       return Promise.resolve(null);
     }

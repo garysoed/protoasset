@@ -27,7 +27,7 @@ describe('project.SettingsView', () => {
     TestDispose.add(view);
   });
 
-  describe('getProject_', () => {
+  xdescribe('getProject_', () => {
     it('should resolve the correct project', async () => {
       const project = Mocks.object('project');
       const projectId = 'projectId';
@@ -77,7 +77,7 @@ describe('project.SettingsView', () => {
     });
   });
 
-  describe('onEditorProjectNameChanged_', () => {
+  xdescribe('onEditorProjectNameChanged_', () => {
     it('should update the project correctly', async () => {
       const projectId = 'projectId';
       const mockProject = Project.withId(projectId);

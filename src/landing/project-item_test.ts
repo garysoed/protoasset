@@ -1,22 +1,25 @@
 import { assert, TestBase } from '../test-base';
 TestBase.setup();
 
+import { FakeMonadSetter } from 'external/gs_tools/src/event';
 import { Mocks } from 'external/gs_tools/src/mock';
 import { TestDispose } from 'external/gs_tools/src/testing';
 
-import { ProjectItem } from './project-item';
+import { FakeRouteNavigator, RouteNavigator } from 'external/gs_ui/src/routing';
+
+import { ProjectItem } from '../landing/project-item';
+import { TestRouteFactoryService } from '../routing/test-route-factory-service';
+import { Views } from '../routing/views';
 
 
 describe('landing.ProjectItem', () => {
-  let mockRouteFactoryService: any;
   let mockRouteService: any;
   let item: ProjectItem;
 
   beforeEach(() => {
-    mockRouteFactoryService = jasmine.createSpyObj('RouteFactoryService', ['assetList']);
     mockRouteService = jasmine.createSpyObj('RouteService', ['goTo']);
     item = new ProjectItem(
-        mockRouteFactoryService,
+        TestRouteFactoryService,
         mockRouteService,
         Mocks.object('ThemeService'));
     TestDispose.add(item);
@@ -25,19 +28,21 @@ describe('landing.ProjectItem', () => {
   describe('onElementClicked_', () => {
     it('should go to the correct project view', () => {
       const projectId = 'projectId';
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
+      const fakeRouteSetter = new FakeMonadSetter<RouteNavigator<Views>>(fakeRouteNavigator);
 
-      const routeFactory = Mocks.object('routeFactory');
-      mockRouteFactoryService.assetList.and.returnValue(routeFactory);
-
-      item.onElementClicked_(projectId);
-
-      assert(mockRouteService.goTo).to.haveBeenCalledWith(routeFactory, {projectId: projectId});
+      const updates = item.onElementClicked_(projectId, fakeRouteSetter);
+      assert(fakeRouteSetter.findValue(updates)!.value.getDestination()).to.matchObject({
+        params: {projectId},
+        type: Views.PROJECT,
+      });
     });
 
     it('should do nothing if the project ID is null', () => {
-      item.onElementClicked_(null);
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
+      const fakeRouteSetter = new FakeMonadSetter<RouteNavigator<Views>>(fakeRouteNavigator);
 
-      assert(mockRouteService.goTo).toNot.haveBeenCalled();
+      assert(item.onElementClicked_(null, fakeRouteSetter)).to.equal([]);
     });
   });
 

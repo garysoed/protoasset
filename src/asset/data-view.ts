@@ -9,7 +9,7 @@ import { customElement, dom, domOut, onDom, onLifecycle } from 'external/gs_tool
 
 import { BaseThemedElement2 } from 'external/gs_ui/src/common';
 import { FileService } from 'external/gs_ui/src/input';
-import { RouteService } from 'external/gs_ui/src/routing';
+import { RouteNavigator, RouteService } from 'external/gs_ui/src/routing';
 import { ThemeService } from 'external/gs_ui/src/theming';
 
 import { AssetManager } from '../data/asset-manager';
@@ -121,13 +121,15 @@ export class DataView extends BaseThemedElement2 {
   /**
    * @return Promise that will be resolved with the asset, or null if the asset cannot be found.
    */
-  private getAsset_(assetDataAccess: DataAccess<Asset2>): Promise<Asset2 | null> {
-    const params = this.routeService_.getParams(this.routeFactoryService_.assetData());
-    if (params === null) {
+  private getAsset_(
+      assetDataAccess: DataAccess<Asset2>,
+      navigator: RouteNavigator<Views>): Promise<Asset2 | null> {
+    const route = navigator.getRoute(this.routeFactoryService_.assetData());
+    if (route === null) {
       return Promise.resolve(null);
     }
 
-    return assetDataAccess.get(params.assetId);
+    return assetDataAccess.get(route.params.assetId);
   }
 
   /**
@@ -137,8 +139,9 @@ export class DataView extends BaseThemedElement2 {
    */
   private async updateAsset_(
       dataSource: TsvDataSource,
-      assetDataAccess: DataAccess<Asset2>): Promise<DataAccess<Asset2>> {
-    const asset = await this.getAsset_(assetDataAccess);
+      assetDataAccess: DataAccess<Asset2>,
+      navigator: RouteNavigator<Views>): Promise<DataAccess<Asset2>> {
+    const asset = await this.getAsset_(assetDataAccess, navigator);
     if (asset === null) {
       return assetDataAccess;
     }
@@ -152,6 +155,7 @@ export class DataView extends BaseThemedElement2 {
       @dom.attribute(DATA_SOURCE_INPUT_BUNDLE_ID_ATTR) bundleId: string | null,
       @dom.attribute(START_ROW_INPUT_VALUE_ATTR) startRow: number | null,
       @dom.attribute(END_ROW_INPUT_VALUE_ATTR) endRow: number | null,
+      @monad((view: DataView) => view.routeService_.monad()) navigator: RouteNavigator<Views>,
       @monadOut(AssetManager.monad()) assetDataAccessSetter:
           MonadSetter<DataAccess<Asset2>>): Promise<MonadValue<any>[]> {
     if (bundleId === null
@@ -171,7 +175,7 @@ export class DataView extends BaseThemedElement2 {
           .setEndRow(endRow);
       updates.push(
           assetDataAccessSetter.set(
-              await this.updateAsset_(dataSource, assetDataAccessSetter.value)));
+              await this.updateAsset_(dataSource, assetDataAccessSetter.value, navigator)));
     }
     return updates;
   }
@@ -201,13 +205,14 @@ export class DataView extends BaseThemedElement2 {
   async updatePreview_(
       @dom.attribute(VIEW_ACTIVE_ATTR) isViewActive: boolean | null,
       @monad(AssetManager.monad()) assetDataAccess: DataAccess<Asset2>,
+      @monad((view: DataView) => view.routeService_.monad()) navigator: RouteNavigator<Views>,
       @domOut.childElements(PREVIEW_CHILDREN) previewChildrenSetter:
           MonadSetter<PreviewData | null>): Promise<MonadValue<any>[]> {
     if (!isViewActive) {
       return [];
     }
 
-    const asset = await this.getAsset_(assetDataAccess);
+    const asset = await this.getAsset_(assetDataAccess, navigator);
     if (asset === null) {
       return [previewChildrenSetter.set(null)];
     }

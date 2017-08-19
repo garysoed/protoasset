@@ -2,7 +2,7 @@ import { BaseListenable } from 'external/gs_tools/src/event';
 import { ImmutableList } from 'external/gs_tools/src/immutable';
 import { bind, inject } from 'external/gs_tools/src/inject';
 
-import { RouteService } from 'external/gs_ui/src/routing';
+import { Route, RouteService } from 'external/gs_ui/src/routing';
 
 import { SampleDataServiceEvent } from '../common/sample-data-service-event';
 import { AssetCollection } from '../data/asset-collection';
@@ -50,19 +50,21 @@ export class SampleDataService extends BaseListenable<SampleDataServiceEvent> {
   }
 
   async getData_(): Promise<string[][] | null> {
-    const params = ImmutableList
+    const navigator = this.routeService_.monad().get();
+    const routes = ImmutableList
         .of([
-          this.routeService_.getParams(this.routeFactoryService_.layer()),
-          this.routeService_.getParams(this.routeFactoryService_.helper()),
+          navigator.getRoute(this.routeFactoryService_.layer()),
+          navigator.getRoute(this.routeFactoryService_.helper()),
         ])
-        .find((params: {assetId: string, projectId: string} | null) => {
-          return params !== null;
+        .find((route: Route<Views, any> | null) => {
+          return route !== null;
         })!;
 
-    if (params === null) {
+    if (routes === null) {
       return null;
     }
 
+    const {params} = routes;
     const asset = await this.assetCollection_.get(params.projectId, params.assetId);
     if (asset === null) {
       return null;

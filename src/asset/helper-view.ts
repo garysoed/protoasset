@@ -240,13 +240,15 @@ export class HelperView extends BaseThemedElement {
     asset.setHelper(newHelperId, helper);
 
     const [helperId] = await Promise.all([newHelperId, this.assetCollection_.update(asset)]);
-    this.routeService_.goTo<{assetId: string, helperId: string, projectId: string}>(
+    const monad = this.routeService_.monad();
+    const navigator = monad.get();
+    monad.set(navigator.goTo<{assetId: string, helperId: string, projectId: string}>(
         this.routeFactoryService_.helper(),
         {
           assetId: asset.getId(),
           helperId: helperId,
           projectId: asset.getProjectId(),
-        });
+        }));
   }
 
   /**
@@ -269,12 +271,12 @@ export class HelperView extends BaseThemedElement {
    *     be determined.
    */
   private getAsset_(): Promise<Asset | null> {
-    const params = this.routeService_
-        .getParams<HelperIdParams>(this.routeFactoryService_.helper());
-    if (params === null) {
+    const route = this.routeService_.monad().get().getRoute(this.routeFactoryService_.helper());
+    if (route === null) {
       return Promise.resolve(null);
     }
 
+    const params = route.params;
     return this.assetCollection_.get(params.projectId, params.assetId);
   }
 
@@ -283,9 +285,8 @@ export class HelperView extends BaseThemedElement {
    *     cannot be determined.
    */
   private async getHelper_(): Promise<Helper | null> {
-    const params = this.routeService_
-        .getParams<HelperIdParams>(this.routeFactoryService_.helper());
-    if (params === null) {
+    const route = this.routeService_.monad().get().getRoute(this.routeFactoryService_.helper());
+    if (route === null) {
       return Promise.resolve(null);
     }
 
@@ -294,7 +295,7 @@ export class HelperView extends BaseThemedElement {
       return null;
     }
 
-    return asset.getHelper(params.helperId);
+    return asset.getHelper(route.params.helperId);
   }
 
   @handle(null).attributeChange('gs-view-active')
@@ -310,7 +311,9 @@ export class HelperView extends BaseThemedElement {
 
     const asset = await this.getAsset_();
     if (asset === null) {
-      this.routeService_.goTo(this.routeFactoryService_.landing(), {});
+      const monad = this.routeService_.monad();
+      const navigator = monad.get();
+      monad.set(navigator.goTo(this.routeFactoryService_.landing(), {}));
       return;
     }
     this.sampleDataPickerAssetIdHook_.set(asset.getId());
@@ -387,11 +390,13 @@ export class HelperView extends BaseThemedElement {
       if (helpers.length <= 0) {
         await this.createHelper_(asset);
       } else {
-        this.routeService_.goTo(this.routeFactoryService_.helper(), {
+        const monad = this.routeService_.monad();
+        const navigator = monad.get();
+        monad.set(navigator.goTo(this.routeFactoryService_.helper(), {
           assetId: asset.getId(),
           helperId: helpers[0].getId(),
           projectId: asset.getProjectId(),
-        });
+        }));
       }
       return;
     }
@@ -514,7 +519,8 @@ export class HelperView extends BaseThemedElement {
    * Handles event when the route is changed.
    */
   private onRouteChanged_(): void {
-    this.onActiveChange_(this.routeService_.getParams(this.routeFactoryService_.helper()) !== null);
+    const route = this.routeService_.monad().get().getRoute(this.routeFactoryService_.helper());
+    this.onActiveChange_(!!route);
   }
 
   /**

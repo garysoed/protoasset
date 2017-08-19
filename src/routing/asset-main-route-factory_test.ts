@@ -25,11 +25,11 @@ describe('routing.AssetMainRouteFactory', () => {
       const asset = Asset2.withId(assetId).setName(assetName);
 
       const fakeAssetAccess = new FakeDataAccess<Asset2>(ImmutableMap.of([[assetId, asset]]));
-      spyOn(AssetManager, 'monad').and.returnValue(() => ({
+      spyOn(AssetManager, 'monad').and.returnValue({
         get(): DataAccess<Asset2> {
           return fakeAssetAccess;
         },
-      }));
+      });
 
       const name = await factory.getName({assetId: assetId, projectId: projectId});
       assert(name).to.equal(assetName);
@@ -37,11 +37,11 @@ describe('routing.AssetMainRouteFactory', () => {
 
     it('should return "Unknown asset" if the asset cannot be found', async () => {
       const fakeAssetAccess = new FakeDataAccess<Asset2>();
-      spyOn(AssetManager, 'monad').and.returnValue(() => ({
+      spyOn(AssetManager, 'monad').and.returnValue({
         get(): DataAccess<Asset2> {
           return fakeAssetAccess;
         },
-      }));
+      });
 
       const name = await factory.getName({assetId: 'assetId', projectId: 'projectId'});
       assert(name).to.equal('Unknown asset');

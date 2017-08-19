@@ -3,41 +3,44 @@ TestBase.setup();
 
 import { DataAccess, FakeDataAccess } from 'external/gs_tools/src/datamodel';
 import { FakeMonadSetter } from 'external/gs_tools/src/event';
-import { ImmutableList } from 'external/gs_tools/src/immutable';
+import { ImmutableMap } from 'external/gs_tools/src/immutable';
 import { Mocks } from 'external/gs_tools/src/mock';
 import { TestDispose } from 'external/gs_tools/src/testing';
 
+import { FakeRouteFactoryService, FakeRouteNavigator } from 'external/gs_ui/src/routing';
+
 import { Project } from '../data/project';
 import { CreateProjectView } from '../landing/create-project-view';
+import { Views } from '../routing/views';
 
 
 describe('landing.CreateProjectView', () => {
-  let mockRouteFactoryService: any;
   let mockRouteService: any;
   let view: CreateProjectView;
 
   beforeEach(() => {
-    mockRouteFactoryService = jasmine.createSpyObj('RouteFactoryService', ['assetList', 'landing']);
+    const fakeRouteFactoryService = FakeRouteFactoryService.create(ImmutableMap.of([
+      ['assetList', Views.PROJECT],
+      ['landing', Views.LANDING],
+    ])) as any;
     mockRouteService = jasmine.createSpyObj('RouteService', ['goTo']);
     view = new CreateProjectView(
         Mocks.object('ThemeService'),
-        mockRouteFactoryService,
+        fakeRouteFactoryService,
         mockRouteService);
     TestDispose.add(view);
   });
 
-  describe('onCancelAction_', () => {
+  describe('goToLanding_', () => {
     it('should navigate to the landing page', () => {
-      const routeFactory = Mocks.object('routeFactory');
-      mockRouteFactoryService.landing.and.returnValue(routeFactory);
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
+      const fakeRouteSetter = new FakeMonadSetter(fakeRouteNavigator);
 
-      const projectNameSetter = Mocks.object('projectNameSetter');
-      const resetMap = Mocks.object('resetMap');
-      spyOn(view, 'reset_').and.returnValue(resetMap);
-
-      assert(view.onCancelAction_(projectNameSetter)).to.equal(resetMap);
-      assert(view['reset_']).to.haveBeenCalledWith(projectNameSetter);
-      assert(mockRouteService.goTo).to.haveBeenCalledWith(routeFactory, {});
+      const updates = view.goToLanding_(fakeRouteSetter);
+      assert(fakeRouteSetter.findValue(updates)!.value.getDestination()!).to.matchObject({
+        params: {},
+        type: Views.LANDING,
+      });
     });
   });
 
@@ -62,35 +65,33 @@ describe('landing.CreateProjectView', () => {
     async () => {
       const projectId = 'projectId';
 
-      const routeFactory = Mocks.object('routeFactory');
-      mockRouteFactoryService.assetList.and.returnValue(routeFactory);
-
-      const resetValue = Mocks.object('resetValue');
-      spyOn(view, 'reset_').and.returnValue(ImmutableList.of([resetValue]));
-
       const projectName = 'projectName';
       const projectNameSetter = Mocks.object('projectNameSetter');
       projectNameSetter.value = projectName;
 
       const projectAccess = new FakeDataAccess<Project>();
       const fakeProjectAccessSetter = new FakeMonadSetter<DataAccess<Project>>(projectAccess);
-      const list = await view.onSubmitAction_(
+
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
+      const fakeRouteSetter = new FakeMonadSetter(fakeRouteNavigator);
+
+      const updates = await view.onSubmitAction_(
           Promise.resolve(projectId),
           projectNameSetter,
-          fakeProjectAccessSetter);
-      assert(list).to.startWith([resetValue]);
+          fakeProjectAccessSetter,
+          fakeRouteSetter);
+      assert(fakeRouteSetter.findValue(updates)!.value.getDestination()!).to.matchObject({
+        params: {projectId},
+        type: Views.PROJECT,
+      });
 
-      const projectUpdateQueue = fakeProjectAccessSetter.findValue(list)!.value.getUpdateQueue();
+      const projectUpdateQueue = fakeProjectAccessSetter.findValue(updates)!.value.getUpdateQueue();
       assert(projectUpdateQueue).to
           .haveElements([[projectId, Matchers.any<Project>(Project as any)]]);
 
       const project = projectUpdateQueue.get(projectId)!;
       assert(project.getName()).to.equal(projectName);
       assert(project.getId()).to.equal(projectId);
-
-      assert(view['reset_']).to.haveBeenCalledWith(projectNameSetter);
-      assert(mockRouteService.goTo).to
-          .haveBeenCalledWith(routeFactory, {projectId: projectId});
     });
 
     it('should reject if name is not set', async () => {
@@ -98,10 +99,14 @@ describe('landing.CreateProjectView', () => {
       projectNameSetter.value = null;
       const projectAccess = Mocks.object('projectAccess');
 
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
+      const fakeRouteSetter = new FakeMonadSetter(fakeRouteNavigator);
+
       const promise = view.onSubmitAction_(
-        Promise.resolve('newId'),
-        projectNameSetter,
-        projectAccess);
+          Promise.resolve('newId'),
+          projectNameSetter,
+          projectAccess,
+          fakeRouteSetter);
       await assert(promise).to.rejectWithError(/Project name is not set/);
     });
   });

@@ -7,8 +7,12 @@ import { ImmutableList, ImmutableMap, ImmutableSet } from 'external/gs_tools/src
 import { Mocks } from 'external/gs_tools/src/mock';
 import { TestDispose } from 'external/gs_tools/src/testing';
 
+import { FakeRouteNavigator, RouteNavigator } from 'external/gs_ui/src/routing';
+
 import { Project } from '../data/project';
 import { ASSET_ITEM_CHILDREN, AssetItemData, AssetListView } from '../project/asset-list-view';
+import { TestRouteFactoryService } from '../routing/test-route-factory-service';
+import { Views } from '../routing/views';
 
 
 describe('ASSET_ITEM_CHILDREN', () => {
@@ -67,21 +71,17 @@ describe('ASSET_ITEM_CHILDREN', () => {
 
 
 describe('project.AssetListView', () => {
-  let mockRouteFactoryService: any;
   let mockRouteService: any;
   let view: AssetListView;
 
   beforeEach(() => {
-    mockRouteFactoryService = jasmine.createSpyObj(
-        'RouteFactoryService',
-        ['assetList', 'createAsset', 'projectSettings']);
     mockRouteService = Mocks.listenable('RouteService');
     mockRouteService.getParams = jasmine.createSpy('RouteService.getParams');
     mockRouteService.goTo = jasmine.createSpy('RouteService.goTo');
     TestDispose.add(mockRouteService);
 
     view = new AssetListView(
-        mockRouteFactoryService,
+        TestRouteFactoryService,
         mockRouteService,
         jasmine.createSpyObj('ThemeService', ['applyTheme']));
     TestDispose.add(view);
@@ -90,24 +90,21 @@ describe('project.AssetListView', () => {
   describe('getProjectId_', () => {
     it('should return the correct project ID if there is a match', () => {
       const projectId = 'projectId';
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
+      spyOn(fakeRouteNavigator, 'getRoute').and.returnValue({params: {projectId}});
 
-      const routeFactory = Mocks.object('routeFactory');
-      mockRouteFactoryService.assetList.and.returnValue(routeFactory);
-
-      mockRouteService.getParams.and.returnValue({projectId: projectId});
-
-      assert(view['getProjectId_']()).to.equal(projectId);
-      assert(mockRouteService.getParams).to.haveBeenCalledWith(routeFactory);
+      assert(view['getProjectId_'](fakeRouteNavigator)).to.equal(projectId);
+      assert(fakeRouteNavigator.getRoute).to
+          .haveBeenCalledWith(TestRouteFactoryService.assetList());
     });
 
-    it('should return null if there are no project IDs', () => {
-      const routeFactory = Mocks.object('routeFactory');
-      mockRouteFactoryService.assetList.and.returnValue(routeFactory);
+    it('should return null if there are no routes', () => {
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
+      spyOn(fakeRouteNavigator, 'getRoute').and.returnValue(null);
 
-      mockRouteService.getParams.and.returnValue(null);
-
-      assert(view['getProjectId_']()).to.beNull();
-      assert(mockRouteService.getParams).to.haveBeenCalledWith(routeFactory);
+      assert(view['getProjectId_'](fakeRouteNavigator)).to.beNull();
+      assert(fakeRouteNavigator.getRoute).to
+          .haveBeenCalledWith(TestRouteFactoryService.assetList());
     });
   });
 
@@ -116,19 +113,25 @@ describe('project.AssetListView', () => {
       const projectId = 'projectId';
       spyOn(view, 'getProjectId_').and.returnValue(projectId);
 
-      const routeFactory = Mocks.object('routeFactory');
-      mockRouteFactoryService.createAsset.and.returnValue(routeFactory);
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
+      const fakeRouteSetter = new FakeMonadSetter<RouteNavigator<Views>>(fakeRouteNavigator);
 
-      view.onCreateButtonClicked_();
-
-      assert(mockRouteService.goTo).to.haveBeenCalledWith(routeFactory, {projectId: projectId});
+      const updates = view.onCreateButtonClicked_(fakeRouteSetter);
+      assert(fakeRouteSetter.findValue(updates)!.value.getDestination()).to.matchObject({
+        params: {projectId},
+        type: Views.CREATE_ASSET,
+      });
+      assert(view['getProjectId_']).to.haveBeenCalledWith(fakeRouteNavigator);
     });
 
-    it('should not throw error if there are no project IDs', () => {
+    it('should do nothing if there are no project IDs', () => {
       spyOn(view, 'getProjectId_').and.returnValue(null);
-      assert(() => {
-        view.onCreateButtonClicked_();
-      }).toNot.throw();
+
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
+      const fakeRouteSetter = new FakeMonadSetter<RouteNavigator<Views>>(fakeRouteNavigator);
+
+      assert(view.onCreateButtonClicked_(fakeRouteSetter)).to.equal([]);
+      assert(view['getProjectId_']).to.haveBeenCalledWith(fakeRouteNavigator);
     });
   });
 
@@ -150,16 +153,19 @@ describe('project.AssetListView', () => {
       const fakeProjectAccess = new FakeDataAccess<Project>(ImmutableMap.of([
         [projectId, project],
       ]));
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
 
       const updates = await view.onProjectIdChanged_(
           fakeAssetItemListSetter,
           fakeProjectNameSetter,
-          fakeProjectAccess);
+          fakeProjectAccess,
+          fakeRouteNavigator);
       assert(fakeProjectNameSetter.findValue(updates)!.value).to.equal(projectName);
       assert(fakeAssetItemListSetter.findValue(updates)!.value).to.haveElements([
         {assetId: assetId1, projectId},
         {assetId: assetId2, projectId},
       ]);
+      assert(view['getProjectId_']).to.haveBeenCalledWith(fakeRouteNavigator);
     });
 
     it('should do nothing if project cannot be found', async () => {
@@ -170,11 +176,13 @@ describe('project.AssetListView', () => {
           new FakeMonadSetter<ImmutableList<AssetItemData>>(ImmutableList.of([]));
       const fakeProjectNameSetter = new FakeMonadSetter<string | null>(null);
       const fakeProjectAccess = new FakeDataAccess<Project>();
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
 
       const updates = await view.onProjectIdChanged_(
           fakeAssetItemListSetter,
           fakeProjectNameSetter,
-          fakeProjectAccess);
+          fakeProjectAccess,
+          fakeRouteNavigator);
       assert([...updates]).to.equal([]);
     });
 
@@ -186,11 +194,13 @@ describe('project.AssetListView', () => {
           new FakeMonadSetter<ImmutableList<AssetItemData>>(ImmutableList.of([]));
       const fakeProjectNameSetter = new FakeMonadSetter<string | null>(null);
       const fakeProjectAccess = new FakeDataAccess<Project>();
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
 
       const updates = await view.onProjectIdChanged_(
           fakeAssetItemListSetter,
           fakeProjectNameSetter,
-          fakeProjectAccess);
+          fakeProjectAccess,
+          fakeRouteNavigator);
       assert([...updates]).to.equal([]);
     });
   });
@@ -200,19 +210,23 @@ describe('project.AssetListView', () => {
       const projectId = 'projectId';
       spyOn(view, 'getProjectId_').and.returnValue(projectId);
 
-      const routeFactory = Mocks.object('routeFactory');
-      mockRouteFactoryService.projectSettings.and.returnValue(routeFactory);
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
+      const fakeRouteSetter = new FakeMonadSetter<RouteNavigator<Views>>(fakeRouteNavigator);
 
-      view.onSettingsButtonClicked_();
-
-      assert(mockRouteService.goTo).to.haveBeenCalledWith(routeFactory, {projectId: projectId});
+      const updates = view.onSettingsButtonClicked_(fakeRouteSetter);
+      assert(fakeRouteSetter.findValue(updates)!.value.getDestination()).to.matchObject({
+        params: {projectId},
+        type: Views.PROJECT_SETTINGS,
+      });
     });
 
-    it('should not throw error if there are no project IDs', () => {
+    it('should do nothing if there are no project IDs', () => {
       spyOn(view, 'getProjectId_').and.returnValue(null);
-      assert(() => {
-        view.onSettingsButtonClicked_();
-      }).toNot.throw();
+
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
+      const fakeRouteSetter = new FakeMonadSetter<RouteNavigator<Views>>(fakeRouteNavigator);
+
+      assert(view.onSettingsButtonClicked_(fakeRouteSetter)).to.equal([]);
     });
   });
 });

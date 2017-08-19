@@ -19,7 +19,7 @@ export class AssetMainRouteFactory extends AbstractRouteFactory<Views, CP, CR, P
    * @override
    */
   async getName(params: CR): Promise<string> {
-    const asset = await AssetManager.monad()(this).get().get(params.assetId);
+    const asset = await AssetManager.monad().get().get(params.assetId);
     if (asset === null) {
       return 'Unknown asset';
     } else {

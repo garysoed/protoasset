@@ -1,13 +1,12 @@
 import { DataAccess } from 'external/gs_tools/src/datamodel';
-import { monad } from 'external/gs_tools/src/event';
-import { ImmutableSet } from 'external/gs_tools/src/immutable';
+import { monad, monadOut } from 'external/gs_tools/src/event';
 import { inject } from 'external/gs_tools/src/inject';
 import { MonadSetter, MonadValue } from 'external/gs_tools/src/interfaces';
 import { StringParser } from 'external/gs_tools/src/parse';
 import { customElement, dom, domOut, onDom } from 'external/gs_tools/src/webc';
 
 import { BaseThemedElement2 } from 'external/gs_ui/src/common';
-import { RouteService } from 'external/gs_ui/src/routing';
+import { RouteNavigator, RouteService } from 'external/gs_ui/src/routing';
 import { ThemeService } from 'external/gs_ui/src/theming';
 
 import { AssetManager } from '../data/asset-manager';
@@ -45,12 +44,18 @@ export class AssetItem extends BaseThemedElement2 {
   @onDom.event(null, 'click')
   onElementClicked_(
       @dom.attribute(ASSET_ID_ATTR) assetId: string | null,
-      @dom.attribute(PROJECT_ID_ATTR) projectId: string | null): void {
+      @dom.attribute(PROJECT_ID_ATTR) projectId: string | null,
+      @monadOut((item: AssetItem) => item.routeService_.monad())
+          navigatorSetter: MonadSetter<RouteNavigator<Views>>): MonadValue<any>[] {
     if (assetId !== null && projectId !== null) {
-      this.routeService_.goTo(
-          this.routeFactoryService_.assetMain(),
-          {assetId: assetId, projectId: projectId});
+      return [
+        navigatorSetter.set(navigatorSetter.value.goTo(
+            this.routeFactoryService_.assetMain(),
+            {assetId: assetId, projectId: projectId})),
+      ];
     }
+
+    return [];
   }
 
   @onDom.attributeChange(ASSET_ID_ATTR)
@@ -58,17 +63,16 @@ export class AssetItem extends BaseThemedElement2 {
   async onIdsChanged_(
       @dom.attribute(ASSET_ID_ATTR) assetId: string | null,
       @domOut.innerText(ASSET_NAME_INNER_TEXT) assetNameSetter: MonadSetter<string | null>,
-      @monad(AssetManager.monad()) assetManager: DataAccess<Asset2>):
-      Promise<Iterable<MonadValue<any>>> {
+      @monad(AssetManager.monad()) assetManager: DataAccess<Asset2>): Promise<MonadValue<any>[]> {
     if (assetId === null) {
-      return ImmutableSet.of([assetNameSetter.set(null)]);
+      return [assetNameSetter.set(null)];
     }
 
     const asset = await assetManager.get(assetId);
     if (asset !== null) {
-      return ImmutableSet.of([assetNameSetter.set(asset.getName())]);
+      return [assetNameSetter.set(asset.getName())];
     }
 
-    return ImmutableSet.of([]);
+    return [];
   }
 }

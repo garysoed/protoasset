@@ -7,9 +7,13 @@ import { ImmutableList, ImmutableMap } from 'external/gs_tools/src/immutable';
 import { Fakes, Mocks } from 'external/gs_tools/src/mock';
 import { TestDispose } from 'external/gs_tools/src/testing';
 
+import { FakeRouteNavigator } from 'external/gs_ui/src/routing';
+
+import { DataView, PREVIEW_CHILDREN, PreviewData } from '../asset/data-view';
 import { Asset2 } from '../data/asset2';
 import { TsvDataSource } from '../data/tsv-data-source';
-import { DataView, PREVIEW_CHILDREN, PreviewData } from './data-view';
+import { TestRouteFactoryService } from '../routing/test-route-factory-service';
+import { Views } from '../routing/views';
 
 
 describe('PREVIEW_CHILDREN', () => {
@@ -106,18 +110,16 @@ describe('PREVIEW_CHILDREN', () => {
 
 describe('asset.DataView', () => {
   let mockFileService: any;
-  let mockRouteFactoryService: any;
   let mockRouteService: any;
   let view: DataView;
 
   beforeEach(() => {
     mockFileService = jasmine.createSpyObj('FileService', ['processBundle']);
-    mockRouteFactoryService = jasmine.createSpyObj('RouteFactoryService', ['assetData']);
     mockRouteService = jasmine.createSpyObj('RouteService', ['getParams']);
 
     view = new DataView(
         mockFileService,
-        mockRouteFactoryService,
+        TestRouteFactoryService,
         mockRouteService,
         Mocks.object('ThemeService'));
     TestDispose.add(view);
@@ -129,23 +131,24 @@ describe('asset.DataView', () => {
       const projectId = 'projectId';
       mockRouteService.getParams.and.returnValue({assetId, projectId});
 
-      const assetDataFactory = Mocks.object('assetDataFactory');
-      mockRouteFactoryService.assetData.and.returnValue(assetDataFactory);
-
       const asset = Asset2.withId(assetId);
       const fakeAssetDataAccess = new FakeDataAccess<Asset2>(ImmutableMap.of([[assetId, asset]]));
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
+      spyOn(fakeRouteNavigator, 'getRoute').and.returnValue({params: {assetId, projectId}});
 
-      const actualAsset = await view['getAsset_'](fakeAssetDataAccess);
+      const actualAsset = await view['getAsset_'](fakeAssetDataAccess, fakeRouteNavigator);
       assert(actualAsset).to.equal(asset);
-      assert(mockRouteService.getParams).to.haveBeenCalledWith(assetDataFactory);
+      assert(fakeRouteNavigator.getRoute).to
+          .haveBeenCalledWith(TestRouteFactoryService.assetData());
     });
 
     it('should return null if route params cannot be resolved', async () => {
       mockRouteService.getParams.and.returnValue(null);
-      mockRouteFactoryService.assetData.and.returnValue(Mocks.object('assetDataFactory'));
       const fakeAssetDataAccess = new FakeDataAccess<Asset2>();
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
+      spyOn(fakeRouteNavigator, 'getRoute').and.returnValue(null);
 
-      const actualAsset = await view['getAsset_'](fakeAssetDataAccess);
+      const actualAsset = await view['getAsset_'](fakeAssetDataAccess, fakeRouteNavigator);
       assert(actualAsset).to.beNull();
     });
   });
@@ -158,17 +161,21 @@ describe('asset.DataView', () => {
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(asset));
 
       const fakeAssetDataAccess = new FakeDataAccess<Asset2>(ImmutableMap.of([[assetId, asset]]));
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
 
-      const newDataAccess = await view['updateAsset_'](dataSource, fakeAssetDataAccess);
+      const newDataAccess = await view['updateAsset_'](
+          dataSource, fakeAssetDataAccess, fakeRouteNavigator);
       assert(newDataAccess.getUpdateQueue().get(assetId)!.getData()).to.equal(dataSource);
+      assert(view['getAsset_']).to.haveBeenCalledWith(fakeAssetDataAccess, fakeRouteNavigator);
     });
 
     it('should not reject if asset cannot be found', async () => {
       spyOn(view, 'getAsset_').and.returnValue(Promise.resolve(null));
       const fakeAssetDataAccess = new FakeDataAccess<Asset2>();
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
 
-      const dataAccess =
-          await view['updateAsset_'](Mocks.object('dataSource'), fakeAssetDataAccess);
+      const dataAccess = await view['updateAsset_'](
+          Mocks.object('dataSource'), fakeAssetDataAccess, fakeRouteNavigator);
       assert(dataAccess.getUpdateQueue()).to.haveElements([]);
     });
   });
@@ -191,10 +198,12 @@ describe('asset.DataView', () => {
 
       const fakeAssetAccess = new FakeDataAccess<Asset2>();
       const fakeAssetAccessSetter = new FakeMonadSetter<DataAccess<Asset2>>(fakeAssetAccess);
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
 
-      const updates =
-          await view.updateDataSource_(bundleId, startRow, endRow, fakeAssetAccessSetter);
-      assert(view['updateAsset_']).to.haveBeenCalledWith(Matchers.anyThing(), fakeAssetAccess);
+      const updates = await view.updateDataSource_(
+          bundleId, startRow, endRow, fakeRouteNavigator, fakeAssetAccessSetter);
+      assert(view['updateAsset_']).to
+          .haveBeenCalledWith(Matchers.anyThing(), fakeAssetAccess, fakeRouteNavigator);
 
       const dataSource: TsvDataSource = updateAssetSpy.calls.argsFor(0)[0];
       const data = await dataSource.getData();
@@ -209,17 +218,19 @@ describe('asset.DataView', () => {
     });
 
     it('should not update the asset if there are no files in the bundle', async () => {
-        mockFileService.processBundle.and.returnValue(Promise.resolve(new Map()));
+      mockFileService.processBundle.and.returnValue(Promise.resolve(new Map()));
 
-        spyOn(view, 'updateAsset_');
+      spyOn(view, 'updateAsset_');
 
-        const fakeAssetAccess = new FakeDataAccess<Asset2>();
-        const fakeAssetAccessSetter = new FakeMonadSetter<DataAccess<Asset2>>(fakeAssetAccess);
+      const fakeAssetAccess = new FakeDataAccess<Asset2>();
+      const fakeAssetAccessSetter = new FakeMonadSetter<DataAccess<Asset2>>(fakeAssetAccess);
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
 
-        const updates = await view.updateDataSource_('bundleId', 123, 456, fakeAssetAccessSetter);
-        assert(updates).to.equal([]);
-        assert(view['updateAsset_']).toNot.haveBeenCalled();
-      });
+      const updates = await
+          view.updateDataSource_('bundleId', 123, 456, fakeRouteNavigator, fakeAssetAccessSetter);
+      assert(updates).to.equal([]);
+      assert(view['updateAsset_']).toNot.haveBeenCalled();
+    });
 
     it('should not update the asset, if the bundle cannot be processed', async () => {
       mockFileService.processBundle.and.returnValue(Promise.resolve(null));
@@ -228,8 +239,10 @@ describe('asset.DataView', () => {
 
       const fakeAssetAccess = new FakeDataAccess<Asset2>();
       const fakeAssetAccessSetter = new FakeMonadSetter<DataAccess<Asset2>>(fakeAssetAccess);
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
 
-      const updates = await view.updateDataSource_('bundleId', 123, 456, fakeAssetAccessSetter);
+      const updates = await
+          view.updateDataSource_('bundleId', 123, 456, fakeRouteNavigator, fakeAssetAccessSetter);
       assert(updates).to.equal([]);
       assert(view['updateAsset_']).toNot.haveBeenCalled();
     });
@@ -239,8 +252,10 @@ describe('asset.DataView', () => {
 
       const fakeAssetAccess = new FakeDataAccess<Asset2>();
       const fakeAssetAccessSetter = new FakeMonadSetter<DataAccess<Asset2>>(fakeAssetAccess);
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
 
-      const updates = await view.updateDataSource_('bundleId', NaN, 456, fakeAssetAccessSetter);
+      const updates = await
+          view.updateDataSource_('bundleId', NaN, 456, fakeRouteNavigator, fakeAssetAccessSetter);
       assert(updates).to.equal([]);
       assert(view['updateAsset_']).toNot.haveBeenCalled();
     });
@@ -250,8 +265,10 @@ describe('asset.DataView', () => {
 
       const fakeAssetAccess = new FakeDataAccess<Asset2>();
       const fakeAssetAccessSetter = new FakeMonadSetter<DataAccess<Asset2>>(fakeAssetAccess);
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
 
-      const updates = await view.updateDataSource_('bundleId', null, 456, fakeAssetAccessSetter);
+      const updates = await
+          view.updateDataSource_('bundleId', null, 456, fakeRouteNavigator, fakeAssetAccessSetter);
       assert(updates).to.equal([]);
       assert(view['updateAsset_']).toNot.haveBeenCalled();
     });
@@ -261,8 +278,10 @@ describe('asset.DataView', () => {
 
       const fakeAssetAccess = new FakeDataAccess<Asset2>();
       const fakeAssetAccessSetter = new FakeMonadSetter<DataAccess<Asset2>>(fakeAssetAccess);
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
 
-      const updates = await view.updateDataSource_('bundleId', 123, NaN, fakeAssetAccessSetter);
+      const updates = await
+          view.updateDataSource_('bundleId', 123, NaN, fakeRouteNavigator, fakeAssetAccessSetter);
       assert(updates).to.equal([]);
       assert(view['updateAsset_']).toNot.haveBeenCalled();
     });
@@ -272,8 +291,10 @@ describe('asset.DataView', () => {
 
       const fakeAssetAccess = new FakeDataAccess<Asset2>();
       const fakeAssetAccessSetter = new FakeMonadSetter<DataAccess<Asset2>>(fakeAssetAccess);
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
 
-      const updates = await view.updateDataSource_('bundleId', 123, null, fakeAssetAccessSetter);
+      const updates = await
+          view.updateDataSource_('bundleId', 123, null, fakeRouteNavigator, fakeAssetAccessSetter);
       assert(updates).to.equal([]);
       assert(view['updateAsset_']).toNot.haveBeenCalled();
     });
@@ -283,8 +304,10 @@ describe('asset.DataView', () => {
 
       const fakeAssetAccess = new FakeDataAccess<Asset2>();
       const fakeAssetAccessSetter = new FakeMonadSetter<DataAccess<Asset2>>(fakeAssetAccess);
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
 
-      const updates = await view.updateDataSource_(null, 123, 456, fakeAssetAccessSetter);
+      const updates = await
+          view.updateDataSource_(null, 123, 456, fakeRouteNavigator, fakeAssetAccessSetter);
       assert(updates).to.equal([]);
       assert(view['updateAsset_']).toNot.haveBeenCalled();
     });
@@ -303,10 +326,12 @@ describe('asset.DataView', () => {
 
       const fakePreviewChildrenSetter = new FakeMonadSetter<PreviewData | null>(null);
       const fakeAssetAccess = new FakeDataAccess<Asset2>();
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
 
-      const updates = await view.updatePreview_(true, fakeAssetAccess, fakePreviewChildrenSetter);
+      const updates = await
+          view.updatePreview_(true, fakeAssetAccess, fakeRouteNavigator, fakePreviewChildrenSetter);
       assert(fakePreviewChildrenSetter.findValue(updates)!.value).to.equal(data);
-      assert(view['getAsset_']).to.haveBeenCalledWith(fakeAssetAccess);
+      assert(view['getAsset_']).to.haveBeenCalledWith(fakeAssetAccess, fakeRouteNavigator);
     });
 
     it('should clear the preview if the data cannot be loaded', async () => {
@@ -320,10 +345,12 @@ describe('asset.DataView', () => {
 
       const fakePreviewChildrenSetter = new FakeMonadSetter<PreviewData | null>(null);
       const fakeAssetAccess = new FakeDataAccess<Asset2>();
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
 
-      const updates = await view.updatePreview_(true, fakeAssetAccess, fakePreviewChildrenSetter);
+      const updates = await
+          view.updatePreview_(true, fakeAssetAccess, fakeRouteNavigator, fakePreviewChildrenSetter);
       assert(fakePreviewChildrenSetter.findValue(updates)!.value).to.beNull();
-      assert(view['getAsset_']).to.haveBeenCalledWith(fakeAssetAccess);
+      assert(view['getAsset_']).to.haveBeenCalledWith(fakeAssetAccess, fakeRouteNavigator);
     });
 
     it('should clear the preview if the asset has no data source', async () => {
@@ -334,10 +361,12 @@ describe('asset.DataView', () => {
 
       const fakePreviewChildrenSetter = new FakeMonadSetter<PreviewData | null>(null);
       const fakeAssetAccess = new FakeDataAccess<Asset2>();
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
 
-      const updates = await view.updatePreview_(true, fakeAssetAccess, fakePreviewChildrenSetter);
+      const updates = await
+          view.updatePreview_(true, fakeAssetAccess, fakeRouteNavigator, fakePreviewChildrenSetter);
       assert(fakePreviewChildrenSetter.findValue(updates)!.value).to.beNull();
-      assert(view['getAsset_']).to.haveBeenCalledWith(fakeAssetAccess);
+      assert(view['getAsset_']).to.haveBeenCalledWith(fakeAssetAccess, fakeRouteNavigator);
     });
 
     it('should clear the preview if asset cannot be found', async () => {
@@ -345,10 +374,12 @@ describe('asset.DataView', () => {
 
       const fakePreviewChildrenSetter = new FakeMonadSetter<PreviewData | null>(null);
       const fakeAssetAccess = new FakeDataAccess<Asset2>();
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
 
-      const updates = await view.updatePreview_(true, fakeAssetAccess, fakePreviewChildrenSetter);
+      const updates = await
+          view.updatePreview_(true, fakeAssetAccess, fakeRouteNavigator, fakePreviewChildrenSetter);
       assert(fakePreviewChildrenSetter.findValue(updates)!.value).to.beNull();
-      assert(view['getAsset_']).to.haveBeenCalledWith(fakeAssetAccess);
+      assert(view['getAsset_']).to.haveBeenCalledWith(fakeAssetAccess, fakeRouteNavigator);
     });
 
     it(`should do nothing if the view is not active`, async () => {
@@ -356,8 +387,13 @@ describe('asset.DataView', () => {
 
       const fakePreviewChildrenSetter = new FakeMonadSetter<PreviewData | null>(null);
       const fakeAssetAccess = new FakeDataAccess<Asset2>();
+      const fakeRouteNavigator = new FakeRouteNavigator<Views>();
 
-      const updates = await view.updatePreview_(false, fakeAssetAccess, fakePreviewChildrenSetter);
+      const updates = await view.updatePreview_(
+          false,
+          fakeAssetAccess,
+          fakeRouteNavigator,
+          fakePreviewChildrenSetter);
       assert(updates).to.equal([]);
     });
   });

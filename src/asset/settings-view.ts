@@ -75,11 +75,13 @@ export class SettingsView extends BaseThemedElement {
    *    cannot be found.
    */
   private async getAsset_(): Promise<Asset | null> {
-    const params = this.routeService_.getParams(this.routeFactoryService_.assetSettings());
-    if (params === null) {
+    const route = this.routeService_.monad().get()
+        .getRoute(this.routeFactoryService_.assetSettings());
+    if (route === null) {
       return null;
     }
 
+    const {params} = route;
     return this.assetCollection_.get(params.projectId, params.assetId);
   }
 

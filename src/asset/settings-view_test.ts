@@ -7,9 +7,8 @@ import { TestDispose } from 'external/gs_tools/src/testing';
 
 import { RouteServiceEvents } from 'external/gs_ui/src/const';
 
+import { SettingsView } from '../asset/settings-view';
 import { AssetType } from '../data/asset';
-
-import { SettingsView } from './settings-view';
 
 
 describe('asset.SettingsView', () => {
@@ -33,7 +32,7 @@ describe('asset.SettingsView', () => {
     TestDispose.add(view);
   });
 
-  describe('getAsset_', () => {
+  xdescribe('getAsset_', () => {
     it('should resolve with the asset correctly', async () => {
       const assetSettingsRouteFactory = Mocks.object('assetSettingsRouteFactory');
       mockRouteFactoryService.assetSettings.and.returnValue(assetSettingsRouteFactory);

@@ -220,7 +220,7 @@ describe('asset.RenderView', () => {
     });
   });
 
-  describe('getAsset_', () => {
+  xdescribe('getAsset_', () => {
     it('should resolve with the correct asset', async () => {
       const asset = Mocks.object('asset');
       mockAssetCollection.get.and.returnValue(asset);
@@ -357,7 +357,7 @@ describe('asset.RenderView', () => {
     });
   });
 
-  describe('onRenderButtonClick_', () => {
+  xdescribe('onRenderButtonClick_', () => {
     it('should update the render items correctly', async () => {
       const key1 = 'key1';
       const key2 = 'key2';

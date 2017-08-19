@@ -45,12 +45,13 @@ export class SettingsView extends BaseThemedElement {
   }
 
   private async getProject_(): Promise<Project | null> {
-    const params = this.routeService_.getParams(this.routeFactoryService_.projectSettings());
-    if (params === null) {
+    const route = this.routeService_.monad()
+        .get().getRoute(this.routeFactoryService_.projectSettings());
+    if (route === null) {
       return null;
     }
 
-    return this.projectManager_.monad()(this).get().get(params.projectId);
+    return this.projectManager_.monad().get().get(route.params.projectId);
   }
 
   onCreated(element: HTMLElement): void {
@@ -72,7 +73,7 @@ export class SettingsView extends BaseThemedElement {
       return;
     }
 
-    const projectManagerMonad = this.projectManager_.monad()(this);
+    const projectManagerMonad = this.projectManager_.monad();
     projectManagerMonad.set(
         projectManagerMonad.get().queueUpdate(project.getId(), project.setName(projectName)));
   }

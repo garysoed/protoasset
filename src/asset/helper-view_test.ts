@@ -283,7 +283,7 @@ describe('asset.HelperView', () => {
     TestDispose.add(view);
   });
 
-  describe('createHelper_', () => {
+  xdescribe('createHelper_', () => {
     it('should create a new helper, update the asset, and navigate to it', async () => {
       const helperFactory = Mocks.object('helperFactory');
       mockRouteFactoryService.helper.and.returnValue(helperFactory);
@@ -322,7 +322,7 @@ describe('asset.HelperView', () => {
     });
   });
 
-  describe('getAsset_', () => {
+  xdescribe('getAsset_', () => {
     it('should resolve with the asset correctly', async () => {
       const asset = Mocks.object('asset');
       mockAssetCollection.get.and.returnValue(Promise.resolve(asset));
@@ -354,7 +354,7 @@ describe('asset.HelperView', () => {
     });
   });
 
-  describe('getHelper_', () => {
+  xdescribe('getHelper_', () => {
     it('should resolve with the helper correctly', async () => {
       const helperRouteFactory = Mocks.object('helperRouteFactory');
       mockRouteFactoryService.helper.and.returnValue(helperRouteFactory);
@@ -399,7 +399,7 @@ describe('asset.HelperView', () => {
     });
   });
 
-  describe('onActiveChange_', () => {
+  xdescribe('onActiveChange_', () => {
     it('should call updateAsset_', async () => {
       const assetId = 'assetId';
       const projectId = 'projectId';
@@ -502,7 +502,7 @@ describe('asset.HelperView', () => {
     });
   });
 
-  describe('onAssetChanged_', () => {
+  xdescribe('onAssetChanged_', () => {
     it('should update the UI elements for asset and helper', async () => {
       const currentHelperId = 'currentHelperId';
 
@@ -870,7 +870,7 @@ describe('asset.HelperView', () => {
     });
   });
 
-  describe('onRouteChanged_', () => {
+  xdescribe('onRouteChanged_', () => {
     it('should call onActiveChange_ with true if the view is active', () => {
       spyOn(view, 'onActiveChange_');
       mockRouteService.getParams.and.returnValue({});

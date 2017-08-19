@@ -192,11 +192,13 @@ export class HelperItem extends BaseThemedElement {
       return;
     }
 
-    this.routeService_.goTo(this.routeFactoryService_.helper(), {
+    const monad = this.routeService_.monad();
+    const navigator = monad.get();
+    monad.set(navigator.goTo(this.routeFactoryService_.helper(), {
       assetId: asset.getId(),
       helperId: helper.getId(),
       projectId: asset.getProjectId(),
-    });
+    }));
 
     // TODO: FIX THIS
     this.overlayService_.hideOverlay(Symbol('FIX THIS'));
