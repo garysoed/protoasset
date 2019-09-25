@@ -1,9 +1,13 @@
 import { bind, inject } from 'external/gs_tools/src/inject';
+import { deprecated } from 'external/gs_tools/src/typescript';
+import { Log } from 'external/gs_tools/src/util';
 
+import { Asset2 } from '../data/asset2';
 import { Asset } from './asset';
 import { BuiltInHelpers } from './built-in-helpers';
 import { TemplateCompiler } from './template-compiler';
 
+const LOGGER = Log.of('pa.data.TemplateCompilerService');
 
 /**
  * Creates TemplateCompilers from asset.
@@ -25,6 +29,7 @@ export class TemplateCompilerService {
    * @return Promise that will be resolved with the newly created TemplateCompiler, or null if it
    *    cannot be created.
    */
+  @deprecated(LOGGER, 'create has been deprecated. Use create2 instead')
   create(asset: Asset, data: string[]): TemplateCompiler {
     const handlebars = this.handlebars_.create();
     for (const helper of asset.getAllHelpers()) {
@@ -34,5 +39,14 @@ export class TemplateCompilerService {
     handlebars.registerHelper('ifeq', BuiltInHelpers.ifeq);
     return TemplateCompiler.of(data, handlebars);
   }
+
+  create2(asset: Asset2, data: string[]): TemplateCompiler {
+    const handlebars = this.handlebars_.create();
+    for (const [, helper] of asset.getHelpers()) {
+      handlebars.registerHelper(helper.getName(), helper.asFunction());
+    }
+    handlebars.registerHelper('case', BuiltInHelpers.case);
+    handlebars.registerHelper('ifeq', BuiltInHelpers.ifeq);
+    return TemplateCompiler.of(data, handlebars);
+  }
 }
-// TODO: Mutable

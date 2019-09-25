@@ -135,7 +135,7 @@ export class CreateAssetView extends BaseThemedElement2 {
       return [];
     }
     const id = await newIdPromise;
-    const asset = Asset2.withId(id)
+    const asset = Asset2.withId(id, projectId)
         .setName(assetName)
         .setType(assetType)
         .setHeight(height)

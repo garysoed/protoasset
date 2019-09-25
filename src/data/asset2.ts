@@ -172,7 +172,10 @@ export abstract class Asset2 implements DataModel<AssetSearchIndex> {
     }
   }
 
-  static withId(id: string): Asset2 {
-    return DataModels.newInstance<Asset2>(Asset2, ImmutableMap.of([['id_', id]]));
+  static withId(id: string, projectId: string): Asset2 {
+    return DataModels.newInstance<Asset2>(Asset2, ImmutableMap.of([
+      ['id_', id],
+      ['projectId_', projectId],
+    ]));
   }
 }

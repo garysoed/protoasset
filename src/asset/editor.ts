@@ -29,7 +29,7 @@ const WIDTH_INPUT_EL = '#widthInput';
 
 const ASSET_NAME_ATTR = {name: 'asset-name', parser: StringParser, selector: null};
 const ASSET_NAME_INPUT_VALUE_ATTR = {
-  name: 'value',
+  name: 'out-value',
   parser: StringParser,
   selector: ASSET_NAME_INPUT_EL,
 };
@@ -40,7 +40,7 @@ const ASSET_TYPE_MENU_VISIBLE_ATTR = {
   selector: ASSET_TYPE_MENU_EL,
 };
 const HEIGHT_ATTR = {name: 'asset-height', parser: FloatParser, selector: null};
-const HEIGHT_INPUT_VALUE_ATTR = {name: 'value', parser: FloatParser, selector: HEIGHT_INPUT_EL};
+const HEIGHT_INPUT_VALUE_ATTR = {name: 'out-value', parser: FloatParser, selector: HEIGHT_INPUT_EL};
 const PRESET_TYPE_MENU_VISIBLE_ATTR = {
   name: 'visible',
   parser: BooleanParser,
@@ -52,7 +52,7 @@ const TEMPLATE_SECTION_HIDDEN_ATTR = {
   selector: TEMPLATE_SECTION_EL,
 };
 const WIDTH_ATTR = {name: 'asset-width', parser: FloatParser, selector: null};
-const WIDTH_INPUT_VALUE_ATTR = {name: 'value', parser: FloatParser, selector: WIDTH_INPUT_EL};
+const WIDTH_INPUT_VALUE_ATTR = {name: 'out-value', parser: FloatParser, selector: WIDTH_INPUT_EL};
 
 const ASSET_TYPE_INNER_TEXT = {parser: StringParser, selector: ASSET_TYPE_EL};
 const PRESET_TYPE_INNER_TEXT = {parser: StringParser, selector: PRESET_TYPE_EL};

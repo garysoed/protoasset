@@ -9,7 +9,7 @@ import { ThemeService } from 'external/gs_ui/src/theming';
 
 const PROJECT_NAME_EDITOR_EL = '#editor';
 const PROJECT_NAME_EDITOR_ATTR = {
-  name: 'value',
+  name: 'out-value',
   parser: StringParser,
   selector: PROJECT_NAME_EDITOR_EL,
 };

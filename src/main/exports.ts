@@ -1,5 +1,6 @@
 import { Jsons } from 'external/gs_tools/src/data';
 import { Injector } from 'external/gs_tools/src/inject';
+import { Log, LogLevel } from 'external/gs_tools/src/util';
 import { Templates } from 'external/gs_tools/src/webc';
 
 import { Main } from 'external/gs_ui/src/bootstrap';
@@ -10,6 +11,7 @@ import { LandingView } from '../landing/landing-view';
 import { ProjectView } from '../project/project-view';
 import { RouteFactoryService } from '../routing/route-factory-service';
 
+Log.setEnabledLevel(LogLevel.DEBUG);
 
 function bootstrap(document: Document): void {
   Injector.bindProvider(() => Handlebars, 'x.Handlebars');
@@ -18,6 +20,7 @@ function bootstrap(document: Document): void {
     ace: window['ace'],
     routeFactoryServiceCtor: RouteFactoryService,
   });
+
   const theme = Theme.newInstance(
       DefaultPalettes.get('electricviolet'),
       DefaultPalettes.get('cerulean'));
